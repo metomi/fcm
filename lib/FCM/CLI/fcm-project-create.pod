@@ -1,0 +1,34 @@
+=head1 NAME
+
+fcm project-create
+
+=head1 SYNOPSIS
+
+Creates a new project in a repository.
+
+    fcm project-create [OPTIONS] PROJECT-NAME REPOS-ROOT-URL
+
+=head1 ARGUMENTS
+
+PROJECT-NAME is a valid name of a project for the given repository.
+
+=head1 OPTIONS
+
+=over 4
+
+=item --non-interactive
+
+Do no interactive prompting. This option implies --svn-non-interactive.
+
+=item --password=PASSWORD
+
+Specify a password for write access to the repository.
+
+=item --svn-non-interactive
+
+Do no interactive prompting at commit time. This option is implied by
+--non-interactive.
+
+=back
+
+=cut

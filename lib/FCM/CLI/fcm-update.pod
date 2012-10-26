@@ -1,0 +1,14 @@
+=head1 NAME
+
+fcm update (up)
+
+=head1 SYNOPSIS
+
+Bring changes from the repository into the working copy.
+
+    fcm update [PATH...]
+
+Note: "fcm update" only supports --non-interactive, --revision=REV (-r REV) and
+--quiet (-q). For detail, see the output of "L<svn|svn> help update".
+
+=cut

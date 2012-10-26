@@ -1,0 +1,19 @@
+TESTS_FCM1="
+fcm1_var_hpc
+fcm1_postproc_hpc
+fcm1_um_hpc
+fcm1_um_inherit_hpc
+"
+
+TESTS_FCM2="
+fcm2_var_hpc
+fcm2_postproc_hpc
+fcm2_um_hpc
+fcm2_um_inherit_hpc
+fcm2_um77_hpc
+fcm2_um77_inherit_hpc
+"
+
+# Remove any commented out tests
+TESTS_FCM1=$(echo $TESTS_FCM1 | sed 's/#[^ ]*//g')
+TESTS_FCM2=$(echo $TESTS_FCM2 | sed 's/#[^ ]*//g')

@@ -1,0 +1,80 @@
+#!/bin/bash
+#-------------------------------------------------------------------------------
+# (C) British Crown Copyright 2006-2012 Met Office.
+#
+# This file is part of FCM, tools for managing and building source code.
+#
+# FCM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FCM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FCM. If not, see <http://www.gnu.org/licenses/>.
+#-------------------------------------------------------------------------------
+set -eu
+if (($# < 1)); then
+    echo "Usage: $(basename $0) DEST" >&2
+    exit 1
+fi
+DEST=$1
+if [[ -e $DEST ]]; then
+    echo "$DEST: destination already exists." >&2
+    exit 1
+fi
+THIS_HOME=$(cd $(dirname $0) && pwd)
+WORK_DIR=
+function FINALLY() {
+    trap '' ERR
+    trap '' EXIT
+    cd ~
+    if [[ -n $WORK_DIR ]]; then
+        rm -rf $WORK_DIR
+    fi
+}
+#-------------------------------------------------------------------------------
+function rsyncs() {
+    rsync -a --exclude=".svn" --checksum "$@"
+}
+#-------------------------------------------------------------------------------
+
+WORK_DIR=$(mktemp -d)
+trap FINALLY ERR
+trap FINALLY EXIT
+cd $WORK_DIR
+
+svnadmin create repos
+REPOS_URL=file://$PWD/repos
+svn checkout -q $REPOS_URL working-copy
+mkdir -p working-copy/tutorial/{trunk,branches,tags}
+
+# r1
+rsyncs $THIS_HOME/trunk-r1/* working-copy/tutorial/trunk/
+svn add -q working-copy/tutorial
+svn commit -q -m'tutorial: initial import.' working-copy
+svn update -q working-copy
+
+# r2
+TRUNK_SRC=working-copy/tutorial/trunk/src
+svn move -q $TRUNK_SRC/module/hello_num.f90 $TRUNK_SRC/module/hello_number.f90
+sed -i 's/Hello World/Hello Earth/' $TRUNK_SRC/module/hello_constants.f90
+sed -i 's/Hello World/Hello Earth/' $TRUNK_SRC/subroutine/hello_c.c
+svn commit -q -m'tutorial: World=Earth, and correct module name.' working-copy
+svn update -q working-copy
+
+rsyncs $THIS_HOME/hooks/* repos/hooks/
+curl -o repos/hooks/svnperms.py \
+    http://svn.apache.org/repos/asf/subversion/trunk/tools/hook-scripts/svnperms.py
+chmod +x repos/hooks/svnperms.py
+cat >repos/hooks/svnperms.conf <<__SVNPERMS_CONF__
+[$(basename $DEST)]
+tutorial/branches/[^/]+/.* = *(add,remove,update)
+__SVNPERMS_CONF__
+mkdir -p $(dirname $DEST)
+svnadmin hotcopy repos $DEST
+echo "$DEST: tutorial repository created."

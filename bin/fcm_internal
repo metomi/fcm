@@ -1,0 +1,629 @@
+#!/usr/bin/env perl
+#-------------------------------------------------------------------------------
+# (C) British Crown Copyright 2006-2012 Met Office.
+#
+# This file is part of FCM, tools for managing and building source code.
+#
+# FCM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FCM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FCM. If not, see <http://www.gnu.org/licenses/>.
+#-------------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use Fcm::Timer qw{timestamp_command};
+
+# Function declarations
+sub catfile;
+sub basename;
+sub dirname;
+
+# ------------------------------------------------------------------------------
+
+# Module level variables
+my %unusual_tool_name = ();
+
+# ------------------------------------------------------------------------------
+
+MAIN: {
+  # Name of program
+  my $this = basename $0;
+
+  # Arguments
+  my $subcommand = shift @ARGV;
+  my ($function, $type) = split /:/, $subcommand; 
+
+  my ($srcpackage, $src, $target, $requirepp, @objects, @blockdata);
+  
+  if ($function eq 'archive') {
+    ($target, @objects) = @ARGV;
+
+  } elsif ($function eq 'load') {
+    ($srcpackage, $src, $target, @blockdata) = @ARGV;
+
+  } else {
+    ($srcpackage, $src, $target, $requirepp) = @ARGV;
+  }
+
+  # Set up hash reference for all the required information
+  my %info = (
+    SRCPACKAGE => $srcpackage,
+    SRC        => $src,
+    TYPE       => $type,
+    TARGET     => $target,
+    REQUIREPP  => $requirepp,
+    OBJECTS    => \@objects,
+    BLOCKDATA  => \@blockdata,
+  );
+
+  # Get list of unusual tools
+  my $i = 0;
+  while (my $label = &get_env ('FCM_UNUSUAL_TOOL_LABEL' . $i)) {
+    my $value = &get_env ('FCM_UNUSUAL_TOOL_VALUE' . $i);
+    $unusual_tool_name{$label} = $value;
+    $i++;
+  }
+
+  # Invoke the action
+  my $rc = 0;
+  if ($function eq 'compile') {
+    $rc = &compile (\%info);
+
+  } elsif ($function eq 'load') {
+    $rc = &load (\%info);
+
+  } elsif ($function eq 'archive') {
+    $rc = &archive (\%info);
+
+  } else {
+    print STDERR $this, ': incorrect usage, abort';
+    $rc = 1;
+  }
+
+  # Throw error if action failed
+  if ($rc) {
+    print STDERR $this, ' ', $function, ' failed (', $rc, ')', "\n";
+    exit 1;
+
+  } else {
+    exit;
+  }
+}
+
+# ------------------------------------------------------------------------------
+# SYNOPSIS
+#   $rc = &compile (\%info);
+#
+# DESCRIPTION
+#   This method invokes the correct compiler with the correct options to
+#   compile the source file into the required target. The argument $info is a
+#   hash reference set up in MAIN. The following environment variables are
+#   used, where * is the source file type (F for Fortran, and C for C/C++):
+# 
+#   *C          - compiler command
+#   *C_OUTPUT   - *C option to specify the name of the output file
+#   *C_DEFINE   - *C option to declare a pre-processor def
+#   *C_INCLUDE  - *C option to declare an include directory
+#   *C_MODSEARCH- *C option to declare a module search directory
+#   *C_COMPILE  - *C option to ask the compiler to perform compile only
+#   *CFLAGS     - *C user options
+#   *PPKEYS     - list of pre-processor defs (may have sub-package suffix)
+#   FCM_VERBOSE - verbose level
+#   FCM_OBJDIR  - destination directory of object file
+#   FCM_TMPDIR  - temporary destination directory of object file
+# ------------------------------------------------------------------------------
+
+sub compile {
+  my $info = shift;
+
+  # Verbose mode
+  my $verbose = &get_env ('FCM_VERBOSE');
+  $verbose    = 1 unless defined ($verbose);
+
+  my @command = ();
+
+  # Guess file type for backward compatibility
+  my $type = $info->{TYPE} ? $info->{TYPE} : &guess_file_type ($info->{SRC});
+
+  # Compiler
+  push @command, &get_env ($type . 'C', 1);
+
+  # Compile output target (typical -o option)
+  push @command, &get_env ($type . 'C_OUTPUT', 1), $info->{TARGET};
+
+  # Pre-processor definition macros
+  if ($info->{REQUIREPP}) {
+    my @ppkeys = split /\s+/, &select_flags ($info, $type . 'PPKEYS');
+    my $defopt = &get_env ($type . 'C_DEFINE', 1);
+
+    push @command, (map {$defopt . $_} @ppkeys);
+  }
+
+  # Include search path
+  my $incopt  = &get_env ($type . 'C_INCLUDE', 1);
+  my @incpath = split /:/, &get_env ('FCM_INCPATH');
+  push @command, (map {$incopt . $_} @incpath);
+
+  # Compiled module search path
+  my $modopt  = &get_env ($type . 'C_MODSEARCH');
+  if ($modopt) {
+    push @command, (map {$modopt . $_} @incpath);
+  }
+
+  # Other compiler flags
+  my $flags = &select_flags ($info, $type . 'FLAGS');
+  push @command, $flags if $flags;
+
+  my $compile_only = &get_env ($type . 'C_COMPILE');
+  if ($flags !~ /(?:^|\s)$compile_only\b/) {
+    push @command, &get_env ($type . 'C_COMPILE');
+  }
+
+  # Name of source file
+  push @command, $info->{SRC};
+
+  # Execute command
+  my $objdir = &get_env ('FCM_OBJDIR', 1);
+  my $tmpdir = &get_env ('FCM_TMPDIR', 1);
+  chdir $tmpdir;
+
+  my $command = join ' ', @command;
+  if ($verbose > 1) {
+    print 'cd ', $tmpdir, "\n";
+    print &timestamp_command ($command, 'Start');
+
+  } elsif ($verbose) {
+    print $command, "\n";
+  }
+
+  my $rc = system $command;
+
+  print &timestamp_command ($command, 'End  ') if $verbose > 1;
+
+  # Move temporary output to correct location on success
+  # Otherwise, remove temporary output
+  if ($rc) { # error
+    unlink $info->{TARGET};
+
+  } else {   # success
+    print 'mv ', $info->{TARGET}, ' ', $objdir, "\n" if $verbose > 1;
+    rename $info->{TARGET}, &catfile ($objdir, $info->{TARGET});
+  }
+
+  # Move any Fortran module definition files to the INC directory
+  my @modfiles = <*.mod *.MOD>;
+  for my $file (@modfiles) {
+    rename $file, &catfile ($incpath[0], $file);
+  }
+
+  return $rc;
+}
+
+# ------------------------------------------------------------------------------
+# SYNOPSIS
+#   $rc = &load (\%info);
+#
+# DESCRIPTION
+#   This method invokes the correct loader with the correct options to link
+#   the main program object into an executable. The argument $info is a hash
+#   reference set up in MAIN. The following environment variables are used:
+# 
+#   LD           - * linker command
+#   LD_OUTPUT    - LD option to specify the name of the output file
+#   LD_LIBSEARCH - LD option to declare a directory in the library search path
+#   LD_LIBLINK   - LD option to declare an object library
+#   LDFLAGS      - LD user options
+#   FCM_VERBOSE  - verbose level
+#   FCM_LIBDIR   - destination directory of object libraries
+#   FCM_OBJDIR   - destination directory of object files
+#   FCM_BINDIR   - destination directory of executable file
+#   FCM_TMPDIR   - temporary destination directory of executable file
+#
+#   * If LD is not set, it will attempt to guess the file type and use the
+#     compiler as the linker.
+# ------------------------------------------------------------------------------
+
+sub load {
+  my $info = shift;
+
+  my $rc = 0;
+
+  # Verbose mode
+  my $verbose = &get_env ('FCM_VERBOSE');
+  $verbose    = 1 unless defined ($verbose);
+
+  # Create temporary object library
+  (my $name   = $info->{TARGET}) =~ s/\.\S+$//;
+  my $libname = '__fcm__' . $name;
+  my $lib     = 'lib' . $libname . '.a';
+  my $libfile = catfile (&get_env ('FCM_LIBDIR', 1), $lib);
+  $rc = &archive ({TARGET => $lib});
+
+  unless ($rc) {
+    my @command = ();
+
+    # Linker
+    my $ld = &select_flags ($info, 'LD');
+    if (not $ld) {
+      # Guess file type for backward compatibility
+      my $type = $info->{TYPE} ? $info->{TYPE} : &guess_file_type ($info->{SRC});
+      $ld = &get_env ($type . 'C', 1);
+    }
+    push @command, $ld;
+
+    # Linker output target (typical -o option)
+    push @command, &get_env ('LD_OUTPUT', 1), $info->{TARGET};
+
+    # Name of main object file
+    my $mainobj = (basename ($info->{SRC}) eq $info->{SRC})
+                  ? catfile (&get_env ('FCM_OBJDIR'), $info->{SRC})
+                  : $info->{SRC};
+    push @command, $mainobj;
+
+    # Link with Fortran BLOCKDATA objects if necessary
+    if (@{ $info->{BLOCKDATA} }) {
+      my @blockdata = @{ $info->{BLOCKDATA} };
+      my @objpath   = split /:/, &get_env ('FCM_OBJPATH');
+
+      # Search each BLOCKDATA object file from the object search path
+      for my $file (@blockdata) {
+        for my $dir (@objpath) {
+          my $full = catfile ($dir, $file);
+
+          if (-r $full) {
+            $file = $full;
+            last;
+          }
+        }
+
+        push @command, $file;
+      }
+    }
+
+    # Library search path
+    my $libopt  = &get_env ('LD_LIBSEARCH', 1);
+    my @libpath = split /:/, &get_env ('FCM_LIBPATH');
+    push @command, (map {$libopt . $_} @libpath);
+
+    # Link with temporary object library if it exists
+    push @command, &get_env ('LD_LIBLINK', 1) . $libname if -f $libfile;
+
+    # Other linker flags
+    my $flags = &select_flags ($info, 'LDFLAGS');
+    push @command, $flags;
+
+    # Execute command
+    my $tmpdir = &get_env ('FCM_TMPDIR', 1);
+    my $bindir = &get_env ('FCM_BINDIR', 1);
+    chdir $tmpdir;
+
+    my $command = join ' ', @command;
+    if ($verbose > 1) {
+      print 'cd ', $tmpdir, "\n";
+      print &timestamp_command ($command, 'Start');
+
+    } elsif ($verbose) {
+      print $command, "\n";
+    }
+
+    $rc = system $command;
+
+    print &timestamp_command ($command, 'End  ') if $verbose > 1;
+
+    # Move temporary output to correct location on success
+    # Otherwise, remove temporary output
+    if ($rc) { # error
+      unlink $info->{TARGET};
+
+    } else {   # success
+      print 'mv ', $info->{TARGET}, ' ', $bindir, "\n" if $verbose > 1;
+      rename $info->{TARGET}, &catfile ($bindir, $info->{TARGET});
+    }
+  }
+
+  # Remove the temporary object library
+  unlink $libfile if -f $libfile;
+
+  return $rc;
+}
+
+# ------------------------------------------------------------------------------
+# SYNOPSIS
+#   $rc = &archive (\%info);
+#
+# DESCRIPTION
+#   This method invokes the library archiver to create an object library. The
+#   argument $info is a hash reference set up in MAIN. The following
+#   environment variables are used:
+# 
+#   AR           - archiver command
+#   ARFLAGS      - AR options to update/create an object library
+#   FCM_VERBOSE  - verbose level
+#   FCM_LIBDIR   - destination directory of object libraries
+#   FCM_OBJPATH  - search path of object files
+#   FCM_OBJDIR   - destination directory of object files
+#   FCM_TMPDIR   - temporary destination directory of executable file
+# ------------------------------------------------------------------------------
+
+sub archive {
+  my $info = shift;
+
+  my $rc = 0;
+
+  # Verbose mode
+  my $verbose = &get_env ('FCM_VERBOSE');
+  $verbose    = 1 unless defined ($verbose);
+
+  # Set up the archive command
+  my $lib     = &basename ($info->{TARGET});
+  my $tmplib  = &catfile (&get_env ('FCM_TMPDIR', 1), $lib);
+  my @ar_cmd  = ();
+  push @ar_cmd, (&get_env ('AR', 1), &get_env ('ARFLAGS', 1));
+  push @ar_cmd, $tmplib;
+
+  # Get object directories and their files
+  my %objdir;
+  if (exists $info->{OBJECTS}) {
+    # List of objects set in the argument, sort into directory/file list
+    for my $name (@{ $info->{OBJECTS} }) {
+      my $dir = (&dirname ($name) eq '.')
+                ? &get_env ('FCM_OBJDIR', 1) : &dirname ($name);
+      $objdir{$dir}{&basename ($name)} = 1;
+    }
+
+  } else {
+    # Objects not listed in argument, search object path for all files
+    my @objpath  = split /:/, &get_env ('FCM_OBJPATH', 1);
+    my %objbase  = ();
+
+    # Get registered objects into a hash (keys = objects, values = 1)
+    
+    my %objects = map {($_, 1)} split (/\s+/, &get_env ('OBJECTS', 1));
+
+    # Seach object path for all files
+    for my $dir (@objpath) {
+      next unless -d $dir;
+
+      chdir $dir;
+
+      # Use all files from each directory in the object search path
+      for ((glob ('*'))) {
+        next unless exists $objects{$_}; # consider registered objects only
+        $objdir{$dir}{$_} = 1 unless exists $objbase{$_};
+        $objbase{$_} = 1;
+      }
+    }
+  }
+
+  for my $dir (sort keys %objdir) {
+    next unless -d $dir;
+
+    # Go to each object directory and executes the library archive command 
+    chdir $dir;
+    my $command = join ' ', (@ar_cmd, sort keys %{ $objdir{$dir} });
+
+    if ($verbose > 1) {
+      print 'cd ', $dir, "\n";
+      print &timestamp_command ($command, 'Start');
+
+    } else {
+      print $command, "\n" if exists $info->{OBJECTS};
+    }
+
+    $rc = system $command;
+
+    print &timestamp_command ($command, 'End  ')
+      if $verbose > 1;
+    last if $rc;
+  }
+
+  # Move temporary output to correct location on success
+  # Otherwise, remove temporary output
+  if ($rc) { # error
+    unlink $tmplib;
+
+  } else {   # success
+    my $libdir = &get_env ('FCM_LIBDIR', 1);
+
+    print 'mv ', $tmplib, ' ', $libdir, "\n" if $verbose > 1;
+    rename $tmplib, &catfile ($libdir, $lib);
+  }
+
+  return $rc;
+}
+
+# ------------------------------------------------------------------------------
+# SYNOPSIS
+#   $type = &guess_file_type ($filename);
+#
+# DESCRIPTION
+#   This function attempts to guess the file type by looking at the extension
+#   of the $filename. Only C and Fortran at the moment.
+# ------------------------------------------------------------------------------
+
+sub guess_file_type {
+  return (($_[0] =~ /\.c(\w+)?$/i) ? 'C' : 'F');
+}
+
+# ------------------------------------------------------------------------------
+# SYNOPSIS
+#   $flags = &select_flags (\%info, $set);
+#
+# DESCRIPTION
+#   This function selects the correct compiler/linker flags for the current
+#   sub-package from the environment variable prefix $set. The argument $info
+#   is a hash reference set up in MAIN.
+# ------------------------------------------------------------------------------
+
+sub select_flags {
+  my ($info, $set) = @_;
+
+  my $srcbase = &basename ($info->{SRC});
+  my @names    = ($set);
+  push @names, split (/__/, $info->{SRCPACKAGE} . '__' . $srcbase);
+
+  my $string = '';
+  for my $i (reverse (0 .. $#names)) {
+    my $var  = &get_env (join ('__', (@names[0 .. $i])));
+
+    $var = &get_env (join ('__', (@names[0 .. $i])))
+      if (not defined ($var)) and $i and $names[-1] =~ s/\.[^\.]+$//;
+
+    next unless defined $var;
+    $string = $var;
+    last;
+  }
+
+  return $string;
+}
+
+# ------------------------------------------------------------------------------
+# SYNOPSIS
+#   $variable = &get_env ($name);
+#   $variable = &get_env ($name, $compulsory);
+#
+# DESCRIPTION
+#   This internal method gets a variable from $ENV{$name}. If $compulsory is
+#   set to true, it throws an error if the variable is a not set or is an empty
+#   string. Otherwise, it returns C<undef> if the variable is not set.
+# ------------------------------------------------------------------------------
+
+sub get_env {
+  (my $name, my $compulsory) = @_;
+  my $string;
+
+  if ($name =~ /^\w+$/) {
+    # $name contains only word characters, variable is exported normally
+    die 'The environment variable "', $name, '" must be set, abort'
+      if $compulsory and not exists $ENV{$name};
+
+    $string = exists $ENV{$name} ? $ENV{$name} : undef;
+
+  } else {
+    # $name contains unusual characters
+    die 'The environment variable "', $name, '" must be set, abort'
+      if $compulsory and not exists $unusual_tool_name{$name};
+
+    $string = exists $unusual_tool_name{$name}
+              ? $unusual_tool_name{$name} : undef;
+  }
+
+  return $string;
+}
+
+# ------------------------------------------------------------------------------
+# SYNOPSIS
+#   $path = &catfile (@paths);
+#
+# DESCRIPTION
+#   This is a local implementation of what is in the File::Spec module.
+# ------------------------------------------------------------------------------
+
+sub catfile {
+  my @names = split (m!/!, join ('/', @_));
+  my $path  = shift @names;
+
+  for my $name (@names) {
+    $path .= '/' . $name if $name;
+  }
+
+  return $path;
+}
+
+# ------------------------------------------------------------------------------
+# SYNOPSIS
+#   $basename = &basename ($path);
+#
+# DESCRIPTION
+#   This is a local implementation of what is in the File::Basename module.
+# ------------------------------------------------------------------------------
+
+sub basename {
+  my $name = $_[0];
+
+  $name =~ s{/*$}{}; # remove trailing slashes
+
+  if ($name =~ m#.*/([^/]+)$#) {
+    return $1;
+
+  } else {
+    return $name;
+  }
+}
+
+# ------------------------------------------------------------------------------
+# SYNOPSIS
+#   $dirname = &dirname ($path);
+#
+# DESCRIPTION
+#   This is a local implementation of what is in the File::Basename module.
+# ------------------------------------------------------------------------------
+
+sub dirname {
+  my $name = $_[0];
+
+  if ($name =~ m#^/+$#) {
+    return '/'; # dirname of root is root
+
+  } else {
+    $name =~ s{/*$}{}; # remove trailing slashes
+
+    if ($name =~ m#^(.*)/[^/]+$#) {
+      my $dir = $1;
+      $dir =~ s{/*$}{}; # remove trailing slashes
+      return $dir;
+
+    } else {
+      return '.';
+    }
+  }
+}
+
+# ------------------------------------------------------------------------------
+
+__END__
+
+=head1 NAME
+
+fcm_internal
+
+=head1 SYNOPSIS
+
+    fcm_internal SUBCOMMAND ARGS
+
+=head1 DESCRIPTION
+
+The fcm_internal command is a frontend for some of the internal commands of
+the FCM build system. The subcommand can be "compile", "load" or "archive"
+for invoking the compiler, loader and library archiver respectively. If
+"compile" or "load" is specified, it can be suffixed with ":TYPE" to
+specify the nature of the source file. If TYPE is not specified, it is set
+to C if the file extension begins with ".c". For all other file types, it
+is set to F (for Fortran source). For compile and load, the other arguments
+are 1) the name of the container package of the source file, 2) the path to
+the source file and 3) the target name after compiling or loading the
+source file. For compile, the 4th argument is a flag to indicate whether
+pre-processing is required for compiling the source file.  For load, the
+4th and the rest of the arguments is a list of object files that cannot be
+archived into the temporary load library and must be linked into the target
+through the linker command. (E.g. Fortran BLOCKDATA program units must be
+linked this way.) If archive is specified, the first argument should be the
+name of the library archive target and the rest should be the object files
+to be included in the archive. This command is invoked via the build system
+and should never be called directly by the user.
+
+=head1 COPYRIGHT
+
+(C) Crown copyright Met Office. All rights reserved.
+
+=cut

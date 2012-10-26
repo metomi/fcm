@@ -1,0 +1,9 @@
+#-------------------------------------------------------------------------------
+# FCM Keyword Configuration Example
+#-------------------------------------------------------------------------------
+# For detail, please refer to:
+# FCM User Guide Annex: FCM Configuration File > FCM Keyword Configuration
+#-------------------------------------------------------------------------------
+
+# E.g. Location of FCM
+location{primary}[fcm] = svn://host/fcm

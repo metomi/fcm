@@ -1,0 +1,86 @@
+=head1 NAME
+
+fcm branch-create (bcreate, bc)
+
+=head1 SYNOPSIS
+
+Creates a branch.
+
+    fcm branch-create [OPTIONS] NAME [SOURCE]
+
+=head1 ARGUMENTS
+
+NAME is a short name for the branch, which should contain only characters in the
+set [A-Za-z0-9_\-\.]. If the --ticket=N option is not specified and NAME
+contains only a list of positive integers separated by [_-] (an underscore or a
+hyphen), the command will assume that NAME also specifies the related ticket
+numbers.
+
+SOURCE can be an URL or a Subversion working copy. Otherwise, the current
+working directory must be a working copy. The specified URL (or the URL of the
+working copy) must be URL under a standard FCM project.
+
+=head1 OPTIONS
+
+=over 4
+
+=item --branch-of-branch
+
+If this option is specified and the SOURCE is a branch, it will create a new
+branch from the SOURCE branch. Otherwise, the branch is created from the trunk.
+
+=item --non-interactive
+
+Do no interactive prompting. This option implies --svn-non-interactive.
+
+=item --password=PASSWORD
+
+Specify a password for write access to the repository.
+
+=item --rev-flag=NONE|NORMAL|NUMBER
+
+Specify a flag for determining the prefix of the branch name. The flag can be
+the string "NORMAL", "NUMBER" or "NONE".  "NORMAL" is the default behaviour,
+in which the branch name will be prefixed with a Subversion revision number if
+the revision is not associated with a registered FCM revision keyword. If the
+revision is registered with a FCM revision keyword, the keyword will be used in
+place of the number. If "NUMBER" is specified, the branch name will always be
+prefixed with a Subversion revision number. If "NONE" is specified, the branch
+name will not be prefixed by a revision number or keyword.
+
+=item --svn-non-interactive
+
+Do no interactive prompting at commit time. This option is implied by
+--non-interactive.
+
+=item --switch
+
+C<fcm switch> the current working directory (if it contains a relevant working
+copy) to point to the newly created branch after the branch is created.
+
+=item --ticket=N, -k N
+
+Specify one (or more) Trac ticket. If specified, the ticket numbers will be
+included in the commit log message. Multiple tickets can be set by specifying
+this option multiple times, or by specifying the tickets in a comma-separated
+list.
+
+=item --type=TYPE, -t TYPE
+
+Specify the type of the branch to be created. It must be one of the following:
+
+ DEV::USER [DEV, USER] - a development branch for the user
+ DEV::SHARE [SHARE]    - a shared development branch
+ TEST::USER [TEST]     - a test branch for the user
+ TEST::SHARE           - a shared test branch
+ PKG::USER [PKG]       - a package branch for the user
+ PKG::SHARE            - a shared package branch
+ PKG::CONFIG [CONFIG]  - a configuration branch
+ PKG::REL [REL]        - a release branch
+
+If not specified, the default is to create a development branch for the current
+user, i.e.  DEV::USER.
+
+=back
+
+=cut

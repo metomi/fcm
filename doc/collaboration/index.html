@@ -1,0 +1,444 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for Linux/x86 (vers 1st December 2004), see www.w3.org" />
+
+  <title>External Distribution &amp; Collaboration for FCM Projects</title>
+  <meta name="author" content="FCM team" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" type="text/css" href="../etc/fcm.css" />
+<script type="text/javascript" src="../etc/fcm.js">
+</script>
+<script type="text/javascript" src="../etc/fcm-version.js">
+</script>
+</head>
+
+<body>
+  <div id="body-header">
+    <a href="http://www.metoffice.gov.uk/research/collaboration/fcm/">
+    <img src="../etc/fcm.png" alt="FCM" />
+    </a>
+    <address>
+      &copy; British Crown Copyright 2006-11
+      <a href="http://www.metoffice.gov.uk">Met Office</a>.
+      See <a href="../etc/fcm-terms-of-use.html">Terms of Use</a>.<br />
+      This document is released under the <a href=
+      "http://www.nationalarchives.gov.uk/doc/open-government-licence/" rel=
+      "license">Open Government Licence</a>.<br />
+      <span id="fcm-version"></span>
+    </address>
+  </div>
+
+  <h1>External Distribution &amp; Collaboration for FCM Projects</h1>
+
+  <div id="fcm-content"></div>
+
+  <h2 id="introduction">Introduction</h2>
+
+  <p>This document describes how projects configured under FCM can be
+  distributed externally. Particular attention is given to collaborative
+  distributions - where the external user regularly returns code for
+  consolidation into the central repositories which hold the master copies of
+  the code.</p>
+
+  <p><dfn>Note:</dfn> This document assumes that the repositories are
+  inaccessible to the external user, due to issues of security and
+  practicality.</p>
+
+  <h2 id="distribution">Creating a Distribution</h2>
+
+  <p>A system configured under FCM can be distributed by packaging a known
+  revision (usually corresponding to a stable release) into an archive (e.g. a
+  tarball) of directories and files. Various issues need to be considered:</p>
+
+  <ul>
+    <li>A distribution may contain a variety of different files including
+    source code, scripts, benchmark and validation tests, documentation,
+    etc.</li>
+
+    <li>A system may consist of several different <em>projects</em> which
+    should be put into separate directories in the distribution. Please refer
+    to the section <a href=
+    "../user_guide/system_admin.html#svn_design">Repository design</a> in the
+    FCM user guide for an explanation of what is meant by a project in this
+    context.</li>
+
+    <li>Some files in a project may not be included in the distribution. This
+    may be because they are of no interest to external users or because of
+    license restrictions. Such files will need to be filtered out when creating
+    the distribution.</li>
+
+    <li>The distribution may also contain some files which are not maintained
+    under FCM version control (test results for instance).</li>
+
+    <li>Some systems share code with other systems.
+
+      <ul>
+        <li>If a distribution is intended to be used standalone then the
+        necessary files from these other systems will need to be included. e.g.
+        The VAR system requires code from the OPS and GEN systems.</li>
+
+        <li>If the distribution is part of a wider collaboration then it is
+        likely that the files from the other systems will be distributed
+        separately. It is best if stable releases of the various systems can be
+        synchronised so that, for example, a VAR stable release uses code from
+        an OPS stable release which both use code from the same GEN
+        release.</li>
+      </ul>
+    </li>
+
+    <li>Release notes should be prepared to accompany a distribution which
+    explain, among other things, how the distribution is structured.</li>
+
+    <li>The distribution should contain a file which identifies the repository
+    revision(s) contained in the distribution.</li>
+
+    <li>System managers will probably wish to maintain a script which automates
+    the generation of these distributions.</li>
+  </ul>
+
+  <h2 id="feedback">Feeding Back Changes</h2>
+
+  <p>Although we would encourage all collaborators to make use of the FCM
+  system for version control, we recognise that they may already have their own
+  preferred systems in place. There is no particular problem with this. The
+  main requirement is that any proposed changes are provided as a modification
+  relative to the provided distribution. The changeset could be provided in the
+  form of a modified project tree or as a patchfile (refer to the later section
+  <a href="#patchfiles">Exchanging Changesets using Patchfiles</a> for further
+  discussion). If the change involves any renaming or removal of files or
+  directories then special instructions should be provided plus a script to
+  perform the changes.</p>
+
+  <p>At the central repository, the changeset should be applied to a branch
+  created from the repository revision which formed the basis of the changeset
+  (possibly making use of the Subversion utility <a href=
+  "http://svnbook.red-bean.com/en/1.4/svn.advanced.vendorbr.html#svn.advanced.vendorbr.svn_load_dirs">
+  svn_load_dirs.pl</a>). Note that extra care is needed with changesets
+  provided as modified project trees if there are any files in the project
+  which are excluded from the distribution. Once imported, the changeset should
+  then undergo any necessary testing or review before being merged into the
+  trunk.</p>
+
+  <h2 id="usingfcm">Collaborating Using FCM for Version Control</h2>
+
+  <p>There are a number of advantages if the FCM system is used for version
+  control by the collaborator. In particular it means that:</p>
+
+  <ul>
+    <li>Collaborators will be able to see all of the individual changesets
+    which went in to a new release rather than only being able to view each new
+    release as one big change.</li>
+
+    <li>The process of sending a proposed change to the central repository can
+    be standardised through the use of an <em>FCM patch</em> (explained
+    later).</li>
+
+    <li>The FCM Extract system can be fully utilised.</li>
+
+    <li>Common tools will help to ease communication. We will all use technical
+    terms to mean the same thing.</li>
+  </ul>
+
+  <p>This section explains the recommended way of using FCM in a
+  collaboration.</p>
+
+  <h3 id="initsvn">Initialising the Subversion Repositories</h3>
+
+  <p>The collaborator needs to set up a repository and import each of the
+  projects. Please see the section <a href=
+  "../user_guide/system_admin.html#svn_create">Creating a repository</a> in the
+  FCM user guide for advice. Collaborators may wish to use separate
+  repositories and Trac systems for each project or they may prefer to use a
+  single repository for all projects and use a single Trac system. Either
+  option should be fine so long as the same set of projects is retained.</p>
+
+  <p>After completing the initial import, the collaborator should have the
+  required set of projects available in Subversion where the initial version of
+  the trunk of each project corresponds with the initial stable release
+  provided in the distribution.</p>
+
+  <h3 id="prepchanges">Preparing Changes at the Collaborator's Site</h3>
+
+  <p>The recommended way of preparing changes is illustrated in Figure 1a:</p>
+
+  <p class="image"><img src="working-as-collaborator.png" alt=
+  "Figure 1a: working at the collaborator's site" /><br />
+  Figure 1a: working at the collaborator's site</p>
+
+  <p>The collaborator will create a shared package branch from the latest
+  stable release on the trunk. This branch will contain all the changes that
+  will eventually be fed back to the central repository. Developers will also
+  create their own development branches. These may be branched from the latest
+  stable release on the trunk. Alternatively, if the change needs to build on
+  other changes then a branch can be created from the shared package branch.
+  When the changes are ready (i.e. tested, documented, reviewed, etc) then they
+  are merged into the shared package branch. The trunk is not used for the
+  shared changes as it is reserved for changes received from the central
+  repository.</p>
+
+  <p>Should it be required, a second shared package branch can be created from
+  the same point to contain any local modifications that will not be fed back
+  to the central repository. A configuration branch can then be used to combine
+  the local changes with those destined to be fed back. This is illustrated in
+  Figure 1b:</p>
+
+  <p class="image"><img src="managing-local-changes.png" alt=
+  "Figure 1b: managing local changes" /><br />
+  Figure 1b: managing local changes</p>
+
+  <h3 id="feedbackfcm">Feeding Back Changes Using FCM</h3>
+
+  <p>Eventually, a series of changesets will exist on the first package branch.
+  These changes will be fed back to the central repository via an <em>FCM
+  patch</em>. This contains a series of differences associated with changesets
+  in a given branch of development, created by the <code>fcm mkpatch</code>
+  command. For further information about the command, please refer to its
+  <a href="../user_guide/command_ref.html#fcm-mkpatch">command
+  reference</a> in the FCM user guide.</p>
+
+  <p>At the central repository, the changeset will be applied to a branch
+  created from the repository revision which formed the basis of the changeset.
+  This is illustrated in Figure 2:</p>
+
+  <p class="image"><img src="feeding-back-patch.png" alt=
+  "Figure 2: feeding back changes" /><br />
+  Figure 2: feeding back changes</p>
+
+  <p>Patches will usually be exchanged in the form of a tarball. To apply the
+  patch it must first be extracted to a directory. In this directory there
+  should be a shell script called <code>fcm-import-patch</code>. A TARGET needs
+  to be specified when invoking the script. The TARGET must either be a URL or
+  a working copy of a valid project tree that can accept the import of the
+  patches. It is essential that this target matches the version of the project
+  from which the patch was created (usually this means a particular stable
+  release). The script contains a series of <code>cp</code> and
+  <code>svn</code> commands to import the changesets one by one. Note that the
+  changesets are committed automatically with no user interaction. It is worth
+  ensuring that an up to date backup of the repository is available in case of
+  problems.</p>
+
+  <h3 id="changescentral">Incorporating Changes into the Trunk of the Central
+  Repository</h3>
+
+  <p>Once the changes have undergone any necessary testing or review they can
+  be merged into the trunk. There are three ways of approaching this:</p>
+
+  <ol>
+    <li>As one changeset: all changes in the branch will be merged into the
+    trunk as a single changeset. This approach is the easiest and has the
+    advantage that any conflicts only need to be resolved once. However, the
+    drawback of this approach is that the logical changesets as fed back by the
+    collaborator will be combined into a large single changeset on the trunk,
+    which may not be the most desirable (although the logical changesets will
+    still be available to examine on the import branch). This is illustrated in
+    Figure 3a:
+
+      <p class="image"><img src="merging-patch-one.png" alt=
+      "Figure 3a: merging a patch in a single changeset" /><br />
+      Figure 3a: merging a patch in a single changeset</p>
+    </li>
+
+    <li>As multiple changesets: each changeset in the branch will be merged
+    into the trunk in order. This can be quite complicated and time consuming,
+    especially if you have a large number of changesets and there are a lot of
+    clashes. The advantage is that each logical changeset will retain its
+    logical identity, which may be more desirable in the long run, when you
+    come to inspect the history. This is illustrated in Figure 3b:
+
+      <p class="image"><img src="merging-patch-multi.png" alt=
+      "Figure 3b: merging a patch in multiple changesets" /><br />
+      Figure 3b: merging a patch in multiple changesets</p>
+    </li>
+
+    <li>As a mixture of the above: you may want to combine the above two
+    approaches when it makes sense to do so. For example, there may be a series
+    of small changesets that can be combined logically, or there may be a
+    changeset that fixes a bug introduced in the previous one. The bottom line
+    is that the project/system manager should use his/her own judgement in the
+    matter for what is best for the future of the project.</li>
+  </ol>
+
+  <h3 id="changescollab">Incorporating Updates at the Collaborator's Site</h3>
+
+  <p>Once a new stable release is available it will be supplied in the form of
+  a distribution tarball as described earlier. However, collaborators will also
+  be supplied with an <em>FCM patch</em> (as described earlier) for each
+  project containing all the changes made since the previous stable release.
+  Note that this assumes that stable releases are prepared on the trunk and not
+  in branches.</p>
+
+  <p>Each patch should be applied to the trunk of the collaborator's
+  repository. This means that the collaborator's trunk will always be mirroring
+  that of the central repository. This is illustrated in Figure 4:</p>
+
+  <p class="image"><img src="mirroring-trunk.png" alt=
+  "Figure 4: mirroring the trunk at the collaborator's site" /><br />
+  Figure 4: mirroring the trunk at the collaborator's site</p>
+
+  <p>In order to be certain that the patch has worked correctly, we recommend
+  that a check is performed to ensure that the new stable release on the trunk
+  matches the files provided in the distribution (preferably using a copy of
+  the repository for testing purposes before applying the patch to the live
+  repository).</p>
+
+  <h3 id="updatebranches">Updating Existing Branches</h3>
+
+  <p>Old branches that are still active at the collaborators site should be
+  updated to the latest stable release when it becomes available. Developers
+  should create a new branch from the latest stable release and then merge the
+  changes from the old branch to the new branch. The old branch should be
+  deleted once it is no longer required. This is illustrated in Figure 5a:</p>
+
+  <p class="image"><img src="updating-branch.png" alt=
+  "Figure 5a: updating a branch to the latest stable release" /><br />
+  Figure 5a: updating a branch to the latest stable release</p>
+
+  <p>Note that the merge will be easiest if the old branch was created from the
+  previous stable release. If it was created from the shared package branch
+  then a custom merge will be required to achieve the desired result (a normal
+  FCM merge command would choose the wrong base for comparison). This is
+  illustrated in Figure 5b:</p>
+
+  <p class="image"><img src="updating-shared-branch.png" alt=
+  "Figure 5b: updating a branch of the shared package branch" /><br />
+  Figure 5b: updating a branch of the shared package branch</p>
+
+  <h3 id="other">Other Scenarios</h3>
+
+  <p>The previous sections have only considered how developments on the trunk
+  of a central repository can be shared with a single collaborator. However,
+  the same techniques can be applied to more complex situations.</p>
+
+  <ul>
+    <li>If there are multiple external collaborators each working with their
+    own repository then hopefully it is clear that this does not alter things
+    in any way. Inevitably there will be an increased workload on the
+    maintainers of the central repository. There will also be an increased need
+    for coordination of planned code changes. However, the method of code
+    exchange is unaltered.</li>
+
+    <li>Sometimes there may be the need to collaborate on development of a
+    branch (i.e. to exchange code which is not yet ready to be incorporated
+    onto the trunk). The collaborator would maintain the trunk of their
+    repository as before, importing patches to keep their trunk alligned with
+    the stable releases from the central repository. In addition, they would
+    receive an <em>FCM patch</em> from the central repository representing the
+    changes on the shared branch relative to the stable release. The
+    collaborator should create a branch from the stable release and the patch
+    should then be imported onto this branch. They should then create a branch
+    from this branch on which to prepare their changes. When ready the changes
+    would be returned in the form of an <em>FCM patch</em>, and so on.
+    Hopefully it can be seen that the same process can be applied to this
+    shared branch as we have previously described for trunk developments.</li>
+  </ul>
+
+  <h3 id="alternative">An Alternative Branching Strategy</h3>
+
+  <p>We have described the branching strategy we believe will work best for
+  collaborators. However, this is by no means the only branching strategy that
+  can be used. In particular, some collaborators may prefer to keep the latest
+  copies of the code they are using on the trunk. This effectively means
+  getting rid of the shared package branches for shared and local changes and
+  merging all changes on to the trunk. A separate branch would be used for
+  keeping a pristine copy of the main site and merging changes from new stable
+  builds on to the trunk.</p>
+
+  <p>This approach is certainly possible and has the advantage that developers
+  at the collaborator's site may find it easier to work with. However there are
+  two disadvantages that need to be considered:</p>
+
+  <ol>
+    <li>Merging in changes from a new stable release may be more difficult. If
+    the new stable release includes changes which were fed back by the
+    collaborator then these will already be present on the collaborators trunk.
+    If these changes were modified in any way or if they overlap with other
+    changes then this will result in a conflict which could be tricky to
+    resolve.</li>
+
+    <li>Any changes which need to be fed back by the collaborator need to be
+    made relative to a stable release. However, changes will have been prepared
+    relative to some version of the trunk. This means that a separate branch
+    will need to be taken (from the branch containing the pristine copy of the
+    main site) and a custom merge will be required in order to achieve the
+    desired result.</li>
+  </ol>
+
+  <h3 id="patchfiles">Exchanging Changesets using Patchfiles</h3>
+
+  <p>In some cases, an <em>FCM patch</em> may not be the best way of exchanging
+  changesets. For instance, when distributing code changes which have not yet
+  been finalised, you probably wouldn't want to send a patch containing all the
+  individual commits to the branch on which the change is being developed. What
+  you want is a summary of the changes in a single changeset. In this case you
+  will often be better to use a patchfile (which can be applied using the Unix
+  command <code>patch</code>). A patchfile is simply the output from an
+  <code>fcm diff</code> command. For example:</p>
+  <pre>
+fcm diff --branch fcm:myproj-br/dev/frdm/r2134_my_branch &gt; my_patchfile
+</pre>
+
+  <p>The patchfile must be applied to a working copy of the project which
+  corresponds to the same revision from which the patchfile was generated. The
+  option <code>-p0</code> must be used with the <code>patch</code> command. For
+  example:</p>
+  <pre>
+patch -p0 &lt; my_patchfile
+</pre>
+
+  <p>Patchfiles have the advantage that they are simple to generate and
+  exchange and that they can combine the changes from a number of changsets
+  into one. However, they have a number of limitations such as:</p>
+
+  <ul>
+    <li>Binary files are ignored.</li>
+
+    <li>Deleted directories are ignored.</li>
+
+    <li>Deleted files are left as empty files.</li>
+
+    <li>Copied files appear as new files.</li>
+
+    <li>A moved file is treated as a deleted file and a new file.</li>
+  </ul>
+
+  <p>Fortunately these limitations will not be an issue for the majority of
+  changes and, where they are a problem, there are various options such as
+  providing additional instructions with the patchfile, using an <em>FCM
+  patch</em>, or exchanging a modified project tree.</p>
+
+  <h2 id="further">Further Considerations</h2>
+
+  <p>The previous sections have only considered the version control aspects of
+  a collaboration. This section lists some other aspects of the collaboration
+  which will need to be considered.</p>
+
+  <ul>
+    <li>The FCM build system can be used regardless of what version control
+    system is used. This avoids effort being wasted trying to maintain
+    compatibility with an alternate build system. It also ensures that any code
+    changes prepared by the collaborator are compatible with the coding
+    standards which the FCM build system requires. Even if there are good
+    reasons for the collaborator not to use FCM for version control, it is
+    highly recommended that the FCM build system is used (assuming that is what
+    is used at the central repository).</li>
+
+    <li>Coding standards should be agreed by all collaborators.</li>
+
+    <li>Working practices should be agreed which should define, amongst other
+    things, what level of testing, review and documentation is expected to
+    accompany any proposed change.</li>
+
+    <li>All parties in the collaboration should note the advice given in the
+    <a href="../user_guide/code_management.html#svn_problems">FCM user
+    guide</a> to avoid renaming files or directories unless you can ensure that
+    no-one is working in parallel on the affected areas of the project.</li>
+
+    <li><acronym title="intellectual property rights">IPR</acronym>, copyright
+    and license issues should be agreed by all collaborators.</li>
+  </ul>
+</body>
+</html>

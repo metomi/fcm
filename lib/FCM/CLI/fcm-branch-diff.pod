@@ -1,0 +1,52 @@
+=head1 NAME
+
+fcm branch-diff (bdiff, bdi)
+
+=head1 SYNOPSIS
+
+Show differences relative to the base of the target branch, i.e. the changes
+available for merging from the target branch into its parent.
+
+    fcm branch-diff [OPTIONS] [TARGET]
+
+=head1 ARGUMENTS
+
+If TARGET is specified, it must either be a URL or a working copy. Otherwise,
+the target is the current directory which must be a working copy. The target
+URL must be a branch in a standard FCM project.
+
+=head1 OPTIONS
+
+=over 4
+
+=item --diff-cmd=PATH
+
+Use PATH as I<diff> command.
+
+=item --graphical, -g
+
+Equivalent to C<--diff-cmd=fcm_graphic_diff>.
+
+=item --summarize, --summarise
+
+Show a summary of the results.
+
+=item --xml
+
+With --summarise, show a summary of the results in XML format.
+
+=item --trac, -t
+
+If TARGET is a URL, use Trac to display the diff.
+
+=item --wiki
+
+If TARGET is a URL, print Trac link for the diff.
+
+=item --extensions=ARG, -x ARG
+
+Options of the I<diff> command. See the help for "L<svn|svn> diff".
+
+=back
+
+=cut

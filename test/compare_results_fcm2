@@ -1,0 +1,205 @@
+#!/bin/ksh
+
+TEST_NAME=$1
+BASE_DIR=$PWD
+DIFF=${DIFF:-diff}
+
+if [[ ! -f control/$TEST_NAME/.tests.complete ]]; then
+  echo "WARNING: Control tests did not complete, skipping comparisons"
+  exit
+fi
+
+DIFF_OUTPUT=$BASE_DIR/$TEST_NAME.diff
+
+# Compare directory contents
+for DIR in extract build/etc .fcm-make/cache
+do
+  if [[ -d test/$TEST_NAME/$DIR ]]; then
+    if [[ $DEBUG == true ]]; then
+      echo "Comparing $DIR directory contents ..."
+    fi
+    $DIFF -r --exclude=hello_sub2.F90 control/$TEST_NAME/$DIR test/$TEST_NAME/$DIR >$DIFF_OUTPUT
+    if [[ $? != 0 ]]; then
+      echo "FAILED: $TEST_NAME - $DIR directory contents differ from control"
+      exit 1
+    fi
+  fi
+done
+
+# Compare file listings from directories
+for DIR in build/bin build/o build/include
+do
+  if [[ -d test/$TEST_NAME/$DIR ]]; then
+    if [[ $DEBUG == true ]]; then
+      echo "Comparing $DIR directory listings ..."
+    fi
+    cd $BASE_DIR/control/$TEST_NAME
+    ls -R -1 $DIR >$BASE_DIR/$TEST_NAME.control_files
+    cd $BASE_DIR/test/$TEST_NAME
+    ls -R -1 $DIR >$BASE_DIR/$TEST_NAME.test_files
+    cd $BASE_DIR
+    $DIFF $TEST_NAME.control_files $TEST_NAME.test_files >$DIFF_OUTPUT
+    if [[ $? != 0 ]]; then
+      echo "FAILED: $TEST_NAME - $DIR file listing differs from control"
+      exit 1
+    fi
+    rm $TEST_NAME.control_files $TEST_NAME.test_files
+  fi
+done
+
+# Compare file listings from directories (non-recursive)
+for DIR in . extract build preprocess
+do
+  if [[ -d test/$TEST_NAME/$DIR ]]; then
+    if [[ $DEBUG == true ]]; then
+      echo "Comparing $DIR directory listings ..."
+    fi
+    cd $BASE_DIR/control/$TEST_NAME
+    ls -1 $DIR >$BASE_DIR/$TEST_NAME.control_files
+    cd $BASE_DIR/test/$TEST_NAME
+    ls -1 $DIR >$BASE_DIR/$TEST_NAME.test_files
+    cd $BASE_DIR/
+    $DIFF $TEST_NAME.control_files $TEST_NAME.test_files >$DIFF_OUTPUT
+    if [[ $? != 0 ]]; then
+      echo "FAILED: $TEST_NAME - $DIR file listing differs from control"
+      exit 1
+    fi
+    rm $TEST_NAME.control_files $TEST_NAME.test_files
+  fi
+done
+
+# Compare files in build/include directory (except *.mod)
+if [[ -d test/$TEST_NAME/build/include ]]; then
+  if [[ $DEBUG == true ]]; then
+    echo "Comparing build/include directory contents ..."
+  fi
+  cd test/$TEST_NAME/build/include
+  for FILE in $(ls -1 | grep -v "\.mod$")
+  do
+    $DIFF $BASE_DIR/control/$TEST_NAME/build/include/$FILE $FILE >$DIFF_OUTPUT
+    if [[ $? != 0 ]]; then
+      echo "FAILED: $TEST_NAME - $FILE contents differ from control"
+      exit 1
+    fi
+  done
+fi
+cd $BASE_DIR
+
+# Compare files in preprocess directory (ignoring RUN_DIR in *.c & *.cpp files)
+if [[ -d test/$TEST_NAME/preprocess ]]; then
+  if [[ $DEBUG == true ]]; then
+    echo "Comparing preprocess directory contents ..."
+  fi
+  cd test/$TEST_NAME
+  FILES=$(find preprocess -type f)
+  cd $BASE_DIR
+  for FILE in $FILES
+  do
+    if [[ $FILE == ${FILE%.c} && $FILE == ${FILE%.cpp} ]]; then
+      $DIFF control/$TEST_NAME/$FILE test/$TEST_NAME/$FILE >$DIFF_OUTPUT
+    else
+      sed "s#/.*/fcm_test_suite/control/##g" control/$TEST_NAME/$FILE >$TEST_NAME.control_file
+      sed "s#/.*/fcm_test_suite/test/##g" test/$TEST_NAME/$FILE >$TEST_NAME.test_file
+      $DIFF $TEST_NAME.control_file $TEST_NAME.test_file >$DIFF_OUTPUT
+    fi
+    if [[ $? != 0 ]]; then
+      echo "FAILED: $TEST_NAME - $FILE contents differ from control"
+      exit 1
+    fi
+    rm -f $TEST_NAME.control_file $TEST_NAME.test_file
+  done
+fi
+
+# Compare build command files
+cd test
+unset TEST_FILES CONTROL_FILES
+if [[ -f $TEST_NAME.build.commands.1 ]]; then
+  TEST_FILES=$(ls -1 $TEST_NAME.build.commands.*)
+fi
+cd $BASE_DIR/control
+if [[ -f $TEST_NAME.build.commands.1 ]]; then
+  CONTROL_FILES=$(ls -1 $TEST_NAME.build.commands.*)
+fi
+if [[ $TEST_FILES != $CONTROL_FILES ]]; then
+  echo "FAILED: $TEST_NAME - number of build command files differs from control"
+  exit 1
+fi
+cd $BASE_DIR
+for FILE in $TEST_FILES
+do
+  if [[ $DEBUG == true ]]; then
+    echo "Comparing $FILE contents ..."
+  fi
+  if [[ $NPROC = 1 ]]; then
+    $DIFF control/$FILE test/$FILE >$DIFF_OUTPUT
+  else
+    sort control/$FILE >$TEST_NAME.control_file
+    sort test/$FILE >$TEST_NAME.test_file
+    $DIFF $TEST_NAME.control_file $TEST_NAME.test_file >$DIFF_OUTPUT
+  fi
+  if [[ $? != 0 ]]; then
+    echo "FAILED: $TEST_NAME - $FILE contents differ from control"
+    exit 1
+  fi
+  rm -f $TEST_NAME.control_file $TEST_NAME.test_file
+done
+
+# Compare run output files
+cd test
+unset TEST_FILES CONTROL_FILES
+if [[ -f $TEST_NAME.exe.stdout.1 ]]; then
+  TEST_FILES="$TEST_FILES $(ls -1 $TEST_NAME.exe.stdout.*)"
+fi
+cd $BASE_DIR/control
+if [[ -f $TEST_NAME.exe.stdout.1 ]]; then
+  CONTROL_FILES="$CONTROL_FILES $(ls -1 $TEST_NAME.exe.stdout.*)"
+fi
+if [[ $TEST_FILES != $CONTROL_FILES ]]; then
+  echo "FAILED: $TEST_NAME - number of run output files differs from control"
+  exit 1
+fi
+cd $BASE_DIR
+for FILE in $TEST_FILES
+do
+  if [[ $DEBUG == true ]]; then
+    echo "Comparing $FILE contents ..."
+  fi
+  $DIFF control/$FILE test/$FILE >$DIFF_OUTPUT
+  if [[ $? != 0 ]]; then
+    echo "FAILED: $TEST_NAME - $FILE contents differ from control"
+    exit 1
+  fi
+done
+
+# Compare file contents ignoring RUN_DIR
+for FILE in .fcm-make/config-as-parsed.cfg .fcm-make/config-on-success.cfg
+do
+  if [[ -f test/$TEST_NAME/$FILE ]]; then
+    if [[ $DEBUG == true ]]; then
+      echo "Comparing $FILE contents ..."
+    fi
+    cat control/$TEST_NAME/$FILE | sed "s#/.*/fcm_test_suite/control/##g" >$TEST_NAME.control_file
+    cat test/$TEST_NAME/$FILE | sed "s#/.*/fcm_test_suite/test/##g" >$TEST_NAME.test_file
+    $DIFF $TEST_NAME.control_file $TEST_NAME.test_file >$DIFF_OUTPUT
+    if [[ $? != 0 ]]; then
+      echo "FAILED: $TEST_NAME - $FILE file contents differ from control"
+      exit 1
+    fi
+    rm $TEST_NAME.control_file $TEST_NAME.test_file
+  fi
+done
+
+if [[ $COMPARE_TIMES == true ]]; then
+  cd control
+  for FILE in $(ls -1 $TEST_NAME.make.stdout.*)
+  do
+    echo "Make times:"
+    grep -e '\[done\]' -e '\[FAIL\]' $FILE >$TEST_NAME.control_make_times
+    grep -e '\[done\]' -e '\[FAIL\]' $BASE_DIR/test/$FILE >$TEST_NAME.test_make_times
+    $DIFF --side-by-side $TEST_NAME.control_make_times $TEST_NAME.test_make_times
+    rm $TEST_NAME.control_make_times $TEST_NAME.test_make_times
+  done
+fi
+
+rm -f $DIFF_OUTPUT
+exit 0

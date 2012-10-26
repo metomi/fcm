@@ -1,0 +1,25 @@
+=head1 NAME
+
+fcm loc-layout
+
+=head1 SYNOPSIS
+
+Parse the URL of a FCM/Subversion TARGET, and print its FCM layout information.
+
+    fcm keyword-print [OPTIONS] [TARGET ...]
+
+=head1 ARGUMENTS
+
+If no argument is specified, TARGET is the current working directory.
+
+=head1 OPTIONS
+
+=over 4
+
+=item --verbose, -v
+
+Increase the verbosity level.
+
+=back
+
+=cut

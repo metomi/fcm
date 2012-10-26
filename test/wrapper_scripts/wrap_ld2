@@ -1,0 +1,2 @@
+echo "wrap_ld2 $@" | sed "s#$RUN_DIR##g" >>$command_file
+ifort  "$@"

@@ -1,0 +1,129 @@
+#!/usr/bin/env perl
+# ------------------------------------------------------------------------------
+# (C) British Crown Copyright 2006-2012 Met Office.
+#
+# This file is part of FCM, tools for managing and building source code.
+#
+# FCM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FCM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FCM. If not, see <http://www.gnu.org/licenses/>.
+# ------------------------------------------------------------------------------
+use strict;
+use warnings;
+
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+use FCM::CLI;
+
+our $GUI;
+
+# ------------------------------------------------------------------------------
+if (!caller()) {
+    main(@ARGV);
+}
+
+# ------------------------------------------------------------------------------
+sub main {
+    my @args = @_;
+    my $gui;
+    if (@args && $args[0] eq 'gui-internal') {
+        (undef, $gui, @args) = @args;
+    }
+    FCM::CLI->new({'gui' => $gui})->main(@args);
+}
+
+__END__
+
+=head1 NAME
+
+fcm
+
+=head1 SYNOPSIS
+
+    fcm [APPLICATION] [OPTIONS] [ARGUMENTS]
+
+=head1 OVERVIEW
+
+B<fcm> is the command line interface of the Flexible Configuration Management
+(FCM) system. For full detail of the system, please refer to the FCM user
+guide, which you should receive with this distribution in both HTML and PDF
+formats.
+
+Run "fcm help" to access the built-in tool documentation.
+
+=head1 ARGUMENTS
+
+B<fcm> provides the following applications:
+
+    branch-create, bcreate, bc
+    branch-delete, bdelete, bdel, brm
+    branch-diff, bdiff, bdi
+    branch-info, binfo
+    branch-list, bls
+    browse, trac, www
+    build
+    cfg-print, cfg
+    cmp-ext-cfg
+    conflicts, cf
+    export-items
+    extract
+    gui
+    keyword-print, kp
+    loc-layout
+    make
+    mkpatch
+
+B<fcm> overrides the following B<svn> applications:
+
+    add
+    commit, ci
+    delete, del, remove, rm
+    diff, di
+    merge
+    switch, sw
+    update, up
+
+B<fcm> explicitly doesn't support the following B<svn> applications:
+
+    changelist
+
+Type "fcm help APPLICATION" for help on individual application.
+
+Type "svn help APPLICATION" for help on other B<svn> application.
+
+=head1 AUTHOR
+
+FCM Team L<fcm-team@metoffice.gov.uk>.
+Please feedback any bug reports or feature requests to us by e-mail.
+
+=head1 SEE ALSO
+
+L<svn (1)|svn>,
+L<perl (1)| perl>,
+L<FCM::CLI|FCM::CLI>
+
+=head1 COPYRIGHT
+
+FCM is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+FCM is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with FCM. If not, see L<http://www.gnu.org/licenses/>.
+
+=cut

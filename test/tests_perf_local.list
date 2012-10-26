@@ -1,0 +1,23 @@
+TESTS_FCM1="
+fcm1_var
+fcm1_var_parallel
+fcm1_ops_parallel
+fcm1_sps_parallel
+fcm1_um
+fcm1_um_inherit
+"
+
+TESTS_FCM2="
+fcm2_var
+fcm2_var_parallel
+fcm2_ops_parallel
+fcm2_sps_parallel
+fcm2_um
+fcm2_um_inherit
+fcm2_um77
+fcm2_um77_inherit
+"
+
+# Remove any commented out tests
+TESTS_FCM1=$(echo $TESTS_FCM1 | sed 's/#[^ ]*//g')
+TESTS_FCM2=$(echo $TESTS_FCM2 | sed 's/#[^ ]*//g')

@@ -1,0 +1,9 @@
+#-------------------------------------------------------------------------------
+# FCM External Configuration Example
+#-------------------------------------------------------------------------------
+# For detail, please refer to:
+# FCM User Guide Annex: FCM Configuration File > FCM External Configuration
+#-------------------------------------------------------------------------------
+
+# E.g. Web browser
+browser = firefox

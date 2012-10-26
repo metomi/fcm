@@ -1,0 +1,27 @@
+#!/bin/ksh
+
+TEST=$1
+DIFF=${DIFF:-diff}
+
+for FILE in $(ls -1 $TEST.make.stdout.*)
+do
+  FCM1_EXTRACT=$(echo "fcm1_${FILE#fcm2_}" | sed 's/make/extract/')
+  FCM1_BUILD=$(echo "fcm1_${FILE#fcm2_}" | sed 's/make/build/')
+  if [[ -f $FCM1_EXTRACT || -f $FCM1_BUILD ]]; then
+    if [[ $DEBUG == true ]]; then
+      echo "Comparing $FILE with $FCM1_EXTRACT & $FCM1_BUILD ..."
+    fi
+    echo "Times:"
+    if [[ -f $FCM1_EXTRACT ]]; then
+      grep "\->.*second" $FCM1_EXTRACT | grep -v Setup | grep -v Parse >> $TEST.fcm1_times
+    fi
+    if [[ -f $FCM1_BUILD ]]; then
+      grep "\->.*second" $FCM1_BUILD | grep -v Setup | grep -v Parse >> $TEST.fcm1_times
+    fi
+    grep -e '\[done\]' -e '\[FAIL\]' $FILE > $TEST.fcm2_times
+    $DIFF --side-by-side $TEST.fcm1_times $TEST.fcm2_times
+    rm $TEST.fcm1_times $TEST.fcm2_times
+  fi
+done
+
+exit 0

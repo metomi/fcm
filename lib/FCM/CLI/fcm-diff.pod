@@ -1,0 +1,45 @@
+=head1 NAME
+
+fcm diff (di)
+
+=head1 SYNOPSIS
+
+Display the differences between two revisions or paths.
+
+    1. fcm diff --branch [OPTIONS] [TARGET]
+       fcm diff -b                 [TARGET]
+    2. fcm diff [OPTIONS] [ARGS]
+
+=over 4
+
+=item 1.
+
+This usage is deprecated. It is replaced by C<fcm branch-diff>. Type
+C<fcm help branch-diff> for detail.
+
+=item 2.
+
+See the output of "L<svn|svn> help diff".
+
+=back
+
+=head1 OPTIONS
+
+The following are additional options supported by C<fcm diff>.
+
+=over 4
+
+=item --graphical, -g
+
+If this option is specified, the command uses a graphical tool to display the
+differences. This option can be used in combination with all other valid
+options except --diff-cmd and --extensions.
+
+=item --summarise
+
+This option is implemented in FCM as a wrapper to the Subversion --summarize
+option. It prints only a summary of the results.
+
+=back
+
+=cut

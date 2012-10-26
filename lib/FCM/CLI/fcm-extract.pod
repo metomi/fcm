@@ -1,0 +1,46 @@
+=head1 NAME
+
+fcm extract (ext)
+
+=head1 SYNOPSIS
+
+Invokes the deprecated FCM 1 extract system.
+
+    fcm extract [OPTIONS] [CFGFILE]
+
+=head1 ARGUMENTS
+
+The path to a CFG file may be provided. Otherwise, the extract system searches
+the default locations for an ext cfg file.
+
+=head1 OPTIONS
+
+=over 4
+
+=item --clean
+
+Clean the destination.
+
+=item --full, -f
+
+Run in full mode. If the option for full extract is specified, the
+sub-directories created by previous extracts will be removed, so that the
+current extract can start cleanly.
+
+=item --ignore-lock
+
+Ignore lock file. When an extract is invoked, it sets up a lock file in the
+extract root directory.  The lock is normally removed at the end of the extract.
+While the lock file is in place, the extract commands invoked in the same root
+directory will fail. If you need to bypass this check for whatever reason, you
+can invoke the extract system with this option.
+
+=item --verbose=N, -v N
+
+Specify the verbosity level. If specified, the verbosity level must be an
+integer greater than 0. Verbosity level 0 is the quiet mode. Increasing the
+verbosity level will increase the amount of diagnostic output.
+
+=back
+
+=cut

@@ -1,0 +1,51 @@
+=head1 NAME
+
+fcm make
+
+=head1 SYNOPSIS
+
+Invokes the FCM make system. See the user guide for detail.
+
+    fcm make [OPTIONS]
+
+=head1 OPTIONS
+
+=over 4
+
+=item --config-file=PATH, --file=PATH, -f PATH
+
+Specify the path to the configuration file. (default = fcm-make.cfg in the
+current working directory)
+
+=item --directory=PATH, -C PATH
+
+Specify the path to the destination. (default = $PWD or whatever is specified
+in the "dest" setting in the configuration file)
+
+=item --ignore-lock
+
+Ignore lock file. When the system is invoked, it sets up a lock file in the
+destination.  The lock is normally removed when the system completes the make.
+While the lock file is in place, another make invoked in the same destination
+will fail. This option can be used to bypass this check.
+
+=item --jobs=N, -j N
+
+Specify the number of (child) processes that can be run simultaneously.
+
+=item --new
+
+Remove items in the destination created by the previous make, and starts a new
+make.
+
+=item --quiet, -q
+
+Decrease the verbosity level.
+
+=item --verbose, -v
+
+Increase the verbosity level.
+
+=back
+
+=cut

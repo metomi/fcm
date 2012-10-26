@@ -1,0 +1,30 @@
+=head1 NAME
+
+fcm browse (trac www)
+
+=head1 SYNOPSIS
+
+Invokes the browser for a version controlled target.
+
+    fcm browse [OPTIONS] [TARGET ...]
+
+=head1 ARGUMENTS
+
+If TARGET is specified, it must be a FCM URL keyword, a Subversion URL or the
+path to a local working copy. If not specified, the current working directory
+is assumed to be a working copy. If the --browser option is specified, the
+specified web browser command is used to launch the repository browser.
+Otherwise, it attempts to use the default browser from the configuration
+setting.
+
+=head1 OPTIONS
+
+=over 4
+
+=item --browser=COMMAND
+
+Specify the web browser command.
+
+=back
+
+=cut

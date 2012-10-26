@@ -1,0 +1,127 @@
+#!/bin/bash
+#-------------------------------------------------------------------------------
+# (C) British Crown Copyright 2006-2012 Met Office.
+#
+# This file is part of FCM, tools for managing and building source code.
+#
+# FCM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FCM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FCM. If not, see <http://www.gnu.org/licenses/>.
+#-------------------------------------------------------------------------------
+# NAME
+#     fcm-rpmbuild
+#
+# SYNOPSIS
+#     fcm-rpmbuild [--no-vcs] [SOURCE]
+#
+# DESCRIPTION
+#     Build an rpm for distributing fcm on production servers managed by
+#     the  Met Office Linux Team.
+#
+# OPTIONS
+#     --no-vcs - do not add subversion and related dependencies to RPM.
+#
+# ARGUMENTS
+#     SOURCE - The source of the distribution. (default = fcm:fcm/trunk)
+#-------------------------------------------------------------------------------
+set -eu
+THIS=$(basename $0)
+
+# Sort out the rpmbuild directory structure
+if [[ -f $HOME/.rpmmacros ]]; then
+    DIR=$(awk '$1 ~ /^%_topdir$/ {print $2}' $HOME/.rpmmacros)
+    mkdir -p $DIR
+else
+    DIR=$(mktemp -d)
+    echo "%_topdir $DIR" >$HOME/.rpmmacros
+    function finally() {
+        cd
+        rm -f $HOME/.rpmmacros
+        rm -rf $DIR
+    }
+    trap finally ERR
+    trap finally EXIT
+    trap finally INT
+fi
+cd $DIR
+mkdir -p BUILD RPMS SOURCES SPECS SRPMS
+rm -rf SOURCES/fcm
+
+# Build RPM without no dependency on subversion or xxdiff?
+REQUIRES_VCS="perl-Tk perl-XML-Parser subversion xxdiff"
+if (($# > 0)) && [[ $1 == '--no-vcs' ]]; then
+    REQUIRES_VCS=
+    shift 1
+fi
+
+# Create the source tree
+SOURCE=${1:-fcm:fcm/trunk}
+fcm export -q $SOURCE SOURCES/fcm
+REV=$(fcm info $SOURCE | awk -F': ' '$1 ~ /^Last Changed Rev$/ {print $2}')
+mkdir -p SOURCES/fcm/usr/local/bin
+echo "FCM (r$REV)" >SOURCES/fcm/etc/fcm/version
+cat >SOURCES/fcm/usr/local/bin/fcm <<'__FCM_WRAPPER__'
+#!/bin/bash
+FCM_HOME=${FCM_HOME:-/opt/fcm}
+PATH=$FCM_HOME/bin:$PATH exec $FCM_HOME/bin/$(basename $0) "$@"
+__FCM_WRAPPER__
+
+# Create the rpmbuild spec file
+chmod +x SOURCES/fcm/usr/local/bin/fcm
+cat >SPECS/fcm.spec <<__SPEC__
+Summary: FCM is a set of tools for managing and building source code.
+Name: fcm
+Version: $REV
+Release: 1
+URL: http://www.metoffice.gov.uk/research/collaboration/fcm/
+License: http://collab.metoffice.gov.uk/twiki/pub/Support/FCM/LICENSE.html
+Group: Development/Tools
+Vendor: http://www.metoffice.gov.uk/
+Packager: fcm-team@metoffice.gov.uk
+BuildRoot: $PWD/BUILD/%{name}-%{version}
+BuildArch: noarch
+Source: $PWD/SOURCES/fcm
+Requires: diffutils gzip make perl perl-libwww-perl $REQUIRES_VCS
+
+%description
+http://www.metoffice.gov.uk/research/collaboration/fcm/
+
+%prep
+
+%build
+
+%install
+rm -rf \$RPM_BUILD_ROOT
+mkdir -p \$RPM_BUILD_ROOT/opt/fcm
+mkdir -p \$RPM_BUILD_ROOT/usr/local/bin
+cd \$RPM_SOURCE_DIR
+find fcm/{bin,etc,lib} -type d -exec install -Dd {} \$RPM_BUILD_ROOT/opt/{} \;
+find fcm/{bin,etc,lib} -type f -exec install -D {} \$RPM_BUILD_ROOT/opt/{} \;
+install \$RPM_SOURCE_DIR/fcm/usr/local/bin/fcm \$RPM_BUILD_ROOT/usr/local/bin/
+
+%clean 
+rm -rf \$RPM_BUILD_ROOT
+
+%files
+%defattr(0755,root,root)
+%dir /opt/fcm
+/opt/fcm/bin/
+/opt/fcm/etc/
+/opt/fcm/lib/
+/usr/local/bin/fcm
+__SPEC__
+
+# Build the rpm
+rpmbuild -ba SPECS/fcm.spec
+
+cd $OLDPWD
+cp $DIR/RPMS/noarch/* .

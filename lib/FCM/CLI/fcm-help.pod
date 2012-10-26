@@ -1,0 +1,25 @@
+=head1 NAME
+
+fcm help (h, usage, --help, --usage)
+
+=head1 SYNOPSIS
+
+Describes the usage of this program or its subcommands.
+
+    fcm help [OPTIONS] [SUBCOMMAND...]
+
+=head1 OPTIONS
+
+=over 4
+
+=item --quiet, -q
+
+Decrease the verbosity level.
+
+=item --verbose, -v
+
+Increase the verbosity level.
+
+=back
+
+=cut

@@ -1,0 +1,52 @@
+=head1 NAME
+
+fcm branch-list (blist, bls)
+
+=head1 SYNOPSIS
+
+Searches and lists branches in projects. By default, it lists only branches
+created by the current user.
+
+    fcm branch-list [OPTIONS] [TARGET ...]
+
+=head1 ARGUMENTS
+
+If no TARGET is specified, the current working directory is assumed to be the
+target. Each target must either be a URL[@REV] or a PATH[@REV] to a working copy
+of a standard FCM project.
+
+=head1 OPTIONS
+
+=over 4
+
+=item --only=DEPTH:PATTERN, ...
+
+Specify a regular expression to match at various depth. E.g.  with the normal
+FCM branch naming convention, C<--only=1:dev --only=2:fred> will display only
+the development branches owned by user ID "fred". (This option is cumalative,
+and overrides the --show-all and --user=PATTERN options.)
+
+=item --quiet, -q
+
+Decreases verbosity. Only prints branches matching the search criteria.
+
+=item --show-all, -a
+
+Print branches of all users. (This option overrides the --user=USER option.)
+
+=item --url
+
+Displays Subversion URL instead of FCM location keywords.
+
+=item --user=PATTERN, -u PATTERN
+
+Equivalent to --only=2:^PATTERN$ for projects with the normal FCM branch naming
+convention. Lists branches created by the specified list of users instead of the
+current user. With the normal FCM branch naming convention, you can also list
+shared branches by specifying the user as "Share", configuration branches by
+specifying the user as "Config" and release branches by specifying the user as
+"Rel". (This option is cumalative.)
+
+=back
+
+=cut

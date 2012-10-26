@@ -1,0 +1,4 @@
+build_1=succeed_known
+
+# The build succeeds when it should, in fact, fail.
+# See ticket:205

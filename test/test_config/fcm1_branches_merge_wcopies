@@ -1,0 +1,4 @@
+mkdir -p $BASE_DIR/work
+svn co -q $REPOS_URL/branches/dev/Share/modify_files_base $BASE_DIR/work/b1
+svn co -q $REPOS_URL/branches/dev/Share/modify_files_merge1 $BASE_DIR/work/b2
+svn co -q $REPOS_URL/branches/dev/Share/modify_files_merge2 $BASE_DIR/work/b3

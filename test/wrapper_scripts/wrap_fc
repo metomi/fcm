@@ -1,0 +1,2 @@
+echo "wrap_fc $@" | sed "s#$RUN_DIR##g" | sed "s#-I\./#-I#g" | sed "s#-L/var/tmp/[^ ]* #-Llib #" >>$command_file
+ifort  "$@"

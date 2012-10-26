@@ -1,0 +1,912 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for Linux/x86 (vers 1st December 2004), see www.w3.org" />
+
+  <title>FCM User Guide: Annex: Declarations in FCM 1 build configuration
+  file</title>
+  <meta name="author" content="FCM team" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" type="text/css" href="../etc/fcm.css" />
+<script type="text/javascript" src="../etc/fcm.js">
+</script>
+<script type="text/javascript" src="../etc/fcm-version.js">
+</script>
+</head>
+
+<body>
+  <div id="body-header">
+    <a href="http://www.metoffice.gov.uk/research/collaboration/fcm/">
+    <img src="../etc/fcm.png" alt="FCM" />
+    </a>
+    <address>
+      &copy; British Crown Copyright 2006-12
+      <a href="http://www.metoffice.gov.uk">Met Office</a>.
+      See <a href="../etc/fcm-terms-of-use.html">Terms of Use</a>.<br />
+      This document is released under the <a href=
+      "http://www.nationalarchives.gov.uk/doc/open-government-licence/" rel=
+      "license">Open Government Licence</a>.<br />
+      <span id="fcm-version"></span><br />
+      <span id="fcm-js-trail"></span>
+    </address>
+  </div>
+
+  <h1>Annex: Declarations in FCM 1 build configuration file</h1>
+
+  <p><em>The FCM 1 build system is deprecated. The documentation for the current
+  build system can be found at <a href="make.html">FCM Make</a>.</em></p>
+
+  <p>The following is a list of supported declarations for the configuration
+  file used by the FCM build system. Unless otherwise stated, the fields in all
+  declaration labels are not case sensitive. Build declarations can be made
+  either in a build configuration file or in an extract configuration file. In
+  the latter case, the prefix <code>BLD::</code> must be added at the beginning
+  of each label to inform the extract system that the declaration is a build
+  system declaration. (In a build configuration file, the prefix
+  <code>BLD::</code> is optional.)</p>
+
+  <dl>
+    <dt>CFG::TYPE</dt>
+
+    <dd>
+      <p>The configuration file type, the value should always be
+      <samp>bld</samp> for a build configuration file. This declaration is
+      compulsory for all build configuration files. (This declaration is
+      automatic when the extract system creates a build configuration
+      file.)</p>
+
+      <p>Example:</p>
+      <pre>
+cfg::type  bld
+</pre>
+    </dd>
+
+    <dt>CFG::VERSION</dt>
+
+    <dd>
+      <p>The file format version, currently <samp>1.0</samp> - a version is
+      included so that we shall be able to read the configuration file
+      correctly should we decide to change its format in the future. (This
+      declaration is automatic when the extract system creates a build
+      configuration file.)</p>
+
+      <p>Example:</p>
+      <pre>
+cfg::version  1.0
+</pre>
+    </dd>
+
+    <dt>%&lt;name&gt;</dt>
+
+    <dd>
+      <p><code>%&lt;name&gt;</code> declares an internal variable
+      <var>&lt;name&gt;</var> that can later be re-used.</p>
+
+      <p>Example:</p>
+      <pre>
+%my_variable  -foo -bar
+tool::fflags  %my_variable
+tool::cflags  %my_variable
+</pre>
+    </dd>
+
+    <dt>INC</dt>
+
+    <dd>
+      <p>This declares the name of a file containing build configuration. The
+      lines in the declared file will be included inline to the current
+      configuration file.</p>
+
+      <p>Example:</p>
+      <pre>
+inc  ~frva/var_stable_22.0/cfg/bld.cfg
+# ... and then your changes ...
+</pre>
+    </dd>
+
+    <dt>
+      DEST[::ROOTDIR]<br />
+      <del>DIR::ROOT</del>
+    </dt>
+
+    <dd>
+      <p>The destination of the build. It must be declared for each build.
+      (This declaration is automatic when the extract system creates a build
+      configuration file. The value is normally the path of the extract
+      destination.)</p>
+
+      <p>Example:</p>
+      <pre>
+dest  $HOME/my_build
+</pre>
+    </dd>
+
+    <dt>USE</dt>
+
+    <dd>
+      <p>This inherits settings from a previous build. The value must be must
+      be either the configuration file or the root directory of a successful
+      build. Output of the build, the tools, the exclude dependency
+      declarations, the file type registers declarations are automatically
+      inherited from the declared build. Source directories and build targets
+      declarations may be inherited depending on the INHERIT declarations. (If
+      you have a USE declaration in an extract, the resulting build
+      configuration file will contain an automatic USE declaration, which
+      expects an inherited build at the extract destination.)</p>
+
+      <p>Example:</p>
+      <pre>
+# Use VAR build 22.0
+USE  ~frva/var_22.0
+</pre>
+    </dd>
+
+    <dt>INHERIT::&lt;name&gt;[::&lt;pcks&gt;]</dt>
+
+    <dd>
+      <p>This declares whether build targets (&lt;name&gt; =
+      <samp>target</samp>) or source directories (&lt;name&gt; =
+      <samp>src</samp>) can be inherited using the USE statement. By default,
+      source directories are inherited, while build targets are not. Use the
+      value <samp>true</samp> to switch on inheritance, or <samp>false</samp>
+      to switch off. For source directories declarations, the name of a
+      sub-package &lt;pcks&gt; can be specified. If a sub-package pcks is
+      specified, the declaration applies only to the files and directories
+      under the sub-package. Otherwise, the declaration applies globally.</p>
+
+      <p>Example:</p>
+      <pre>
+inherit::target   true
+inherit::src      false
+</pre>
+    </dd>
+
+    <dt>SRC[::&lt;pcks&gt;]</dt>
+
+    <dd>
+      <p>This declares a source file/directory. You must specify the
+      sub-package &lt;pcks&gt; if the source file/directory is located outside
+      of the <samp>src/</samp> sub-directory of the build destination or if you
+      want to redefine the sub-package name of the source file/directory. The
+      name of the sub-package &lt;pcks&gt; must be unique. Package names are
+      delimited by double colons <code>::</code> or double underscores
+      <code>__</code>. If you declare a relative path, it is assumed to be
+      relative to the <samp>src/</samp> sub-directory of the build destination.
+      (This declaration is automatic when the extract system creates the build
+      configuration file. The list of declared source directories will be the
+      list of extracted source directories.)</p>
+
+      <p>Example:</p>
+      <pre>
+src::var/code/VarMod_PF  $HOME/var/src/code/VarMod_PF
+</pre>
+    </dd>
+
+    <dt>SEARCH_SRC</dt>
+
+    <dd>
+      <p>This declares a flag to determine whether the build system should
+      search the <samp>src/</samp> sub-directory of the build root for a list
+      of source files. The automatic search is useful if the build system is
+      invoked standalone and the <samp>src/</samp> sub-directory contains the
+      full source tree of the build. The default is to search
+      (<samp>true</samp>). Set the flag to <samp>false</samp> to switch off the
+      behaviour. (When the extract system creates a build configuration file,
+      it declares all source files. Searching of the source sub-directory
+      should not be required, and so this flag is automatically set to
+      <samp>false</samp>.)</p>
+
+      <p>Example:</p>
+      <pre>
+search_src  false
+</pre>
+    </dd>
+
+    <dt>TARGET</dt>
+
+    <dd>
+      <p>Specify the targets for the build. Multiple targets can be declared in
+      one or more declarations. These targets become the dependencies of the
+      default <samp>all</samp> target in the <em>Makefile</em>. It is worth
+      noting that <code>TARGET</code> declarations are cumulative. A later
+      declaration does not override an earlier one - it simply adds more targets
+      to the list.</p>
+
+      <p>Example:</p>
+      <pre>
+target  VarScr_AnalysePF VarScr_CovAccStats
+target  VarScr_CovPFstats
+</pre>
+    </dd>
+
+    <dt>TOOL::&lt;label&gt;[::&lt;pcks&gt;]</dt>
+
+    <dd>
+      <p>This declaration is used to specify a build tool such as the Fortran
+      compiler or its flags. The &lt;label&gt; determines the tool you are
+      declaring. A TOOL declaration normally applies globally. However, where
+      it is sensible to do so, a sub-package &lt;pcks&gt; can be specified. In
+      which case, the declaration applies only to the files and directories
+      under the sub-package. A list of &lt;label&gt; fields is available
+      <a href="#tools-list">later in this annex</a>.</p>
+
+      <p>Example:</p>
+      <pre>
+tool::fc      sxmpif90
+tool::fflags  -Chopt -Pstack
+
+tool::cc      sxmpic++
+tool::cflags  -O nomsg -pvctl nomsg
+
+tool::ar      sxar
+</pre>
+    </dd>
+
+    <dt>EXE_DEP[::&lt;target&gt;]</dt>
+
+    <dd>
+      <p>This declares an extra dependency for either all main program targets
+      or only &lt;target&gt; if it is specified. If &lt;target&gt; is
+      specified, it must be the name of a main program target. The value of the
+      declaration is a space delimited list. Each item in the list can either
+      be a valid name of a sub-package or the name of a valid object target. If
+      a sub-package name is used, the <em>make</em> rule for the main program
+      will be set to depend on all (non-program) object files within the
+      sub-package.</p>
+
+      <p>Example:</p>
+      <pre>
+# Only foo.exe to depend on the package foo::bar and egg.o
+exe_dep::foo.exe  foo::bar egg.o
+
+# All executables to depend on the package foo::bar and egg.o
+exe_dep  foo::bar egg.o
+
+# Only foo.exe to depend on all objects
+exe_dep::foo.exe
+
+# All executables to depend on all objects
+exe_dep
+</pre>
+    </dd>
+
+    <dt>BLOCKDATA[::&lt;target&gt;]</dt>
+
+    <dd>
+      <p>This declares a BLOCKDATA dependency for either all main program
+      targets or only &lt;target&gt; if it is specified. If &lt;target&gt; is
+      specified, it must be the name of a main program target. The value of the
+      declaration is a space delimited list. Each item in the list must be the
+      name of a valid object target containing a Fortran BLOCKDATA program
+      unit.</p>
+
+      <p>Example:</p>
+      <pre>
+# Only foo.exe to depend on blkdata.o
+blockdata::foo.exe  blkdata.o
+
+# All executables to depend on fbd.o
+blockdata  fbd.o
+</pre>
+    </dd>
+
+    <dt>EXCL_DEP[::&lt;pcks&gt;]</dt>
+
+    <dd>
+      <p>This declaration is used to specify whether a particular dependency
+      should be ignored during the automatic dependency scan. If a sub-package
+      &lt;pcks&gt; is specified, the declaration applies only to the files and
+      directories under the sub-package. Otherwise, the declaration applies
+      globally. The value of this declaration must contain one or two fields
+      (separated by the double colon <code>::</code>). The first field denotes
+      the dependency type, and the second field is the dependency target. If
+      the second field is specified, it will only exclude the dependency to the
+      specified target. Otherwise, it will exclude all dependency to the
+      specified type. The following dependency types are supported:</p>
+
+      <dl id="dependency-types">
+        <dt>USE</dt>
+
+        <dd>The dependency target is a Fortran module.</dd>
+
+        <dt>INTERFACE</dt>
+
+        <dd>The dependency target is a Fortran 9X interface block file.</dd>
+
+        <dt>INC</dt>
+
+        <dd>The dependency target is a Fortran INCLUDE file.</dd>
+
+        <dt>H</dt>
+
+        <dd>The dependency target is a pre-processor #include header file.</dd>
+
+        <dt>OBJ</dt>
+
+        <dd>The dependency target is a compiled binary object file.</dd>
+
+        <dt>EXE</dt>
+
+        <dd>The dependency target is an executable binary or script.</dd>
+      </dl>
+
+      <p>N.B. The following dependency targets are in the default list of
+      excluded dependencies:</p>
+
+      <dl>
+        <dt>Intrinsic Fortran modules:</dt>
+
+        <dd>
+          <ul>
+            <li>USE::ISO_C_BINDING</li>
+
+            <li>USE::IEEE_EXCEPTIONS</li>
+
+            <li>USE::IEEE_ARITHMETIC</li>
+
+            <li>USE::IEEE_FEATURES</li>
+          </ul>
+        </dd>
+
+        <dt>Intrinsic Fortran subroutines:</dt>
+
+        <dd>
+          <ul>
+            <li>OBJ::CPU_TIME</li>
+
+            <li>OBJ::GET_COMMAND</li>
+
+            <li>OBJ::GET_COMMAND_ARGUMENT</li>
+
+            <li>OBJ::GET_ENVIRONMENT_VARIABLE</li>
+
+            <li>OBJ::MOVE_ALLOC</li>
+
+            <li>OBJ::MVBITS</li>
+
+            <li>OBJ::RANDOM_NUMBER</li>
+
+            <li>OBJ::RANDOM_SEED</li>
+
+            <li>OBJ::SYSTEM_CLOCK</li>
+          </ul>
+        </dd>
+
+        <dt>Dummy declarations:</dt>
+
+        <dd>
+          <ul>
+            <li>OBJ::NONE</li>
+
+            <li>EXE::NONE</li>
+          </ul>
+        </dd>
+      </dl>
+
+      <p>Example:</p>
+      <pre>
+excl_dep  USE::YourFortranMod
+excl_dep  INTERFACE::HerFortran.interface
+excl_dep  INC::HisFortranInc.inc
+excl_dep  H::TheirHeader.h
+excl_dep  OBJ
+excl_dep  EXE
+</pre>
+    </dd>
+
+    <dt>DEP::&lt;pcks&gt;</dt>
+
+    <dd>
+      <p>This declaration is used to specify a dependency for a source file in
+      &lt;pcks&gt;. The value of this declaration must contain two fields
+      (separated by the double colon <code>::</code>). The first field denotes
+      the dependency type, and the second field is the dependency target. The
+      dependency types are the same as those for EXCL_DEP described <a href=
+      "#dependency-types">above</a>.</p>
+
+      <p>Example:</p>
+      <pre>
+dep::foo/bar.f  USE::your_fortran_mod
+dep::foo/bar.f  INTERFACE::her_fortran.interface
+dep::foo/bar.f  INC::his_fortran_inc.inc
+dep::foo/bar.f  H::their_header.h
+dep::foo/bar.f  OBJ::its_object.o
+dep::foo/egg    EXE::ham
+</pre>
+    </dd>
+
+    <dt>NO_DEP::&lt;pcks&gt;</dt>
+
+    <dd>
+      <p>This declaration is used to switch off/on dependency checking. If
+      &lt;pcks&gt; is specified in the label, the declaration applies to the
+      specified sub-package only.</p>
+
+      <p>Example:</p>
+      <pre>
+# Switch on dependency checking only for "foo"
+no_dep      true
+no_dep::foo false
+</pre>
+    </dd>
+
+    <dt>EXE_NAME::&lt;name&gt;</dt>
+
+    <dd>
+      <p>This renames the executable target of a main program source file
+      &lt;name&gt; to the specified value.</p>
+
+      <p>Example:</p>
+      <pre>
+# Rename executable target of foo.f90 from "foo.exe" to "bar"
+exe_name::foo  bar
+</pre>
+    </dd>
+
+    <dt>LIB[::&lt;pcks&gt;]</dt>
+
+    <dd>
+      <p>This declares the name of a library archive target. If &lt;pcks&gt; is
+      specified in the label, the declaration applies to the library archive
+      target for that sub-package only. If set, the name of the library archive
+      target will be named <samp>lib&lt;value&gt;.a</samp>, where &lt;value&gt;
+      is the value of the declaration. If not specified, the default is to name
+      the global library <samp>libfcm_default.a</samp>. For a library archive
+      of a sub-package, the default is to name its library after the name of
+      the sub-package.</p>
+
+      <p>Example:</p>
+      <pre>
+# Rename the top level library "libfoo.a"
+lib  foo
+
+# Rename the library for the sub-package "egg::ham"
+# from "libegg__ham.a" to "libegg-ham.a"
+lib::egg/ham  egg-ham
+</pre>
+    </dd>
+
+    <dt>PP[::&lt;pcks&gt;]</dt>
+
+    <dd>
+      <p>This declares whether a pre-processing stage is required. To switch on
+      pre-processing, set the value to <samp>true</samp>. If &lt;pcks&gt; is
+      specified in the label, the flag applies to the files within that
+      sub-package only. Otherwise, the flag affects source directories in all
+      packages. The pre-processing stage is useful if the pre-processor changes
+      the dependency and/or the argument list of the source files. The default
+      behaviour is skip the pre-processing stage for all source.</p>
+
+      <p>Example:</p>
+      <pre>
+pp::gen true  # switch on pre-processing for "gen" only
+pp      true  # switch on pre-processing globally
+</pre>
+    </dd>
+
+    <dt>SRC_TYPE::&lt;pcks&gt;</dt>
+
+    <dd>
+      <p>This declaration is used to (re-)register the file type of the
+      sub-package &lt;pcks&gt; to associate with different file types. The
+      value of the declaration is a list of type flags delimited by the double
+      colon <code>::</code>. Each type flag is used internally to describe the
+      nature of the file. For example, a Fortran free source form containing a
+      main program is registered as
+      <code>FORTRAN::FORTRAN9X::SOURCE::PROGRAM</code>. A list of type flags is
+      available <a href="#infile-ext-types">later in this annex</a>.</p>
+
+      <p>Example:</p>
+      <pre>
+src_type::foo/bar.f  FORTRAN::FORTRAN9X::SOURCE::PROGRAM
+</pre>
+    </dd>
+
+    <dt>INFILE_EXT::&lt;ext&gt;</dt>
+
+    <dd>
+      <p>This declaration is used to re-register particular file name
+      extensions &lt;ext&gt; to associate with different file types. The value
+      of the declaration has a similar format to that of SRC_TYPE declaration
+      described above. A list of type flags is available <a href=
+      "#infile-ext-types">later in this annex</a>.</p>
+
+      <p>Example:</p>
+      <pre>
+infile_ext::h90  CPP::INCLUDE
+infile_ext::inc  FORTRAN::FORTRAN9X::INCLUDE
+</pre>
+    </dd>
+
+    <dt>OUTFILE_EXT::&lt;type&gt;</dt>
+
+    <dd>
+      <p>This declaration is used to re-register the output file extension for
+      a particular &lt;type&gt; of output files. The value must be a valid file
+      extension. The following is a list of output file types in-use by the
+      build system:</p>
+
+      <dl id="outfile-ext-types">
+        <dt>OBJ</dt>
+
+        <dd>compiled object files<br />
+        [default = .o]</dd>
+
+        <dt>MOD</dt>
+
+        <dd>compiled Fortran module information files<br />
+        [default = .mod]</dd>
+
+        <dt>EXE</dt>
+
+        <dd>binary executables<br />
+        [default = .exe]</dd>
+
+        <dt>DONE</dt>
+
+        <dd><em>done</em> files for compiled source<br />
+        [default = .done]</dd>
+
+        <dt>IDONE</dt>
+
+        <dd><em>done</em> files for included source<br />
+        [default = .idone]</dd>
+
+        <dt>FLAGS</dt>
+
+        <dd><em>flags</em> files, compiler flags config<br />
+        [default = .flags]</dd>
+
+        <dt>INTERFACE</dt>
+
+        <dd>interface files for F9X standalone subroutines/functions<br />
+        [default = .interface]</dd>
+
+        <dt>LIB</dt>
+
+        <dd>archive object library<br />
+        [default = .a]</dd>
+
+        <dt>TAR</dt>
+
+        <dd>TAR archive<br />
+        [default = .tar]</dd>
+      </dl>
+
+      <p>Example:</p>
+      <pre>
+# Output F9X interface files will now have ".foo" extension
+outfile_ext::interface  .foo
+</pre>
+    </dd>
+  </dl>
+
+  <p id="tools-list">The following is a list of &lt;label&gt; fields that can
+  be used with a <code>TOOL</code> declaration. Those marked with an asterisk
+  (*) accept declarations at sub-package levels.</p>
+
+  <dl>
+    <dt>FC</dt>
+
+    <dd>The Fortran compiler.<br />
+    [default = <samp>f90</samp>]</dd>
+
+    <dt>FFLAGS *</dt>
+
+    <dd>Options used by the Fortran compiler.<br />
+    [default = ""]</dd>
+
+    <dt>FC_COMPILE</dt>
+
+    <dd>The option used by the Fortran compiler to suppress the linking
+    stage.<br />
+    [default = <samp>-c</samp>]</dd>
+
+    <dt>FC_INCLUDE</dt>
+
+    <dd>The option used by the Fortran compiler to specify the include search
+    path.<br />
+    [default = <samp>-I</samp>]</dd>
+
+    <dt>FC_MODSEARCH</dt>
+
+    <dd>The option used by the Fortran compiler to specify the search
+    path for the compiled module definition files. This option is often
+    unnecessary as it is normally covered by the include search path.<br />
+    [default = ""]</dd>
+
+    <dt>FC_DEFINE</dt>
+
+    <dd>The option used by the Fortran compiler to define a pre-processor
+    definition macro.<br />
+    [default = <samp>-D</samp>]</dd>
+
+    <dt>FC_OUTPUT</dt>
+
+    <dd>The option used by the Fortran compiler to specify the output file
+    name.<br />
+    [default = <samp>-o</samp>]</dd>
+
+    <dt>CC</dt>
+
+    <dd>The C compiler.<br />
+    [default = <samp>cc</samp>]</dd>
+
+    <dt>CFLAGS *</dt>
+
+    <dd>Options used by the C compiler.<br />
+    [default = ""]</dd>
+
+    <dt>CC_COMPILE</dt>
+
+    <dd>The option used by the C compiler to suppress the linking stage.<br />
+    [default = <samp>-c</samp>]</dd>
+
+    <dt>CC_INCLUDE</dt>
+
+    <dd>The option used by the C compiler to specify the include search
+    path.<br />
+    [default = <samp>-I</samp>]</dd>
+
+    <dt>CC_DEFINE</dt>
+
+    <dd>The option used by the C compiler to define a pre-processor definition
+    macro.<br />
+    [default = <samp>-D</samp>]</dd>
+
+    <dt>CC_OUTPUT</dt>
+
+    <dd>The option used by the C compiler to specify the output file
+    name.<br />
+    [default = <samp>-o</samp>]</dd>
+
+    <dt>LD *</dt>
+
+    <dd>Name of the linker or loader for linking object files into an
+    executable. If not set, use the compiler of the source file containing the
+    main program.<br />
+    [default = ""]</dd>
+
+    <dt>LDFLAGS *</dt>
+
+    <dd>The flags used by the linker or loader.<br />
+    [default = ""]</dd>
+
+    <dt>LD_OUTPUT</dt>
+
+    <dd>The option used by the linker or loader for the output file name (other
+    than the default <samp>a.out</samp>).<br />
+    [default = <samp>-o</samp>]</dd>
+
+    <dt>LD_LIBSEARCH</dt>
+
+    <dd>The option used by the linker or loader for specifying the search path
+    for link libraries.<br />
+    [default = <samp>-L</samp>]</dd>
+
+    <dt>LD_LIBLINK</dt>
+
+    <dd>The option used by the linker or loader command for linking with a
+    library.<br />
+    [default = <samp>-l</samp>]</dd>
+
+    <dt>AR</dt>
+
+    <dd>The archive command.<br />
+    [default = <samp>ar</samp>]</dd>
+
+    <dt>ARFLAGS</dt>
+
+    <dd>The options used for the archive command to create a library.<br />
+    [default = <samp>rs</samp>]</dd>
+
+    <dt>FPP</dt>
+
+    <dd>The Fortran pre-processor command.<br />
+    [default = <samp>cpp</samp>]</dd>
+
+    <dt>FPPKEYS *</dt>
+
+    <dd>The Fortran pre-processor will pre-define each word in this setting as
+    a macro.<br />
+    [default = ""]</dd>
+
+    <dt>FPPFLAGS *</dt>
+
+    <dd>The options used by the Fortran pre-processor.<br />
+    [default = <samp>-P -traditional</samp>]</dd>
+
+    <dt>FPP_DEFINE</dt>
+
+    <dd>The option used by the Fortran pre-processor to define a macro.<br />
+    [default = <samp>-D</samp>]</dd>
+
+    <dt>FPP_INCLUDE</dt>
+
+    <dd>The option used by the Fortran pre-processor to specify the include
+    search path.<br />
+    [default = <samp>-I</samp>]</dd>
+
+    <dt>CPP</dt>
+
+    <dd>The C pre-processor command.<br />
+    [default = <samp>cpp</samp>]</dd>
+
+    <dt>CPPKEYS *</dt>
+
+    <dd>The C pre-processor will pre-define each word in this setting as a
+    macro.<br />
+    [default = ""]</dd>
+
+    <dt>CPPFLAGS *</dt>
+
+    <dd>The options used by the C pre-processor.<br />
+    [default = <samp>-C</samp>]</dd>
+
+    <dt>CPP_DEFINE</dt>
+
+    <dd>The option used by the C pre-processor to define a macro.<br />
+    [default = <samp>-D</samp>]</dd>
+
+    <dt>CPP_INCLUDE</dt>
+
+    <dd>The option used by the C pre-processor to specify the include search
+    path.<br />
+    [default = <samp>-I</samp>]</dd>
+
+    <dt>MAKE</dt>
+
+    <dd>The <code>make</code> command.<br />
+    [default = <samp>make</samp>]</dd>
+
+    <dt>MAKEFLAGS</dt>
+
+    <dd>The options used by the <code>make</code> command.<br />
+    [default = ""]</dd>
+
+    <dt>MAKE_SILENT</dt>
+
+    <dd>The option used by the <code>make</code> command to specify silent
+    operation.<br />
+    [default = <samp>-s</samp>]</dd>
+
+    <dt>MAKE_JOB</dt>
+
+    <dd>The option used by the <code>make</code> command to specify the number
+    jobs to run simultaneously.<br />
+    [default = <samp>-j</samp>]</dd>
+
+    <dt>GENINTERFACE *</dt>
+
+    <dd>The command/method to extract the calling interfaces of top level
+    subroutines and functions in a Fortran 9X source. Supported values are
+    <samp>f90aib</samp> and <samp>none</samp> (to switch off interface
+    generation). If not specified, the system will use its own internal logic.
+    <br />
+    [default = (not specified)]</dd>
+
+    <dt>INTERFACE *</dt>
+
+    <dd>Generate Fortran 9X interface files with root names according to either
+    the root name of the source <samp>file</samp> or the name of the
+    <samp>program</samp> unit.<br />
+    [default = <samp>file</samp>]</dd>
+  </dl>
+
+  <p id="infile-ext-types">The following is a list of type flags that are
+  currently in-use (or <dfn>* reserved</dfn>) by the build system for TYPE and
+  INFILE_EXT declarations:</p>
+
+  <dl>
+    <dt>SOURCE</dt>
+
+    <dd>a source file containing program code of a supported language
+    (currently Fortran, FPP, C and CPP).</dd>
+
+    <dt>INCLUDE</dt>
+
+    <dd>an include file containing program code of a supported language
+    (currently Fortran, FPP, C and CPP).</dd>
+
+    <dt>FORTRAN</dt>
+
+    <dd>a file containing Fortran code.</dd>
+
+    <dt>FORTRAN9X</dt>
+
+    <dd>a file containing the Fortran free source form. This word must be used
+    in conjunction with the word <code>FORTRAN</code>.</dd>
+
+    <dt>FPP</dt>
+
+    <dd>a file containing Fortran code requiring pre-processing.</dd>
+
+    <dt>FPP9X</dt>
+
+    <dd>a file containing Fortran free source form requiring pre-processing.
+    This word must be used in conjunction with the word <code>FPP</code>.</dd>
+
+    <dt>C</dt>
+
+    <dd>a file containing C code.</dd>
+
+    <dt>CPP</dt>
+
+    <dd>a file containing CPP include header.</dd>
+
+    <dt>INTERFACE</dt>
+
+    <dd>a file containing a Fortran 9X interface block.</dd>
+
+    <dt>PROGRAM</dt>
+
+    <dd>a file containing a main program.</dd>
+
+    <dt>MODULE</dt>
+
+    <dd>a file containing a Fortran 9X module.</dd>
+
+    <dt>BINARY</dt>
+
+    <dd>a binary file.</dd>
+
+    <dt>EXE</dt>
+
+    <dd>an executable file. This word must be used in conjunction with the word
+    <code>BINARY</code>.</dd>
+
+    <dt>LIB</dt>
+
+    <dd>an archive library. This word must be used in conjunction with the word
+    <code>BINARY</code>.</dd>
+
+    <dt>SCRIPT</dt>
+
+    <dd>a file containing source code of a scripting language.</dd>
+
+    <dt>PVWAVE</dt>
+
+    <dd>a file containing executable PVWAVE scripts. This word must be used in
+    conjunction with the word <code>SCRIPT</code>.</dd>
+
+    <dt>SQL</dt>
+
+    <dd>a file containing SQL scripts. This word must be used in conjunction
+    with the word <code>SCRIPT</code>.</dd>
+
+    <dt>GENLIST</dt>
+
+    <dd>a GEN List file.</dd>
+
+    <dt>OBJ</dt>
+
+    <dd><dfn>(* reserved)</dfn> an object file. This word must be used in
+    conjunction with the word <code>BINARY</code>.</dd>
+
+    <dt>SHELL</dt>
+
+    <dd><dfn>(* reserved)</dfn> a file containing executable shell scripts.
+    This word must be used in conjunction with the word
+    <code>SCRIPT</code>.</dd>
+
+    <dt>PERL</dt>
+
+    <dd><dfn>(* reserved)</dfn> a file containing executable Perl scripts. This
+    word must be used in conjunction with the word <code>SCRIPT</code>.</dd>
+
+    <dt>PYTHON</dt>
+
+    <dd><dfn>(* reserved)</dfn> a file containing executable Python scripts.
+    This word must be used in conjunction with the word
+    <code>SCRIPT</code>.</dd>
+
+    <dt>TCL</dt>
+
+    <dd><dfn>(* reserved)</dfn> a file containing executable TCL scripts. This
+    word must be used in conjunction with the word <code>SCRIPT</code>.</dd>
+  </dl>
+</body>
+</html>

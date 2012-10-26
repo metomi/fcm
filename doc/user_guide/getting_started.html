@@ -1,0 +1,1474 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for Linux (vers 14 June 2007), see www.w3.org" />
+
+  <title>FCM User Guide: Getting Started</title>
+  <meta name="author" content="FCM team" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" type="text/css" href="../etc/fcm.css" />
+  <script type="text/javascript" src="../etc/fcm.js">
+</script>
+<script type="text/javascript" src="../etc/fcm-version.js">
+</script>
+</head>
+
+<body>
+  <div id="body-header">
+    <a href="http://www.metoffice.gov.uk/research/collaboration/fcm/">
+    <img src="../etc/fcm.png" alt="FCM" />
+    </a>
+    <address>
+      &copy; British Crown Copyright 2006-12
+      <a href="http://www.metoffice.gov.uk">Met Office</a>.
+      See <a href="../etc/fcm-terms-of-use.html">Terms of Use</a>.<br />
+      This document is released under the <a href=
+      "http://www.nationalarchives.gov.uk/doc/open-government-licence/" rel=
+      "license">Open Government Licence</a>.<br />
+      <span id="fcm-version"></span><br />
+      <span id="fcm-js-trail"></span>
+    </address>
+  </div>
+
+  <h1>Getting Started</h1>
+
+  <div id="fcm-content"></div>
+
+  <h2 id="introduction">Introduction</h2>
+
+  <p>This chapter takes a <em>hands-on</em> approach to help you set up your
+  FCM session, and familiarise yourself with some of the system's basic
+  concepts and working practices. It is designed to complement other sections
+  of the User Guide.</p>
+
+  <p>You may also find it useful to refer to the <a href=
+  "annex_quick_ref.html">Annex: Quick reference</a>.</p>
+
+  <h2 id="setup">How to set yourself up to run FCM</h2>
+
+  <p>It is easy to set yourself up to run FCM. Simply follow the steps
+  below:</p>
+
+  <dl>
+    <dt>Installation</dt>
+
+    <dd>If FCM is not yet installed at your site, please refer to the <a href=
+    "../installation/">FCM: Installation</a> for detail.</dd>
+
+    <dt>Configure your editor for Subversion</dt>
+
+    <dd>
+      <p>When you attempt to create a branch or commit changes to the
+      repository, you will normally be prompted to edit your commit log message
+      using a text editor. The order of priority for determining the editor
+      command (where lower-numbered locations take precedence over
+      higher-numbered locations) is:</p>
+
+      <ol>
+        <li>environment variable <var>SVN_EDITOR</var></li>
+
+        <li>the <var>editor-cmd</var> option in the <var>[helpers]</var>
+        section of the user's <samp>$HOME/.subversion/config</samp> file.</li>
+
+        <li>environment variable <var>VISUAL</var></li>
+
+        <li>environment variable <var>EDITOR</var></li>
+
+        <li>default to <code>vi</code> (or <code>gedit</code> when running the
+        FCM GUI)</li>
+      </ol>
+
+      <p>It is worth bearing in mind that an editor must be able to run in the
+      foreground. For example, you can add one of the followings in your
+      <samp>$HOME/.kshrc</samp> (ksh) or <samp>$HOME/.bashrc</samp> (bash):</p>
+      <pre>
+# GVim
+export SVN_EDITOR='gvim -f'
+
+# Emacs
+export SVN_EDITOR=emacs
+
+# gedit
+export SVN_EDITOR=gedit
+
+# Kate
+export SVN_EDITOR=kate
+</pre>
+    </dd>
+
+    <dt>Configure your e-mail address in Trac</dt>
+
+    <dd>
+      <p>Trac can be configured to send automatic e-mail notifications to
+      authors of any ticket whenever there are changes to that ticket (and we
+      would expect most systems to be configured in this way). You should check
+      that the settings for your name and e-mail address are correct. To do
+      this you need to go to the Settings page once you are logged into Trac.
+      (Click on <kbd>Settings</kbd> just above the menu bar). Check that your
+      settings are entered correctly.</p>
+    </dd>
+
+    <dt>Configure your web browser</dt>
+
+    <dd>
+      <p>FCM assumes that <code>firefox</code> is the command to invoke your
+      default web browser. If you use another web browser, you should configure
+      it in your <samp>$HOME/.met-um/fcm/external.cfg</samp> file. See the
+      section on <a href="command_ref.html#fcm-browse">fcm browse</a> for
+      further information.</p>
+    </dd>
+  </dl>
+
+  <h2 id="tutorial">Tutorial</h2>
+
+  <h3 id="tutorial_intro">Introduction</h3>
+
+  <p>This tutorial leads you through the basics of using FCM to make changes to
+  your source code, and demonstrates the recommended practices for working with
+  it. A tutorial Subversion repository, with its own Trac system, is available
+  for you to practice for working with the FCM system. You will work through
+  the following activities:</p>
+
+  <ul>
+    <li><a href="#tutorial_create-ticket">Create a new ticket</a></li>
+
+    <li><a href="#tutorial_create-branch">Create a branch</a></li>
+
+    <li><a href="#tutorial_checkout">Checkout a working copy</a></li>
+
+    <li><a href="#tutorial_change">Make changes to files in your working
+    copy</a></li>
+
+    <li><a href="#tutorial_commit">Commit your changes to the
+    repository</a></li>
+
+    <li><a href="#tutorial_extract">Test your changes</a></li>
+
+    <li><a href="#tutorial_merge">Merge changes from the trunk and resolve
+    conflicts</a></li>
+
+    <li><a href="#tutorial_review-ticket">Review changes</a></li>
+
+    <li><a href="#tutorial_merge-back">Commit to the trunk</a></li>
+
+    <li><a href="#tutorial_extra-extract">Extra activities on the extract and
+    build systems</a></li>
+
+    <li><a href="#tutorial_delete-branch">Delete your branch</a></li>
+
+    <li><a href="#tutorial_delete-final-comments">Final comments</a></li>
+  </ul>
+
+  <p>We recommend that you create a work area in your filespace, for example,
+  <samp>$HOME/tutorial/work</samp> for your working copy, and
+  <samp>$HOME/tutorial/test</samp> for your build test.</p>
+
+  <p>If you have not already done so, you should set up your desktop
+  environment as described above in the <a href="#setup">How to set yourself up
+  to run FCM</a> section.</p>
+
+  <p>It is also worth knowing that the <a href=
+  "http://svnbook.red-bean.com/en/1.6/">Subversion Book</a> is a great source
+  of reference of Subversion features. In particular, the <a href=
+  "http://svnbook.red-bean.com/en/1.6/svn.basic.html">Fundamental Concepts</a>
+  and <a href="http://svnbook.red-bean.com/en/1.6/svn.tour.html">Basic
+  Usage</a> chapters are well worth reading.</p>
+
+  <h3 id="tutorial_create-ticket">Create a new ticket</h3>
+
+  <p><em>Trac is an integrated web-based issue tracker and wiki system. You
+  will use it to manage and keep track of changes in your project. The issue
+  tracker is called the ticket system. When you want to report a problem or
+  submit a change request, you will create a new ticket. In a typical
+  situation, you and/or your colleagues will make changes to your system in
+  order to resolve the problem or change request, and you will monitor these
+  changes via the ticket.</em></p>
+
+  <p>After completing this sub-section, you will learn how to:</p>
+
+  <ul>
+    <li>launch a Trac system,</li>
+
+    <li>create a new Trac ticket,</li>
+
+    <li>search for a Trac ticket, and</li>
+
+    <li>accept a Trac ticket.</li>
+  </ul>
+
+  <p>Further reading:</p>
+
+  <ul>
+    <li><a href="overview.html">System Overview</a></li>
+
+    <li>Code Management System &gt; <a href=
+    "code_management.html#svn_basic">Basic Command Line Usage</a></li>
+
+    <li>Code Management System &gt; <a href="code_management.html#trac">Using
+    Trac</a></li>
+
+    <li>FCM Command Reference &gt; <a href="command_ref.html#fcm-browse">fcm
+    browse</a></li>
+  </ul>
+
+  <h4>Launch a Trac system</h4>
+
+  <p>To launch the Trac system for the tutorial: type and <kbd>Enter</kbd> the
+  following command:</p>
+  <pre>
+(SHELL PROMPT)$ fcm browse fcm:tutorial
+</pre>
+
+  <p>This is probably the first time you have used the <code>fcm</code>
+  command. The command has the general syntax:</p>
+  <pre>
+fcm &lt;sub-command&gt; [&lt;options...&gt;] &lt;arguments&gt;
+</pre>
+
+  <p>For example, if you type <code>fcm help</code>, it will display a listing
+  of what sub-commands are available, and if you type <code>fcm help
+  &lt;sub-command&gt;</code>, it will display help for that particular
+  sub-command.</p>
+
+  <p>The <code>trac</code> sub-command launches the corresponding Trac system
+  browser for a Subversion URL specified in your argument. In this case, we are
+  asking it to display the Trac system browser for the tutorial. The argument
+  <samp>fcm:tutorial</samp> is a FCM URL keyword and will be expanded by FCM
+  into a real Subversion URL (e.g.
+  <samp>svn://fcm1/tutorial_svn/tutorial</samp>). You are encouraged to use FCM
+  URL keywords throughout the tutorial, as it will save you a lot of
+  typing.</p>
+
+  <p>Note: Although we use the Trac system as a browser for a Subversion
+  repository, they do not interact in any other ways. Having access to a Trac
+  system does not guarantee the same privilege to a Subversion repository. In
+  particular, you should note the differences between the URLs of a Subversion
+  repository path and its equivalence in a Trac browser.</p>
+
+  <p>There are other ways to launch the Trac system for a project. If you know
+  its URL, you can launch the Trac system by entering it in the address box of
+  your favourite browser. If you often access a Trac system for a particular
+  project, you should bookmark it in your favourite browser.</p>
+
+  <h4>Create a new Trac ticket</h4>
+
+  <p>Click on <kbd>Login</kbd> just above the menu bar, enter your Unix/Linux
+  user ID as your user name and leave the password empty. Then click on
+  <kbd>OK</kbd> to proceed.</p>
+
+  <p>Once you have logged in, the <kbd>New Ticket</kbd> link will become
+  available on the menu bar. Click on it to display a new ticket form, where
+  you can enter details about your problem or change request. In the tutorial,
+  it does not matter what you enter, but you should feel free to play around
+  with wiki formatting when entering the <em>Full description</em>. (Click on
+  <kbd>WikiFormatting</kbd> to see how you can use it.) For example:</p>
+
+  <ul>
+    <li>Short summary:
+      <pre>
+Tutorial to change repository files and resolve conflicts with the trunk
+</pre>
+    </li>
+
+    <li>Full description:
+      <pre>
+In this tutorial, I shall:
+ 1. use FCM commands
+ 2. play with WikiFormatting in Trac tickets     
+ 3. create a branch and checkout a working copy
+ 4. make changes to files in it
+ 5. commit my changes and assign the ticket for review
+ 6. record the review and assign the ticket back to the author
+ 7. merge in the trunk, and resolve any conflicts 
+ 8. merge my changes back to the trunk
+ 9. close the ticket
+ 10. delete my branch
+</pre>
+    </li>
+
+    <li>Feel free to select an option you desire for each of the other ticket
+    properties: Type, Component, Priority, Version and Milestone.</li>
+  </ul>
+
+  <p>At the bottom of the page, click the <kbd>Preview</kbd> button to see what
+  the description would look like. When you are happy, click the <kbd>Submit
+  changes</kbd> button. Trac will create the new ticket and return it in a
+  state where you can append to it.</p>
+
+  <p>When the ticket is created, you should get an automatic e-mail notication
+  from the Trac system. In real life, depending on the setting, the owner of
+  your Trac system may also get a similar e-mail notification. It is worth
+  noting that each time the ticket is modified, the Trac system will send out
+  an e-mail notification to you (the reporter) and anyone who modified the
+  ticket subsequently.</p>
+
+  <h4>Search for a Trac ticket</h4>
+
+  <p>You should remember the number of your new ticket, as you will have to
+  revisit it later.</p>
+
+  <p>In real work, it is often not practical to have to remember the numbers of
+  all the tickets you have created. Trac provides a powerful custom query for
+  searching a ticket. You can search for the ticket you have just created by
+  clicking the <kbd>View Tickets</kbd> link. Feel free to play with the custom
+  query tool. Add or remove filters and try grouping your results by different
+  categories.</p>
+
+  <p>In addition, you can search your ticket using the keyword
+  <kbd>Search</kbd> utility at the top right hand corner of each Trac page. (If
+  you enter <kbd>#&lt;number&gt;</kbd> in the search box, it will take you
+  directly to that ticket.) In the tutorial, however, it may be easiest if you
+  simply leave the tutorial Trac system open, so that you do not have to login
+  again when you come back to your ticket.</p>
+
+  <h4>Start work on your Trac ticket</h4>
+
+  <p>The status of the ticket is <em>new</em>. When you start working on a
+  problem reported in a ticket it is good practice to change the status to
+  <em>in_progress</em> to indicate that you are working on it. For the purpose
+  of the tutorial, however, this is entirely optional since you know you will
+  be doing all the work any way.</p>
+
+  <p>To start work on a ticket, click on <kbd>start work</kbd> in the
+  <em>Action</em> box at the bottom of the page, and then click on <kbd>Submit
+  changes</kbd>.</p>
+
+  <h3 id="tutorial_create-branch">Create a branch</h3>
+
+  <p><em>You create a branch by making a copy of your project at a particular
+  revision. Most often, this will be a particular revision of the trunk, i.e.
+  the main branch/development line in your project. A branch resides in the
+  repository. It allows you to work in parallel with your colleagues without
+  affecting one another, while keeping your changes under version
+  control.</em></p>
+
+  <p>After completing this sub-section, you will learn how to:</p>
+
+  <ul>
+    <li>create a branch in a Subversion repository, and</li>
+
+    <li>update a ticket with a link to a branch.</li>
+  </ul>
+
+  <p>Further reading:</p>
+
+  <ul>
+    <li>Code Management System &gt; Branching &amp; Merging &gt; <a href=
+    "code_management.html#svn_branching_create">Creating Branches</a></li>
+
+    <li>Code Management Working Practices &gt; <a href=
+    "working_practices.html#branching">Branching &amp; Merging</a></li>
+
+    <li>FCM Command Reference &gt; <a href=
+    "command_ref.html#fcm-branch-create">fcm branch-create</a></li>
+  </ul>
+
+  <h4>Create a branch in a Subversion repository</h4>
+
+  <p><strong>Important note: please ensure that your branch is created from
+  revision 1 of the trunk here, or the tutorial on merge will fail to work
+  later.</strong></p>
+
+  <p><dfn>Command line</dfn>: issue the <code>fcm branch-create [-rREV] TICKET
+  URL-PROJECT</code> command. (Note: you can write <code>fcm
+  branch-create</code> as <code>fcm bcreate</code> or even <code>fcm
+  bc</code>.) E.g. if your ticket number is <samp>#133</samp>:</p>
+  <pre>
+(SHELL PROMPT)$ fcm bc 133 fcm:tutorial@1
+</pre>
+
+  <p>You will be prompted to edit the message log file. A standard template is
+  automatically supplied for the commit. However, if you want to add extra
+  comment for the branch, please do so <strong>above</strong> the line that
+  says <samp>--Add your commit message ABOVE - do not alter this line or those
+  below--</samp>. When you are ready, save your change and exit the editor.
+  Answer <kbd>Yes</kbd> when you are prompted to go ahead and create the
+  branch.</p>
+
+  <p>Note: Subversion will prompt you for a password the first time you access
+  a repository. The password will normally be cached by the client, and you
+  will not have to specify a password on subsequent access.</p>
+
+  <p>When creating branches for the first time, you will notice that FCM will
+  create and commit any missing sub-directories it needs to set up your branch
+  inside the repository, before creating your branch and commiting it.</p>
+
+  <p>Take a note of the revision number the branch was created at, and its
+  branch name. (The revision number is the number following the last output
+  that says "Committed revision". In the example above, the branch created at
+  <samp>r811</samp> is called <samp>branches/dev/matt/r1_133</samp>, which is a
+  branch of the <samp>tutorial</samp> project in the
+  <samp>svn://fcm1/tutorial_svn</samp> repository.)</p>
+
+  <h4>Update your ticket with a link to your branch</h4>
+
+  <p>If you wish, you can update your ticket with details of the branch. Note
+  that this step is entirely optional. It is useful for developments which will
+  take a long time to complete. For short lived branches, this step is probably
+  unnecessary.</p>
+
+  <p>In the ticket you have created, refer to the revision number in the
+  <kbd>Add/Change</kbd> box, for example:</p>
+  <pre>
+r811: created source:tutorial/branches/dev/matt/r1_133@811.
+</pre>
+
+  <p>Note:</p>
+
+  <ul>
+    <li><samp>source:tutorial/branches/dev/matt/r1_133@811</samp> is a Trac
+    wiki link. In this syntax, you do not have to put in the root URL, (e.g.
+    <samp>svn://fcm1/tutorial_svn/</samp>), but you should specify your branch
+    using the project name (<samp>tutorial</samp>), the branch name
+    (<samp>branches/dev/matt/r1_133</samp>), and a revision number. Trac will
+    translate this into a link to that branch.</li>
+
+    <li>Trac will translate the syntax <code>r&lt;number&gt;</code> or
+    <code>[&lt;number&gt;]</code> into a link to the numbered changeset.</li>
+  </ul>
+
+  <p>Click on <kbd>Preview</kbd> and check that the links work correctly, and
+  on <kbd>Submit changes</kbd> when you are ready.</p>
+
+  <h3 id="tutorial_checkout">Checkout a working copy</h3>
+
+  <p><em>A Subversion working copy is an ordinary directory tree on your local
+  system, containing a collection of files. It is your private working area in
+  which you can make changes before publishing them back to the repository. You
+  create a working copy by using the checkout command on some subtree of the
+  repository.</em></p>
+
+  <p>After completing this sub-section, you will learn how to:</p>
+
+  <ul>
+    <li>checkout a Subversion working copy.</li>
+  </ul>
+
+  <p>Further reading:</p>
+
+  <ul>
+    <li>Code Management System &gt; <a href=
+    "code_management.html#svn_concepts">Basic Concepts</a></li>
+
+    <li>FCM Command Reference &gt; <a href="command_ref.html#svn">Other
+    Subversion Commands</a></li>
+  </ul>
+
+  <h4>Checkout a Subversion working copy</h4>
+
+  <p><dfn>Command line</dfn>: issue the <code>fcm checkout</code> (or simply
+  <code>fcm co</code>) command. E.g.:</p>
+  <pre>
+(SHELL PROMPT)$ fcm checkout fcm:tutorial_br/dev/matt/r1_133 tutorial
+</pre>
+
+  <ul>
+    <li>In the example, we have replaced the leading part of the Subversion URL
+    <samp>svn://fcm1/tutorial_svn/tutorial/branches</samp> with the FCM URL
+    keyword <samp>fcm:tutorial_br</samp>. This is mainly to save you from
+    having to type in the full URL. However, you may find it easier to
+    copy-and-paste the full Subversion URL from the output generated when you
+    created the branch.</li>
+
+    <li>In the above command, we have asked the system to create a working copy
+    in <samp>$PWD/tutorial</samp>. If you do not specify a local directory
+    <var>PATH</var> in the <code>checkout</code> command, it will create a
+    working copy in the current working directory, using the basename of the
+    URL. For example, when you checkout the branch you have just created, the
+    command would create the working copy in <samp>$PWD/r1_133</samp>, which is
+    often undesirable. Make a note of the location of your working copy, in
+    case you forget where you have put it.</li>
+
+    <li>If you do not specify a revision to checkout, it will checkout the
+    HEAD, i.e. the latest, revision.</li>
+  </ul>
+
+  <p>Example:</p>
+  <pre>
+=&gt; fcm checkout fcm:tutorial_br/dev/matt/r1_133 tutorial
+A    tutorial/doc
+A    tutorial/doc/hello.html
+A    tutorial/src
+A    tutorial/src/subroutine
+A    tutorial/src/subroutine/hello_c.c
+A    tutorial/src/subroutine/hello_sub.f90
+A    tutorial/src/module
+A    tutorial/src/module/hello_num.f90
+A    tutorial/src/module/hello_constants.f90
+A    tutorial/src/program
+A    tutorial/src/program/hello.f90
+A    tutorial/fcm-make.cfg
+Checked out revision 811.
+</pre>
+
+  <h3 id="tutorial_change">Make changes to files in your working copy</h3>
+
+  <p><em>Subversion provides various useful commands to help you monitor your
+  working copy. The most useful ones are "diff", "revert" and "status". You
+  will also find "add", "copy", "delete" and "move" useful when you are
+  rearranging your files and directories.</em></p>
+
+  <p>After completing this sub-section, you will learn how to:</p>
+
+  <ul>
+    <li>make and revert changes,</li>
+
+    <li>add and remove files,</li>
+
+    <li>inspect the status of a working copy, and</li>
+
+    <li>display changes in a working copy.</li>
+  </ul>
+
+  <p>Further reading:</p>
+
+  <ul>
+    <li>Code Management System &gt; <a href=
+    "code_management.html#svn_basic">Basic Command Line Usage</a></li>
+
+    <li>FCM Command Reference &gt; <a href="command_ref.html#fcm-add">fcm
+    add</a>, <a href="command_ref.html#fcm-diff">fcm diff</a>, <a href=
+    "command_ref.html#fcm-delete">fcm delete</a>, <a href=
+    "command_ref.html#svn">Other Subversion Commands</a></li>
+  </ul>
+
+  <h4>Make and revert changes</h4>
+
+  <p>For the later part of the tutorial to work, you must make the following
+  modifications:</p>
+
+  <ul>
+    <li>Change to the <samp>src/module/</samp> sub-directory in your working
+    copy.</li>
+
+    <li>Edit <samp>hello_constants.f90</samp>, using your favourite editor, and
+    change: <samp>Hello World!</samp> to <kbd>Hello Earthlings!</kbd>. Save
+    your change and exit the editor.</li>
+
+    <li>Edit <samp>hello_num.f90</samp> and either add a comment, or make a
+    minor code change - for example, use one of :
+      <pre>
+!This will print a really really big integer.
+WRITE(*, *) "Sadly, there's no encoding for Martian base-60"
+</pre>
+    </li>
+  </ul>
+
+  <p>Try the following so that you know how to restore a changed file:</p>
+
+  <ul>
+    <li>Change to the <samp>src/subroutine/</samp> directory of your working
+    copy.</li>
+
+    <li>Make a change in file <b>hello_c.c</b>, using your favourite
+    editor.</li>
+
+    <li>To see that you have <strong>M</strong>odified this file: issue the
+    <code>fcm status</code> command</li>
+
+    <li>Run the <code>revert</code> command to get the file back unmodified:
+      <pre>
+(SHELL PROMPT)$ fcm revert hello_c.c
+</pre>
+    </li>
+  </ul>
+
+  <h4>Add and remove files</h4>
+
+  <p>You may also want to try the following FCM commands in your
+  <samp>doc/</samp> sub-directory. You can safely make changes here since they
+  will not interfere with your code changes.</p>
+
+  <ul>
+    <li>change to the <samp>doc/</samp> directory of your working copy.</li>
+
+    <li>Echo some text into a new file and then run the <code>add</code>
+    command, which lets the repository know you're adding a new file at the
+    next commit. For example:
+      <pre>
+(SHELL PROMPT)$ echo 'Some text' &gt;new_file.txt
+(SHELL PROMPT)$ fcm add new_file.txt
+</pre>
+    </li>
+
+    <li>Make a copy of <samp>hello.html</samp> and remove the original, using
+    the <code>copy</code> and <code>delete</code> commands. For example:
+      <pre>
+(SHELL PROMPT)$ fcm copy hello.html add.html
+(SHELL PROMPT)$ fcm delete hello.html
+</pre>
+    </li>
+
+    <li>You can use a simple <code>move</code> sub-command for the above
+    <code>copy</code> and <code>delete</code>.</li>
+  </ul>
+
+  <h4>Inspect the status of a working copy</h4>
+
+  <p>Change to the root directory of your working copy.</p>
+
+  <p><dfn>Command line</dfn>: issue the <code>fcm status</code> (or simply
+  <code>fcm st</code>) command.</p>
+
+  <p>Example:</p>
+  <pre>
+=&gt; fcm status
+D      doc/hello.html
+A      doc/new_file.txt
+A  +   doc/add.html
+M      src/module/hello_num.f90
+M      src/module/hello_constants.f90
+</pre>
+
+  <p>This confirms the actions you have taken. You have
+  <strong>D</strong>eleted a file, <strong>A</strong>dded a new file,
+  <strong>A</strong>dded a file with history (<strong>+</strong>) and
+  <strong>M</strong>odified two others. It also confirms the action of the
+  <code>revert</code> command.</p>
+
+  <h4>Display changes in a working copy</h4>
+
+  <p>You can view the changes you have made to your working copy.</p>
+
+  <p><dfn>Command line</dfn>: issue the <code>fcm diff --graphical</code> (or
+  simply <code>fcm di -g</code>) command.</p>
+
+  <p>A listing of the files you have changed will be displayed, and a graphical
+  diff tool will open up for each modified file.</p>
+
+  <h3 id="tutorial_commit">Commit your changes to the repository</h3>
+
+  <p><em>The change in your working copy remains local until you commit it to
+  the repository where it becomes permanent. If you are planning to make a
+  large number of changes, you are encouraged to commit regularly to your
+  branch at appropriate intervals.</em></p>
+
+  <p>After completing this sub-section, you will learn how to:</p>
+
+  <ul>
+    <li>commit your changes, and</li>
+
+    <li>inspect your changes using Trac.</li>
+  </ul>
+
+  <p>Further reading:</p>
+
+  <ul>
+    <li>Code Management System &gt; <a href=
+    "code_management.html#svn_basic">Basic Command Line Usage</a></li>
+
+    <li>FCM Command Reference &gt; <a href="command_ref.html#fcm-commit">fcm
+    commit</a></li>
+  </ul>
+
+  <h4>Commit changes</h4>
+
+  <p><dfn>Command line</dfn>: issue the <code>fcm commit</code> (or simply
+  <code>fcm ci</code>) command.</p>
+
+  <p>A text editor will appear to allow you to edit the commit message. You
+  must add a commit message to describe your change <strong>above</strong> the
+  line that says <samp>--Add your commit message ABOVE - do not alter this line
+  or those below--</samp>. (A suggestion is given as the highlighted text in
+  the example below.) Your commit will fail if you do not enter a commit
+  message.</p>
+
+  <p>Save your change and exit the editor. Answer <kbd>Yes</kbd> when you are
+  prompted to confirm the commit. For example:</p>
+  <pre>
+[info] gvim -f: starting commit message editor...
+Change summary:
+--------------------------------------------------------------------------------
+[Project: tutorial]
+[Branch : branches/dev/matt/r1_133]
+[Sub-dir: &lt;top&gt;]
+
+D       doc/hello.html
+A       doc/new_file.txt
+A  +    doc/add.html
+M       src/module/hello_num.f90
+M       src/module/hello_constants.f90
+--------------------------------------------------------------------------------
+Commit message is as follows:
+--------------------------------------------------------------------------------
+#133: tutorial is fun.
+--------------------------------------------------------------------------------
+Would you like to commit this change?
+Enter "y" or "n" (or just press &lt;return&gt; for "n"): y
+Adding         doc/add.html
+Deleting       doc/hello.html
+Adding         doc/new_file.txt
+Sending        src/module/hello_constants.f90
+Sending        src/module/hello_num.f90
+Transmitting file data ...
+Committed revision 812.
+=&gt; svn update
+At revision 812.
+</pre>
+
+  <h4>Inspect changes using Trac</h4>
+
+  <p>Click on <kbd>Timeline</kbd> in Trac. Drill down to your changeset and see
+  how it appears. (Alternatively, if you enter <samp>r&lt;number&gt;</samp>
+  into the search box at the top right, it will take you directly to the
+  numbered changeset.)</p>
+
+  <p>Note:</p>
+
+  <ul>
+    <li>Wiki Formatting, used in the commit message, has customised the
+    changeset message.</li>
+
+    <li>All your changes are listed.</li>
+  </ul>
+
+  <h3 id="tutorial_extract">Test your changes</h3>
+
+  <p><em>You should test the changes in your branch before asking a colleague
+  to review them. FCM features a build system that allows you to build your
+  code easily. As your changes may be located in a repository branch and/or a
+  working copy, you should work with the extract system to extract the correct
+  code to build. The extract system allows you to extract code from the
+  repository, combining changes in different branches and your working copy,
+  before generating a configuration file and a suitable source tree for feeding
+  into the build system.</em></p>
+
+  <p><em>In this sub-section of the tutorial, you will be shown how to extract
+  and build the code from your branch. (There are some <a href=
+  "#tutorial_extra-extract">extra activities on the extract and build
+  systems</a> in a later sub-section of the tutorial should you want to explore
+  the extract and build systems in more depth.) In the example here, the
+  extract and build systems will be shown to you in their simplest form. In
+  real life, the managers of the systems you are developing code for will
+  provide you with more information on how to extract and build their
+  systems.</em></p>
+
+  <p>After completing this sub-section, you will learn how to:</p>
+
+  <ul>
+    <li>set up a simple FCM make configuration file for extract and build,
+    and</li>
+
+    <li>use the <a href="make.html">FCM Make</a> system to perform simple
+    extracts and builds.</li>
+  </ul>
+
+  <p>Further reading:</p>
+
+  <ul>
+    <li><a href="make.html">FCM Make</a></li>
+  </ul>
+
+  <p>You should extract and build your code in a different directory to your
+  working copy. For example, you may want to create a sub-directory
+  <samp>$HOME/tutorial/test/</samp> and change to it:</p>
+  <pre>
+(SHELL PROMPT)$ mkdir -p $HOME/tutorial/test
+(SHELL PROMPT)$ cd $HOME/tutorial/test
+</pre>
+
+  <h4>Set up a FCM make configuration file</h4>
+
+  <p>To set up a FCM make configuration file from scratch, launch your
+  favourite editor and add the following lines:</p>
+  <pre>
+steps = extract build
+extract.ns = tutorial
+extract.location[tutorial] = branches/dev/$LOGNAME/r1_133
+extract.path-root[tutorial] = src
+build.target{task} = link
+</pre>
+
+  <p>Note:</p>
+
+  <ul>
+    <li>The <code><a href=
+    "annex_cfg.html#make.extract.location">extract.location</a></code>
+    declaration is set to <samp>branches/dev/$LOGNAME/r1_133</samp>. If you
+    have named your branch differently, you should modify the right hand side
+    of the declaration.</li>
+
+    <li>The build system uses <code>gfortran</code> and <code>gcc</code> as the
+    default Fortran and C (respectively) compilers. If you do not have these
+    compilers installed on your system, you can configure your Fortran and C
+    compilers using the <code><a href=
+    "annex_cfg.html#make.build.prop.fc">build.prop{fc}</a></code> and
+    <code><a href="annex_cfg.html#make.build.prop.cc">build.prop{cc}</a></code>
+    declarations.</li>
+  </ul>
+
+  <p>Save the file as <samp>fcm-make.cfg</samp> and exit your editor.</p>
+
+  <h4>Perform an extract and a build</h4>
+
+  <p>Issue the command <code><a href="command_ref.html#fcm-make">fcm
+  make</a></code> and you should get an output similar to the following:</p>
+  <pre>
+(SHELL PROMPT)$ fcm make
+[init] make                # 2011-11-03 10:31:10Z
+[init] make config-parse   # 2011-11-03 10:31:10Z
+[info] config-file=/home/matt/tutorial/test/fcm-make.cfg
+[done] make config-parse   # 0.0s
+[init] make dest-init      # 2011-11-03 10:31:10Z
+[info] dest=frsn@eld081:/home/matt/tutorial/test
+[info] mode=new
+[done] make dest-init      # 0.0s
+[init] make extract        # 2011-11-03 10:31:10Z
+[info] location tutorial: 0: svn://fcm1/tutorial_svn/tutorial/branches/dev/matt/r1_133@811
+[info]   dest:    5 [A added]
+[info] source:    5 [U from base]
+[done] make extract        # 0.1s
+[init] make build          # 2011-11-03 10:31:10Z
+[info] sources: total=5, analysed=5, elapsed-time=0.0s, total-time=0.0s
+[info] compile   targets: modified=5, unchanged=0, total-time=0.3s
+[info] compile+  targets: modified=2, unchanged=0, total-time=0.0s
+[info] ext-iface targets: modified=1, unchanged=0, total-time=0.0s
+[info] link      targets: modified=1, unchanged=0, total-time=0.0s
+[info] TOTAL     targets: modified=9, unchanged=0, elapsed-time=0.4s
+[done] make build          # 0.4s
+[done] make                # 0.5s
+</pre>
+
+  <p>If nothing goes wrong, you should end up with the sub-direcories
+  <samp>extract/</samp> and <samp>build/</samp> in your working directory. The
+  <samp>extract/</samp> sub-directory contains the result of the extract and
+  the <samp>build/</samp> sub-directory contains the result of the build.</p>
+
+  <p>N.B. You should also find a <samp>.fcm-make/</samp> sub-directory. It is
+  used by <code>fcm make</code> as a working area for your extract and build.
+  It also contains a diagnostic <samp>log</samp> file generated by the latest
+  <code>fcm make</code> command. The log file contains the diagnostic output in
+  high verbosity. If anything goes wrong, it is worth checking the content of
+  the log file for clues.</p>
+
+  <p>The executable you have built is <samp>hello.exe</samp>, which is located
+  in the <samp>build/bin/</samp> sub-directory. You can test your executable by
+  running it. You should get an output similar to the following:</p>
+  <pre>
+(SHELL PROMPT)$ PATH=$PWD/build/bin:$PATH hello.exe
+hello: Hello Earthlings!
+hello_sub: Hello Earthlings!
+hello_huge_number: maximum integer: 2147483647
+hello_c: Hello World!
+</pre>
+
+  <h3 id="tutorial_merge">Merge changes from the trunk and resolve
+  conflicts</h3>
+
+  <p><em>Your branch is normally isolated from other development lines in your
+  project. However, at some point during your development, you may need to
+  merge your changes with those of your colleagues. In some cases, it is
+  desirable to merge changes regularly from the trunk to keep your branch up to
+  date with the latest development. The automatic merge provided by FCM allows
+  you to do this easily.</em></p>
+
+  <p><em>A merge results in a conflict if changes being applied to a file
+  overlap. FCM uses a graphical merge tool to help you resolve overlaps in file
+  text changes (</em>text conflicts<em>). If some of the changes include a
+  deletion, renaming, or addition of the file, a filesystem conflict (</em>tree
+  conflict<em>) may occur, which needs to be dealt with manually.</em></p>
+
+  <p>After completing this sub-section, you will learn how to:</p>
+
+  <ul>
+    <li>merge changes from the trunk into your working copy, and</li>
+
+    <li>resolve text and tree conflicts in your working copy.</li>
+  </ul>
+
+  <p>Further reading:</p>
+
+  <ul>
+    <li>Code Management System &gt; Basic Command Line Usage &gt; <a href=
+    "code_management.html#svn_basic_conflicts">Resolving Conflicts</a></li>
+
+    <li>Code Management System &gt; <a href=
+    "code_management.html#svn_branching">Branching &amp; Merging</a></li>
+
+    <li>Code Management Working Practices &gt; <a href=
+    "working_practices.html#branching">Branching &amp; Merging</a></li>
+
+    <li>FCM Command Reference &gt; <a href="command_ref.html#fcm-conflicts">fcm
+    conflicts</a></li>
+
+    <li>FCM Command Reference &gt; <a href="command_ref.html#fcm-merge">fcm
+    merge</a></li>
+  </ul>
+
+  <h4>Merge changes from the trunk into a working copy</h4>
+
+  <p>Perform the merge in your working copy.</p>
+
+  <p><dfn>Command line</dfn>: issue the <code>fcm merge</code> command.
+  E.g.</p>
+  <pre>
+(SHELL PROMPT)$ fcm merge trunk
+</pre>
+
+  <p>If there is more than one revision of the source that you can merge with,
+  you will be prompted for the revision number you wish to merge from. You will
+  not be prompted in this case, because there is only one revision of the
+  source that you can merge with.</p>
+
+  <p>Example:</p>
+  <pre>
+Eligible merge(s) from /tutorial/trunk: 2
+Merge: /tutorial/trunk@2
+ c.f.: /tutorial/trunk@1
+-------------------------------------------------------------------------dry-run
+--- Merging r2 into '.':
+U    src/subroutine/hello_c.c
+A    src/module/hello_number.f90
+C    src/module/hello_constants.f90
+   C src/module/hello_num.f90
+Summary of conflicts:
+  Text conflicts: 1
+  Tree conflicts: 1
+-------------------------------------------------------------------------dry-run
+Would you like to go ahead with the merge?
+Enter "y" or "n" (or just press &lt;return&gt; for "n"): y
+Merge succeeded.
+</pre>
+
+  <h4>Status of the working copy after a merge</h4>
+
+  <p>In the output of the merge, the <samp>C</samp> status at the beginning of
+  a line indicates that the first file you changed,
+  <samp>src/module/hello_constants.f90</samp>, is now in <em>text
+  conflict</em>. The <samp>C</samp> status in the 4th column of a line
+  indicates that the second file you changed,
+  <samp>src/subroutines/hello_num.f90</samp>, is now in <em>tree conflict</em>.
+  If you run <code>fcm status</code>, you will see extra information about the
+  merge, which may help you to resolve the conflicts:</p>
+  <pre>
+=&gt; fcm status
+ M      .
+?       #commit_message#
+M       src/subroutine/hello_c.c
+?       src/module/hello_constants.f90.merge-left.r1
+?       src/module/hello_constants.f90.merge-right.r2
+?       src/module/hello_constants.f90.working
+      C src/module/hello_num.f90
+      &gt;   local edit, incoming delete upon merge
+A  +    src/module/hello_number.f90
+C       src/module/hello_constants.f90
+</pre>
+
+  <p>In the case of the file <samp>hello_constants.f90</samp>, the extra files
+  created (ending with <samp>working</samp>, <samp>merge-left.r1</samp>,
+  <samp>merge-right.r2</samp>) will be used to resolve the text conflict using
+  the 3-way difference tool <code>xxdiff</code>.</p>
+
+  <p>In the case of the file <samp>hello_num.f90</samp>, the extra line
+  underneath (<em>local edit, incoming delete upon merge</em>) displays the
+  conflict or dilemma that you must resolve - you have made a change to the
+  file in your branch (<em>local edit</em>) but someone has deleted the file on
+  the trunk (<em>incoming delete upon merge</em>). If you inspect the log of
+  the trunk, by typing e.g. <code>fcm log -v -rHEAD:1
+  fcm:tutorial/trunk</code>, you will find that someone has renamed
+  <samp>src/module/hello_num.f90</samp> to
+  <samp>src/module/hello_number.f90</samp>.</p>
+
+  <p>The line: <samp>M .</samp> just refers to Subversion's merge tracking,
+  which is not relevant here.</p>
+
+  <p>You will now have to resolve the conflicts.</p>
+
+  <h4>Resolve the conflicts</h4>
+
+  <p>Issue the <code>fcm conflicts</code> (or simply <code>fcm cf</code>)
+  command.</p>
+
+  <p>The <code>xxdiff</code> program comes into play:</p>
+
+  <p class="image"><img src="xxdiff_tutorial.png" alt="3-way diff" /></p>
+
+  <p>See the sub-section on <a href=
+  "code_management.html#svn_basic_conflicts">resolving conflicts</a>, or the
+  <cite>xxdiff User's Manual</cite> (click on <em>Help</em>) to guide you
+  through this process. (If you do not want to learn how to use
+  <code>xxdiff</code> now, you can just click on the highlighted line in the
+  left hand column, and select <kbd>Exit with MERGED</kbd> from the
+  <em>File</em> menu. This saves the file you are merging in as the result of
+  the merge, i.e. you have <em>merged</em> the changes).</p>
+
+  <p>On resolving this conflict, you will be asked to run <code>svn
+  resolved</code>. Answer <kbd>Yes</kbd>.</p>
+
+  <p>You are now prompted to try to solve the <em>tree conflict</em>.</p>
+  <pre>
+[info] src/module/hello_num.f90: in tree conflict.
+Locally: modified
+Externally: renamed to src/module/hello_number.f90
+Answer (y) to keep the old name.
+Answer (n) to accept the rename.
+You can then merge in changes.
+Keep the local version?
+Enter "y" or "n" (or just press &lt;return&gt; for "n") 
+</pre>
+
+  <p>Entering <samp>y</samp> will keep the file as it is, and entering
+  <samp>n</samp> will accept the external changes. Your problem is that the
+  edit you made to <samp>hello_num.f90</samp> is no longer valid on the trunk,
+  because there the file has been renamed to <samp>hello_number.f90</samp>. To
+  Subversion, it looks like <samp>hello_num.f90</samp> disappeared. Your
+  choices would be either to delete the new file by answering <samp>y</samp>,
+  or incorporate your changes into the new file (<samp>hello_number.f90</samp>)
+  by answering <samp>n</samp>. As the new filename comes from the trunk, we
+  would normally accept it and incorporate changes into it, rather than delete
+  it.</p>
+
+  <p>Answer <samp>n</samp> to accept the renaming of the file and merge in
+  changes. This will occur using <code>xxdiff</code>, as above.</p>
+
+  <p>Exit the <code>xxdiff</code> window as before, with <kbd>Exit with
+  MERGED</kbd>.</p>
+
+  <p>If you now run <code>status</code>, you will notice that these extra
+  conflict files have disappeared, and there are no more <samp>C</samp>
+  filename statuses.</p>
+
+  <p>Example:</p>
+  <pre>
+=&gt; fcm status
+ M      .
+?       #commit_message#
+M       src/subroutine/hello_c.c
+D       src/module/hello_num.f90
+A  +    src/module/hello_number.f90
+</pre>
+
+  <p>You have now resolved all the conflicts.</p>
+
+  <h4>Commit after the merge</h4>
+
+  <p>It is important to remember that the <code>fcm merge</code> command only
+  applies changes to your working copy. Therefore, you must now commit the
+  change in order for it to become permanent in the repository. Similar to
+  other changes, it is a good practice to use <code>fcm diff</code> to inspect
+  the changes before committing.</p>
+
+  <p>When you run <code>fcm commit</code>, you will be prompted to edit the
+  commit log as usual. However, you may notice that a standard template is
+  already provided for you by the <code>fcm merge</code> command. In most
+  cases, the standard message should be sufficient. However, if you want to add
+  extra comment to the commit, please do so <strong>above</strong> the line
+  that says <samp>--Add your commit message ABOVE - do not alter this line or
+  those below--</samp>. This is useful, for example, if there were significant
+  issues addressed in the merge.</p>
+
+  <h3 id="tutorial_review-ticket">Review changes</h3>
+
+  <p><em>For the purpose of this tutorial, we assume that your changes are
+  complete, have been tested and committed to the repository, and are now ready
+  for review. You should assign the ticket to the reviewer and inform him/her
+  where to find the changes you wish him/her to review. The reviewer will
+  record any issues in the ticket, perhaps linking to other documents as
+  required. Once completed, he/she will record the outcome in the ticket and
+  assign it back to the you.</em></p>
+
+  <p>After completing this sub-section, you will learn how to:</p>
+
+  <ul>
+    <li>display changes in a branch, and</li>
+
+    <li>re-assign a ticket.</li>
+  </ul>
+
+  <p>Further reading:</p>
+
+  <ul>
+    <li>Code Management System &gt; Branching &amp; Merging &gt; <a href=
+    "code_management.html#svn_branching_info">Getting Information About
+    Branches</a></li>
+
+    <li>Code Management System &gt; <a href="code_management.html#trac">Using
+    Trac</a></li>
+
+    <li>Code Management Working Practices &gt; <a href=
+    "working_practices.html#tickets">Using Tickets</a></li>
+
+    <li>FCM Command Reference &gt; <a href="command_ref.html#fcm-diff">fcm
+    diff</a></li>
+  </ul>
+
+  <h4>Display changes in a branch</h4>
+
+  <p>Before you ask someone to review your code, it is often a good idea to
+  have a look at the changes one more time. To view the changes in a branch,
+  you can look at all the changes relative to its base.</p>
+
+  <p><dfn>Command line</dfn>: issue the <code>fcm branch-diff
+  --graphical</code> (or simply <code>fcm bdi -g</code>) command.</p>
+
+  <p>You should be presented with the differences between the branch and the
+  trunk (since the last merge).</p>
+
+  <p>Note: you can also use the <code>--trac</code> (<code>-t</code>) option
+  instead of <code>--graphical</code> (<code>-g</code>) to view the changes in
+  a branch using Trac rather than using a graphical diff tool.</p>
+
+  <p><dfn>Command line</dfn>: issue the <code>fcm branch-diff --trac</code> (or
+  simply <code>fcm bdi -t</code>) command.</p>
+
+  <p>Take note of the Trac URL for displaying the differences. The part that
+  begins with <code>diff:</code> is of particular interest to you, as it is a
+  Trac link that can be inserted into a Trac wiki/ticket. In the above example,
+  the Trac link would look like:
+  <samp>diff:/tutorial/trunk@2///tutorial/branches/dev/matt/r1_133@813</samp>.</p>
+
+  <h4>Re-assign a ticket to a reviewer</h4>
+
+  <p>Back in your ticket, add an appropriate comment showing where to find your
+  changes, in the <em>Add/Change</em> box. Include a link to your branch and a
+  diff link (see above) in the comment. For example:</p>
+  <pre>
+The [log:tutorial/branches/dev/matt/r1_133@811:813] branch proposes
+changes to the greeting in hello_constants.f90. It also contains some new
+documents. See
+[diff:/tutorial/trunk@2///tutorial/branches/dev/matt/r1_133@813] for the
+changes.
+
+Fred, could you review the change, please?
+</pre>
+
+  <p>Note: the syntax
+  <samp>[log:tutorial/branches/dev/matt/r1_133@811:813]</samp> will be
+  translated by Trac into a link to the revision log browser to display the log
+  between revision 811 and 813 of the <samp>branches/dev/matt/r1_133</samp>
+  branch in the <samp>tutorial</samp> project; and the syntax
+  <samp>[diff:/tutorial/trunk@2///tutorial/branches/dev/matt/r1_133@813]</samp>
+  will be translated into a link to display the differences between the trunk
+  at revision 2 and the branch at revision 813. Click on <kbd>Preview</kbd> and
+  check that the links work correctly.</p>
+
+  <p>To re-assign a ticket to your reviewer, click on the <kbd>reassign
+  to</kbd> button in the <em>Action</em> box section and enter the reviewer's
+  User ID.</p>
+
+  <p>When you are ready, click on <kbd>Submit changes</kbd>.</p>
+
+  <h4>Reassign the ticket back to the author</h4>
+
+  <p>For the purpose of this tutorial, you will act as the reviewer of the
+  changes you have made. Following the review, you should record its outcome
+  and re-assign the ticket back to the author. Enter the comment <kbd>No issues
+  were found during the review</kbd>. Click on the <kbd>reassign to</kbd>
+  button in the <em>Action</em> box section, and enter your guest account name.
+  Click on <kbd>Submit changes</kbd> when you are ready.</p>
+
+  <h3 id="tutorial_merge-back">Commit to the trunk</h3>
+
+  <p><em>Your changes in the branch have been tested and reviewed. It is now
+  time to merge and commit it to the trunk. Once you have committed your
+  change, you will close your ticket to complete the work cycle.</em></p>
+
+  <p>After completing this sub-section, you will learn how to:</p>
+
+  <ul>
+    <li>switch a working copy,</li>
+
+    <li>merge and commit your changes into the trunk, and</li>
+
+    <li>close a ticket</li>
+  </ul>
+
+  <p>Further reading:</p>
+
+  <ul>
+    <li>Code Management System &gt; <a href=
+    "code_management.html#svn_branching">Branching &amp; Merging</a></li>
+
+    <li>Code Management Working Practices &gt; <a href=
+    "working_practices.html#branching">Branching &amp; Merging</a></li>
+
+    <li>FCM Command Reference &gt; <a href="command_ref.html#fcm-switch">fcm
+    switch</a></li>
+  </ul>
+
+  <h4>Switch a working copy to point to the trunk</h4>
+
+  <p><dfn>Command line</dfn>: issue the <code>fcm switch</code> (or simply
+  <code>fcm sw</code>) command. E.g.:</p>
+  <pre>
+(SHELL PROMPT)$ fcm sw trunk
+</pre>
+
+  <p><dfn>Command line</dfn>: To check that your working copy is pointing to
+  the trunk, issue the <code>fcm info</code> command.</p>
+
+  <h4>Merge and commit your changes into the trunk</h4>
+
+  <p><dfn>Command line</dfn>: issue the <code>fcm merge</code> command.
+  E.g.</p>
+  <pre>
+(SHELL PROMPT)$ fcm merge branches/dev/matt/r1_133
+</pre>
+
+  <p>Example:</p>
+  <pre>
+Eligible merge(s) from /tutorial/branches/dev/matt/r1_133: 813 812
+Enter a revision (or just press &lt;return&gt; for "813"):
+Merge: /tutorial/branches/dev/matt/r1_133@813
+ c.f.: /tutorial/trunk@2
+-------------------------------------------------------------------------dry-run
+--- Merging differences between repository URLs into '.':
+A    doc/new_file.txt
+A    doc/add.html
+D    doc/hello.html
+U    src/module/hello_number.f90
+U    src/module/hello_constants.f90
+-------------------------------------------------------------------------dry-run
+Would you like to go ahead with the merge?
+Enter "y" or "n" (or just press &lt;return&gt; for "n"): y
+Merge succeeded.
+</pre>
+
+  <p>Since there is more than one revision available for merging, you will be
+  prompted for the revision number you wish to merge from. The default is the
+  last changed revision of your branch. which is the revision you want to merge
+  with, so you should just proceed with the default.</p>
+
+  <p>Since we merged in the latest changes from the trunk into the branch,
+  there should be no conflicts from this merge.</p>
+
+  <p>Once again, please remember that the merge command only changes your
+  working copy. You need to commit the change before it becomes permanent in
+  the repository. Before you commit to the trunk, however, it is often sensible
+  to have a last look at what you are going to change using the
+  <code>diff</code> command.</p>
+
+  <p>Note: We have set up the repository to prevent any commits to the trunk to
+  preserve the tutorial for other users, so your commit to the trunk will fail.
+  However, you should try doing it any way to complete the exercise.</p>
+
+  <p><dfn>Command line</dfn>: issue the <code>fcm commit</code> (or simply
+  <code>fcm ci</code>) command.</p>
+
+  <p>A text editor will appear to allow you to edit the commit message. You
+  must add a commit message to describe your change <strong>above</strong> the
+  line that says <samp>--Add your commit message ABOVE - do not alter this line
+  or those below--</samp>. Since you are going to commit changes to the trunk,
+  you should provide a useful message, including a link to your ticket. For
+  example:</p>
+  <pre>
+#133: tutorial completed.
+</pre>
+
+  <p>When you are ready, save your change and exit the editor.</p>
+
+  <p>As we have said before, the command will fail when you try to proceed with
+  the commit.</p>
+
+  <h4>Close your ticket</h4>
+
+  <p>As you have completed your work, you should now update and close your
+  ticket. In real life, you will typically include a closing comment with an
+  appropriate Trac wiki link to the changeset in the trunk that fixes the
+  ticket.</p>
+
+  <p>Since you cannot commit to the trunk in the tutorial, you can include a
+  Trac link to the latest changeset in your branch. For example, you can put
+  <samp>r813: fixed.</samp> in the comment. To mark the ticket as
+  <em>fixed</em>, move down to the <em>Action</em> box section, click on
+  <kbd>resolve as</kbd> and choose <kbd>fixed</kbd>. Use <kbd>Preview</kbd> to
+  ensure that your links work correctly. When you are happy, click on
+  <kbd>Submit changes</kbd>.</p>
+
+  <h3 id="tutorial_extra-extract">Extra activities on the extract and build
+  systems</h3>
+
+  <p><em>The extract and build systems are very flexible. If you have time, you
+  may want to explore their uses in more depth.</em></p>
+
+  <p>After completing this sub-section, you will learn how to:</p>
+
+  <ul>
+    <li>extract from a working copy,</li>
+
+    <li>change a compiler flag, and</li>
+
+    <li>extract from a particular branch and/or revision from the
+    repository.</li>
+  </ul>
+
+  <p>Further reading:</p>
+
+  <ul>
+    <li><a href="make.html">FCM Make</a></li>
+  </ul>
+
+  <h4>Extract from a working copy</h4>
+
+  <p>Modify the source files in your working copy and commit the changes back
+  to your branch in the repository. Re-run <code><a href=
+  "command_ref.html#fcm-make">fcm make</a></code> and see the results of the
+  changes.</p>
+
+  <p>In fact, you can test changes in your working copy directly using a
+  similar extract and build mechanism. In such case, you need to modify the
+  <code><a href=
+  "annex_cfg.html#make.extract.location">extract.location</a></code>
+  declaration. For example:</p>
+  <pre>
+extract.location[tutorial] = $HOME/work/tutorial
+</pre>
+
+  <h4>Change a compiler flag</h4>
+
+  <p>Modify the compiler flags, and re-run <code><a href=
+  "command_ref.html#fcm-make">fcm make</a></code> and see the results of the
+  changes. To modify the compiler flags, edit your FCM make configuration file,
+  and add the declarations for changing compiler flags. For example:</p>
+  <pre>
+# Declare extra options for Fortran compiler
+build.prop{fc.flags} = -i8 -O3
+</pre>
+
+  <p>For further information on how to set your compiler flags, please refer to
+  the <a href="make.html">FCM Make</a> &gt; <a href=
+  "make.html#build">Build</a>.</p>
+
+  <h4>Extract from a particular branch and/or revision</h4>
+
+  <p>Try extracting from an earlier revision of your branch. Suppose the HEAD
+  of your branch is revision 813, and the branch was created at an earlier
+  revision. You can extract your branch at, say, revision 811 by adding the
+  following to the <code><a href=
+  "annex_cfg.html#make.extract.location">extract.location</a></code>
+  declaration in your FCM make configuration file:</p>
+  <pre>
+extract.location[tutorial] = branches/dev/$LOGNAME/r1_133@811
+</pre>
+
+  <p>You can also try extracting from the trunk. To extract from the
+  <samp>trunk@HEAD</samp>, simply comment out or remove the <code><a href=
+  "annex_cfg.html#make.extract.location">extract.location</a></code>
+  declaration. To extract from a given revision of the trunk, you will need to
+  modify the <code><a href=
+  "annex_cfg.html#make.extract.location">extract.location</a></code>
+  declaration in your FCM make configuration file. For example:</p>
+  <pre>
+extract.location[tutorial] = trunk@1
+</pre>
+
+  <h3 id="tutorial_delete-branch">Delete your branch</h3>
+
+  <p><em>You should remove your branch when it is no longer required. When you
+  remove it, it becomes invisible from the HEAD revision, but will continue to
+  exist in the repository, should you want to refer to it in the
+  future.</em></p>
+
+  <p>After completing this sub-section, you will learn how to:</p>
+
+  <ul>
+    <li>list branches owned by you, and</li>
+
+    <li>delete a branch.</li>
+  </ul>
+
+  <p>Further reading:</p>
+
+  <ul>
+    <li>Code Management System &gt; Branching &amp; Merging &gt; <a href=
+    "code_management.html#svn_branching_list">Listing Branches Created by You
+    or Other Users</a></li>
+
+    <li>Code Management System &gt; Branching &amp; Merging &gt; <a href=
+    "code_management.html#svn_branching_delete">Deleting Branches</a></li>
+  </ul>
+
+  <h4>List branches owned by you</h4>
+
+  <p>If you forget what your branch is called and/or what other branches you
+  have created, you can get a listing of all the branches you have created in a
+  project.</p>
+
+  <p><dfn>Command line</dfn>: issue the <code>fcm branch-list</code> (or simply
+  <code>fcm bls</code>) command</p>
+
+  <h4>Delete a branch</h4>
+
+  <p>Switch your working copy to point back to your branch. Before you do so,
+  revert any changes you have made in the working copy by issuing the <code>fcm
+  revert -R .</code> command. If a <samp>#commit_message#</samp> file exists,
+  remove it by issuing the <code>rm '#commit_message#'</code> command.</p>
+
+  <p><dfn>Command line</dfn>: issue the <code>fcm switch &lt;URL&gt;</code> (or
+  simply <code>fcm sw &lt;URL&gt;</code>) command.</p>
+
+  <p>You can continue your work in the branch if you wish, but once you have
+  finished all the work, you should delete it.</p>
+
+  <p><dfn>Command line</dfn>: issue the <code>fcm branch-delete</code> (or
+  simply <code>fcm bdel</code>) command.</p>
+
+  <p>Example:</p>
+  <pre>
+URL: svn://fcm1/tutorial_svn/tutorial/branches/dev/matt/r1_133
+Repository Root: svn://fcm1/tutorial_svn
+Repository UUID: cb858ce8-0f05-0410-9e64-efa98b760b62
+Revision: 813
+Node Kind: directory
+Last Changed Author:
+Last Changed Rev: 813
+Last Changed Date: 2005-11-09 09:11:57 +0000 (Wed, 09 Nov 2005)
+--------------------------------------------------------------------------------
+Branch Create Rev: 811
+Branch Create Date: 2005-11-09 08:34:22 +0000 (Wed, 09 Nov 2005)
+Branch Parent: svn://fcm1/tutorial_svn/tutorial/trunk@1
+--------------------------------------------------------------------------------
+Last Merge From Trunk: /tutorial/branches/dev/matt/r1_133@813 /tutorial/trunk@2
+Avail Merges Into Trunk: 813 812
+[info] gvim -f: starting commit message editor...
+Change summary:
+------------------------------------------------------------------------
+D    svn://fcm1/tutorial_svn/tutorial/branches/dev/matt/r1_133
+------------------------------------------------------------------------
+Commit message is as follows:
+------------------------------------------------------------------------
+Deleted tutorial/branches/dev/matt/r1_133.
+------------------------------------------------------------------------
+Would you like to go ahead and delete this branch?
+Enter "y" or "n" (or just press &lt;return&gt; for "n"): y
+Deleting branch svn://fcm1/tutorial_svn/tutorial/branches/dev/matt/r1_133 ...
+
+Committed revision 813.
+</pre>
+
+  <p>You will be prompted to edit the commit message file. A standard template
+  is automatically supplied for the commit. However, if you want to add extra
+  comment for the branch, please do so <strong>above</strong> the line that
+  says <samp>--Add your commit message ABOVE - do not alter this line or those
+  below--</samp>. Save your change and exit the editor.</p>
+
+  <p>Your working copy is now pointing to a branch that no longer exists at the
+  HEAD revision of the repository. If you want to try the tutorial again, you
+  may want to create another branch, and switch your working copy to point to
+  the new branch. Otherwise, you can remove your working copy by issuing a
+  careful <code>rm -rf</code> command.</p>
+
+  <h3 id="tutorial_delete-final-comments">Final comments</h3>
+
+  <p>We have guided you through the basics of the complete change process,
+  using recommended ways of working. Most of the basic and important commands
+  have been covered by the tutorial. (The exceptions are <code>fcm log</code>
+  and <code>fcm update</code>, which you may have to use regularly. For
+  information on these commands, please refer to the section on <a href=
+  "http://svnbook.red-bean.com/en/1.6/svn.tour.history.html#svn.tour.history.log">
+  svn log</a> and <a href=
+  "http://svnbook.red-bean.com/en/1.6/svn.tour.cycle.html#svn.tour.cycle.update">
+  Update Your Working Copy</a> in the <a href=
+  "http://svnbook.red-bean.com/en/1.6/">Subversion book</a>.) You should now be
+  in a position to continue with your development work with FCM. However, if at
+  any time you are unsure about any aspect of using FCM, please consult the
+  relevant section of the <a href="index.html">FCM User Guide</a>.</p>
+
+  <p>Feel free to use the tutorial, at any time, for testing out any aspect of
+  the system. You may wish to do this rather than use your own repository and
+  ticket system, to avoid cluttering them with unwanted junk.</p>
+</body>
+</html>

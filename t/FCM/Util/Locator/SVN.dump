@@ -1,0 +1,67 @@
+SVN-fs-dump-format-version: 2
+
+UUID: 84575c49-2a6d-0410-b990-92b9c5c18321
+
+Revision-number: 0
+Prop-content-length: 56
+Content-length: 56
+
+K 8
+svn:date
+V 27
+2009-06-25T11:11:33.701555Z
+PROPS-END
+
+Revision-number: 1
+Prop-content-length: 104
+Content-length: 104
+
+K 7
+svn:log
+V 6
+TEST.
+
+K 10
+svn:author
+V 4
+frsn
+K 8
+svn:date
+V 27
+2009-06-25T11:14:37.524630Z
+PROPS-END
+
+Node-path: file
+Node-kind: file
+Node-action: add
+Prop-content-length: 10
+Text-content-length: 43
+Text-content-md5: da1139133947b560a8b4229e4638b070
+Content-length: 53
+
+PROPS-END
+foo bar baz
+egg ham bacon
+beer wine spirit
+
+
+Node-path: file-with-property
+Node-kind: file
+Node-action: add
+Prop-content-length: 60
+Text-content-length: 43
+Text-content-md5: da1139133947b560a8b4229e4638b070
+Content-length: 103
+
+K 8
+fcm:test
+V 31
+egg ham bacon
+beer wine spirit
+
+PROPS-END
+foo bar baz
+egg ham bacon
+beer wine spirit
+
+

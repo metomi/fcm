@@ -1,0 +1,7 @@
+#!/bin/bash
+set -eu
+REPOS=$1
+TXN=$2
+SCRIPT=$REPOS/hooks/svnperms.py
+CONFIG=$REPOS/hooks/svnperms.conf
+$SCRIPT -r $REPOS -t $TXN -f $CONFIG

@@ -1,0 +1,958 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for Linux/x86 (vers 1st December 2004), see www.w3.org" />
+
+  <title>Fortran coding standard for FCM</title>
+  <meta name="author" content="FCM team" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" type="text/css" href="../etc/fcm.css" />
+<script type="text/javascript" src="../etc/fcm.js">
+</script>
+<script type="text/javascript" src="../etc/fcm-version.js">
+</script>
+</head>
+
+<body>
+  <div id="body-header">
+    <a href="http://www.metoffice.gov.uk/research/collaboration/fcm/">
+    <img src="../etc/fcm.png" alt="FCM" />
+    </a>
+    <address>
+      &copy; British Crown Copyright 2006-11
+      <a href="http://www.metoffice.gov.uk">Met Office</a>.
+      See <a href="../etc/fcm-terms-of-use.html">Terms of Use</a>.<br />
+      This document is released under the <a href=
+      "http://www.nationalarchives.gov.uk/doc/open-government-licence/" rel=
+      "license">Open Government Licence</a>.<br />
+      <span id="fcm-version"></span>
+    </address>
+  </div>
+
+  <h1>Fortran coding standard for FCM</h1>
+
+  <div id="fcm-content"></div>
+
+  <h2 id="intro">1. Introduction</h2>
+
+  <p>Fortran is the standard programming language at the Met Office for
+  developing scientific and research applications, in particular, for programs
+  running on the supercomputers. This document describes some guidelines that
+  should be followed by developers when writing Fortran code, especially for
+  code in systems hosted by FCM.</p>
+
+  <h2 id="fcm">2. Programming Fortran for the FCM build system</h2>
+
+  <p>To get the most out of the FCM build system, you should follow these
+  guidelines when you develop your code.</p>
+
+  <h3 id="fcm-dependency">2.1 Dependency</h3>
+
+  <p>A program unit should be provided with the interfaces of the
+  <code>SUBROUTINE</code> and/or <code>FUNCTION</code> procedures that it
+  calls. Not only is this considered good practice, it also allows FCM to
+  determine the dependency relationship of your source files. An interface can
+  be provided in these ways:</p>
+
+  <dl>
+    <dt>Internal sub-program</dt>
+
+    <dd>
+      <p>Place sub-programs in the <code>CONTAINS</code> section of a
+      standalone program unit. There are two advantages for this approach.
+      Firstly, the sub-programs will get an automatic interface when the
+      container program unit is compiled. Secondly, it should be easier for the
+      compiler to provide optimisation when the sub-programs are internal to
+      the caller. The disadvantage of this approach is that the sub-programs
+      are local to the caller, and so they cannot be called by other program
+      units. Therefore, this approach is only suitable for small sub-programs
+      local to a particular program unit.</p>
+
+      <p>Note: One way to share a sub-program unit between several top level
+      program units is to make use of the Fortran <code>INCLUDE</code>
+      statement. You can write the sub-program unit in a separate file and
+      place it in the <code>CONTAINS</code> section of different program units
+      using <code>INCLUDE</code> statements. The disadvantage of this approach
+      is that when the program is compiled, a copy of the sub-program unit will
+      be embedded within each of the top level program units. This may lead to
+      an increase in size of the executable, and so this approach is still only
+      suitable for small sub-programs local to a small number of program
+      units.</p>
+
+      <p>For example, if we have a <code>SUBROUTINE</code> in
+      <samp>sub_prog.inc</samp>:</p>
+    </dd>
+
+    <dd>
+      <pre>
+SUBROUTINE sub_prog(some, arg)
+! Some declarations ...
+! Some executable statements ...
+END SUBROUTINE sub_prog
+</pre>
+
+      <p>It can be placed in a <code>MODULE</code> in <samp>bar.f90</samp>:</p>
+    </dd>
+
+    <dd>
+      <pre>
+SUBROUTINE bar(more, arg)
+! Some declarations ...
+! Some executable statements ...
+CALL sub_prog(some, arg)
+! More executable statements ...
+CONTAINS
+  INCLUDE 'sub_prog.inc'
+END SUBROUTINE bar
+</pre>
+    </dd>
+
+    <dt>Module procedures</dt>
+
+    <dd>
+      <p>Place sub-programs in the <code>CONTAINS</code> section of a
+      <code>MODULE</code>. Again, the sub-programs will have automatic
+      interfaces when the <code>MODULE</code> is compiled. If you give the
+      sub-programs the PUBLIC attribute (which is the default), you will be
+      able to call them from anywhere using the current <code>MODULE</code>.
+      You will also gain all the advantages offered by a <code>MODULE</code>.
+      (E.g. a <code>MODULE</code> will allow you to design your code in a more
+      object-oriented manner.)</p>
+
+      <p>For example, if we have a <code>MODULE</code> in
+      <samp>my_mod.f90</samp>:</p>
+      <pre>
+MODULE my_mod
+! Some module declarations
+CONTAINS
+  SUBROUTINE sub_prog(some, arg)
+  ! Some declarations ...
+  ! Some executable statements ...
+  END SUBROUTINE sub_prog
+END MODULE my_mod
+</pre>
+
+      <p>It can be imported to another program as such:</p>
+      <pre>
+SUBROUTINE foo(some, arg)
+USE my_mod, ONLY: sub_prog
+! Some declarations ...
+! Some executable statements ...
+CALL sub_prog(some, arg)
+! More executable statements ...
+END SUBROUTINE foo
+</pre>
+    </dd>
+
+    <dt>Interface files</dt>
+
+    <dd>
+      <p>The FCM build system can extract the calling interfaces of each
+      standalone <code>SUBROUTINE</code> or <code>FUNCTION</code> in a source
+      file. The generated file is named after the original source file, but
+      with the file extension replaced by <samp>*.interface</samp>. In the
+      specification section of the caller routine, you will then be able to
+      declare the interface using a Fortran <code>INCLUDE</code> statement to
+      include the interface file. This type of <code>INCLUDE</code> statement
+      is detected automatically by FCM, which will use it to set up the
+      dependency tree.</p>
+
+      <p>The advantage of using an interface file is that the caller is now
+      dependent on the interface file, rather than the <code>SUBROUTINE</code>
+      or <code>FUNCTION</code> itself. If you change the
+      <code>SUBROUTINE</code> or <code>FUNCTION</code> without modifying its
+      interface, the build system will not re-compile the caller in incremental
+      build, (but it will be intelligent enough to re-link the executable with
+      the updated object). Note that the same is true, to a certain extent,
+      with module procedures. The build system will not re-compile any
+      procedures which use the module unless the corresponding
+      <samp>*.mod</samp> file has changed. However, other changes may also
+      trigger changes to the <samp>.mod</samp> file. This behaviour is also
+      compiler dependent.</p>
+
+      <p>The disadvantage of using an <code>INCLUDE</code> interface file
+      statement is that it is not a standard feature of the Fortran language,
+      and so your application will become dependent on the FCM build system.
+      There is also the danger that you forget to include the interface file in
+      all the calling routines which can result in your program behaving
+      incorrectly.</p>
+
+      <p>Note: The generated interface file is named after the original source
+      file. Bearing this in mind, it is worth noting that file names in a
+      Unix/Linux system are case-sensitive, and so the interface file name
+      declared by your <code>INCLUDE</code> statement is also case sensitive.
+      If you use an incorrect case in the <code>INCLUDE</code> statement, the
+      dependency tree will be set up incorrectly and the compilation will fail.
+      Another problem is that if you do not name your file after the program
+      unit, the dependency tree will be wrong. To avoid this problem, it is
+      recommended that all source files are named in lower case after the
+      program units they contain.</p>
+
+      <p>For example, if we have a <code>SUBROUTINE</code> in
+      <samp>sub_prog.f90</samp>:</p>
+      <pre>
+SUBROUTINE sub_prog(some, arg)
+! Some declarations ...
+! Some executable statements ...
+END SUBROUTINE sub_prog
+</pre>
+
+      <p>It can be imported to another program as such:</p>
+      <pre>
+SUBROUTINE egg(some, arg)
+! Some declarations ...
+INCLUDE 'sub_prog.interface'
+! More declarations ...
+! Some executable statements ...
+CALL sub_prog(some, arg)
+! More executable statements ...
+END SUBROUTINE egg
+</pre>
+    </dd>
+
+    <dt>Interfaces in a module</dt>
+
+    <dd>
+      <p>There is also a half-way house approach between the second and the
+      third options. You can have a dedicated <code>MODULE</code> where a large
+      number of <code>INCLUDE</code> interface file statements are placed.
+      Other program units get their interfaces by importing from this
+      <code>MODULE</code>. A major disadvantage of this approach is that the
+      sub-programs with their interfaces declared within this
+      <code>MODULE</code> will not be able to call any other sub-programs
+      declared within the same <code>MODULE</code>, as it will run into a
+      cyclic dependency problem. Another disadvantage is that if an interface
+      changes, the <code>MODULE</code> and all program units depending on the
+      <code>MODULE</code> will have to be re-compiled, even though the change
+      may be unrelated to some or all of these program units. For these
+      reasons, this approach is only good if you have a bundle of sub-programs
+      that have relatively stable interfaces and are very much independent of
+      one another.</p>
+
+      <p>Note: a similar approach can be useful when you have a library of
+      legacy or external code. In this situation, you will simply declare the
+      interfaces for all the library sub-programs in the <code>MODULE</code>.
+      Any programs that call sub-programs within the library can then import
+      their interfaces by using the <code>MODULE</code>.</p>
+
+      <p>For example, if we have a <samp>MODULE my_i_mod</samp>:</p>
+      <pre>
+MODULE my_i_mod
+! Some declarations
+INCLUDE 'sub_prog.interface'
+! More declarations
+END MODULE my_i_mod
+</pre>
+
+      <p>Its <code>PUBLIC</code> procedures can be imported as such:</p>
+      <pre>
+SUBROUTINE ham(some, arguments)
+USE my_i_mod, ONLY: sub_prog
+! Some declarations ...
+! Some executable statements ...
+CALL sub_prog(some, arguments)
+! More executable statements ...
+END SUBROUTINE ham
+</pre>
+    </dd>
+  </dl>
+
+  <p>FCM also supports the use of a <code>! DEPENDS ON</code> directive for
+  users to specify a dependency from within a source file. This feature is
+  documented in <a href="../user_guide/make.html#build.source-analysis">FCM
+  user guide &gt; FCM Make &gt; Build Source Analysis</a>. However, it is worth
+  noting that this method is only included in FCM to support legacy code. It is
+  not a feature recommended for new code, and its use should be gradually
+  phased out from existing code.</p>
+
+  <h3 id="fcm-interface">2.2 Automatic Interface Files</h3>
+
+  <p>To use the automatic interface files feature of the FCM build system,
+  source files containing top level <code>SUBROUTINE</code> and/or
+  <code>FUNCTION</code> procedures should follow these rules:</p>
+
+  <ul>
+    <li>Use the free source form.</li>
+
+    <li>Declare arguments and local variables in different statements.
+
+      <dl>
+        <dt>bad practice</dt>
+
+        <dd>
+          <pre>
+SUBROUTINE foo(a, b, c)
+INTEGER :: a, b, c, i, j, k
+! ...
+END SUBROUTINE foo
+</pre>
+        </dd>
+
+        <dt>nicer approach</dt>
+
+        <dd>
+          <pre>
+SUBROUTINE foo(a, b, c)
+INTEGER :: a, b, c
+INTEGER :: i, j, k
+! ...
+END SUBROUTINE foo
+</pre>
+        </dd>
+      </dl>
+    </li>
+
+    <li>Use the <code>ONLY</code> clause in a <code>USE &lt;module&gt;</code>
+    statement to declare all imported symbols (i.e. parameters, variables,
+    functions, subroutines, etc). This makes it easier to locate the source of
+    each symbol, and avoids unintentional access to other <code>PUBLIC</code>
+    symbols within the <code>MODULE</code>.</li>
+  </ul>
+
+  <h3 id="fcm-cpp">2.3 Use of C preprocessor with Fortran</h3>
+
+  <p>We do not recommend the use of C preprocessor with Fortran. However, it is
+  acknowledged that there are some situations when it is necessary to
+  preprocess Fortran code. FCM supports preprocessing in two ways.
+  Preprocessing can be left to the compiler or it can be done in a separate
+  <a href="../user_guide/make.html#preprocess">preprocess</a> step. A separate
+  preprocess step can be useful if preprocessing changes any of the following
+  in a program unit:</p>
+
+  <ul>
+    <li>its name</li>
+
+    <li>its calling interface</li>
+
+    <li>its dependencies</li>
+  </ul>
+
+  <p>However, using a separate preprocess step is not the best way of working,
+  as it adds an overhead to the build process. If your code requires
+  preprocessing, you should try to design it to avoid changes in the above.</p>
+
+  <p>In practice, the only reasonable use of C preprocessor with Fortran is for
+  code selection. For example, preprocessing is useful for isolating machine
+  specific libraries or instructions, where it may be appropriate to use inline
+  alternatives for small sections of code. Another example is when multiple
+  versions of the same procedure exist in the source tree and you need to use
+  the preprocessor to select the correct version for your build.</p>
+
+  <p>Avoid using the C preprocessor for code inclusion, as you should be able
+  to do the same via the Fortran <code>INCLUDE</code> statement. You should
+  also avoid embedding preprocessor macros within the continuations of a
+  Fortran statement, as it can make your code very confusing.</p>
+
+  <h2 id="fortran">3. Programming Fortran in general</h2>
+
+  <p>The guidelines in this section are recommended practices for programming
+  Fortran in general. These are guidelines you should try to adhere to when you
+  are developing new code. If you are modifying existing code, you should
+  adhere to its existing standard and style where possible. If you want to
+  change its standard and style, you should seek prior agreements with the
+  owner and the usual developers of the code. Where possible, you should try to
+  maintain the same layout and style within a source file, and preferably,
+  within all the source code in a particular project.</p>
+
+  <p>When reading these guidelines, it is assumed that you already have a good
+  understanding of modern Fortran terminology. It is understood that these
+  guidelines may not cover every aspect of your work. In such cases, you will
+  be a winner if you use a bit of common sense, and always bearing in mind that
+  some other people may have to maintain the code in the future.</p>
+
+  <p>Always test your code before releasing it. Do not ignore compiler
+  warnings, as they may point you to potential problems.</p>
+
+  <h3 id="fortran-layout">3.1 Layout and formatting</h3>
+
+  <p>The following is a list of recommended practices for layout and formatting
+  when you write code in Fortran.</p>
+
+  <ul>
+    <li>Indent blocks with space characters. The use of 2 spaces per
+    indentation level is wide spread at the Met Office. The use of 4 spaces per
+    indentation level is most popular in the open source community because it
+    is easier for the human eyes. If you are modifying existing scripts, you
+    should stick to their existing styles. Otherwise, the use of 2 and 4 spaces
+    per indentation level are both acceptable, as long as it is consistent
+    within a source file. Where possible, comments should be indented with the
+    code within a block.</li>
+
+    <li>Use space and blank lines where appropriate to format your code to
+    improve readability. (Use genuine spaces but avoid using tabs, as the <kbd>
+      tab</kbd> character is not in the Fortran character set.) In the
+      following example, the code on the right hand side is preferred:
+
+      <dl>
+        <dt>bad practice</dt>
+
+        <dd>
+          <pre>
+DO i=1,n
+  a(i)%c=10*i/n
+  b(i)%d=20+i
+ENDDO
+IF(this==that)THEN
+  distance=0
+  time=0
+ENDIF
+</pre>
+        </dd>
+
+        <dt>nicer approach</dt>
+
+        <dd>
+          <pre>
+DO i = 1, n
+  a(i)%c = 10 * i / n
+  b(i)%d = 20 + i
+END DO
+
+IF (this == that) THEN
+  distance = 0
+  time     = 0
+END IF
+</pre>
+        </dd>
+      </dl>
+    </li>
+
+    <li>Confine your line width to 80 characters, so that your code can be
+    displayed on screen for side-by-side comparison and printed easily on A4
+    paper.</li>
+
+    <li>Line up your statements, where appropriate, to improve readability. For
+    example:
+
+      <dl>
+        <dt>bad practice</dt>
+
+        <dd>
+          <pre>
+REAL, INTENT(OUT) :: my_out(:)
+REAL, INTENT(INOUT) :: my_inout(:)
+REAL, INTENT(IN) :: my_in(:)
+! ...
+CHARACTER(LEN=256) :: my_char
+! ...
+my_char = 'This is a very very very very very very very very very very ' // &amp;
+   'very very very very very very very very very very very very ' // &amp;
+   'long character assignment'
+</pre>
+        </dd>
+
+        <dt>nicer approach</dt>
+
+        <dd>
+          <pre>
+REAL, INTENT(  OUT) ::   my_out(:)
+REAL, INTENT(INOUT) :: my_inout(:)
+REAL, INTENT(IN   ) ::    my_in(:)
+! ...
+CHARACTER(LEN=256) :: my_char
+! ...
+my_char                                                                &amp;
+    =  'This is a very very very very very very very very very very '  &amp;
+    // 'very very very very very very very very very very very very '  &amp;
+    // 'long character assignment'
+</pre>
+        </dd>
+      </dl>
+    </li>
+
+    <li>Short and simple Fortran statements are easier to read and understand
+    than long and complex ones. Where possible, avoid using continuation lines
+    in a statement.</li>
+
+    <li>Avoid putting multiple statements on the same line. It is not good for
+    readability.</li>
+  </ul>
+
+  <h3 id="fortran-style">3.2 Style</h3>
+
+  <p>The following is a list of recommended styles when you write code in
+  Fortran.</p>
+
+  <ul>
+    <li>Write Fortran in the free format source form.</li>
+    
+    <li>Use only the <samp>*.f90</samp> file extension (and <samp>*.F90</samp>
+    for source files requiring preprocessing) for free format source files.</li>
+
+    <li>Each source file should contain only one top level program unit, and
+    should be named after the program unit it contains.</li>
+
+    <li>New code should be written using Fortran 95 syntax. Avoid unportable
+    vendor/compiler extensions. Avoid Fortran 2003 features for the moment, as
+    they will not become widely available in the near future. (Having said
+    that, there is no harm in designing your code with the future in mind. For
+    example, if there is a feature that is not in Fortran 95 and you know that
+    it is in Fortran 2003, you may want to write your Fortran 95 code to make
+    it easier for the future upgrade.)</li>
+
+    <li>Write your program in UK English, unless you have a very good reason
+    for not doing so. Write your comments in simple UK English and name your
+    program units and variables based on sensible UK English words, bearing in
+    mind that your code may be read by people who are not proficient English
+    speakers.</li>
+
+    <li>When naming your variables and program units, always bear in mind that
+    Fortran is a case-insensitive language. (E.g. <var>EditOrExit</var> is the
+    same as <var>EditorExit</var>.)</li>
+
+    <li>Use only characters in the Fortran character set. In particular, accent
+    characters and tabs are not allowed in code, although they are usually OK
+    in comments. If your editor inserts tabs automatically, you should
+    configure it to switch off the functionality when you are editing Fortran
+    source files.</li>
+
+    <li>Although Fortran has no reserved keywords, you should avoid naming your
+    program units and variables with names that match an intrinsic
+    <code>FUNCTION</code> or <code>SUBROUTINE</code>. Similarly, you should
+    avoid naming your program units and variables with names that match a
+    <em>keyword</em> in a Fortran statement.</li>
+
+    <li>Be generous with comments, but avoid repeating the Fortran logic in
+    words. State the reason for doing something instead.</li>
+
+    <li>To improve readability, write your program in mainly lower case
+    characters. Writing a program in mainly lower case also means that you will
+    not have to use the <kbd>Shift/Caps Lock</kbd> keys often, hence, improving
+    your code's accessibility. There is a lot of debate on using upper/lower
+    cases in a case insensitive language such as Fortran. There is no right or
+    wrong, but people have adopted the different approaches over time, each has
+    its own merit. If you are starting a new project, you should choose a
+    suitable option and stick to it. Otherwise, you should stick with the style
+    in the existing code. Some options are listed here:
+
+      <ul>
+        <li>The ALL CAPS Fortran keywords approach, like most of the examples
+        in this document, where all Fortran keywords and intrinsic procedures
+        are written in ALL CAPS. This approach has the advantage that Fortran
+        keywords stand out, but it does increase how often the Shift/Caps Lock
+        key is used. Programmers who are used to some other programming
+        languages may also find it difficult to read a program with a lot of
+        upper case characters.</li>
+
+        <li>The Title Case Fortran keywords approach, where all Fortran
+        keywords are written with an initial capital case letter.</li>
+
+        <li>The sentence case approach, where only the initial character in a
+        Fortran statements is written in capital case letter, like a normal
+        sentence.</li>
+
+        <li>The all lower case approach, where all Fortran keywords are written
+        in lower case letters.</li>
+
+        <li>Some people have also proposed a variable naming convention where
+        local variables start with an initial lower case letter, private module
+        level variables with an initial capital case letter and public module
+        variables written in all caps. However, this approach has been seen by
+        many as too restrictive, and so its use has not been widely
+        spread.</li>
+      </ul>
+    </li>
+
+    <li>Use the new and clearer syntax for <code>LOGICAL</code> comparisons,
+    i.e.:
+
+      <ul>
+        <li><code>==</code> instead of <code>.EQ.</code></li>
+
+        <li><code>/=</code> instead of <code>.NE.</code></li>
+
+        <li><code>&gt;</code> instead of <code>.GT.</code></li>
+
+        <li><code>&lt;</code> instead of <code>.LT.</code></li>
+
+        <li><code>&gt;=</code> instead of <code>.GE.</code></li>
+
+        <li><code>&lt;=</code> instead of <code>.LE.</code></li>
+      </ul>
+    </li>
+
+    <li>Where appropriate, simplify your <code>LOGICAL</code> assignments, for
+    example:
+
+      <dl>
+        <dt>bad practice</dt>
+
+        <dd>
+          <pre>
+IF (my_var == some_value) THEN
+  something      = .TRUE.
+  something_else = .FALSE.
+ELSE
+  something      = .FALSE.
+  something_else = .TRUE.
+END IF
+! ...
+IF (something .EQV. .TRUE.) THEN
+  CALL do_something()
+  ! ...
+END IF
+</pre>
+        </dd>
+
+        <dt>nicer approach</dt>
+
+        <dd>
+          <pre>
+something      = (my_var == some_value)
+something_else = (my_var /= some_value)
+! ...
+IF (something) THEN
+  CALL do_something()
+  ! ...
+END IF
+</pre>
+        </dd>
+      </dl>
+    </li>
+
+    <li>Positive logic is usually easier to understand. When you have an <code>
+      IF</code>-<code>ELSE</code>-<code>END IF</code> construct, you should use
+      positive logic in the <code>IF</code> test, provided that the positive
+      and the negative blocks are about the same size. (However, it may be more
+      appropriate to use negative logic if the negative block is significantly
+      bigger than the positive block.) For example:
+
+      <dl>
+        <dt>bad practice</dt>
+
+        <dd>
+          <pre>
+IF (my_var != some_value) THEN
+  CALL do_this()
+ELSE
+  CALL do_that()
+END IF
+</pre>
+        </dd>
+
+        <dt>nicer approach</dt>
+
+        <dd>
+          <pre>
+IF (my_var == some_value) THEN
+  CALL do_that()
+ELSE
+  CALL do_this()
+END IF
+</pre>
+        </dd>
+      </dl>
+    </li>
+
+    <li>Where a Fortran keyword allows an optional space to separate words, use
+    it to improve readability. (However, it is worth noting that some keywords
+    such as <code>ELSEWHERE</code> do not support an optional space.) The
+    following keywords allow an optional space:
+      <pre>
+ELSE IF         END DO          END FORALL      END FUNCTION
+END IF          END INTERFACE   END MODULE      END PROGRAM
+END SELECT      END SUBROUTINE  END TYPE        END WHERE
+SELECT CASE
+</pre>
+    </li>
+
+    <li>If you have a large or complex code block embedding other code blocks,
+    you may consider naming some or all of them to improve readability.</li>
+
+    <li>If you have a large or complex interface block or if you have one or
+    more sub-program units in the <code>CONTAINS</code> section, you can
+    improve readability by using the full version of the <code>END</code>
+    statement (i.e. <code>END SUBROUTINE</code> &lt;name&gt; or <code>END
+    FUNCTION</code> &lt;name&gt; instead of just <code>END</code>) at the end
+    of each sub-program unit. For readability in general, the full version of
+    the <code>END</code> statement is recommended over the simple
+    <code>END</code>.</li>
+
+    <li>Where possible, consider using <code>CYCLE</code>, <code>EXIT</code> or
+    a <code>WHERE</code>-construct to simplify complicated
+    <code>DO</code>-loops.</li>
+
+    <li>When writing a <code>REAL</code> literal with an integer value, put a
+    <code>0</code> after the decimal point (i.e. <samp>1.0</samp> as opposed to
+    <samp>1.</samp>) to improve readability.</li>
+
+    <li>Where reasonable and sensible to do so, you should try to match the
+    names of dummy and actual arguments to a
+    <code>SUBROUTINE</code>/<code>FUNCTION</code>.</li>
+
+    <li>In an array assignment, it is recommended that you use array notations
+    to improve readability. E.g.:
+
+      <dl>
+        <dt>bad practice</dt>
+
+        <dd>
+          <pre>
+INTEGER :: array1(10, 20), array2(10, 20)
+INTEGER :: scalar
+! ...
+array1 = 1
+array2 = array1 * scalar
+</pre>
+        </dd>
+
+        <dt>nicer approach</dt>
+
+        <dd>
+          <pre>
+INTEGER :: array1(10, 20), array2(10, 20)
+INTEGER :: scalar
+! ...
+array1(:, :) = 1
+array2(:, :) = array1(:, :) * scalar
+</pre>
+        </dd>
+      </dl>
+    </li>
+
+    <li>Where appropriate, use parentheses to improve readability. E.g.:
+    <code>a = (b * i) + (c / n)</code> is easier to read than <code>a = b * i +
+    c / n</code>.</li>
+  </ul>
+
+  <h3 id="fortran-feature">3.3 Fortran features</h3>
+
+  <p>The following is a list of Fortran features that you should use or
+  avoid.</p>
+
+  <ul>
+    <li>Use <code>IMPLICIT NONE</code> in all program units. It means that you
+    have declare all your variables explicitly. This helps to reduce bugs in
+    your program that will otherwise be difficult to track.</li>
+
+    <li>Design your derived data types carefully and use them to group related
+    variables. Appropriate use of derived data types will allow you to design
+    modules and procedures with simpler and cleaner interfaces.</li>
+
+    <li>Where possible, module variables and procedures should be declared
+    <code>PRIVATE</code>. This avoids unnecessary export of symbols, promotes
+    data hiding and may also help the compiler to optimise the code.</li>
+
+    <li>Always declare an argument with an <code>INTENT</code> attribute. The
+    only exception is when the argument is a <code>POINTER</code> or a
+    procedure. A <code>FUNCTION</code> should only have <code>INTENT(IN)</code>
+    arguments. Use a <code>SUBROUTINE</code> if any argument needs to have an
+    <code>INTENT(OUT)</code> or <code>INTENT(INOUT)</code> attribute.</li>
+
+    <li>When you are passing an array argument to a
+    <code>SUBROUTINE</code>/<code>FUNCTION</code>, and the
+    <code>SUBROUTINE</code>/<code>FUNCTION</code> does not change the
+    <code>SIZE</code>/<code>DIMENSION</code> of the array, you should pass it
+    as an assumed shape array. Memory management of such an array is
+    automatically handled by the <code>SUBROUTINE</code>/<code>FUNCTION</code>,
+    and you do not have to worry about having to <code>ALLOCATE</code> or
+    <code>DEALLOCATE</code> your array. It also helps the compiler to optimise
+    the code.</li>
+
+    <li>Use an array <code>POINTER</code> when you are passing an array
+    argument to a <code>SUBROUTINE</code>, and the <code>SUBROUTINE</code> has
+    to alter the <code>SIZE</code>/<code>DIMENSION</code> of the array. You
+    should also use an array <code>POINTER</code> when you need a dynamic array
+    in a component of a derived data type. (Note: Fortran 2003 allows passing
+    <code>ALLOCATABLE</code> arrays as arguments as well as using
+    <code>ALLOCATABLE</code> arrays as components of a derived data type.
+    Therefore, the need for using an array <code>POINTER</code> should be
+    reduced once Fortran 2003 becomes more widely accepted.)</li>
+
+    <li>Where possible, an <code>ALLOCATE</code> statement for an
+    <code>ALLOCATABLE</code> array (or a <code>POINTER</code> used as a dynamic
+    array) should be coupled with a <code>DEALLOCATE</code> within the same
+    scope. If an <code>ALLOCATABLE</code> array is a <code>PUBLIC</code>
+    <code>MODULE</code> variable, it is highly desirable if its memory
+    allocation and deallocation are only performed in procedures within the
+    <code>MODULE</code> in which it is declared. You may consider writing
+    specific <code>SUBROUTINE</code>s within the <code>MODULE</code> to handle
+    these memory managements.</li>
+
+    <li>Always define a <code>POINTER</code> before using it. You can define a
+    <code>POINTER</code> in its declaration by pointing it to the intrinsic
+    function <code>NULL()</code>. Alternatively, you can make sure that your
+    <code>POINTER</code> is defined or nullified early on in the program unit.
+    Similarly, <code>NULLIFY</code> a <code>POINTER</code> when it is no longer
+    in use, either by using the <code>NULLIFY</code> statement or by pointing
+    your <code>POINTER</code> to <code>NULL()</code>.</li>
+
+    <li>Avoid the <code>DIMENSION</code> attribute or statement. Declare the
+    <code>DIMENSION</code> with the declared variables. E.g.:
+
+      <dl>
+        <dt>bad practice</dt>
+
+        <dd>
+          <pre>
+INTEGER, DIMENSION(10) :: array1
+INTEGER                :: array2
+DIMENSION              :: array2(20)
+</pre>
+        </dd>
+
+        <dt>nicer approach</dt>
+
+        <dd>
+          <pre>
+INTEGER :: array1(10), array2(20)
+</pre>
+        </dd>
+      </dl>
+    </li>
+
+    <li>Avoid <code>COMMON</code> blocks and <code>BLOCK DATA</code> program
+    units. Use <code>PUBLIC</code> <code>MODULE</code> variables.</li>
+
+    <li>Avoid the <code>EQUIVALENCE</code> statament. Use a
+    <code>POINTER</code> or a derived data type, and the <code>TRANSFER</code>
+    intrinsic function to convert between types.</li>
+
+    <li>Avoid the <code>PAUSE</code> statement, as your program will hang in a
+    batch environment. If you need to halt your program for interactive use,
+    consider using a <code>READ*</code> statement instead.</li>
+
+    <li>Avoid the <code>ENTRY</code> statement. Use a <code>MODULE</code> or
+    internal <code>SUBROUTINE</code>.</li>
+
+    <li>Avoid the <code>GOTO</code> statement. The only commonly acceptable
+    usage of <code>GOTO</code> is for error trapping. In such case, the jump
+    should be to a commented <code>9999 CONTINUE</code> statement near the end
+    of the program unit. Typically, you will only find error handlers beyond
+    the <code>9999 CONTINUE</code> statement.</li>
+
+    <li>Avoid assigned <code>GOTO</code>, computed <code>GOTO</code>,
+    arithmetic <code>IF</code>, etc. Use the appropriate modern constructs such
+    as <code>IF</code>, <code>WHERE</code>, <code>SELECT CASE</code>,
+    etc..</li>
+
+    <li>Avoid numbered statement labels. <code>DO ... label CONTINUE</code>
+    constructs should be replaced by <code>DO ... END DO</code> constructs.
+    <code>FORMAT</code> statements should be replaced by format strings. (Tip:
+    a format string can be a <code>CHARACTER</code> variable.)</li>
+
+    <li>Avoid the <code>FORALL</code> statement/construct. Despite what it is
+    supposed to do, <code>FORALL</code> is often difficult for compilers to
+    optimise. (See, for example, <a href=
+    "http://www.fortran.bcs.org/2007/jubilee/f50.pdf">Implementing the
+    Standards including Fortran 2003</a> by <acronym title=
+    "Numerical Algorithms Group">NAG</acronym>.) Stick to the equivalent
+    <code>DO</code> construct, and simple <code>WHERE</code>
+    statement/construct or array assignments unless there are actual
+    performance benefits using <code>FORALL</code> in your code.</li>
+
+    <li>Avoid nested <code>WHERE</code> constructs for clarity. Stick to the
+    equivalent <code>DO</code> constructs, which are often easier for humans to
+    understand and for compilers to optimise.</li>
+
+    <li>A <code>FUNCTION</code> should be <code>PURE</code>, i.e. it should
+    have no side effects (e.g. altering an argument or module variable, or
+    performing I/O). If you need to perform a task with side effects, you
+    should use a <code>SUBROUTINE</code> instead.</li>
+
+    <li>Avoid using a statement <code>FUNCTION</code>. Use an internal
+    <code>FUNCTION</code> instead.</li>
+
+    <li>Avoid <code>RECURSIVE</code> procedures if possible.
+    <code>RECURSIVE</code> procedures are usually difficult to understand, and
+    are always difficult to optimise in a supercomputer environment.</li>
+
+    <li>Avoid using the specific names of intrinsic procedures. Use the generic
+    names of intrinsic procedures where possible.</li>
+  </ul>
+
+  <h2 id="template">4. Program templates</h2>
+
+  <p>The following is a basic template for a <code>FUNCTION</code>:</p>
+  <pre>
+[&lt;type&gt;] FUNCTION &lt;name&gt;(&lt;args, ...&gt;) [RESULT(&lt;result&gt;)]
+
+!-------------------------------------------------------------------------------
+! (C) Crown copyright Met Office. All rights reserved.
+! For further details please refer to the file COPYRIGHT.txt
+! which you should have received as part of this distribution.
+!-------------------------------------------------------------------------------
+! DESCRIPTION
+!   &lt;Explain what the function does.&gt;
+!
+!-------------------------------------------------------------------------------
+USE &lt;module&gt;, ONLY : &lt;symbols, ...&gt;
+
+IMPLICIT NONE
+
+! Function arguments:
+&lt;arguments with INTENT(IN) ...&gt;
+
+! Function result:
+&lt;declare the type returned by the function&gt;
+
+! Local declarations:
+&lt;parameters, derived data types, variables, ...&gt;
+
+! INTERFACE blocks
+&lt;INCLUDE interface files...&gt;
+&lt;other interface blocks...&gt;
+
+&lt;other specification statements ...&gt;
+!-------------------------------------------------------------------------------
+&lt;executable statements ...&gt;
+!-------------------------------------------------------------------------------
+CONTAINS
+  &lt;sub-programs&gt;
+END FUNCTION &lt;name&gt;
+</pre>
+
+  <p>The basic templates for other types of program units are similar to that
+  of a <code>FUNCTION</code>, with the following exceptions:</p>
+
+  <ul>
+    <li>A <code>PROGRAM</code> does not have arguments, so the arguments list
+    in the header and the <cite>Arguments</cite> section in the declaration
+    section should be removed. All declarations are local to a
+    <code>PROGRAM</code>, so the <cite>Local Declarations</cite> section should
+    be replaced by a simple <em>Declarations</em> section.</li>
+
+    <li>A <code>SUBROUTINE</code> may have <code>INTENT(OUT)</code> and
+    <code>INTENT(INOUT)</code> arguments as well.</li>
+
+    <li>A <code>MODULE</code> does not have arguments, so the arguments list in
+    the header and the <cite>Arguments</cite> section in the declaration
+    section should be removed. Where appropriate, the <cite>Local
+    Declarations</cite> section should be replaced by a <em>PUBLIC
+    declarations</em> section and a <em>PRIVATE declarations</em> section.</li>
+  </ul>
+
+  <p>When you are distributing your code, you should include a
+  <samp>COPYRIGHT.txt</samp> file at a top level directory in your source tree.
+  The file should contain the detailed copyright information:</p>
+
+  <ul>
+    <li>the copyright year, ranging from the year the code is first distributed
+    to the year the code is last distributed</li>
+
+    <li>the copyright statement</li>
+
+    <li>the owner of the code and his/her address</li>
+  </ul>
+
+  <p>For example:</p>
+  <pre>
+!------------------------------------------------------------------------------!
+!                                                                              !
+! (C) Crown copyright 2005-10 Met Office. All rights reserved.                 !
+!                                                                              !
+! Use, duplication or disclosure of this code is subject to the restrictions   !
+! as set forth in the licence. If no licence has been raised with this copy    !
+! of the code, the use, duplication or disclosure of it is strictly            !
+! prohibited. Permission to do so must first be obtained in writing from the   !
+! IPR Manager at the following address:                                        !
+!                                                                              !
+! Met Office, FitzRoy Road, Exeter, Devon, EX1 3PB, United Kingdom             !
+!                                                                              !
+!------------------------------------------------------------------------------!
+</pre>
+</body>
+</html>

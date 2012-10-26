@@ -1,0 +1,61 @@
+=head1 NAME
+
+fcm mkpatch
+
+=head1 SYNOPSIS
+
+Create patches from specified revisions of a URL
+
+    fcm mkpatch [OPTIONS] URL [OUTDIR]
+
+=head1 ARGUMENTS
+
+If OUTDIR is specified, the output is sent to OUTDIR. Otherwise, the output will
+be sent to a default location in the current directory ($PWD/fcm-mkpatch-out).
+The output directory will contain the patch for each revision as well as a
+script for importing the patch.
+
+A warning is given if the URL is not of a branch in a FCM project or if it is a
+sub-directory of a branch.
+
+=head1 OPTIONS
+
+=over 4
+
+=item --exclude arg
+
+Exclude a path in the URL. Multiple paths can be specified by using a
+colon-separated list of paths, or by specifying this option multiple times.
+
+The specified path must be a relative path of the URL. Glob patterns such as *
+and ? are acceptable. Changes in an excluded path will not be considered in the
+patch. A changeset containing changes only in the excluded path will not be
+considered at all.
+
+=item --organisation arg
+
+This option can be used to specify the name of your organisation.
+
+The command will attempt to parse the commit log message for each revision in
+the patch. It will remove all merge templates, replace Trac links with a
+modified string, and add information about the original changeset. If you
+specify the name of your organisation, it will replace Trac links such as
+"ticket:123" with "$organisation_ticket:123", and report the original changeset
+with a message such as "$organisation_changeset:1000".  If the organisation
+name is not specified then it defaults to "original".
+
+=item --revision=arg, -r arg
+
+Specify a revision number or a revision number range.
+
+If a revision is specified with the --revision option, it will attempt to create
+a patch based on the changes at that revision. If a revision is not specified,
+it will attempt to create a patch based on the changes at the HEAD revision. If
+a revision range is specified, it will attempt to create a patch for each
+revision in that range (including the change in the lower range) where changes
+have taken place in the URL. No output will be written if there is no change in
+the given revision (range).
+
+=back
+
+=cut

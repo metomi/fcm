@@ -1,0 +1,61 @@
+=head1 NAME
+
+fcm branch-delete (bdelete bdel brm)
+
+=head1 SYNOPSIS
+
+Deletes a branch.
+
+    fcm branch-delete [OPTIONS] [TARGET]
+
+=head1 ARGUMENTS
+
+TARGET can be an URL or a Subversion working copy. Otherwise, the current
+working directory must be a working copy. The specified URL (or the URL of the
+working copy) must be a URL under a valid branch in a standard FCM project.
+
+=head1 OPTIONS
+
+=over 4
+
+=item --verbose, -v
+
+Print extra information.
+
+=item --show-all, -a
+
+Set --show-children, --show-other and --show-siblings.
+
+=item --show-children
+
+Report children of the current branch.
+
+=item --show-other
+
+Report custom/ reverse merges into the current branch.
+
+=item --show-siblings
+
+Report merges with siblings of the current branch.
+
+=item --non-interactive
+
+Do no interactive prompting. This option implies --svn-non-interactive.
+
+=item --password=PASSWORD
+
+Specify a password for write access to the repository.
+
+=item --svn-non-interactive
+
+Do no interactive prompting at commit time. This option is implied by
+--non-interactive.
+
+=item --switch
+
+If TARGET not specified in the argument list, C<fcm switch> the current working
+copy to point to the C<trunk> after the branch deletion.
+
+=back
+
+=cut

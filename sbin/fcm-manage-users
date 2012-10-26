@@ -1,0 +1,119 @@
+#!/usr/bin/perl
+# ------------------------------------------------------------------------------
+# (C) British Crown Copyright 2006-2012 Met Office.
+#
+# This file is part of FCM, tools for managing and building source code.
+#
+# FCM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FCM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FCM. If not, see <http://www.gnu.org/licenses/>.
+# ------------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+use FCM::Admin::System qw{
+    get_projects_from_trac_live
+    get_users
+    manage_users_in_svn_passwd
+    manage_users_in_trac_passwd
+    manage_users_in_trac_db_of
+};
+use FCM::Admin::Util qw{option2config};
+use Getopt::Long qw{GetOptions};
+use Pod::Usage qw{pod2usage};
+
+main();
+
+sub main {
+    my %option;
+    my $result = GetOptions(
+        \%option,
+        q{help|usage|h},
+        q{svn-live-dir=s},
+        q{svn-passwd-file=s},
+        q{trac-live-dir=s},
+        q{trac-passwd-file=s},
+    );
+    if (!$result) {
+        pod2usage(1);
+    }
+    if (exists($option{help})) {
+        pod2usage(q{-verbose} => 1);
+    }
+    if (@ARGV) {
+        my $message = sprintf("No argument expected, %d given", scalar(@ARGV));
+        pod2usage({q{-exitval} => 1, q{-message} => $message});
+    }
+    option2config(\%option);
+    my $user_ref = get_users();
+    manage_users_in_svn_passwd($user_ref);
+    manage_users_in_trac_passwd($user_ref);
+    my @projects = get_projects_from_trac_live();
+    for my $project (@projects) {
+        manage_users_in_trac_db_of($project, $user_ref),
+    }
+}
+
+__END__
+
+=head1 NAME
+
+fcm-manage-users
+
+=head1 SYNOPSIS
+
+    fcm-manage-users [OPTIONS]
+
+=head1 OPTIONS
+
+=over 4
+
+=item --help, -h, --usage
+
+Prints help and exits.
+
+=item --svn-live-dir=DIR
+
+Specifies the root location of the live directory of the Subversion
+repositories. See L<FCM::Admin::Config|FCM::Admin::Config> for the current
+default.
+
+=item --svn-passwd-file=FILE
+
+Specifies the base name of the Subversion password file. See
+L<FCM::Admin::Config|FCM::Admin::Config> for the current default.
+
+=item --trac-live-dir=DIR
+
+Specifies the root location of the live directory of the Trac environments. See
+L<FCM::Admin::Config|FCM::Admin::Config> for the current default.
+
+=item --trac-passwd-file=FILE
+
+Specifies the base name of the Trac password file. See
+L<FCM::Admin::Config|FCM::Admin::Config> for the current default.
+
+=back
+
+=head1 DESCRIPTION
+
+This program manages user (login) information for Subversion repositories and
+Trac environments hosted by FCM.
+
+=head1 COPYRIGHT
+
+E<169> Crown copyright Met Office. All rights reserved.
+
+=cut

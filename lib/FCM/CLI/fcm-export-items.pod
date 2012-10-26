@@ -1,0 +1,57 @@
+=head1 NAME
+
+fcm export-items
+
+=head1 SYNOPSIS
+
+Exports directories in SOURCE as a list of versioned items.
+
+This command is used to support a legacy working practice, in which directories
+in a source tree are regarded as individual versioned items.
+
+    fcm export-items [OPTIONS] SOURCE
+
+=head1 ARGUMENTS
+
+The SOURCE should be the URL of a branch in a Subversion repository with the
+standard FCM layout.
+
+=head1 OPTIONS
+
+=over 4
+
+=item --config-file=PATH, --file=PATH, -f PATH
+
+Specify the path to the configuration file.
+(default=$PWD/fcm-export-items.cfg)
+
+=item --directory=PATH, -C PATH
+
+Specify the path to the destination. (default=$PWD)
+
+=item --new
+
+Specify the new mode. In this mode, everything is re-exported. Otherwise, the
+system runs in incremental mode, in which the version directories are only
+updated if they do not already exist.
+
+=back
+
+=head1 CONFIGURATION
+
+The configuration file should be in the deprecated FCM 1 configuration format.
+The label in each entry should be a path relative to the source URL. If the path
+ends in * then the path is expanded recursively and any sub-directories
+containing regular files are added to the list of relative paths to export. The
+value may be empty, or it may be a list of space separated "conditions". Each
+condition is a conditional operator (>, >=, <, <=, == or !=) followed by a
+revision number. The command uses the revision log to determine the revisions at
+which the relative path has been updated in the source URL. If these revisions
+also satisfy the "conditions" set by the user, they will be considered in the
+export.
+
+=head1 COPYRIGHT
+
+(C) Crown copyright Met Office. All rights reserved.
+
+=cut

@@ -1,0 +1,112 @@
+#!/bin/bash
+#-------------------------------------------------------------------------------
+# (C) British Crown Copyright 2006-2012 Met Office.
+#
+# This file is part of FCM, tools for managing and building source code.
+#
+# FCM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FCM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FCM. If not, see <http://www.gnu.org/licenses/>.
+#-------------------------------------------------------------------------------
+# NAME
+#   post-commit-background
+#
+# SYNOPSIS
+#   post-commit-background REPOS REV
+#
+# DESCRIPTION
+#   This script performs the post-commit tasks of a Subversion repository in
+#   the background. The 1st argument is the path to the Subversion repository,
+#   and the 2nd argument is the revision of the commit.
+#
+#   The script does the following:
+#    1. Updates the latest revision file in the log directory with the latest
+#       revision number of the repository.
+#    2. Creates an incremental revision dump of the current revision.
+#    3. Checks the size of the revision dump. Warns if it exceeds a threshold.
+#    4. Runs the "post-commit-background-custom" hook if it exists.
+#    5. E-mails the host user account on error.
+#-------------------------------------------------------------------------------
+set -eu
+
+REPOS=$1
+REV=$2
+
+ERR=
+HOME=$(eval echo ~$(whoami))
+CUSTOM_HOOK=${REPOS}/hooks/post-commit-background-custom
+REPOS_NAME=${REPOS##*/}
+LOG_DIR=~/svn/post-commit
+LOG_FILE=$LOG_DIR/${REPOS_NAME}.log
+LATEST_FILE=$LOG_DIR/${REPOS_NAME}.latest
+REV_FILE=$REPOS/db/revs/$((REV / 1000))/$REV
+REV_FILE_SIZE_THRESHOLD=1048576 # 1MB
+DUMP_DIR=~/svn/dumps/$REPOS_NAME
+DUMP_FILE=$DUMP_DIR/$REV.gz
+
+# ------------------------------------------------------------------------------
+function err() {
+    local ACTION=$1
+    local RC=$2
+    local FLAG=${3:-ERROR}
+    if ((RC != 0)); then
+        ERR="${ERR}[$FLAG] $ACTION ($RC). "
+        echo "[$FLAG] $REPOS@$REV: $ACTION ($RC)." >&2
+    fi
+}
+
+function log() {
+    local ACTION=$1
+    echo "[$(date +'%Y-%m-%d %H:%M:%S%z') $REPOS@$REV] $ACTION ..."
+}
+
+function main() {
+    ACTION="update latest revision number file"
+    log "$ACTION"
+    echo $REV 1>$LATEST_FILE
+    err "$ACTION" $?
+
+    ACTION="create changeset dump"
+    log "$ACTION"
+    if [[ ! -d $DUMP_DIR ]]; then
+        mkdir -p $DUMP_DIR
+    fi
+    svnadmin dump -r $REV --incremental --deltas $REPOS | gzip 1>$DUMP_FILE
+    err "$ACTION" $?
+
+    ACTION="check changeset size"
+    log "$ACTION"
+    REV_FILE_SIZE=$(du -b -s $REV_FILE | cut -f 1)
+    if (($REV_FILE_SIZE > $REV_FILE_SIZE_THRESHOLD)); then
+        # Abuse the "err" function to print dump size in 2 forms
+        err "$ACTION $(du -h -s $REV_FILE | cut -f 1) blocks" $REV_FILE_SIZE 'WARN'
+    fi
+
+    ACTION="perform custom tasks"
+    if [[ -x $CUSTOM_HOOK ]]; then
+        log "$ACTION"
+        TMPDIR=/var/tmp $CUSTOM_HOOK "$REPOS" "$REV"
+        err "$ACTION" $?
+    fi
+    return
+}
+
+# ------------------------------------------------------------------------------
+main 1>$LOG_FILE 2>&1
+if (($? != 0)); then
+    MESSAGE="[FAIL] $REPOS@$REV: $(basename $0)"
+    echo "$MESSAGE" | mail -s "$MESSAGE" $(whoami)
+fi
+if [[ -n $ERR ]]; then
+    ERR=${ERR% *}
+    mail -s "$REPOS@$REV: $ERR" $(whoami) <$LOG_FILE
+fi

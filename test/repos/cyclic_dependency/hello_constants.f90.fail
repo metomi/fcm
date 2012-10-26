@@ -1,0 +1,19 @@
+MODULE Hello_Constants
+
+INCLUDE 'hello_constants_dummy.inc'
+
+CONTAINS
+
+SUBROUTINE Hello_Sub_Wrapper (integer_arg)
+
+IMPLICIT NONE
+
+INTEGER :: integer_arg
+
+INCLUDE 'hello_sub.interface'
+
+CALL Hello_Sub (integer_arg)
+
+END SUBROUTINE Hello_Sub_Wrapper
+
+END MODULE Hello_Constants

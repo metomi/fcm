@@ -1,0 +1,188 @@
+#!/usr/bin/perl
+# ------------------------------------------------------------------------------
+# (C) British Crown Copyright 2006-2012 Met Office.
+#
+# This file is part of FCM, tools for managing and building source code.
+#
+# FCM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FCM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FCM. If not, see <http://www.gnu.org/licenses/>.
+# ------------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+use File::Basename qw{basename};
+use File::Spec;
+
+use FCM::Admin::Config;
+use FCM::Admin::Runner;
+use FCM::Admin::System qw{
+    distribute_wc
+    filter_projects
+    get_projects_from_svn_live
+    install_svn_hook
+};
+use FCM::Admin::Util qw{
+    run_mkpath
+    run_rmtree
+    run_svn_info
+    run_svn_update
+    write_file
+};
+use Getopt::Long qw{GetOptions};
+use Pod::Usage qw{pod2usage};
+
+# ------------------------------------------------------------------------------
+my $CONFIG = FCM::Admin::Config->instance();
+my %PATTERN_OF = (
+    q{}      => qr{.*}xms,
+    SRC_HOOK => qr{svn-hooks/}xms,
+);
+
+if (!caller()) {
+    main(@ARGV);
+}
+
+# ------------------------------------------------------------------------------
+# The main logic.
+sub main {
+    local(@ARGV) = @_;
+    my %option;
+    my $result = GetOptions(
+        \%option,
+        q{help|usage|h},
+        q{force},
+    );
+    if (!$result) {
+        pod2usage(1);
+    }
+    if (exists($option{help})) {
+        pod2usage(q{-verbose} => 1);
+    }
+    create_lock() || return;
+    my $RUNNER = FCM::Admin::Runner->instance();
+    my $is_force = $option{'force'};
+    UPDATE:
+    while (1) {
+        my @updates_in_fcm      = run_svn_update($CONFIG->get_fcm_wc());
+        my @updates_in_fcm_site = run_svn_update($CONFIG->get_fcm_site_wc());
+        if (!$is_force && !@updates_in_fcm && !@updates_in_fcm_site) {
+            last UPDATE;
+        }
+        for my $task ((
+            {   name => '(re-)installing hook scripts',
+                main => sub {
+                    for my $project (get_projects_from_svn_live()) {
+                        install_svn_hook($project);
+                    }
+                    return 1;
+                },
+                want => get_pattern_grepper('SRC_HOOK', 1),
+            },
+            {   name => 'distributing FCM to standard locations',
+                main => \&distribute_wc,
+                want => get_pattern_grepper(q{}, 1),
+            },
+        )) {
+            if (    $is_force
+                ||  $task->{want}->(\@updates_in_fcm, \@updates_in_fcm_site)
+            ) {
+                $RUNNER->run($task->{name}, $task->{main});
+            }
+        }
+        $is_force = 0;
+    }
+}
+
+# ------------------------------------------------------------------------------
+# Returns a function that "grep" for a known pattern ($pattern_key). The
+# returned function expects a list reference in the 0th element of its argument
+# list.
+sub get_pattern_grepper {
+    my ($pattern_key, $should_grep_fcm_site) = @_;
+    sub {
+        my ($updates_in_fcm_ref, $updates_in_fcm_site_ref) = @_;
+        my @updates = @{$updates_in_fcm_ref};
+        if ($should_grep_fcm_site) {
+            push(@updates, @{$updates_in_fcm_site_ref});
+        }
+        grep({$_ =~ $PATTERN_OF{$pattern_key}} @updates);
+    };
+}
+
+# ------------------------------------------------------------------------------
+# Creates a lock. Returns true on success. Removes lock when program finishes.
+our $LOCK;
+sub create_lock {
+    my $home = (getpwuid($<))[7];
+    $LOCK = File::Spec->catfile($home, sprintf(".%s.lock", basename($0)));
+    if (-e $LOCK) {
+        $LOCK = undef;
+        return;
+    }
+    return run_mkpath($LOCK);
+    END {
+        if ($LOCK) {
+            run_rmtree($LOCK);
+        }
+    }
+}
+
+__END__
+
+=head1 NAME
+
+fcm-commit-update
+
+=head1 SYNOPSIS
+
+    fcm-commit-update
+
+=head1 DESCRIPTION
+
+This program performs the post-commit update for the FCM system. It runs
+continuously until no more update is available. It prevent another copy from
+running by creating a lock. If another copy detects a lock, it exits without
+doing anything.
+
+=head1 OPTIONS
+
+=over 4
+
+=item --force
+
+Force an update.
+
+=back
+
+=head1 ARGUMENTS
+
+=over 4
+
+=item REPOS-NAME
+
+The name of the repository invoking this program.
+
+=item LOG-DIR-PATH
+
+The path to the log directory.
+
+=back
+
+=head1 COPYRIGHT
+
+E<169> Crown copyright Met Office. All rights reserved.
+
+=cut

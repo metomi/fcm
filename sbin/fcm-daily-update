@@ -1,0 +1,178 @@
+#!/usr/bin/perl
+#-------------------------------------------------------------------------------
+# (C) British Crown Copyright 2006-2012 Met Office.
+#
+# This file is part of FCM, tools for managing and building source code.
+#
+# FCM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FCM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FCM. If not, see <http://www.gnu.org/licenses/>.
+#-------------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+use File::Basename qw{basename};
+use File::Spec;
+use IO::File;
+use Mail::Mailer;
+
+use FCM::Admin::Config;
+use FCM::Admin::Runner;
+use FCM::Admin::System qw{
+    backup_svn_repository
+    backup_trac_environment
+    backup_trac_files
+    distribute_wc
+    get_projects_from_svn_live
+    get_projects_from_trac_live
+    get_users
+    manage_users_in_svn_passwd
+    manage_users_in_trac_passwd
+    manage_users_in_trac_db_of
+};
+
+my $THIS   = basename($0);
+my $CONFIG = FCM::Admin::Config->instance();
+
+my $OUT_FILE = File::Spec->catfile(
+    $CONFIG->get_fcm_home(), qw{public_html FCM}, qq{$THIS.out},
+);
+
+main();
+
+sub main {
+    # Redirects STDOUT and STDERR to the $OUT_FILE
+    open(my $old_out, q{>&}, \*STDOUT)
+        or die("$THIS: cannot duplicate STDOUT ($!)\n");
+    open(my $old_err, q{>&}, \*STDERR)
+        or die("$THIS: cannot duplicate STDERR ($!)\n");
+    open(STDOUT, q{>}, $OUT_FILE)
+        or die("$THIS: cannot redirect STDOUT ($!)\n");
+    open(STDERR, q{>&}, \*STDOUT)
+        or die("$THIS: cannot redirect STDERR ($!)\n");
+
+    do_tasks();
+
+    # Restores STDOUT and STDERR
+    open(STDERR, q{>&}, $old_err)
+        or die("$THIS: cannot reinstate STDERR ($!)\n");
+    open(STDOUT, q{>&}, $old_out)
+        or die("$THIS: cannot reinstate STDOUT ($!)\n");
+
+    notify();
+}
+
+# ------------------------------------------------------------------------------
+# Performs the daily update tasks.
+sub do_tasks {
+    # (no argument)
+    my $RUNNER = FCM::Admin::Runner->instance();
+    my @svn_projects = get_projects_from_svn_live();
+    my @trac_projects = get_projects_from_trac_live();
+    my $user_ref = undef;
+    $RUNNER->run_continue(
+        "retrieving user accounts",
+        sub {$user_ref = get_users(); 1;},
+    );
+    if (defined($user_ref)) {
+        $RUNNER->run_continue(
+            "updating SVN user accounts",
+            sub {manage_users_in_svn_passwd($user_ref)},
+        );
+        $RUNNER->run_continue(
+            "updating Trac user accounts",
+            sub {manage_users_in_trac_passwd($user_ref)},
+        );
+        for my $project (@trac_projects) {
+            $RUNNER->run_continue(
+                "updating Trac accounts in $project",
+                sub {manage_users_in_trac_db_of($project, $user_ref)},
+            );
+        }
+    }
+    for my $project (@svn_projects) {
+        $RUNNER->run_continue(
+            "backing up SVN repository for $project",
+            sub {backup_svn_repository({}, $project)},
+        );
+    }
+    for my $project (@trac_projects) {
+        $RUNNER->run_continue(
+            "backing up Trac environment for $project",
+            sub {backup_trac_environment({}, $project)},
+        );
+    }
+    $RUNNER->run_continue("backing up Trac files", \&backup_trac_files);
+    $RUNNER->run_continue(
+        "distributing FCM to standard locations", \&distribute_wc,
+    );
+}
+
+# ------------------------------------------------------------------------------
+# Notifies on completion.
+sub notify {
+    # (no argument)
+    # Reports number of arguments in subject.
+    my @exceptions = FCM::Admin::Runner->instance()->get_exceptions();
+    my $subject
+        = sprintf(qq{$THIS finished with %d error(s)}, scalar(@exceptions));
+
+    my $mailer = Mail::Mailer->new();
+    $mailer->open({
+        From    => $CONFIG->get_admin_email(),
+        To      => $CONFIG->get_admin_email(),
+        Subject => $subject,
+    });
+
+    # Summarises the exceptions at the beginning of the message
+    $mailer->print(qq{$subject:\n});
+    for my $exception (@exceptions) {
+        $mailer->print(qq{    $exception});
+    }
+    $mailer->print(qq{\n});
+
+    # Prints content of the output
+    $mailer->print(q{#} x 72 . qq{\n});
+    $mailer->print(qq{# Output and error output of $THIS:\n});
+    $mailer->print(q{#} x 72 . qq{\n});
+    my $out_file_handle = IO::File->new($OUT_FILE);
+    if (defined($out_file_handle)) {
+        while (my $line = $out_file_handle->getline()) {
+            $mailer->print($line);
+        }
+        $out_file_handle->close();
+    }
+    $mailer->close();
+}
+
+__END__
+
+=head1 NAME
+
+fcm-daily-update
+
+=head1 SYNOPSIS
+
+    fcm-daily-update
+
+=head1 DESCRIPTION
+
+This program performs the daily update for the FCM system.
+
+=head1 COPYRIGHT
+
+E<169> Crown copyright Met Office. All rights reserved.
+
+=cut

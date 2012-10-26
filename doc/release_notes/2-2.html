@@ -1,0 +1,565 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for Linux (vers 14 June 2007), see www.w3.org" />
+
+  <title>FCM 2-2 Release Notes</title>
+  <meta name="author" content="FCM team" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" type="text/css" href="../etc/fcm.css" />
+  <script type="text/javascript" src="../etc/fcm.js">
+</script>
+</head>
+
+<body onload="javascript: FCM.load();">
+  <h1>FCM 2-2 Release Notes<br />
+  15 June 2012</h1>
+
+  <p>These are the release notes for FCM 2-2. You can use this release of FCM
+  freely under the terms of the FCM LICENSE, which you should receive with the
+  distribution of this release.</p>
+
+  <p>FCM is maintained by the FCM team at the Met Office. Please feedback any
+  bug reports or feature requests to us by <a href=
+  "mailto:fcm-team@metoffice.gov.uk">e-mail</a>.</p>
+
+  <h2>Contents</h2>
+
+  <div id="fcm-content"></div>
+
+  <h2 id="changes-highlight">Highlight Changes</h2>
+
+  <dl>
+    <dt><code>Subversion 1.6</code></dt>
+
+    <dd>
+      <p>Code management commands and extract system tested with Subversion
+      1.6. Note that Subversion 1.4 is no longer supported and Subversion 1.5
+      has not been tested.</p>
+
+      <p>We experienced some non-repeatable problems using Subversion 1.6 where
+      we got incorrect results from a merge. Running <code>svn cleanup</code>
+      appears to avoid the problem. Therefore this is now run prior to any
+      update, switch or merge command.</p>
+    </dd>
+
+    <dt><code>fcm branch-create</code></dt>
+
+    <dd>
+      <p><code>-rREV</code> option no longer supported - add a peg revision to
+      the source if necessary.</p>
+    </dd>
+
+    <dt><code>fcm branch-list</code></dt>
+
+    <dd>
+      <p>significant improvement to speed.</p>
+
+      <p>multiple projects can be specified as arguments.</p>
+
+      <p>more options for advanced listing.</p>
+
+      <p><code>-rREV</code> option no longer supported - can use peg revision
+      for each project in the argument list.</p>
+
+      <p>no longer returns 1 if 0 branch is found - non-zero value reserved for
+      fatal errors.</p>
+
+      <p>new <code>--quiet</code> option to print names of matched branches
+      only.</p>
+
+      <p><code>-v</code> option no longer supported - use new
+      <code>--url</code> option to print branch names as full URLs instead of
+      FCM location keywords.</p>
+
+      <p>minor change to output format.</p>
+    </dd>
+
+    <dt><code>fcm conflicts</code></dt>
+
+    <dd>
+      <p>handle resolution of common cases of tree conflicts.</p>
+    </dd>
+
+    <dt><code>fcm make</code></dt>
+
+    <dd>
+      <p>build: change in how the dependency tree is created. This fixes the
+      behaviour where the system incorrectly reports cyclic dependency. An
+      example situation is where a recursive <code>subroutine a</code> calls
+      <code>subroutine b</code> which calls <code>subroutine a</code>. The
+      object file target <samp>a.o</samp> has a dependency on
+      <samp>b.interface</samp> and the object file target <samp>b.o</samp> has a
+      dependency on <samp>a.interface</samp>. Previously,
+      <samp>b.interface</samp> would also depend on <samp>b.o</samp> which would
+      result in a cyclic dependency. This fix changes the internal data
+      structure for representing a build target. <strong>Use of <code>fcm
+      make</code> at release 2-2 to build incrementally or to inherit a build
+      created by <code>fcm make</code> at release 2-1 or before will result in an
+      incorrect behaviour or failure. Use the <code>--new</code> option to start
+      a new build if the build destination is known to contain an existing build
+      created by <code>fcm make</code> at release 2-1 or before.</strong></p>
+    </dd>
+
+    <dt>Flexible repository layout</dt>
+
+    <dd>
+      <p>FCM code management commands no longer insist on a rigid layout of its
+      Subversion repositories. Behaviours can now be configured per repository.
+      In its default setting, FCM code management commands no longer insist on
+      <samp>branches/</samp> and <samp>tags/</samp> being present in a
+      <em>project</em>.</p>
+    </dd>
+  </dl>
+
+  <h2 id="changes-minor">Minor Changes and Bug Fixes</h2>
+
+  <dl>
+    <dt><code>fcm branch-create</code></dt>
+
+    <dd>
+      <p>new <code>--switch</code> option to switch the current working copy to
+      point to the newly created branch.</p>
+    </dd>
+
+    <dt><code>fcm branch-delete</code></dt>
+
+    <dd>
+      <p>new <code>--switch</code> option to switch the current working copy to
+      point to the <em>trunk</em> after the branch deletion.</p>
+    </dd>
+
+    <dt><code>fcm branch-diff</code></dt>
+
+    <dd>
+      <p>fixed: the command will no longer fail when called with an unmodified
+      sub-tree of a branch.</p>
+    </dd>
+
+    <dt><code>fcm build/extract</code></dt>
+
+    <dd>
+      <p>fixed multi-level inheritance destination search path.</p>
+    </dd>
+
+    <dt><code>fcm commit</code></dt>
+
+    <dd>
+      <p>fixed incorrect behaviour on <code>svn commit</code> failure.</p>
+    </dd>
+
+    <dt><code>fcm make</code></dt>
+
+    <dd>
+      <p>build: fixed multi-level inheritance destination search path.</p>
+
+      <p>build: do not use relative path for inherited include paths and object
+      file paths in command lines.</p>
+
+      <p>build: fixed duplicated dependent targets being reported as missing
+      dependencies.</p>
+
+      <p>build: fixed incorrect behaviour with Fortran <samp>*.mod</samp>
+      target in incremental mode where only a build property (e.g. a compiler
+      flag) associated with the source file of the <samp>*.mod</samp> target is
+      modified.</p>
+
+      <p>extract: fixed handling of add/delete of files in file system
+      locations during incremental extract.</p>
+
+      <p>extract: fixed Perl warning when a file system location contains a
+      symbolic link with a non-existent target.</p>
+
+      <p>extract: fixed Perl warning when 2 diff locations both add a file of
+      the same name but with different contents.</p>
+
+      <p>extract: improved merge conflict diagnostics.</p>
+
+      <p>extract: allow unmodified location in the configuration to pass in an
+      inherited mode.</p>
+
+      <p>mirror: fixed: create configuration file in target even if there is no
+      source to mirror.</p>
+
+      <p>mirror: always expand a relative path in a mirror target to a full path
+      to allow it to be inherited. Some infrequently used modifiers in the
+      <code>mirror.prop</code> declarations are added/removed for this fix.</p>
+    </dd>
+
+    <dt><code>fcm merge</code></dt>
+
+    <dd>
+      <p>simplified prompts and diagnostic outputs.</p>
+
+      <p>new <code>--auto-log</code> option for automatic merge. If the option
+      is specified, the command will include the logs of the merged revisions in
+      the commit log message automatically.</p>
+    </dd>
+
+    <dt><code>fcm mkpatch</code></dt>
+
+    <dd>
+      <p>no longer uses patch files if they include a carrriage return in the
+      middle of a line.</p>
+    </dd>
+
+    <dt><code>fcm project-create</code></dt>
+
+    <dd>
+      <p>new command to create a new project and its trunk directory in a
+      repository.</p>
+    </dd>
+
+    <dt>code management command line</dt>
+
+    <dd>
+      <p>fixed logic for parsing <var>URL@REV</var> where <var>URL</var> is not
+      a location keyword but <var>REV</var> is a revision keyword.</p>
+    </dd>
+
+    <dt>revision keyword</dt>
+
+    <dd>
+      <p>fixed: <var>fcm:revision</var> property setting: trailing spaces in
+      each line will now be ignored.</p>
+    </dd>
+
+    <dt>user guide</dt>
+
+    <dd>
+      <p>tutorial: added section on tree conflict resolution.</p>
+
+      <p>tutorial: removed references to <code>fcm gui</code>.</p>
+
+      <p>added new annex: quick reference: tree conflict resolution.</p>
+    </dd>
+
+    <dt>Perl 5.12</dt>
+
+    <dd>
+      <p>fixed: <a href=
+      "http://search.cpan.org/~jesse/perl-5.12.0/pod/perl5120delta.pod#REGEXPs_are_now_first_class">
+      incompatibility problem</a>.</p>
+    </dd>
+  </dl>
+
+  <h2 id="issues">Known Issues</h2>
+
+  <dl>
+    <dt>Build inheritance limitation: handling of include files</dt>
+
+    <dd>See the <a href="../user_guide/make.html#build.inherit">User Guide &gt;
+    FCM Make &gt; Build &gt; Build Inheritance</a> for detail.</dd>
+  </dl>
+
+  <h2 id="requirements">System Requirements</h2>
+
+  <p>FCM is intended to run on a Unix/Linux system. It is currently used at the
+  Met Office on AIX-5.3 and RHEL-6.1.</p>
+
+  <dl>
+    <dt><a href="http://www.perl.org/">Perl</a></dt>
+
+    <dd>
+      <p><dfn>used by:</dfn> <code>fcm</code>.</p>
+
+      <p><dfn>versions at Met Office:</dfn> AIX-5.3: 5.8.2 (see remark),
+      RHEL-6.1: 5.10.1.</p>
+
+      <p><dfn>remark:</dfn> 5.8.2 on AIX-5.3: code management commands, the
+      extract system of <code>fcm make</code> and the deprecated <code>fcm
+      extract</code> are not used by Met Office users on this platform.</p>
+
+      <p><dfn>remark:</dfn> 5.8.2 on AIX-5.3: <code>Text::ParseWords</code>
+      (core Perl module) is upgraded to version 3.22.</p>
+    </dd>
+
+    <dt>Perl module <a href=
+    "http://search.cpan.org/~gaas/libwww-perl-5.834/lib/HTTP/Date.pm">HTTP::Date</a></dt>
+
+    <dd>
+      <p><dfn>used by:</dfn> the extract system in <code>fcm make</code> and
+      the deprecated <code>fcm extract</code>.</p>
+
+      <p><dfn>versions at Met Office:</dfn> RHEL-6.1: 5.833.</p>
+    </dd>
+
+    <dt>Perl module <a href=
+    "http://search.cpan.org/~msergeant/XML-Parser-2.36/">XML::Parser</a></dt>
+
+    <dd>
+      <p><dfn>used by:</dfn> the code management commands.</p>
+
+      <p><dfn>versions at Met Office:</dfn> RHEL-6.1: 2.36.</p>
+    </dd>
+
+    <dt>Perl module <a href=
+    "http://search.cpan.org/~srezic/Tk-804.028/">Tk</a></dt>
+
+    <dd>
+      <p><dfn>used by:</dfn> <code>fcm gui</code>.</p>
+
+      <p><dfn>versions at Met Office:</dfn> RHEL-6.1: 804.028.</p>
+    </dd>
+
+    <dt><a href="http://subversion.apache.org/">Subversion</a></dt>
+
+    <dd>
+      <p><dfn>used by:</dfn> the code management commands, the extract system
+      of <code>fcm make</code>, the deprecated <code>fcm extract</code>.</p>
+
+      <p><dfn>versions at Met Office:</dfn> RHEL-6.1: 1.6.17.</p>
+
+      <p><dfn>remark:</dfn> you can use the extract system to mirror code to a
+      remote platform for building. Therefore it is only necessary to have
+      Subversion installed on the platform where you do your code development.
+      If you use other platforms purely for building and running then you do
+      not need to have Subversion installed on these platforms.</p>
+    </dd>
+
+    <dt><a href="http://trac.edgewall.org/">Trac</a></dt>
+
+    <dd>
+      <p><dfn>used by:</dfn> (optional, but highly recommended as a companion
+      to Subversion)</p>
+
+      <p><dfn>versions at Met Office:</dfn> 0.11.7.</p>
+    </dd>
+
+    <dt><a href="http://furius.ca/xxdiff/">xxdiff</a></dt>
+
+    <dd>
+      <p><dfn>used by:</dfn> <code>fcm branch-diff --graphical</code>,
+      <code>fcm conflicts</code>, <code>fcm diff --graphical</code>.</p>
+
+      <p><dfn>versions at Met Office:</dfn> RHEL-6.1: 3.2.</p>
+
+      <p><dfn>remark:</dfn> The <code>fcm branch-diff --graphical</code> and
+      <code>fcm diff --graphical</code> commands use xxdiff by default but can
+      also use other graphical diff tools.</p>
+    </dd>
+
+    <dt><a href="http://www.gzip.org/">gzip</a></dt>
+
+    <dd>
+      <p><dfn>used by:</dfn> <code>fcm make</code>.</p>
+
+      <p><dfn>versions at Met Office:</dfn> AIX-5.3: 1.2.4, RHEL-6.1: 1.3.12.</p>
+    </dd>
+
+    <dt><a href="http://www.gnu.org/software/diffutils/">GNU diffutils</a>:
+    diff3</dt>
+
+    <dd>
+      <p><dfn>used by:</dfn> the extract system of <code>fcm make</code>, the
+      deprecated <code>fcm extract</code>.</p>
+
+      <p><dfn>versions at Met Office:</dfn> RHEL-6.1: 2.8.1.</p>
+
+      <p><dfn>remark:</dfn>: used to merge changes to source files modified by
+      2+ diff source trees (compared with the base).</p>
+    </dd>
+
+    <dt><a href="http://rsync.samba.org/">rsync</a></dt>
+
+    <dd>
+      <p><dfn>used by:</dfn> the mirror system of <code>fcm make</code>, the
+      deprecated <code>fcm extract</code>.</p>
+
+      <p><dfn>versions at Met Office:</dfn> AIX-5.3: 2.6.2, RHEL-6.1: 3.0.6.</p>
+
+      <p><dfn>remark:</dfn> used to mirror source file to another
+      <var>USER@HOST</var>.</p>
+    </dd>
+
+    <dt><a href="http://www.gnu.org/software/make/make.html">GNU make</a></dt>
+
+    <dd>
+      <p><dfn>used by:</dfn> the deprecated <code>fcm build</code>.</p>
+
+      <p><dfn>versions at Met Office:</dfn> AIX-5.3: 3.80, RHEL-6.1: 3.81.</p>
+    </dd>
+  </dl>
+
+  <h2 id="installation">Installation</h2>
+
+  <p>FCM is distributed in the form of a compressed tar file. Un-pack the tar
+  file into an appropriate location on your system. Add the <samp>bin/</samp>
+  directory into your <var>PATH</var> environment variable. Once you have done
+  this you should now have full access to the FCM system, assuming that you
+  have met the requirements described in the previous section.</p>
+
+  <p>You should find the following contents in the distribution:</p>
+
+  <dl>
+    <dt>README</dt>
+
+    <dd>The README file contains the internal revision number of the
+    release.</dd>
+
+    <dt>COPYRIGHT.txt<br />
+    LICENSE.html</dt>
+
+    <dd>The FCM license and other copyright information.</dd>
+
+    <dt>bin/</dt>
+
+    <dd>Contains the <code>fcm</code> command and other utilities.</dd>
+
+    <dt>doc/</dt>
+
+    <dd>System documentation.</dd>
+
+    <dt>doc/release_notes/</dt>
+
+    <dd>Contains these release notes. It also contains the release notes for
+    all previous versions which may be useful if you have skipped any
+    versions.</dd>
+
+    <dt>doc/user_guide/</dt>
+
+    <dd>Contains the <a href="../user_guide/">FCM User Guide</a>.</dd>
+
+    <dt>doc/standards/</dt>
+
+    <dd>Contains the FCM <a href="../standards/perl_standard.html">Perl</a> and
+    <a href="../standards/fortran_standard.html">Fortran</a> coding standards.
+    The Perl standard describes the standards followed by the FCM code. The
+    Fortran standard contains some <a href=
+    "../standards/fortran_standard.html#fcm">specific advice</a> on the best
+    way of writing Fortran code for use with FCM as well as more general advice
+    on good practice.</dd>
+
+    <dt>doc/collaboration/</dt>
+
+    <dd>Contains the <a href="../collaboration/index.html">External
+    Distribution &amp; Collaboration for FCM Projects</a> document which
+    discusses how projects configured under FCM can be distributed
+    externally.</dd>
+
+    <dt>etc/</dt>
+
+    <dd>Miscellaneous items, including the <samp>fcm/keyword.cfg.eg</samp>
+    file. If you wish to define keywords for your site you will need to create
+    the <samp>etc/fcm/keyword.cfg</samp> file. An example file,
+    <samp>fcm/keyword.cfg.eg</samp>, is provided which is a copy of the file
+    currently used at the Met Office. For further details please refer to the
+    section <a href="../user_guide/system_admin.html#fcm-keywords">FCM
+    keywords</a> in the System Admin chapter of the User Guide.</dd>
+
+    <dt>examples/</dt>
+
+    <dd>Contains various example scripts which you may find useful. Note that
+    these scripts are all specific to the Met Office and may contain hard coded
+    paths and email addresses. They are provided in the hope that you may find
+    them useful as examples for setting up similar scripts of your own.
+    However, they should only be used after careful review to adapt them to
+    your environment.</dd>
+
+    <dt>examples/etc/regular-update.eg</dt>
+
+    <dd>An example of how you might set up a cron job to make use of the
+    <samp>&lt;repos&gt;.latest</samp> file (see
+    <code>examples/svn-hooks/post-commit-background</code>).</dd>
+
+    <dt>examples/lib/</dt>
+
+    <dd>Contains the <code>FCM::Admin::*</code> Perl library, which implements
+    the functionalities of the FCM admin utility commands.</dd>
+
+    <dt>examples/sbin/</dt>
+
+    <dd>Contains a selection of useful admin utility commands.</dd>
+
+    <dt>examples/svn-hooks/pre-commit</dt>
+
+    <dd>
+      This script restricts write-access to the repository by checking the
+      following:
+
+      <ul>
+        <li>It executes the Subversion utility <code>svnperms.py</code> if it,
+        and the associated <samp>svnperms.conf</samp> file, exist. This utility
+        checks whether the author of the current transaction has enough
+        permission to write to particular paths in the repository.</li>
+
+        <li>It checks the disk space required by the current transaction. It
+        fails the commit if it requires more than 10MB of disk space (or
+        whatever is specified in the
+        <code>pre-commit-size-threshold.conf</code> file.</li>
+      </ul>
+    </dd>
+
+    <dt>examples/svn-hooks/post-commit</dt>
+
+    <dd>This script runs <code>post-commit-background</code> in the
+    background.</dd>
+
+    <dt>examples/svn-hooks/post-commit-background</dt>
+
+    <dd>
+      This script runs in the background after each commit.
+
+      <ul>
+        <li>It updates a <samp>&lt;repos&gt;.latest</samp> file with the latest
+        revision number.</li>
+
+        <li>It creates a dump of the new revision.</li>
+
+        <li>It calls <code>post-commit-background-custom</code> if it
+        exists.</li>
+      </ul>
+    </dd>
+
+    <dt>examples/svn-hooks/pre-revprop-change</dt>
+
+    <dd>This script only allows the modification of <var>svn:log</var>.</dd>
+
+    <dt>examples/svn-hooks/post-revprop-change</dt>
+
+    <dd>This script runs <code>post-revprop-change-background</code> in the
+    background.</dd>
+
+    <dt>examples/svn-hooks/post-revprop-change-background</dt>
+
+    <dd>This script invokes the <code>trac-admin</code> command to
+    <code>resync</code> the revision property cache stored in the corresponding
+    Trac environment. If a user modifies the log message of a changeset and
+    he/she is not the original author of the changeset, this script will e-mail
+    the original author. If the file
+    <code>post-revprop-change-background-cc.list</code> exits, the script will
+    also e-mail those in the list.</dd>
+
+    <dt>lib/</dt>
+
+    <dd>Contains the Perl library of FCM.</dd>
+
+    <dt>man/</dt>
+
+    <dd>Contains a basic manual page for <code>fcm</code>.</dd>
+
+    <dt>t/</dt>
+
+    <dd>Contains unit test for FCM.</dd>
+
+    <dt>test/</dt>
+
+    <dd>Contains regression tests for FCM.</dd>
+
+    <dt>test/test_include/</dt>
+
+    <dd>Contains simple test code to check how your chosen compilers handle
+    include files (see <a href="#issues">Known Issues</a>).</dd>
+
+    <dt>tutorial/</dt>
+
+    <dd>Contains the files necessary to set up a Subversion repository for the
+    FCM tutorial. This will allow you to follow the <a href=
+    "../user_guide/getting_started.html#tutorial">tutorial section</a> in the
+    User Guide. See <samp>tutorial/README</samp> on how to set it up.</dd>
+  </dl>
+</body>
+</html>

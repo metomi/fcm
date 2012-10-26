@@ -1,0 +1,3 @@
+build_1=succeed_known
+
+# This case does not fail as expected (see #335)

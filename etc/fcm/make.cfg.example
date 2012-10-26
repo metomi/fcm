@@ -1,0 +1,9 @@
+#-------------------------------------------------------------------------------
+# FCM Make Configuration Example
+#-------------------------------------------------------------------------------
+# For detail, please refer to:
+# FCM User Guide Annex: FCM Configuration File > FCM Make Configuration
+#-------------------------------------------------------------------------------
+
+# E.g. C compiler for the build system
+build.prop{cc} = cc

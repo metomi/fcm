@@ -1,0 +1,27 @@
+=head1 NAME
+
+fcm keyword-print (kp)
+
+=head1 SYNOPSIS
+
+Displays registered location and/or revision keywords.
+
+    fcm keyword-print [OPTIONS] [TARGET ...]
+
+=head1 ARGUMENTS
+
+If no argument is specified, prints registered location keywords. Otherwise,
+prints the location keyword and revision keywords for the specified target. If
+--verbose is specified, prints the implied location keywords as well.
+
+=head1 OPTIONS
+
+=over 4
+
+=item --verbose, -v
+
+Increase the verbosity level.
+
+=back
+
+=cut

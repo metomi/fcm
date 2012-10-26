@@ -1,0 +1,12 @@
+=head1 NAME
+
+fcm gui
+
+=head1 SYNOPSIS
+
+Invokes the GUI wrapper for code management commands. The optional argument PATH
+modifies the initial working directory of the GUI.
+
+    fcm gui [PATH]
+
+=cut

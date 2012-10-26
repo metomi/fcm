@@ -1,0 +1,204 @@
+#!/bin/ksh
+set -u
+
+echo "$(date): Running $TEST ..."
+
+cfg_name=$TEST
+if [[ -a test_config/$TEST ]]; then
+ . test_config/$TEST
+fi
+
+export THIS_RUN_DIR=$RUN_DIR/$TEST
+rm -rf $THIS_RUN_DIR
+mkdir $THIS_RUN_DIR
+cd $THIS_RUN_DIR
+mirror=${mirror:-false}
+if [[ $mirror == remote ]]; then
+  export THIS_RUN_DIR_HPC=$RUN_DIR_HPC/$TEST
+fi
+
+NPROC=${NPROC:-1}
+let count=1
+for this_cfg in $cfg_name
+do
+  make=$(eval "echo \${make_$count:-}")
+  run=$(eval "echo \${run_$count:-}")
+  export command_file=$RUN_DIR/$TEST.build.commands.$count
+  touch $command_file
+  if [[ $DEBUG == true ]]; then
+    echo "Running make ($count) ..."
+  fi
+  fcm make -j $NPROC -f $REPOS_URL/trunk/cfg/$this_cfg.cfg >../$TEST.make.stdout.$count 2>../$TEST.make.stderr.$count
+  RC=$?
+  if [[ $make == fail ]]; then
+    if [[ $RC == 0 ]]; then
+      echo "FAILED: $TEST ($count) make did not fail"
+      exit 1
+    fi
+  elif [[ $make == fail_known ]]; then
+    if [[ $RC == 0 ]]; then
+      echo "FAILED: $TEST ($count) make did not fail as expected (known problem fixed?)"
+      exit 1
+    else
+      if [[ $DEBUG == true ]]; then
+        echo "Known problem: $TEST ($count) make failed"
+      fi
+      break
+    fi
+  elif [[ $make == succeed_known ]]; then
+    if [[ $RC == 0 ]]; then
+      if [[ $DEBUG == true ]]; then
+        echo "Known problem: $TEST ($count) make did not fail"
+      fi
+      break
+    else
+      echo "FAILED: $TEST ($count) make did not succeed as expected (known problem fixed?)"
+      exit 1
+    fi
+  else
+    if [[ $RC != 0 ]]; then
+      echo "FAILED: $TEST ($count) make failed"
+      exit 1
+    else
+      if [[ $mirror == remote ]]; then
+        echo "$TEST" >> $BATCH_DIRS
+        break
+      elif [[ $mirror == local ]]; then
+        cd ${THIS_RUN_DIR}_mirror
+        RC=$?
+        if [[ $RC != 0 ]]; then
+          echo "FAILED: $TEST ($count) cd to mirror failed"
+          exit 1
+        fi
+        if [[ $DEBUG == true ]]; then
+          echo "Running make after mirror ($count) ..."
+        fi
+        fcm make -j $NPROC >../$TEST.make2.stdout.$count 2>../$TEST.make2.stderr.$count
+        RC=$?
+        if [[ $RC != 0 ]]; then
+          echo "FAILED: $TEST ($count) make after mirror failed"
+          exit 1
+        fi
+      fi
+      if [[ $run != no ]]; then
+        exe_name=hello.sh
+        build_dir=$PWD/build/bin
+        if [[ ! -a $build_dir ]]; then
+          echo "FAILED: $TEST ($count) build directory does not exist"
+          exit 1
+        else
+          PATH=$build_dir:$PATH
+          if [[ $DEBUG == true ]]; then
+            echo "Running executable ($count) ..."
+          fi
+          $exe_name >../$TEST.exe.stdout.$count 2>../$TEST.exe.stderr.$count
+          RC=$?
+          if [[ $run == fail ]]; then
+            if [[ $RC == 0 ]]; then
+              echo "FAILED: $TEST ($count) run did not fail"
+              exit 1
+            fi
+          elif [[ $run == fail_known ]]; then
+            if [[ $RC == 0 ]]; then
+              echo "FAILED: $TEST ($count) run did not fail as expected (known problem fixed?)"
+              exit 1
+            else
+              if [[ $DEBUG == true ]]; then
+                echo "Known problem: $TEST ($count) run failed"
+              fi
+              break
+            fi
+          elif [[ $run == succeed_known ]]; then
+            if [[ $RC == 0 ]]; then
+              if [[ $DEBUG == true ]]; then
+                echo "Known problem: $TEST ($count) run did not fail"
+              fi
+              break
+            else
+              echo "FAILED: $TEST ($count) run did not succeed as expected (known problem fixed?)"
+              exit 1
+            fi
+          else
+            if [[ $RC != 0 ]]; then
+              echo "FAILED: $TEST ($count) run failed"
+              exit 1
+            else
+              build_dir=$PWD/build2/bin
+              if [[ -a $build_dir ]]; then
+                PATH=$build_dir:$PATH
+                if [[ $DEBUG == true ]]; then
+                  echo "Running executable from build2 ($count) ..."
+                fi
+                $exe_name >../$TEST.exe2.stdout.$count 2>../$TEST.exe2.stderr.$count
+                RC=$?
+                if [[ $RC != 0 ]]; then
+                  echo "FAILED: $TEST ($count) build2 run failed"
+                  exit 1
+                fi
+              fi
+            fi
+          fi
+        fi
+      fi
+    fi
+  fi
+  let count=count+1
+done
+
+rm -rf $BASE_DIR/work
+
+if [[ $TYPE == control ]]; then
+  touch $THIS_RUN_DIR/.tests.complete
+  compare_fcm1=${compare_fcm1:-true}
+  if [[ $compare_fcm1 == true ]]; then
+    cd $RUN_DIR
+    # Test that fcm2 triggers the same build commands as the equivalent from fcm1
+    if [[ -f $TEST.build.commands.1 ]]; then
+      for FILE in $(ls -1 $TEST.build.commands.*)
+      do
+        FCM1_FILE=fcm1_${FILE#fcm2_}
+        if [[ -f $FCM1_FILE ]]; then
+          if [[ $DEBUG == true ]]; then
+            echo "Comparing $FILE with $FCM1_FILE ..."
+          fi
+          cat $FCM1_FILE | grep -v wrap_ar | sed 's#wrap_ld#wrap_fc#' | sed 's# -c # #' | sed 's#__fcm__##' | sed 's#\.F#\.f#' | \
+             sed 's#/fcm1_[^ ]*/##g' | sed 's#-Iinc #-Iinclude #g' | sed 's# -Llib -Llib# -Llib#' | \
+             sed 's# -Llib -lmkmdblseq##' | sort > $TEST.fcm1.build.commands
+          cat $FILE | grep -v wrap_ar  | sed 's# -c # #' | sed 's#-oo/#-o #' | sed 's#-obin/#-o #' | sed 's# o/# #g' | \
+             sed 's#\.F#\.f#' | sed 's#/fcm2_[^ ]*/##g' | sed 's#\.\./\.\.##g' | sed 's#wrap_fc2 \(.*\.exe\)#wrap_fc \1#' | \
+             sort > $TEST.fcm2.build.commands
+          diff $TEST.fcm1.build.commands $TEST.fcm2.build.commands > $TEST.diff
+          if [[ $? != 0 ]]; then
+            echo "FAILED: $FILE - build commands differ from FCM1 case"
+            exit 1
+          else
+            rm $TEST.fcm1.build.commands $TEST.fcm2.build.commands $TEST.diff
+          fi
+        fi
+      done
+    fi
+    # Test that fcm2 run results match equivalent from fcm1
+    if [[ -f $TEST.exe.stdout.1 ]]; then
+      for FILE in $(ls -1 $TEST.exe.stdout.*)
+      do
+        FCM1_FILE=fcm1_${FILE#fcm2_}
+        if [[ -f $FCM1_FILE ]]; then
+          if [[ $DEBUG == true ]]; then
+            echo "Comparing $FILE with $FCM1_FILE ..."
+          fi
+          diff -q $FCM1_FILE $FILE
+          if [[ $? != 0 ]]; then
+            echo "FAILED: $FILE - contents differ from FCM1 case"
+            exit 1
+          fi
+        fi
+      done
+    fi
+    if [[ $COMPARE_TIMES == true ]]; then
+      ../compare_times_fcm1-2 $TEST
+    fi
+  fi
+else
+  cd $BASE_DIR
+  ./compare_results_fcm2 $TEST
+fi

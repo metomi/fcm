@@ -1,0 +1,31 @@
+=head1 NAME
+
+fcm commit (ci)
+
+=head1 SYNOPSIS
+
+Send changes from your working copy to the repository. Invoke your favourite
+editor to prompt you for a commit log message. Update your working copy
+following the commit.
+
+    fcm commit [OPTIONS] [PATH ...]
+
+=head1 OPTIONS
+
+=over 4
+
+=item --dry-run
+
+Allows you to add to the commit message without committing.
+
+=item --svn-non-interactive
+
+Do no interactive prompting at commit time.
+
+=item --password=PASSWORD
+
+Specify a password ARG.
+
+=back
+
+=cut

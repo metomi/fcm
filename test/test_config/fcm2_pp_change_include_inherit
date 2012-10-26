@@ -1,0 +1,4 @@
+compare_fcm1=false
+
+# The wrong include file gets used as demonstrated by the lack of anything being compiled.
+# See ticket:206

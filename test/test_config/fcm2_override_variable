@@ -1,0 +1,2 @@
+cfg_name="fcm2_base"
+export fcflags="-assume nosource_include -g"

@@ -1,0 +1,34 @@
+#!/bin/ksh
+
+while getopts ":ch" opt
+do
+  case $opt in
+    c ) COPY=true ;;
+    h ) HELP=true ;;
+    \? ) echo "Invalid option"
+        HELP=true
+        break ;;
+  esac
+done
+if [[ $# != $(($OPTIND - 1)) ]]; then
+  echo "Invalid argument"
+  HELP=true
+fi
+
+if [[ $HELP == true ]]; then
+ echo 'Usage: get_hpc_results [options]'
+ echo 'Valid options:'
+ echo '-c'
+ echo '   Mirror the full test directory from the HPC'
+ echo '-h'
+ echo '   Print this help message'
+ exit 1
+fi
+
+export HPC=$(rose host-select -q hpc)
+ssh $HPC "cd working/fcm_test_suite; ./report_hpc_results" | tee $LOCALTEMP/fcm_test_suite/hpc.summary
+
+if [[ $COPY == true ]]; then
+  echo "Mirroring results from HPC ..."
+  rsync -a --delete --rsh="ssh" $HPC:fcm_test_suite/ $LOCALTEMP/fcm_test_suite/hpc_mirror
+fi

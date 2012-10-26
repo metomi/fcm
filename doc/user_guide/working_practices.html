@@ -1,0 +1,806 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for Linux/x86 (vers 1st December 2004), see www.w3.org" />
+
+  <title>FCM User Guide: Working Practices</title>
+  <meta name="author" content="FCM team" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" type="text/css" href="../etc/fcm.css" />
+<script type="text/javascript" src="../etc/fcm.js">
+</script>
+<script type="text/javascript" src="../etc/fcm-version.js">
+</script>
+</head>
+
+<body>
+  <div id="body-header">
+    <a href="http://www.metoffice.gov.uk/research/collaboration/fcm/">
+    <img src="../etc/fcm.png" alt="FCM" />
+    </a>
+    <address>
+      &copy; British Crown Copyright 2006-12
+      <a href="http://www.metoffice.gov.uk">Met Office</a>.
+      See <a href="../etc/fcm-terms-of-use.html">Terms of Use</a>.<br />
+      This document is released under the <a href=
+      "http://www.nationalarchives.gov.uk/doc/open-government-licence/" rel=
+      "license">Open Government Licence</a>.<br />
+      <span id="fcm-version"></span><br />
+      <span id="fcm-js-trail"></span>
+    </address>
+  </div>
+
+  <h1>Code Management Working Practices</h1>
+
+  <div id="fcm-content"></div>
+
+  <h2 id="introduction">Introduction</h2>
+
+  <p>The previous chapter described how to use the various parts of the FCM
+  code management system. They also described aspects of working practices
+  which are enforced by the system. This section discusses other recommended
+  working practices. They are optional in the sense that you don't have to
+  follow them to use FCM. It is a matter for individual projects to decide
+  which working practices to adopt (although we expect most projects/systems
+  using FCM to adopt similar practices).</p>
+
+  <h2 id="changes">Making Changes</h2>
+
+  <p>This sub-section gives an overview of the recommended approach for
+  preparing changes. Particular topics are discussed in more detail in later
+  sub-sections where appropriate.</p>
+
+  <p>The recommended process for making a change is as follows:</p>
+
+  <ol>
+    <li>Before work starts on any coding you should make sure that there is a
+    Trac ticket open which explains the purpose of the change.
+
+      <ul>
+        <li>Make sure that you set the ticket milestone to indicate which
+        release of the system you are aiming to include your change in.</li>
+
+        <li>Accept the ticket to indicate that you are working on the
+        change.</li>
+
+        <li>For further advice on using tickets see <a href="#tickets">Trac
+        Tickets</a> later in this section.</li>
+      </ul>
+    </li>
+
+    <li>Create a branch
+
+      <ul>
+        <li>For very simple changes you may be happy to prepare your changes
+        directly on the trunk. For further details see <a href=
+        "#branching_when">When to Branch</a> later in this section.</li>
+
+        <li>Create your branch either from the latest revision or from a stable
+        release (see <a href="#branching_where">Where to Branch From</a> later
+        in this section).</li>
+      </ul>
+    </li>
+
+    <li>Prepare your code changes on the branch
+
+      <ul>
+        <li>Commit interim versions to your branch on a regular basis as you
+        develop your change. This makes it much easier to keep track of what
+        you're changing and to revert changes if necessary.</li>
+
+        <li>You may wish to merge in changes from the trunk. For further
+        details see <a href="#branching_update">Merging From the Trunk</a>
+        later in this section.
+
+          <ul>
+            <li>Make sure that you always commit any local changes to your
+            branch before doing a merge. Otherwise it becomes impossible to
+            distinguish your changes from those you have merged in. It is also
+            impossible to revert the merge without losing your local
+            changes.</li>
+
+            <li>Likewise, always commit the merge to your branch (after
+            resolving any conflicts) before making any further changes.</li>
+          </ul>
+        </li>
+
+        <li>Don't include unrelated changes. If you want to make some changes
+        which aren't really associated with your other changes then use a
+        separate ticket and branch for these changes.</li>
+      </ul>
+    </li>
+
+    <li>Once your changes are ready for review, update the Trac ticket to
+    record which revision of the branch is to be reviewed and assign the ticket
+    to your reviewer.</li>
+
+    <li>If the reviewer is happy with the change then he/she should update the
+    ticket to record that the change is approved and assign the ticket back to
+    you.
+
+      <ul>
+        <li>The reviewer can use the command <code>fcm&nbsp;branch-diff
+        &lt;branch_name&gt;</code> to examine all of the changes on the
+        branch.</li>
+
+        <li>If changes are necessary then these should be prepared and then the
+        ticket updated to refer to the new revision under review.</li>
+      </ul>
+    </li>
+
+    <li>Once the change is approved it can be merged back to the trunk
+
+      <ul>
+        <li>If you have been merging the latest changes from the trunk onto
+        your branch then the merge should be automatic. If not you may have
+        conflicts to resolve.</li>
+
+        <li>Make sure that each merge is a separate commit to the trunk. i.e.
+        Don't combine changes from several branches in one commit. This makes
+        it easier to reverse changes if necessary. It also makes the changeset
+        easier to understand.</li>
+
+        <li>Make sure that you use a good log message to describe your change.
+        For further details see <a href="#messages">Commit Log Messages</a>
+        later in this section.</li>
+
+        <li>Once the changes are commited, update the ticket to refer to the
+        changeset. Then the ticket can be closed.</li>
+      </ul>
+    </li>
+
+    <li>Once you are finished with the branch it should be deleted.</li>
+  </ol>
+
+  <h2 id="wc">Working Copies</h2>
+
+  <p>Some points to consider regarding working copies:</p>
+
+  <ol>
+    <li>If the size of your project is small then you will probably find it
+    easiest to work with a complete copy of the project (either the trunk or
+    your branch). This means that you always have immediate access to all the
+    files and that you are always able to perform merges using your normal
+    working copy.</li>
+
+    <li>If you have a large project then you may prefer to work on a sub-tree
+    of your project.
+
+      <p><dfn>Pros:</dfn></p>
+
+      <ul>
+        <li>Subversion operations on your working copy are faster.</li>
+
+        <li>Your working copies use up less disk space. Remember that you may
+        be working on several changes at once on separate branches so you may
+        wish to have several working copies.</li>
+      </ul>
+
+      <p><dfn>Cons:</dfn></p>
+
+      <ul>
+        <li>You cannot always perform merge operations in sub-trees (if the
+        changes which need to be merged include files outside of your
+        sub-tree). To handle this we suggest that if you need to perform a
+        merge using a complete copy of your project you check it out in your
+        <var>$LOCALDATA</var> area (local disk space which is not backed up) to
+        be used purely for doing the merge.</li>
+
+        <li>You may find that your change involves more files than you
+        originally thought and that some of the files to be changed lie outside
+        of your working copy. You then have to make sure that you have
+        committed any changes before checking out a larger working copy.</li>
+      </ul>
+    </li>
+  </ol>
+
+  <h2 id="branching">Branching &amp; Merging</h2>
+
+  <h3 id="branching_when">When to Branch</h3>
+
+  <p>If you are making a reasonably large change which will take more than a
+  hour or two to prepare then there are clear advantages to doing this work on
+  a branch.</p>
+
+  <ul>
+    <li>You can commit intermediate versions to the branch.</li>
+
+    <li>If you need to merge in changes from the trunk then you have a record
+    of your files prior to the merge.</li>
+
+    <li>The version of the code which gets reviewed is recorded. If subsequent
+    changes are required then only those changes will need reviewing.</li>
+  </ul>
+
+  <p>However, if you are only making a small change (maybe only one line)
+  should you create a branch for this? There are two possible approaches:</p>
+
+  <dl>
+    <dt>Always Branch</dt>
+
+    <dd>
+      <p>ALL coding changes are prepared on branches.</p>
+
+      <p><dfn>Pros:</dfn> Same process is followed in all cases.</p>
+
+      <p><dfn>Cons:</dfn> The extra work required to create the branch and
+      merge it back to the trunk may seem unnecessary for a very small
+      change.</p>
+    </dd>
+
+    <dt>Branch When Needed</dt>
+
+    <dd>
+      <p>Small changes can be committed directly to the trunk (after testing
+      and code review).</p>
+
+      <p><dfn>Pros:</dfn> Avoids the overhead of using branches.</p>
+
+      <p><dfn>Cons:</dfn> Danger of underestimating the size of a change. What
+      you thought was a small change may turn out to be larger than you thought
+      (although you can always move it onto a branch if this happens).</p>
+    </dd>
+  </dl>
+
+  <p>This is a matter for project policy although, in general, we would
+  recommend the <cite>Branch When Needed</cite> approach.</p>
+
+  <h3 id="branching_where">Where to Branch From</h3>
+
+  <p>When you create a new branch you have two choices for which revision to
+  create the branch from:</p>
+
+  <dl>
+    <dt>The latest revision of the trunk</dt>
+
+    <dd>
+      <p>This is the preferred choice where possible. It minimised the chances
+      of conflicts when you need to incorporate your changes back onto the
+      trunk.</p>
+    </dd>
+
+    <dt>An older revision of the trunk</dt>
+
+    <dd>
+      <p>There are a number of reasons why you may need to do this. For
+      example:</p>
+
+      <ul>
+        <li>You are using a stable version to act as your <em>control</em>
+        data.</li>
+
+        <li>You need to know that your baseline is well tested (e.g. scientific
+        changes).</li>
+
+        <li>Your change may need to be merged with other changes relative to a
+        stable version for testing purposes or for use in a package (see
+        <a href="#packages">Creating Packages</a> later in this section).</li>
+      </ul>
+    </dd>
+  </dl>
+
+  <h3 id="branching_update">Merging From the Trunk</h3>
+
+  <p>Once you've created your branch you need to decide whether you now work in
+  isolation or whether you periodically merge in the latest changes from the
+  trunk.</p>
+
+  <ul>
+    <li>Regularly merging from the trunk minimises the work involved when you
+    are ready to merge back to the trunk. You deal with any merge issues as you
+    go along rather than all at the end (by which time your branch and the
+    trunk could have diverged significantly).</li>
+
+    <li>One downside of merging from the trunk is that the baseline for your
+    changes is a moving target. This may not be what you want if you have some
+    <em>control</em> results that you have generated.</li>
+
+    <li>Another downside of merging from the trunk is that it may introduce
+    bugs. Although any code on the trunk should have been tested and reviewed
+    it is unlikely to be as well tested as code from a stable release.</li>
+
+    <li>Unless you originally created your branch from the latest revision of
+    the trunk it is unlikely that you are going to want to merge in changes
+    from the trunk. The exception to this is once your change is complete when
+    it may make sense to merge all the changes on the trunk into your branch as
+    a final step. This is discussed in <a href="#branching_commit">Merging Back
+    to the Trunk</a> below.</li>
+  </ul>
+
+  <p>So, there are basically three methods of working:</p>
+
+  <dl>
+    <dt>Branch from a stable version and prepare all your changes in
+    isolation</dt>
+
+    <dd>Necessary if you need to make your change relative to a well tested
+    release.</dd>
+
+    <dt>Branch from the latest code but then prepare all your changes in
+    isolation</dt>
+
+    <dd>Necessary if you need a stable baseline for your <em>control</em>
+    data.</dd>
+
+    <dt>Branch from the latest code and then update your branch from the trunk
+    on a regular basis</dt>
+
+    <dd>This is considered <em>best practice</em> for parallel working and
+    should be used where possible.</dd>
+  </dl>
+
+  <h3 id="branching_commit">Merging Back to the Trunk</h3>
+
+  <p>Before merging your change back to the trunk you will need to test your
+  change and get it reviewed. There are two options for what code to test and
+  review:</p>
+
+  <dl>
+    <dt>Test and review your changes in isolation, then merge to the trunk and
+    deal with any conflicts</dt>
+
+    <dd>
+      <p>This may be the best method if:</p>
+
+      <ul>
+        <li>Your changes have already been tested against a stable baseline and
+        re-testing after merging would be impracticable.</li>
+
+        <li>Your branch needs to be available for others to merge in its
+        changes in isolation.</li>
+      </ul>
+    </dd>
+
+    <dt>Merge in the latest code from the trunk before your final test and
+    review</dt>
+
+    <dd>
+      <p>This has the advantage that you are testing and reviewing the actual
+      code which will be committed to the trunk. However, it is possible that
+      other changes could get committed to the trunk whilst you are completing
+      your testing and review. There are several ways of dealing with this:</p>
+
+      <ul>
+        <li>Use locking to prevent it happening. The danger with this is that
+        you may prevent others from being able to get their change tested and
+        reviewed, hence inhibiting parallel devlopment.</li>
+
+        <li>Insist that the change is re-tested and reviewed. The problem with
+        this is that there is no guarantee that the same thing won't happen
+        again.</li>
+
+        <li>Merge in the new changes but don't insist on further testing or
+        review.
+
+          <ul>
+            <li>In most cases any changes won't clash so there is little to
+            worry about.</li>
+
+            <li>Where there are clashes then, in most cases, they will be
+            trivial with little danger of any side-effects.</li>
+
+            <li>Where the clashes are significant then, in most cases, this
+            will be very obvious whilst you are resolving the conflicts. In
+            this case you should repeat the testing and get the updates
+            reviewed.</li>
+          </ul>This is the recommended approach since it doesn't inhibit
+          parallel development and yet the chances of a bad change being
+          committed to the trunk are still very small.
+        </li>
+      </ul>
+
+      <p>You should also consider what can be done to minimise the time taken
+      for testing and review.</p>
+
+      <ul>
+        <li>Try to keep your changes small by breaking them down where
+        possible. Smaller changes are easier and quicker to review. This also
+        helps to minimise merge problems by getting changes back onto the trunk
+        earlier.</li>
+
+        <li>Automate your testing as far as possible to speed up the
+        process.</li>
+      </ul>
+    </dd>
+  </dl>
+
+  <p>Most projects will require the developer who prepared the change to merge
+  it back to the trunk once it is complete. However, larger projects may wish
+  to consider restricting this to a number of experienced / trusted
+  developers.</p>
+
+  <ul>
+    <li>This makes it easier to control and prioritise the merges.</li>
+
+    <li>It applies an extra level of quality control.</li>
+
+    <li>It minimises the risk of mistakes being merged back on to the trunk by
+    less experienced developers</li>
+
+    <li>Scientific developers can concentrate on the scientific work.</li>
+
+    <li>One issue is that the person doing the merge to the trunk may need help
+    from the original developer to prepare a suitable log message.</li>
+  </ul>
+
+  <h3 id="branching_delete">When to Delete Branches</h3>
+
+  <p>Once you are finished with your branch it is best to delete it to avoid
+  cluttering up the directory tree (remember that the branch and all its
+  history will still be available). There are two obvious approaches to
+  deleting branches:</p>
+
+  <dl>
+    <dt>Delete the branch as soon as it has been merged back to the trunk
+    (prior to closing any associated Trac ticket)</dt>
+
+    <dd>This is the tidiest approach which minimises the chances of old
+    branches being left around.</dd>
+
+    <dt>Delete the branch once a stable version of the system has been released
+    which incorporates your change</dt>
+
+    <dd>If a bug is found in your change during integration testing then you
+    can prepare the fix on the original branch (without having to do any
+    additional work to restore the branch).</dd>
+  </dl>
+
+  <h2 id="binary">Working with Binary Files</h2>
+
+  <p>The <code>fcm conflicts</code> command and <code>xxdiff</code> can only
+  help you resolve conflicts in text files. If you have binary files in your
+  repository you need to consider whether conflicts in these files would cause
+  a problem.</p>
+
+  <h3 id="binary_conflicts">Resolving Conflicts in Binary Files</h3>
+
+  <p>Conflicts in some types of binary files can be resolved manually. When you
+  are satisfied that the conflicts are resolved, issue the <code>fcm
+  resolved</code> command on the file to remove the conflict status. (You will
+  be prevented from committing if you have a conflicting file in your working
+  copy.)</p>
+
+  <p>If you have a conflicting MS Office 2003+ document, you may be able to
+  take advantage of the <kbd>Tools &gt; Compare and Merge Documents</kbd>
+  facility. Consider a working copy, which you have just updated from revision
+  100 to revision 101, and someone else has committed some changes to a file
+  <samp>doument.doc</samp> you are editing, you will get:</p>
+  <pre>
+(SHELL PROMPT)$ fcm conflicts
+Conflicts in file: document.doc
+document.doc: ignoring binary file, please resolve conflicts manually.
+(SHELL PROMPT)$ fcm status
+=&gt; svn st
+?      document.doc.r100
+?      document.doc.r101
+C      document.doc
+</pre>
+
+  <p>Open <samp>document.doc.r101</samp> with MS Word. In <kbd>Tools &gt;
+  Compare and Merge Documents...</kbd>, open <samp>document.doc</samp>. You
+  will be in Track Changes mode automatically. Go through the document to
+  accept, reject or merge any changes. Save the document and exit MS Word when
+  you are ready. Finally, issue the <code>fcm resolved</code> command to remove
+  the conflict status:</p>
+  <pre>
+(SHELL PROMPT)$ fcm resolved document.doc
+=&gt; svn resolved document.doc
+Resolved conflicted state of 'document.doc'
+(SHELL PROMPT)$ fcm status
+=&gt; svn st
+M      document.doc
+</pre>
+
+  <p>Another type of conflict that you may be able to resolve manually is where
+  the binary file is generated from another file which can be merged. For
+  instance, some people who use LaTeX also store a PDF version of the document
+  in the repository. In such cases it is easy to resolve the conflict by
+  re-generating the PDF file from the merged LaTeX file and then issuing the
+  <code>fcm resolved</code> command to remove the conflict status. Note that,
+  in this particular case, a better approach might be to automate the
+  generation of the PDF file outside of the repository.</p>
+
+  <h3 id="binary_locking">Using Locking</h3>
+
+  <p>For files with binary formats, such as artwork or sound, it is often
+  impossible to merge conflicting changes. In these situations, it is necessary
+  for users to take strict turns when changing the file in order to prevent
+  time wasted on changes that are ultimately discarded.</p>
+
+  <p>Subversion supports <q title=
+  "http://svnbook.red-bean.com/en/1.6/svn.advanced.locking.html">locking</q> to
+  allow you to prevent other users from modifying a file while you are
+  preparing changes. For details please refer to the chapter <a href=
+  "http://svnbook.red-bean.com/en/1.6/svn.advanced.locking.html">Locking</a>
+  from the Subversion book. Note that:</p>
+
+  <ul>
+    <li>FCM does not add any functionality to the locking commands provided by
+    Subversion.</li>
+
+    <li>If you need to lock a file you must do this in a working copy of the
+    trunk. There is nothing to stop you preparing the changes in a branch
+    (maybe you want to prepare the change in combination with a number of other
+    changes which do not require locking). However, you must always remember to
+    lock the file in the trunk first to prevent other users from preparing
+    changes to the file in parallel.</li>
+
+    <li>Locking isn't the only way of preventing conflicts with binary files.
+    If you only have a small project team and a small number of binary files
+    you may find it easier to use other methods of communication such as emails
+    or just talking to each other. Alternatively, you may have a working
+    practice that particular files are only modified by particular users.</li>
+  </ul>
+
+  <h2 id="messages">Commit Log Messages</h2>
+
+  <p>Certain guidelines should be adhered to when writing log messages for code
+  changes when committing to the trunk:</p>
+
+  <ul>
+    <li>Start with a link to the ticket that raises the issues you are
+    addressing.</li>
+
+    <li>Add a keyword to indicate the command/module affected by this change.</li>
+
+    <li>Add a summary of the change.</li>
+
+    <li>Use Trac wiki syntax that can be displayed nicely in plain text.</li>
+
+    <li>E.g. <samp>#429: user guide: improve commit log guidelines.</samp></li>
+  </ul>
+
+  <p>If you realise that you have made a mistake in the commit log, you can
+  modify it by using the command <code>fcm propedit svn:log --revprop -r REV
+  TARGET</code>. Take care since this is an <a href=
+  "http://svnbook.red-bean.com/en/1.6/svn.advanced.props.html">unversioned</a>
+  property so you run the risk of losing information if you aren't careful with
+  your edits.</p>
+
+  <p>There are two possible approaches to recording the changes to individual
+  files:</p>
+
+  <dl>
+    <dt>Maintain history entries in file headers</dt>
+
+    <dd>
+      <p><dfn>Pros:</dfn> You don't need access to the Subversion repository in
+      order to be able to view a files change history (e.g. external
+      collaborators).</p>
+
+      <p><dfn>Cons:</dfn></p>
+
+      <ul>
+        <li>History entries will produce clashes whenever files are changed in
+        parallel (although these conflicts are trivial to resolve).</li>
+
+        <li>Source files which are changed regularly can become cluttered with
+        very long history entries.</li>
+
+        <li>It is not possible to include history entries in some types of
+        file.</li>
+      </ul>
+    </dd>
+
+    <dt>Record which files have changed in the commit log message</dt>
+
+    <dd>
+      <p>The log message should name every modified file and explain why it was
+      changed. Make sure that the log message includes some sort of description
+      for every change. The value of the log becomes much less if developers
+      cannot rely on its completeness. Even if you've only changed comments,
+      note this in the message. For example:</p>
+      <pre>
+ * working_practices.html:
+   Added guidelines for writing log messages.
+</pre>
+
+      <p>If you make exactly the same change in several files, list all the
+      changed files in one entry. For example:</p>
+      <pre>
+ * code_management.html, system_admin.html, index.html:
+   Ran pages through tidy to fix HTML errors.
+</pre>
+
+      <p>It shouldn't normally be necessary to include the full path in the
+      file name - just make sure it is clear which of the changed files you are
+      referring to. You can get a full list of the files changed using
+      <code>fcm log -v</code>.</p>
+    </dd>
+  </dl>
+
+  <p>When you're committing to your own branch then you can be much more
+  relaxed about log messages. Use whatever level of detail you find helpful.
+  However, if you follow similar guidelines then this will help when it comes
+  to preparing the log message when your change is merged back to the
+  trunk.</p>
+
+  <h2 id="tickets">Trac Tickets</h2>
+
+  <h3 id="tickets_create">Creating Tickets</h3>
+
+  <p>There are two different approaches to using the issue tracker within
+  Trac:</p>
+
+  <dl>
+    <dt>All problems should be reported using Trac tickets</dt>
+
+    <dd>
+      <p><dfn>Pros:</dfn> The issue tracker contains a full record of all the
+      problems reported and enhancements requested.</p>
+
+      <p><dfn>Cons:</dfn> The issue tracker gets cluttered up with lots of
+      inappropriate tickets, (which can make it much harder to search the
+      issues and can slow down the response to simple issues).</p>
+
+      <ul>
+        <li>Duplicate tickets.</li>
+
+        <li>Issues already discussed in the documentation.</li>
+
+        <li>Problems which turn out to be unrelated to the system.</li>
+
+        <li>Problems which are poorly described.</li>
+
+        <li>Things which would be better solved by a quick conversation.</li>
+      </ul>
+    </dd>
+
+    <dt>A Trac ticket shouldn't be created until the issue has been agreed</dt>
+
+    <dd>
+      <p>Problems and issues should first be discussed with the project team /
+      system maintainers. Depending on the project, this could be via email, on
+      the newsgroups or through a quick chat over coffee.</p>
+
+      <p>Nothing is lost this way. Issues which are appropriate for the issue
+      tracker still get filed. It just happens slightly later, after initial
+      discussion has helped to clarify the best description for the issue.</p>
+    </dd>
+  </dl>
+
+  <h3 id="tickets_use">Using Tickets</h3>
+
+  <p>This sub-section provides advice on the best way of using tickets:</p>
+
+  <ol>
+    <li>In general, mature systems will require that there is a Trac ticket
+    related to every changeset made to the trunk. However this doesn't mean
+    that there should be a separate ticket for each change.
+
+      <ul>
+        <li>If a change is made to the trunk and then a bug is subsequently
+        found then, if this happens before the next release of the system, the
+        subsequent change can be recorded on the same ticket.</li>
+
+        <li>There can often be changes which don't really affect the system
+        itself since they are just system administration details. One way of
+        dealing with this is to open a ticket for each release in which to
+        record all such miscellaneous changes. It will probably be acceptable
+        to review these changes after they have been committed, prior to the
+        system release.</li>
+      </ul>
+    </li>
+
+    <li>Whenever you refer to source files/directories in tickets, make sure
+    that you refer to particular revisions of the files. This ensures that the
+    links will work in the future, even if those files are no longer in the
+    latest revision. For example:<br />
+    <samp>Changes now ready for review:
+    source:/OPS/branches/dev/frdm/r123_MyBranch@234</samp></li>
+
+    <li>For some types of information, simply appending to the ticket may not
+    be the best way of working. For example, design notes or test results may
+    be best recorded elsewhere, preferably in a wiki page. If using wiki pages
+    we recommend using a naming convention to identify the wiki page with the
+    associated ticket, for example:<br />
+    <samp>Please refer to [wiki:ticket/123/Design design notes]</samp><br />
+    <samp>See separate [wiki:ticket/123/TestResults test results]</samp><br />
+    Note that the square brackets have to be used since a page name containing
+    numbers is not recognised automatically.</li>
+  </ol>
+
+  <h2 id="packages">Creating Packages</h2>
+
+  <p>Sometimes you may need to combine the changes from several different
+  branches. For example:</p>
+
+  <ul>
+    <li>Your branch is just part of a larger change which needs to be tested in
+    its entirety before committing to the trunk.</li>
+
+    <li>You have some diagnostic code stored on a branch which you want to
+    combine with another branch for testing purposes.</li>
+  </ul>
+
+  <p>We refer to this as creating a <em>package</em>.</p>
+
+  <p>To create a package you simply create a new branch as normal. The
+  <em>type</em> should be a <em>package</em> or possibly a
+  <em>configuration</em> branch to help you distinguish it from your other
+  branches. You then simply merge in all of the branches that you want to
+  combine using <code>fcm merge</code>.</p>
+
+  <ul>
+    <li>The chance of conflicts will be reduced if the branches you are
+    combining have been created from the same point on the trunk. Your package
+    branch should also be created from the same point on the trunk.
+
+      <ul>
+        <li><em>Currently, <code>fcm merge</code> will not work unless this is
+        true.</em></li>
+      </ul>
+    </li>
+
+    <li>If further changes are made on a branch you are using in a package then
+    you can incorporate these changes into your package using <code>fcm
+    merge</code>. Note, however, that if you have a branch which is being used
+    in a package then you should avoid merging changes from the trunk into your
+    branch. If you do then it will be very difficult to get updates to your
+    branch merged into the package.</li>
+  </ul>
+
+  <p>The <code>fcm branch-info</code> command is very useful for maintaining
+  packages. It tells you all of the branches which have been merged into your
+  package and whether there are any more recent changes on those branches.</p>
+
+  <h2 id="releases">Preparing System Releases</h2>
+
+  <p>There are two ways of preparing system releases:</p>
+
+  <dl>
+    <dt>A system release is simply a particular revision of the trunk</dt>
+
+    <dd>
+      <p>In order to do this it will be necessary to restrict changes on the
+      trunk whilst the release is being prepared.</p>
+
+      <ul>
+        <li>Users can continue to develop changes not intended for inclusion in
+        this release on branches.</li>
+
+        <li>This may be a problem if preparing the release takes too long.</li>
+      </ul>
+    </dd>
+
+    <dt>Create a release branch where the release is finalised</dt>
+
+    <dd>
+      <p>You then lose the ability to be able to branch from the release.</p>
+
+      <p>It may be harder to identify what changes have been made between
+      releases (since you can't simply look at all the changesets made between
+      two revisions of the trunk).</p>
+    </dd>
+  </dl>
+
+  <h2 id="rapid">Rapid vs Staged Development Practices</h2>
+
+  <p>Most of this section on working practices has focussed on projects/systems
+  which are quite mature. Such systems are likely to have regular releases and
+  will, for example, insist that all changes to the trunk are reviewed and
+  tested.</p>
+
+  <p>If your system is still undergoing rapid development and has not yet
+  reached any sort of formal release then you will probably want to adopt a
+  much more relaxed set of working practices. For example:</p>
+
+  <ul>
+    <li>Changes don't need to be reviewed.</li>
+
+    <li>More changes will be committed to the trunk. Only very large changes
+    will be prepared on branches.</li>
+
+    <li>No requirement to have a Trac ticket associated with each change.</li>
+  </ul>
+
+  <p>We have tried to avoid building too many assumptions about working
+  practices into the FCM system. This gives projects the flexibility to decide
+  which working practices are appropriate for their system. Hopefully this
+  means that FCM can be used for large or small systems and for rapidly
+  evolving or very stable systems.</p>
+</body>
+</html>

@@ -1,0 +1,5 @@
+build_1=fail
+
+# This case does fail as expected.
+# However, the failure is at the link stage whereas it ought to fail
+# due to a missing dependency (see #335)

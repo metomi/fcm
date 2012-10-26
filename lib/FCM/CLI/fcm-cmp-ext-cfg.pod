@@ -1,0 +1,30 @@
+=head1 NAME
+
+fcm cmp-ext-cfg
+
+=head1 SYNOPSIS
+
+Compares the extract configurations of two similar FCM 1 extract configuration
+files CFGFILE1 and CFGFILE2. This application is deprecated.
+
+    fcm cmp-ext-cfg [OPTIONS] CFFILE1 CFGFILE2
+
+=head1 OPTIONS
+
+=over 4
+
+=item --verbose=N, -v N
+
+Specify the verbosity level. In normal mode with verbosity level 2 or above,
+displays the change log of each revision.
+
+=item --wiki-format=TARGET
+
+Print revision tables in wiki format. In wiki mode, print revision tables in
+wiki format. The argument to this option must be the Subversion URL or FCM URL
+keyword of a FCM project associated with the intended Trac system. The --verbose
+option has no effect in wiki mode.
+
+=back
+
+=cut

@@ -1,0 +1,2 @@
+cfg_name="fcm2_base fcm2_fflags1 fcm2_fflags2 fcm2_base"
+compare_fcm1=false

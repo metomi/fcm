@@ -1,0 +1,43 @@
+=head1 NAME
+
+fcm branch-info (binfo)
+
+=head1 SYNOPSIS
+
+Displays information of a branch.
+
+    fcm branch-info [OPTIONS] [TARGET]
+
+=head1 ARGUMENTS
+
+TARGET can be an URL or a Subversion working copy. Otherwise, the current
+working directory must be a working copy. The specified URL (or the URL of the
+working copy) must be a URL under a valid branch in a standard FCM project.
+
+=head1 OPTIONS
+
+=over 4
+
+=item --verbose, -v
+
+Print extra information.
+
+=item --show-all, -a
+
+Set --show-children, --show-other and --show-siblings.
+
+=item --show-children
+
+Report children of the current branch.
+
+=item --show-other
+
+Report custom/ reverse merges into the current branch.
+
+=item --show-siblings
+
+Report merges with siblings of the current branch.
+
+=back
+
+=cut

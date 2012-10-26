@@ -1,0 +1,90 @@
+#!/bin/ksh
+
+cat <<EOF >$BATCH_SCRIPT
+#!/bin/ksh
+#
+# @ job_type = serial
+# @ class = serial
+# @ resources = ConsumableCpus(6) ConsumableMemory(1gb)
+# @ initialdir = $RUN_DIR_HPC
+# @ output = hpc_batch.stdout
+# @ error  = hpc_batch.stderr
+# @ queue
+
+. prg_12_1_0_9
+export PATH=$RUN_DIR_HPC/fcm/bin:\$PATH
+export DIFF="/opt/freeware/bin/diff"
+export DEBUG=$DEBUG
+
+. \$PWD/$BATCH_DIRS_NAME
+let failed=0
+for TEST in \$TESTS_FCM1
+do
+  cd $RUN_DIR_HPC/\$TEST
+  echo "\$(date): Running \$TEST ..."
+  find src -exec touch {} \\;
+  fcm build -v 2 -j 6 >../\$TEST.build.stdout.1 2>../\$TEST.build.stderr.1
+  RC=\$?
+  if [[ \$RC != 0 ]]; then
+    echo "FAILED: \$TEST failed"
+    let failed=failed+1
+  else
+EOF
+
+if [[ $TYPE == control ]]; then
+  echo "    touch .tests.complete" >>$BATCH_SCRIPT
+else
+  cat <<EOF >>$BATCH_SCRIPT
+    export COMPARE_TIMES=true
+    cd $BASE_DIR_HPC
+    ./compare_results_fcm1 \$TEST
+    if [[ \$? != 0 ]]; then
+      let failed=failed+1
+    fi
+EOF
+fi
+
+cat <<EOF >>$BATCH_SCRIPT
+  fi
+done
+for TEST in \$TESTS_FCM2
+do
+  cd $RUN_DIR_HPC/\$TEST
+  echo "\$(date): Running \$TEST ..."
+  find extract -exec touch {} \\;
+  fcm make -j 6 >../\$TEST.make.stdout.1 2>../\$TEST.make.stderr.1
+  RC=\$?
+  if [[ \$RC != 0 ]]; then
+    echo "FAILED: \$TEST failed"
+    let failed=failed+1
+  else
+EOF
+
+if [[ $TYPE == control ]]; then
+  cat <<EOF >>$BATCH_SCRIPT
+    touch .tests.complete
+    cd ..
+    ../compare_times_fcm1-2 \$TEST
+EOF
+else
+  cat <<EOF >>$BATCH_SCRIPT
+    export COMPARE_TIMES=true
+    cd $BASE_DIR_HPC
+    ./compare_results_fcm2 \$TEST
+    if [[ \$? != 0 ]]; then
+      let failed=failed+1
+    fi
+EOF
+fi
+
+cat <<EOF >>$BATCH_SCRIPT
+  fi
+done
+
+echo "\$(date): HPC performance tests finished"
+if [[ \$failed == 0 ]]; then
+  echo "SUMMARY: All HPC performance tests succeeded"
+else
+  echo "SUMMARY: \$failed HPC performance tests failed"
+fi
+EOF

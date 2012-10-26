@@ -1,0 +1,379 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for Linux/x86 (vers 1st December 2004), see www.w3.org" />
+
+  <title>FCM User Guide: Annex: Declarations in FCM 1 extract configuration
+  file</title>
+  <meta name="author" content="FCM team" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" type="text/css" href="../etc/fcm.css" />
+<script type="text/javascript" src="../etc/fcm.js">
+</script>
+<script type="text/javascript" src="../etc/fcm-version.js">
+</script>
+</head>
+
+<body>
+  <div id="body-header">
+    <a href="http://www.metoffice.gov.uk/research/collaboration/fcm/">
+    <img src="../etc/fcm.png" alt="FCM" />
+    </a>
+    <address>
+      &copy; British Crown Copyright 2006-12
+      <a href="http://www.metoffice.gov.uk">Met Office</a>.
+      See <a href="../etc/fcm-terms-of-use.html">Terms of Use</a>.<br />
+      This document is released under the <a href=
+      "http://www.nationalarchives.gov.uk/doc/open-government-licence/" rel=
+      "license">Open Government Licence</a>.<br />
+      <span id="fcm-version"></span><br />
+      <span id="fcm-js-trail"></span>
+    </address>
+  </div>
+  <address id="fcm-js-trail"></address>
+
+  <h1>Annex: Declarations in FCM 1 extract configuration file</h1>
+
+  <p><em>The FCM 1 extract system is deprecated. The documentation for the
+  current extract system can be found at <a href="make.html">FCM
+  Make</a>.</em></p>
+
+  <p>The following is a list of supported declarations for the configuration
+  file used by the FCM extract system. Unless otherwise stated, the fields in
+  all declaration labels are not case sensitive.</p>
+
+  <dl>
+    <dt>CFG::TYPE</dt>
+
+    <dd>
+      <p>The configuration file type, the value should always be
+      <samp>ext</samp> for an extract configuration file. This declaration is
+      compulsory for all extract configuration files.</p>
+
+      <p>Example:</p>
+      <pre>
+cfg::type  ext
+</pre>
+    </dd>
+
+    <dt>CFG::VERSION</dt>
+
+    <dd>
+      <p>The file format version, currently <samp>1.0</samp> - a version is
+      included so that we shall be able to read the configuration file
+      correctly should we decide to change its format in the future.</p>
+
+      <p>Example:</p>
+      <pre>
+cfg::version  1.0
+</pre>
+    </dd>
+
+    <dt>%&lt;name&gt;</dt>
+
+    <dd>
+      <p><code>%&lt;name&gt;</code> declares an internal variable
+      <var>&lt;name&gt;</var> that can later be re-used.</p>
+
+      <p>Example:</p>
+      <pre>
+%my_variable   foo
+src::bar::base %my_variable
+src::egg::base %my_variable
+src::ham::base %my_variable
+</pre>
+    </dd>
+
+    <dt>INC</dt>
+
+    <dd>
+      <p>This declares the name of a file containing extract configuration. The
+      lines in the declared file will be included inline to the current
+      configuration file.</p>
+
+      <p>Example:</p>
+      <pre>
+inc  ~frva/var_stable_22.0/cfg/ext.cfg
+# ... and then your changes ...
+</pre>
+    </dd>
+
+    <dt>DEST[::ROOTDIR]</dt>
+
+    <dd>
+      <p>The <em>root</em> path of the destination of this extract. This
+      declaration is compulsory for all extract configuration files.</p>
+
+      <p>Example:</p>
+      <pre>
+dest  $HOME/project/my_project
+</pre>
+    </dd>
+
+    <dt>USE</dt>
+
+    <dd>
+      <p>This declares the location of a previous successful extract, which the
+      current extract will inherit from. If the previous extract is also a
+      build, the subsequent invocation of the build system on the current
+      extract will automatically trigger an inherited incremental build based
+      on that build.</p>
+
+      <p>Example:</p>
+      <pre>
+use  ~frva/var_stable_22.0
+# ... and then the settings for your current extract ...
+</pre>
+    </dd>
+
+    <dt>RDEST[::ROOTDIR]</dt>
+
+    <dd>
+      <p>The alternate destination of this extract. This declaration is
+      compulsory if this extract requires mirroring to an alternate
+      destination.</p>
+
+      <p>Example:</p>
+      <pre>
+rdest  /home/nwp/da/frva/project/my_project
+</pre>
+    </dd>
+
+    <dt>RDEST::LOGNAME</dt>
+
+    <dd>
+      <p>The login name of the user on the alternate destination machine. If
+      not specified, the current login name of the user on the local platform
+      is assumed.</p>
+
+      <p>Example:</p>
+      <pre>
+rdest::logname  frva
+</pre>
+    </dd>
+
+    <dt>RDEST::MACHINE</dt>
+
+    <dd>
+      <p>The destination machine for this extract. If not specified, the current
+      host name is assumed.</p>
+
+      <p>Example:</p>
+      <pre>
+rdest::machine  tx01
+</pre>
+    </dd>
+
+    <dt>
+      RDEST::MIRROR_CMD<br />
+      <del>MIRROR</del>
+    </dt>
+
+    <dd>
+      <p>The extract system can mirror the extracted source to an alternate
+      machine. Currently, it does this using either the <code>rdist</code> or
+      the <code>rsync</code> command. The default is <samp>rsync</samp>. This
+      declaration can be used to switch to using <samp>rdist</samp>.</p>
+
+      <p>Example:</p>
+      <pre>
+rdest::mirror_cmd  rdist
+</pre>
+    </dd>
+
+    <dt>
+      RDEST::RSH_MKDIR_RSH (<del>RDEST::REMOTE_SHELL</del>)<br />
+      RDEST::RSH_MKDIR_RSHFLAGS<br />
+      RDEST::RSH_MKDIR_MKDIR<br />
+      RDEST::RSH_MKDIR_MKDIRFLAGS
+    </dt>
+
+    <dd>
+      <p>If <code>rsync</code> is used to mirror an extract, the system needs to
+      issue a separate remote shell command to create the container directory of
+      the mirror destination. The default is to issue a shell command in the
+      form <samp>ssh -n -oBatchMode=yes LOGNAME@MACHINE mkdir -p DEST</samp>.
+      These declarations can be used to modify the command.</p>
+
+      <p>Example:</p>
+      <pre>
+# Examples using the default settings:
+rdest::rsh_mkdir_rsh         ssh
+rdest::rsh_mkdir_rshflags    -n -oBatchMode=yes
+rdest::rsh_mkdir_mkdir       mkdir
+rdest::rsh_mkdir_mkdirflags  -p
+</pre>
+    </dd>
+
+    <dt>
+      RDEST::RSYNC<br />
+      RDEST::RSYNCFLAGS
+    </dt>
+
+    <dd>
+      <p>These declarations are only useful if <code>rsync</code> is used to
+      mirror an extract. By default, the system issues the shell command
+      <samp>rsync -a --exclude='.*' --delete-excluded --timeout=900 --rsh='ssh
+      -oBatchMode=yes' SOURCE DEST</samp>. These declarations can be used to
+      modify the command.</p>
+
+      <p>Example:</p>
+      <pre>
+# Examples using the default settings:
+rdest::rsync       rsync
+rdest::rsyncflags  -a --exclude='.*' --delete-excluded --timeout=900 \
+                   --rsh='ssh -oBatchMode=yes'
+</pre>
+    </dd>
+
+    <dt>REPOS::&lt;pck&gt;::&lt;branch&gt;</dt>
+
+    <dd>
+      <p>This declares a URL or a local file system path for the container
+      <em>repository</em> of a branch named &lt;branch&gt; in a package named
+      &lt;pck&gt;. The package name &lt;pck&gt; must be the name of a top-level
+      package (i.e. it must not contain the double colon <code>::</code>
+      delimiter). The name &lt;branch&gt; is used internally within the extract
+      system, and so is independent of the branch name of the code management
+      system. However, it is usually desirable to use the same name of the
+      actual branch in the code management system. For declaration of a local
+      file system path, the convention is to name the branch <samp>user</samp>.
+      Please note that both &lt;pck&gt; and &lt;branch&gt; fields are case
+      sensitive. The declared URL must be a valid Subversion URL or a valid FCM
+      URL keyword.</p>
+
+      <p>Example:</p>
+      <pre>
+repos::var::base    fcm:var_tr
+repos::var::branch1 fcm:var_br/frsn/r4790_foobar
+repos::var::user    $HOME/var
+</pre>
+    </dd>
+
+    <dt>
+      REVISION::&lt;pck&gt;::&lt;branch&gt;<br />
+      <del>VERSION::&lt;pck&gt;::&lt;branch&gt;</del>
+    </dt>
+
+    <dd>
+      <p>The revision to be used for the URL of &lt;branch&gt; in the package
+      &lt;pck&gt;. If specified, the revision must be a revision where the
+      branch exists. If not specified, the revision defaults to last changed
+      revision at the HEAD of the branch. Please note that if the declared
+      <em>branch</em> is in the local file system, this declaration must not be
+      used. The value of the declaration can be a FCM revision keyword or any
+      revision argument acceptable by Subversion. You can use a valid revision
+      number, a date between a pair of curly brackets (e.g. <samp>{"2005-05-01
+      12:00"}</samp>) or the keyword HEAD. However, please do not use the
+      keywords BASE, COMMITTED or PREV as these are reserved for working copies
+      only. Again, please note that both &lt;pck&gt; and &lt;branch&gt; fields
+      are case sensitive.</p>
+
+      <p>Example:</p>
+      <pre>
+# Declare the revision with the FCM revision keyword "vn22.0"
+revision::var::base     vn22.0
+# Declare the revision with a {date}
+revision::var::branch1  {2006-01-01}
+</pre>
+    </dd>
+
+    <dt>REVMATCH</dt>
+
+    <dd>
+      <p>If set to true, the declared revision of a branch must be a changed
+      revision of that branch, (unless the keyword HEAD is used).</p>
+
+      <p>Example:</p>
+      <pre>
+revmatch  true
+</pre>
+    </dd>
+
+    <dt>SRC::&lt;pcks&gt;::&lt;branch&gt;</dt>
+
+    <dd>
+      <p>This declares a source directory for the sub-package &lt;pcks&gt; of
+      &lt;branch&gt;. If the repository is declared as a URL, the source
+      directory must be quoted as a relative path to the URL. If the repository
+      is declared as a path in the local file system, the source directory can
+      be declared as either a relative path to the <em>repository</em> or a
+      full path. If the source directory is a relative path and &lt;pcks&gt; is
+      a top-level package, the full name of the sub-package will be determined
+      automatically using the directory names of the relative path as the names
+      of the sub-packages. If the source directory is a full path, the full
+      sub-package name must be specified. The name of the sub-package
+      determines the destination path of the source directory in the
+      extract.</p>
+
+      <p>Example:</p>
+      <pre>
+src::var::base                    code/VarMod_PF
+src::var/code/VarMod_PF::user   $HOME/var/code/VarMod_PF 
+</pre>
+    </dd>
+
+    <dt>EXPSRC::&lt;pcks&gt;::&lt;branch&gt;</dt>
+
+    <dd>
+      <p>This declares an expandable source directory for the sub-package
+      &lt;pcks&gt; of &lt;branch&gt;. This declaration is essentially the same
+      as the SRC declaration, except that the system will attempt to search
+      recursively for sub-directories within the declared source directory.</p>
+
+      <p>Example:</p>
+      <pre>
+expsrc::var::base  code
+expsrc::var::user  code
+</pre>
+    </dd>
+
+    <dt>
+      CONFLICT<br />
+      <del>OVERRIDE</del>
+    </dt>
+
+    <dd>
+      <p>This declaration can be used to specify the conflict mode, which is
+      relevant when a file is modified by two different branches (or more)
+      relative to the base branch. The conflict mode can be <samp>fail</samp>,
+      <samp>merge</samp> (default) or <samp>override</samp> (or 0, 1 and 2
+      respectively). If <samp>fail</samp> is specified, the extract fails when
+      a file is modified by two branches (or more) relative to the base branch.
+      If <samp>merge</samp> is specified, the system will attempt to merge the
+      changes. It will fail only on unresolved conflicts. If
+      <samp>override</samp> is specified, the changes in the last branch takes
+      precedence and the changes in the earlier branches will be ignored. Note:
+      the old <code>override true|false</code> declaration is deprecated. If
+      declared, <code>override true</code> will be equivalent to <code>conflict
+      override</code>, and <code>override false</code> will be equivalent to
+      <code>conflict fail</code>.</p>
+
+      <p>Example:</p>
+      <pre>
+conflict  override
+</pre>
+    </dd>
+
+    <dt>BLD::&lt;fields&gt;</dt>
+
+    <dd>
+      <p>Declare a build configuration file declaration. The label
+      &lt;fields&gt; is the label of the declaration. On a successful extract,
+      &lt;fields&gt; will be added to the build configuration file. Please note
+      that some of the &lt;fields&gt; may be case sensitive.</p>
+
+      <p>Example:</p>
+      <pre>
+bld::target   VarScr_AnalysePF
+bld::tool::fc sxmpif90
+bld::tool::cc sxmpic++
+# ... and so on ...
+</pre>
+    </dd>
+  </dl>
+</body>
+</html>

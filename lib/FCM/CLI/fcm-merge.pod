@@ -1,0 +1,76 @@
+=head1 NAME
+
+fcm merge
+
+=head1 SYNOPSIS
+
+Merge changes from a source into your working copy.
+
+    1. fcm merge SOURCE
+    2. fcm merge --custom  --revision N[:M] SOURCE
+       fcm merge --custom  URL[\@REV1] URL[\@REV2]
+    3. fcm merge --reverse --revision [M:]N
+
+=over 4
+
+=item 1.
+
+If neither --custom nor --reverse is specified, the command merges changes
+automatically from SOURCE into your working copy. SOURCE must be a valid
+URL[@REV] of a branch in a standard FCM project. The base of the merge will be
+calculated automatically based on the common ancestor and latest merge
+information between the SOURCE and the branch of the working copy.
+
+=item 2.
+
+If --custom is specified, the command can be used in two forms.
+  
+In the first form, it performs a custom merge from the specified changeset(s) of
+SOURCE into your working copy. SOURCE must be a valid URL[@REV] of a branch in
+a standard FCM project. If a single revision is specified, the merge delta is (N
+- 1):N of SOURCE. Otherwise, the merge delta, is N:M of SOURCE, where N < M.
+     
+In the second form, it performs a custom merge using the delta between the two
+specified branch URLs. For each URL, if a peg revision is not specified, the
+command will peg the URL with its last changed revision.
+
+=item 3.
+
+If --reverse is specified, the command performs a reverse merge of the
+changeset(s) specified by the --revision option. If a single revision is
+specified, the merge delta is N:(N - 1). Otherwise, the merge delta is M:N,
+where M > N. Note that you do not have to specify a SOURCE for a reverse merge,
+because the SOURCE should always be the branch your working copy is pointing to.
+  
+=back
+
+The command provide a commit log message template following the merge.
+
+=head1 OPTIONS
+
+=over 4
+
+=item --auto-log
+
+In automatic mode, adds the log messages of the merged revisions in the commit
+log. Has no effect in other merge modes.
+
+=item --dry-run
+
+Try operation but make no changes.
+
+=item --non-interactive
+
+Do no interactive prompting.
+
+=item --revision=REV, -r REV
+
+Specify a (range of) revision number(s).
+
+=item --verbose, -v
+
+Print extra information.
+
+=back
+
+=cut

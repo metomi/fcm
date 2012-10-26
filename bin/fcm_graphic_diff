@@ -1,0 +1,130 @@
+#!/usr/bin/env perl
+#-------------------------------------------------------------------------------
+# (C) British Crown Copyright 2006-2012 Met Office.
+#
+# This file is part of FCM, tools for managing and building source code.
+#
+# FCM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FCM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FCM. If not, see <http://www.gnu.org/licenses/>.
+#-------------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use Getopt::Long qw{GetOptions};
+use Pod::Usage qw{pod2usage};
+
+my $RE_SVN_EMPTY_FILE = qr{\.svn/empty-file}msx;
+
+my %S = (
+    'LABEL'    => "--- %s\n+++ %s",
+    'SKIP_ADD' => "Skipping since file has been added (or old file is empty)",
+    'SKIP_DEL' => "Skipping since file has been deleted (or new file is empty)",
+    'SKIP_BIN' => "Skipping binary file",
+);
+my %LABELS_HANDLER_FOR = (
+    'tkdiff' => sub {map {('-L', $_)} @_},
+    'xxdiff' => sub {('--title1', $_[0], '--title2', $_[1])},
+);
+
+if (!caller()) {
+    # svn diff expects:
+    # 0 - no diff
+    # 1 - diff
+    # other return code - fatal
+    exit main(@ARGV);
+}
+
+sub main {
+    local(@ARGV) = @_;
+    my %option;
+    my $rc = GetOptions(\%option, 'u', 'L=s@');
+    if (!$rc || @ARGV != 2 || grep {!-f $_} @ARGV) {
+        pod2usage(1);
+    }
+    my ($old, $new) = @ARGV;
+    ( $old =~ $RE_SVN_EMPTY_FILE || -z $old ? message('SKIP_ADD')
+    : $new =~ $RE_SVN_EMPTY_FILE || -z $new ? message('SKIP_DEL')
+    : -B $new                               ? message('SKIP_BIN')
+    :                                         command(\%option, @ARGV)
+    );
+}
+
+sub command {
+    my ($option_hash_ref, $old, $new) = @_;
+    my @labels;
+    if ($option_hash_ref->{'L'} && @{$option_hash_ref->{'L'}} >= 2) {
+        @labels = @{$option_hash_ref->{'L'}};
+        message('LABEL', @labels);
+    }
+    my $diff_command
+        = exists($ENV{FCM_GRAPHIC_DIFF}) ? $ENV{FCM_GRAPHIC_DIFF} : 'xxdiff';
+    if (!$diff_command) {
+        return;
+    }
+    my @command = (
+        $diff_command,
+        (   @labels && exists($LABELS_HANDLER_FOR{$diff_command})
+            ? $LABELS_HANDLER_FOR{$diff_command}->(@labels) : ()
+        ),
+        $old, $new,
+    );
+    system(@command);
+}
+
+sub message {
+    my $format = shift();
+    printf($S{$format} . "\n\n", @_);
+    1;
+}
+
+__END__
+
+=head1 NAME
+
+fcm_graphic_diff
+
+=head1 SYNOPSIS
+
+    fcm_graphic_diff [-u] [-L OLD_LABEL] [-L NEW_LABEL] OLD NEW
+
+=head1 DESCRIPTION
+
+Invokes L<xxdiff|xxdiff> (or the command specified in the FCM_GRAPHIC_DIFF
+environment variable) to compare the OLD and NEW files, where possible.
+
+If either file does not exist or is empty, or if the NEW file is a binary, the
+command will only print a diagnostic message.
+
+The -u option is not used, and is for compatibility with the L<svn diff|svn>
+command only.
+
+If OLD_LABEL and NEW_LABEL are set, they are printed in the format:
+
+    ---- OLD_LABEL
+    ++++ NEW_LABEL
+
+The command makes use of the labels when the diff command is either
+L<xxdiff|xxdiff> or L<tkdiff|tkdiff>:
+
+    xxdiff --title1 OLD_LABEL --title2 NEW_LABEL OLD NEW
+    tkdiff -L OLD_LABEL -L NEW_LABEL OLD NEW
+
+The command returns 0 if the files are the same or 1 if the files differ. All
+other return codes should be regarded as fatal errors.
+
+=head1 COPYRIGHT
+
+(C) Crown copyright Met Office. All rights reserved.
+
+=cut

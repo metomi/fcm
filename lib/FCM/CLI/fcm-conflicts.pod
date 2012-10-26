@@ -1,0 +1,17 @@
+=head1 NAME
+
+fcm conflicts (cf)
+
+=head1 SYNOPSIS
+
+Use graphical tool to resolve any conflicts within your working copy.
+
+    fcm conflicts [PATH]
+
+=head1 ARGUMENTS
+
+Invoke a graphical merge tool to help you resolve conflicts in your working copy
+at PATH. It prompts you to run "L<svn|svn> resolved" each time you have resolved
+the conflicts in a text file.
+
+=cut

@@ -1,0 +1,2112 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for Linux/x86 (vers 1st December 2004), see www.w3.org" />
+
+  <title>FCM User Guide: FCM Make</title>
+  <meta name="author" content="FCM team" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" type="text/css" href="../etc/fcm.css" />
+<script type="text/javascript" src="../etc/fcm.js">
+</script>
+<script type="text/javascript" src="../etc/fcm-version.js">
+</script>
+</head>
+
+<body>
+  <div id="body-header">
+    <a href="http://www.metoffice.gov.uk/research/collaboration/fcm/">
+    <img src="../etc/fcm.png" alt="FCM" />
+    </a>
+    <address>
+      &copy; British Crown Copyright 2006-12
+      <a href="http://www.metoffice.gov.uk">Met Office</a>.
+      See <a href="../etc/fcm-terms-of-use.html">Terms of Use</a>.<br />
+      This document is released under the <a href=
+      "http://www.nationalarchives.gov.uk/doc/open-government-licence/" rel=
+      "license">Open Government Licence</a>.<br />
+      <span id="fcm-version"></span><br />
+      <span id="fcm-js-trail"></span>
+    </address>
+  </div>
+
+  <h1>FCM Make</h1>
+
+  <div id="fcm-content"></div>
+
+  <h2 id="introduction">Introduction</h2>
+
+  <p>The FCM make system provides a common environment for running the extract
+  system, build system, and other utilities. Simply put, it controls a chain of
+  steps. It is NOT to be confused with the standard Unix utility
+  <code>make</code>.</p>
+
+  <p>See <a href="annex_cfg.html#make">Annex: FCM Configuration File &gt; FCM
+  Make Configuration</a> for a full list of declarations in an FCM Make
+  configuration file.</p>
+
+  <h2 id="concept">FCM Make: Concept</h2>
+
+  <p>The FCM make system can be invoked using the command line interface:</p>
+  <pre>
+fcm make [OPTIONS]
+</pre>
+
+  <p>The FCM make system relies on a configuration file to tell it what to do.
+  By default, it locates the configuration file from
+  <samp>$PWD/fcm-make.cfg</samp>. You can use the
+  <code>--config-file=PATH</code> (or <code>-f PATH</code>) option to specify
+  an alternate path to the FCM make configuration file. For full details of the
+  other command line options please see <a href="command_ref.html#fcm-make">FCM
+  Command Reference &gt; fcm make</a>.</p>
+
+  <p>The FCM make configuration file is expected to be an FCM configuration
+  file. (See <a href="annex_cfg.html">Annex: FCM Configuration File</a>.) A
+  typical FCM make configuration file may look like:</p>
+  <pre>
+steps = extract build                           # 1
+
+extract.ns = egg ham bacon                      # 2
+# ... more extract configuration
+
+build.target = egg.exe ham.exe bacon            # 3
+# ... more build configuration
+</pre>
+
+  <p>At point 1, the <code><a href="annex_cfg.html#make.steps">steps</a></code>
+  declaration tells the system to invoke two steps. Their IDs are
+  <samp>extract</samp> and <samp>build</samp>, both are IDs for built-in
+  systems. (The other 2 being <samp>mirror</samp> and <samp>preprocess</samp>.)
+  Each step has its own declarations, which are prefixed with the step ID and a
+  full stop. The declarations at point 2 are used by the logic for running the
+  <samp>extract</samp> step and the declarations at point 3 are used by the
+  logic for running the <samp>build</samp> step.</p>
+
+  <p>There are times when you may need to invoke the same system (e.g. the
+  build system) in slightly different configurations. To do this you need to
+  use the <code><a href="annex_cfg.html#make.step.class">step.class</a></code>
+  declaration to define custom step IDs for each build. E.g.:</p>
+  <pre>
+step.class[build-this build-that] = build       # 1
+steps = extract build-this build-that           # 2
+
+extract.ns = egg ham bacon                      # 3
+# ... more extract configuration
+
+build-this.prop{fc.defs} = DEFS TO BUILD THIS   # 4
+build-this.target = this.exe
+# ... more build configuration for "build-this"
+
+build-that.prop{fc.defs} = DEFS TO BUILD THAT   # 5
+build-that.target = that.exe
+# ... more build configuration for "build-that"
+</pre>
+
+  <p>At point 1, we define the IDs <samp>build-this</samp> and
+  <samp>build-that</samp> to be an instance of the <samp>build</samp> class. At
+  point 2, we tell the system to run <samp>extract</samp>, then
+  <samp>build-this</samp>, then <samp>build-that</samp>. At point 4 and 5, we
+  define the configurations for <samp>build-this</samp> and
+  <samp>build-that</samp> respectively.</p>
+
+  <dl>
+    <dt>Directory Structure</dt>
+
+    <dd>
+      <p>When you run <code>fcm make</code>, it will create a directory
+      structure that may look like:</p>
+      <pre>
+.fcm-make/...
+extract/...
+build/...
+...
+</pre>
+
+      <p>Each normal sub-directory, such as <samp>extract/</samp> and
+      <samp>build/</samp>, contains the result of each step. The hidden
+      sub-directory <samp>.fcm-make/</samp> is used by <code>fcm make</code> as
+      a working area. It may contain the following items:</p>
+
+      <p><samp>.fcm-make/cache/</samp> An area for caching non-local items.
+      E.g. the extract system exports source trees from the version control
+      system into this cache.</p>
+
+      <p><samp>.fcm-make/config-as-parsed.cfg</samp> The configuration file as
+      parsed by the latest <code>fcm make</code> command at this
+      destination.</p>
+
+      <p><samp>.fcm-make/config-on-success.cfg</samp> The configuration file
+      that can be used to repeat the latest successful <code>fcm make</code>
+      command at this destination.</p>
+
+      <p><samp>.fcm-make/ctx.gz</samp> A serialised data structure that
+      represents the context of the latest <code>fcm make</code> command at
+      this destination. It is a <code>gzip</code> file containing data in the
+      <a href="http://perldoc.perl.org/Storable.html">Perl Storable</a>
+      format.</p>
+
+      <p><samp>.fcm-make/log</samp> A diagnostic log generated by the latest
+      <code>fcm make</code> command at this destination. The content should be
+      equivalent to the diagnostic output in STDOUT and STDERR at
+      <code>-vv</code> verbosity.</p>
+    </dd>
+  </dl>
+
+  <h2 id="extract">Extract</h2>
+
+  <p>The extract system provides an interface between the version control
+  system (currently Subversion) and the build system. Where appropriate, it
+  extracts code and combines changes from the repositories and other
+  user-defined locations to a directory tree suitable for feeding into the build
+  system.</p>
+
+  <p>The extract system supports the <code>--jobs=N</code> option of the
+  <code>fcm make</code> command. It uses <var>N</var> child processes to get
+  source trees information and to export source trees from their repositories in
+  parallel.</p>
+
+  <h3 id="extract.basic">Extract: Basic</h3>
+
+  <p>The following is an example of how to extract the source trees from a file
+  system path and the trunks of 2 known projects (version controlled in
+  Subversion repositories with a standard FCM layout):</p>
+  <pre>
+steps = extract                    # line 1
+extract.ns = ops var um            # line 2
+extract.location[ops] = $HOME/ops  # line 3
+</pre>
+
+  <p>Here is an explanation of what each line does:</p>
+
+  <ul>
+    <li><dfn>line 1</dfn>: the <code><a href=
+    "annex_cfg.html#make.steps">steps</a></code> declaration tells the make
+    system to invoke the extract system.</li>
+
+    <li><dfn>line 2</dfn>: the <code><a href=
+    "annex_cfg.html#make.extract.ns">extract.ns</a></code> declaration is used
+    to specify a space delimited list of names of the projects to extract.</li>
+
+    <li><dfn>line 3</dfn>: the <code><a href=
+    "annex_cfg.html#make.extract.location">extract.location</a></code>
+    declaration is used to specify the base source tree of a project
+    (<samp>ops</samp> in this case) to extract. The value of the declaration
+    can be a path in the file system or a location in a version control system.
+    In this case, the declaration specifies the base source tree of the
+    <samp>ops</samp> project to be a path in the file system at
+    <samp>$HOME/ops</samp>. If the base source tree of a specified project
+    name-space is not declared, the system will make an assumption. For a
+    project hosted in a Subversion repository, the system will assume
+    <samp>trunk@HEAD</samp> if the project URL is registered in the keyword
+    configuration file or with the <code><a href=
+    "annex_cfg.html#make.extract.location.primary">extract.location{primary}</a></code>
+    declaration (see below).</li>
+  </ul>
+
+  <p>If you save this file as <samp>fcm-make.cfg</samp> and invoke the
+  <code>fcm make</code> command you should end up with a source tree in the
+  current working directory that looks like (hidden path not shown):</p>
+  <pre>
+extract/ops/...
+extract/um/...
+extract/var/...
+</pre>
+
+  <p>The result of the extract can be found in the <samp>extract/</samp>
+  sub-directory. Note: The generated source tree will not contain any symbolic
+  links or hidden files (e.g. file names beginning with a <samp>.</samp>),
+  because the extract system ignores them.</p>
+
+  <dl>
+    <dt>Note - project name-space and location</dt>
+
+    <dd>Whoever installed FCM at your site would have defined the name-spaces
+    and the locations of the common projects at your site using the keyword
+    configuration file at <samp>$FCM/etc/fcm-keyword.cfg</samp> (where
+    <samp>$FCM/bin</samp> is the path at which FCM is installed).
+    Alternatively, users can define their own set of project name-spaces and
+    their locations using <samp>$HOME/.met-um/fcm/keyword.cfg</samp>. For
+    information on keyword configuration files, please refer to <a href=
+    "system_admin.html#fcm-keywords">System Administration &gt; FCM
+    keywords</a>. If a project name-space is not defined in a keyword
+    configuration, it can be defined in the FCM make configuration using the
+    <code><a href=
+    "annex_cfg.html#make.extract.location.primary">extract.location{primary}</a></code>
+    declaration. E.g. to define the location of the <samp>foo</samp> project,
+    you can do: <samp>extract.location{primary}[foo] =
+    svn://server/repos/foo</samp>.</dd>
+
+    <dt>Note - incremental mode</dt>
+
+    <dd>Suppose you have already invoked <code>fcm make</code> using the above
+    configuration file. At a later time, you have made some changes to some of
+    the files in the source trees. Re-running <code>fcm make</code> on the same
+    configuration will trigger the incremental mode. In the incremental mode,
+    the extract system will update only those files that are modified. If the
+    last modified time (or last commit revision) of a source file in the
+    current extract differs from that in the previous extract, the system will
+    attempt a content comparison. The system updates the destination only if
+    the content and/or file access permission of the source differs from that
+    of the destination. To avoid the incremental mode and start afresh, invoke
+    <code>fcm make</code> with the <code>--new</code> option.</dd>
+  </dl>
+
+  <h3 id="extract.path-root">Extract: Redefine the Root of the Source Tree of a
+  Project</h3>
+
+  <p>Consider a project called <samp>foo</samp> with a source tree that looks
+  like:</p>
+  <pre>
+doc/...
+src/bar/...
+src/baz/...
+</pre>
+
+  <p>Suppose you are only interested in the contents of the <samp>src/</samp>
+  sub-tree. You can specify the root of the extract using the <code><a href=
+  "annex_cfg.html#make.extract.path-root">extract.path-root</a></code>
+  declaration. E.g.:</p>
+  <pre>
+steps = extract              # line 1
+extract.ns = foo             # line 2
+extract.path-root[foo] = src # line 3
+</pre>
+
+  <p>Running <code>fcm make</code> with this configuration should give a source
+  tree that looks like (hidden path not shown):</p>
+  <pre>
+extract/foo/bar/...
+extract/foo/baz/...
+</pre>
+
+  <h3 id="extract.path-filter">Extract: Filter the Paths in the Source Tree of
+  a Project</h3>
+
+  <p>Going back to the above source tree in the <samp>foo</samp> project,
+  imagine the <samp>src/bar/</samp> sub-directory contains:</p>
+  <pre>
+src/bar/wine/red.c
+src/bar/wine/rose.c
+src/bar/wine/white.c
+src/bar/...
+</pre>
+
+  <p>If you do not want <samp>src/bar/wine/rose.c</samp> in the extract, you
+  can ask for it to be excluded using the <code><a href=
+  "annex_cfg.html#make.extract.path-excl">extract.path-excl</a></code>
+  declaration. E.g.:</p>
+  <pre>
+steps = extract                          # line 1
+extract.ns = foo
+extract.path-root[foo] = src             # line 3
+extract.path-excl[foo] = bar/wine/rose.c # line 4
+</pre>
+
+  <p>Note: Because the root is redefined in line 3, the path in the
+  <code><a href=
+  "annex_cfg.html#make.extract.path-excl">extract.path-excl</a></code>
+  declaration in line 4 is declared from the new root level.</p>
+
+  <p>Running <code>fcm make</code> with this configuration should give a source
+  tree that looks like (hidden path not shown):</p>
+  <pre>
+extract/foo/bar/wine/red.c
+extract/foo/bar/wine/white.c
+extract/foo/bar/...
+extract/foo/baz/...
+</pre>
+
+  <p>On the other hand, if you only want <samp>src/bar/wine/rose.c</samp> in
+  the extract, you can ask the system to exclude everything in
+  <samp>src/bar/wine/</samp> but include <samp>src/bar/wine/rose.c</samp> using
+  the <code><a href=
+  "annex_cfg.html#make.extract.path-incl">extract.path-incl</a></code>
+  declaration. E.g.:</p>
+  <pre>
+steps = extract                          # line 1
+extract.ns = foo                         # line 2
+extract.path-root[foo] = src             # line 3
+extract.path-excl[foo] = bar/wine        # line 4
+extract.path-incl[foo] = bar/wine/rose.c # line 5
+</pre>
+
+  <p>Running <code>fcm make</code> with this configuration should give a source
+  tree that looks like (hidden path not shown):</p>
+  <pre>
+extract/foo/bar/wine/rose.c
+extract/foo/bar/...
+extract/foo/baz/...
+</pre>
+
+  <h3 id="extract.location-diff">Extract: Combining Changes from Multiple
+  Branches of a Project</h3>
+
+  <p>We have so far only dealt with extracts from a single base source tree in
+  each project. The extract system can also be used to <em>combine</em> changes
+  from different source trees (against a base source tree) of a project.</p>
+
+  <p>E.g. consider a project called <samp>food</samp>. In the latest release
+  (<samp>trunk@3739</samp>), the source tree looks like this:</p>
+  <pre>
+doc/...
+src/egg/boiled.py
+src/egg/microwave.x
+src/egg/omelette.c
+src/egg/poached.f90
+src/...
+</pre>
+
+  <p>Jamie, Gordon and Rick are all developing changes against the latest
+  release of the project.</p>
+
+  <p>Jamie has made the following changes (displayed using the notation of
+  <code>svn status</code>) in his branch at
+  <samp>branches/dev/jamie/r3739_t381@3984</samp>:</p>
+  <pre>
+D      src/egg/boiled.py
+A      src/egg/fried.pl
+M      src/egg/omelette.c
+</pre>
+
+  <p>Gordon has made the following changes in his branch at
+  <samp>branches/dev/gordon/r3739_t376@3993</samp>:</p>
+  <pre>
+M      src/egg/omelette.c
+M      src/egg/poached.f90
+</pre>
+
+  <p>Rick has made the following changes in his working copy at
+  <samp>~rick/food</samp>, but has yet to commit his changes back:</p>
+  <pre>
+M      src/egg/boiled.py
+A      src/egg/scrambled.bash
+</pre>
+
+  <p>To combine their changes in an extract, the FCM make configuration file
+  should look like:</p>
+  <pre id="example.extract">
+steps = extract
+extract.ns = food
+extract.location[food] = trunk@3739
+extract.location{diff}[food] = \
+    branches/dev/jamie/r3739_t381@3984 \
+    branches/dev/gordon/r3739_t376@3993 \
+    ~rick/food
+</pre>
+
+  <p>Here we have an <code><a href=
+  "annex_cfg.html#make.extract.location">extract.location</a></code>
+  declaration like before. This time it is pointing to the latest release of
+  the <samp>food</samp> project. The changes against the base source tree are
+  declared using the <code><a href=
+  "annex_cfg.html#make.extract.location.diff">extract.location{diff}</a></code>
+  declaration.</p>
+
+  <p>Invoking <code>fcm make</code> with this configuration file will result in
+  a source tree that looks like (hidden file not shown):</p>
+  <pre>
+extract/doc/...
+extract/src/egg/fried.pl
+extract/src/egg/microwave.x
+extract/src/egg/omelette.c
+extract/src/egg/poached.f90
+extract/src/egg/scrambled.bash
+extract/src/...
+</pre>
+
+  <p>Note:</p>
+
+  <ul>
+    <li>There is no <samp>extract/src/egg/boiled.py</samp> file in the extract
+    tree because it is deleted by Jamie's branch. Even though this file is
+    modified in Rick's working copy, the extract will ignore this and assume
+    that the deletion takes precedence.</li>
+
+    <li>The <samp>extract/src/egg/fried.pl</samp> file comes from Jamie's
+    branch.</li>
+
+    <li>The <samp>extract/src/egg/microwave.x</samp> file comes from the latest
+    release (base).</li>
+
+    <li>The <samp>extract/src/egg/omelette.c</samp> file is the result of a
+    merge of the changes in Jamie's and Gordon's branches. This example assumes
+    that there is no conflict in the merge. If the merge results in a conflict,
+    the extract will fail.</li>
+
+    <li>The <samp>extract/src/egg/poached.f90</samp> file comes from Gordon's
+    branch.</li>
+
+    <li>The <samp>extract/src/egg/scrambled.bash</samp> file comes from Rick's
+    working copy.</li>
+  </ul>
+
+  <h3 id="extract.inherit">Extract Inheritance</h3>
+
+  <p>If a previous extract with a similar configuration exists in another
+  location, it can be more efficient to inherit from this previous extract in
+  your current extract. This works like a normal incremental extract, except
+  that your extract will only contain the changes you have specified (compared
+  with the inherited extract) instead of the full directory tree in the
+  destination. This type of incremental extract is useful in several ways. For
+  instance:</p>
+
+  <ul>
+    <li>It is fast, because you only have to extract files that you have
+    changed.</li>
+
+    <li>The subsequent build will also be fast, since it will act like an
+    incremental build.</li>
+
+    <li>You do not need write access to the original extract. A system
+    administrator can set up a stable version in a central account, which
+    developers can then inherit from.</li>
+
+    <li>You want an incremental extract, but you need to leave the original
+    extract unmodified.</li>
+  </ul>
+
+  <p>Consider the <a href="#example.extract">previous example</a>. Imagine an
+  extract already exists for the latest release for the <samp>food</samp>
+  project at <samp>/home/food/latest/</samp>, and now you want to test the
+  changes introduced by Jamie, Gordon and Rick. You can <code><a href=
+  "annex_cfg.html#make.use">use</a></code> the original extract with the
+  changes:</p>
+  <pre>
+use = /home/food/latest
+extract.location{diff}[food] = \
+    branches/dev/jamie/r3739_t381@3984 \
+    branches/dev/gordon/r3739_t376@3993 \
+    ~rick/food
+</pre>
+
+  <p>Invoking <code>fcm make</code> with this configuration file will result in
+  a source tree that looks like (hidden file not shown):</p>
+  <pre>
+extract/src/egg/fried.pl
+extract/src/egg/omelette.c
+extract/src/egg/poached.f90
+extract/src/egg/scrambled.bash
+</pre>
+
+  <p>The extract will work in an incremental-like mode. The only difference is
+  that the original extract at <samp>/home/food/latest/</samp> will be left
+  untouched, and the new extract will contain only the changes introduced by
+  the diff locations. Note that, although
+  <samp>extract/src/egg/boiled.py</samp> remains in the original extract, it
+  will not be used in any subsequent build step.</p>
+
+  <dl>
+    <dt>Extract inheritance limitation</dt>
+
+    <dd>
+      <p>Extract inheritance allows you to add more diff locations to a project,
+      but you should not include any other declarations relating to the extract.
+      Doing so is not safe and should trigger an exception.</p>
+
+      <p>In some situations this implies that it will not be possible to use
+      inherited extracts. You should use a new extract if, for instance, a new
+      diff location contains a change which requires the use of source files in
+      a previously excluded name-space.</p>
+    </dd>
+  </dl>
+
+  <h3 id="extract.diagnostic">Extract Diagnostic</h3>
+
+  <p>The amount of diagnostic messages generated by the extract system is
+  dependent on the diagnostic verbosity level that can be modified by the
+  <code>-v</code> and <code>-q</code> options to the <code>fcm make</code>
+  command.</p>
+
+  <p>The following is a list of diagnostic output at each verbosity level:</p>
+
+  <dl>
+    <dt>-q</dt>
+
+    <dd>
+      <ul>
+        <li>Exceptions.</li>
+      </ul>
+    </dd>
+
+    <dt>default</dt>
+
+    <dd>
+      <ul>
+        <li>Everything at the -q level.</li>
+
+        <li>Start time of the extract.</li>
+
+        <li>The number and location of each source tree in each project. The
+        base source tree is number 0. E.g.:
+          <pre>
+[info] location um: 0: svn://fcm2/UM_svn/UM/trunk@11732
+[info] location um: 1: svn://fcm2/UM_svn/UM/branches/dev/Share/VN7.3_hg3_dust_443@11858
+[info] location um: 2: svn://fcm2/UM_svn/UM/branches/dev/Share/VN7.3_hg3_ccw_precip@11857
+[info] location um: 3: svn://fcm2/UM_svn/UM/branches/dev/hadco/VN7.3_HG3_porting_lsp_fixes@12029
+...
+</pre>
+        </li>
+
+        <li>The number of targets by their destination status and their source
+        status. E.g.:
+          <pre>
+[info]   dest:    3 [A added]
+[info]   dest:  134 [a added, overriding inherited]
+[info]   dest:    6 [d deleted, overriding inherited]
+[info]   dest: 2818 [U unchanged]
+[info] source:    3 [A added by a diff source tree]
+[info] source:    6 [D deleted by a diff source tree]
+[info] source:   16 [G merged from 2+ diff source trees]
+[info] source:  118 [M modified by a diff source tree]
+[info] source: 2818 [U from base]
+</pre>
+        </li>
+
+        <li>Total time.</li>
+      </ul>
+    </dd>
+
+    <dt>-v</dt>
+
+    <dd>
+      <ul>
+        <li>Everything at the default level.</li>
+
+        <li>The destination and source status for each modified target. E.g.:
+          <pre>
+...
+[info] aM um:0,13    atmosphere/short_wave_radiation/r2_lwrad3c.F90
+[info] aG um:0,6,13  control/top_level/scm_main.F90
+[info] AA um:-,8     include/constant/cnv_parc_lim.h
+...
+</pre>
+
+          <p>The 2 letters following <samp>[info]</samp> is the destination
+          status and the source status of the target. This is followed by the
+          name-space of the project, a colon and the source tree number(s)
+          providing the source for the target (in a comma separated list). This
+          is then followed by the name-space of the target path. The source
+          tree number <samp>0</samp> denotes the base source tree, a dash
+          <samp>-</samp> in place of a <samp>0</samp> means that the source
+          only exists in a diff source tree.</p>
+        </li>
+      </ul>
+    </dd>
+
+    <dt>-vv</dt>
+
+    <dd>
+      <ul>
+        <li>Everything at the -v level.</li>
+
+        <li>Each shell command invoked with elapsed time and return code.</li>
+      </ul>
+    </dd>
+  </dl>
+
+  <p>Here is an explanation of each target destination status:</p>
+
+  <dl>
+    <dt><samp>[A added]</samp></dt>
+
+    <dd>Target newly added to the destination.</dd>
+
+    <dt><samp>[a added, overriding inherited]</samp></dt>
+
+    <dd>Target added to the current extract destination, i.e. modified compared
+    with the target with the same name-space in an inherited extract
+    destination.</dd>
+
+    <dt><samp>[D deleted]</samp></dt>
+
+    <dd>Target deleted from the extract destination during an incremental
+    extract.</dd>
+
+    <dt><samp>[d deleted, overriding inherited]</samp></dt>
+
+    <dd>Target deleted from the current extract destination, i.e. a target with
+    the same name-space exists in an inherited extract destination.</dd>
+
+    <dt><samp>[M modified]</samp></dt>
+
+    <dd>Target modified in the extract destination during an incremental
+    extract.</dd>
+
+    <dt><samp>[U unchanged]</samp></dt>
+
+    <dd>Target unchanged compared with the previous (or any inherited)
+    extract.</dd>
+
+    <dt><samp>[? unknown]</samp></dt>
+
+    <dd>Target does not have a destination. This destination status is normally
+    associated with the <samp>[D deleted]</samp> source status.</dd>
+  </dl>
+
+  <p>Here is an explanation of each target source status:</p>
+
+  <dl>
+    <dt><samp>[A added by a diff source tree]</samp></dt>
+
+    <dd>The source of the target comes from a diff source tree, and the base
+    source tree does not have a source in the same name-space.</dd>
+
+    <dt><samp>[D deleted by a diff source tree]</samp></dt>
+
+    <dd>Target is deleted by a diff source tree, (i.e. exists in base source
+    tree, but missing from a diff source tree).</dd>
+
+    <dt><samp>[G merged from 2+ diff source trees]</samp></dt>
+
+    <dd>The source of the target comes from 2 or more diff source trees, (i.e.
+    the actual source is the result of a merge between all the changes).</dd>
+
+    <dt><samp>[M modified by a diff source tree]</samp></dt>
+
+    <dd>The source of the target comes from a diff source tree.</dd>
+
+    <dt><samp>[U from base]</samp></dt>
+
+    <dd>The source of the target comes from the base source tree, (i.e. the
+    source is unchanged by any diff source tree).</dd>
+
+    <dt><samp>[? unknown]</samp></dt>
+
+    <dd>The target has no source. This source status is normally displayed in an
+    incremental extract, where a target in a previous extract is not a target in
+    the current extract, and is normally associated with the <samp>[D
+    deleted]</samp> destination status.</dd>
+  </dl>
+
+  <h2 id="mirror">Mirror</h2>
+
+  <p>The mirror system provides a way to mirror the results of the make steps
+  to another location, where the FCM make may need to continue. It is typically
+  used after an extract to set up the build on an alternate platform.</p>
+
+  <h3 id="mirror.basic">Mirror: Basic</h3>
+
+  <p>Consider the following example:</p>
+  <pre>
+steps = extract mirror                            # 1
+# ... some extract declarations
+mirror.target = user@somewhere:/path/in/somewhere # 2
+mirror.prop{config-file.steps} = preprocess build # 3
+# ... some preprocess declarations
+# ... some build declarations
+</pre>
+
+  <p>When the system runs with this configuration, the system will mirror the
+  result of the extract to the <a href=
+  "annex_cfg.html#make.mirror.target">mirror.target</a>, i.e.
+  <samp>user@somewhere:/path/in/somewhere</samp> using <code>ssh</code> and
+  <code>rsync</code>. With the <a href=
+  "annex_cfg.html#make.mirror.prop.config-file.steps">config-file.steps</a>
+  property set at point 3, it will write a <samp>fcm-make.cfg</samp> in the
+  mirror target so that the <samp>preprocess</samp> and <samp>build</samp>
+  steps can continue there.</p>
+
+  <h3 id="mirror.diagnostic">Mirror Diagnostic</h3>
+
+  <p>The amount of diagnostic messages generated by the mirror system is
+  dependent on the diagnostic verbosity level that can be modified by the
+  <code>-v</code> and <code>-q</code> options to the <code>fcm make</code>
+  command.</p>
+
+  <p>The following is a list of diagnostic output at each verbosity level:</p>
+
+  <dl>
+    <dt>-q</dt>
+
+    <dd>
+      <ul>
+        <li>Exceptions.</li>
+      </ul>
+    </dd>
+
+    <dt>default</dt>
+
+    <dd>
+      <ul>
+        <li>Everything at the -q level.</li>
+
+        <li>Start time of the mirror.</li>
+
+        <li>The updated destination and its source.</li>
+
+        <li>Total time.</li>
+      </ul>
+    </dd>
+
+    <dt>-v</dt>
+
+    <dd>
+      <ul>
+        <li>Everything at the default level.</li>
+      </ul>
+    </dd>
+
+    <dt>-vv</dt>
+
+    <dd>
+      <ul>
+        <li>Everything at the -v level.</li>
+
+        <li>Each shell command invoked with elapsed time and return code.</li>
+      </ul>
+    </dd>
+  </dl>
+
+  <h2 id="build">Build</h2>
+
+  <p>The build system performs actions on a set of source files using its
+  predefined logic and the properties specified in the configuration. For
+  example, it will attempt to create a binary executable for a source file
+  containing a Fortran program.</p>
+
+  <p>The build system supports the <code>--jobs=N</code> option of the <code>fcm
+  make</code> command. It uses <var>N</var> child processes to analyse the
+  source files and to update the targets in parallel.</p>
+
+  <h3 id="build.basic">Build: Basic</h3>
+
+  <p>Consider a source tree at <samp>$HOME/my-source-tree/</samp> containing
+  some Fortran source files including at least one with a main program (and
+  maybe other supported types of source files), you can set up an FCM make
+  configuration file to build an executable. E.g.:</p>
+  <pre>
+steps = build
+build.target{task} = link
+build.source = $HOME/my-source-tree
+</pre>
+
+  <p>In this simple 3 line configuration, the <code><a href=
+  "annex_cfg.html#make.steps">steps</a></code> declaration tells the make
+  system to invoke the build system, the <code><a href=
+  "annex_cfg.html#make.build.target">build.target</a></code> declaration tells
+  the system to build any targets which require linking (i.e. any main
+  programs), and the <code><a href=
+  "annex_cfg.html#make.build.source">build.source</a></code> declaration
+  specifies the location of the source tree.</p>
+
+  <p>If you save this file as <samp>fcm-make.cfg</samp> and invoke the
+  <code>fcm make</code> command it should attempt to build the source tree in
+  the current working directory, using the default properties. If the default
+  Fortran compiler <samp>gfortran</samp> is installed, and nothing goes wrong,
+  you will end up with a directory tree that looks like (hidden path not
+  shown):</p>
+  <pre>
+build/bin/...
+build/include/...
+build/o/...
+</pre>
+
+  <p>The result of the build can be found in the sub-directories of the
+  <samp>build/</samp> sub-directory. Each <samp>build/*/</samp> sub-directory
+  contains a category of targets:</p>
+
+  <dl>
+    <dt id="build.category.bin"><samp>bin</samp></dt>
+
+    <dd>e.g. executable binary and script.</dd>
+
+    <dt id="build.category.etc"><samp>etc</samp></dt>
+
+    <dd>e.g. data files.</dd>
+
+    <dt id="build.category.include"><samp>include</samp></dt>
+
+    <dd>e.g. include files and Fortran module definition files.</dd>
+
+    <dt id="build.category.lib"><samp>lib</samp></dt>
+
+    <dd>e.g. object archives.</dd>
+
+    <dt id="build.category.o"><samp>o</samp></dt>
+
+    <dd>e.g. object files</dd>
+  </dl>
+
+  <p>Sub-directories are only created as necessary, so you may not find all of
+  the above in your destination tree.</p>
+
+  <p>To use a different compiler and/or compiler options for Fortran/C, you use
+  the <a href="annex_cfg.html#make.build.prop">build.prop</a> declaration to
+  redefine the build properties. E.g.:</p>
+  <pre>
+steps = build
+build.target{task} = link
+build.source = $HOME/my-source-tree
+
+# Set Fortran compiler/linker
+build.prop{fc} = ifort
+# Set Fortran compiler options
+build.prop{fc.flags} = -i8 -r8 -O3
+# Set Fortran linker options
+build.prop{fc.flags-ld} = -L/path/to/my-lib -lmine
+# Set C compiler/linker
+build.prop{cc} = icc
+# Set C compiler options
+build.prop{cc.flags} = -O3
+# Set C linker options
+build.prop{cc.flags-ld} = -L/path/to/my-lib -lmine
+</pre>
+
+  <h3 id="build.source-locations">Build Source Locations</h3>
+
+  <p>The build system locates its source files from various places,
+  including:</p>
+
+  <ul>
+    <li>Inherited locations. (See <a href="#build.inherit">Build
+    Inheritance</a>.)</li>
+
+    <li>Usable target locations of previous steps in the make. E.g. targets of
+    an extract step, and <samp><a href=
+    "#preprocess.category.src">src</a></samp> category targets of a preprocess
+    step can both be source files of the build system. The <code><a href=
+    "annex_cfg.html#make.build.prop.no-step-source">build.prop{no-step-source}</a></code>
+    declaration can be used to switch off this behaviour.</li>
+
+    <li>Locations specified by the <code><a href=
+    "annex_cfg.html#make.build.source">build.source</a></code> declaration.
+    Note: If you assign a relative path to the <code><a href=
+    "annex_cfg.html#make.build.source">build.source</a></code> declaration, the
+    system will assume the path to be relative to the make destination (not the
+    current working directory, unless they happen to be the same).</li>
+  </ul>
+
+  <p>There are situations when it may not be desirable to consider every source
+  file in a build. You can apply filters by source file name-spaces using the
+  <code><a href="annex_cfg.html#make.build.ns-excl">build.ns-excl</a></code>
+  and <code><a href=
+  "annex_cfg.html#make.build.ns-incl">build.ns-incl</a></code> declarations.
+  E.g.:</p>
+  <pre>
+# To include items in "foo" and "bar/baz" only
+build.ns-excl = /              # exclude everything ...
+build.ns-incl = foo bar/baz    # but include items from these name-spaces
+</pre>
+
+  <h3 id="build.source-ns">Build Source Name-spaces and Properties</h3>
+
+  <p>Each source file is assigned a name-space (which is used to fine tune the
+  build properties, such as the compiler flags). If the source file is a target
+  of an extract, the name-space will be the same as the extract target (the
+  relative path of the <samp>extract/</samp> sub-directory in the make
+  destination). If the source file is a file in a source tree specified by
+  <code><a href="annex_cfg.html#make.build.source">build.source</a></code>, the
+  name-space is the relative path to the specified value. The <code><a href=
+  "annex_cfg.html#make.build.source">build.source</a></code> declaration also
+  accepts an optional name-space, in which case the name-space of each source
+  file in the tree will be prefixed with the specified name-space. Suppose you
+  have a source tree in <samp>$HOME/food</samp>:</p>
+  <pre>
+$HOME/food/egg.c
+$HOME/food/ham.py
+</pre>
+
+  <p>If you specify the source tree with <samp>build.source =
+  $HOME/food</samp>, then <samp>$HOME/food/egg.c</samp> will be given the
+  name-space <samp>egg.c</samp> and <samp>$HOME/food/ham.py</samp> will be
+  given the name-space <samp>ham.py</samp>.</p>
+
+  <p>On the other hand, if you specify the source tree with
+  <samp>build.source[food] = $HOME</samp>, then
+  <samp>$HOME/food/egg.c</samp> will be given the name-space
+  <samp>food/egg.c</samp> and <samp>$HOME/food/ham.py</samp> will be given the
+  name-space <samp>food/ham.py</samp>.</p>
+
+  <p>The name-space is organised in a simple hierarchy. For instance, the
+  <samp>foo/bar/egg</samp> name-space belongs to <samp>foo/bar</samp>, which
+  belongs to <samp>foo</samp>, which belongs to the root name-space. (The root
+  name-space is either an empty string or a <samp>/</samp>.)</p>
+
+  <p>For instance, you can set the flags of the Fortran compiler using the
+  <code><a href=
+  "annex_cfg.html#make.build.prop.fc.flags">build.prop{fc.flags}</a></code>
+  declaration at different name-space levels:</p>
+  <pre>
+# The global Fortran compiler flags
+build.prop{fc.flags} = -O3
+
+# The Fortran compiler flags for the "food" name-space
+build.prop{fc.flags}[food] = -O2 -i8 -r8
+
+# The Fortran compiler flags for a source file
+build.prop{fc.flags}[food/bacon.f90] = -O0 -g -C
+</pre>
+
+  <h3 id="build.source-types">Build Source Types</h3>
+
+  <p>Before the build system can do anything with its source files, it needs to
+  know what they are. It determines the type of each source file by looking at
+  its file name extension, then the file name itself, and then the
+  <code>#!</code> line for a text file. Source files without a type are treated
+  as data files.</p>
+
+  <p>The following types are associated with file extensions:</p>
+
+  <dl>
+    <dt><a href="annex_cfg.html#make.build.prop.file-ext.c">c</a> (C/C++ source
+    file)</dt>
+
+    <dd>.c .cpp</dd>
+
+    <dt><a href="annex_cfg.html#make.build.prop.file-ext.fortran">fortran</a>
+    (Fortran source file)</dt>
+
+    <dd>.F .FOR .FTN .F90 .F95 .f .for .ftn .f90 .f95 .inc</dd>
+
+    <dt><a href="annex_cfg.html#make.build.prop.file-ext.h">h</a> (Preprocessor
+    header file)</dt>
+
+    <dd>.h</dd>
+
+    <dt><a href="annex_cfg.html#make.build.prop.file-ext.script">script</a>
+    (script in various languages)</dt>
+
+    <dd>(empty)</dd>
+  </dl>
+
+  <p>The <code>prop{file-ext.type} = extensions</code> declaration can be used
+  to modify the extensions associated with a type. E.g. if you need to add
+  <samp>.fort</samp> as a file extension for a Fortran source file, you can
+  do:</p>
+  <pre>
+build.prop{file-ext.fortran} = .F .FOR .FORT .FTN .F90 .F95 \
+                               .f .for .fort .ftn .f90 .f95 .inc
+</pre>
+
+  <p>You can associate file names to some file types using a
+  <code>prop{file-pat.type} = regular-expression</code> declaration. E.g. if
+  you have executable scripts in the source tree with no <code>#!</code> lines
+  but are recognised by a <samp>*Scr_*</samp> pattern of their file names, you
+  can specify a regular expression to match their file names using the <a href=
+  "annex_cfg.html#make.build.prop.file-pat.script">file-pat.script</a>
+  property:</p>
+  <pre>
+build.prop{file-pat.script} = (?msx-i:\w+Scr_\w+)
+</pre>
+
+  <p>All other text files with a <code>#!</code> line are recognised as scripts
+  by the build system.</p>
+
+  <h3 id="build.source-analysis">Build Source Analysis</h3>
+
+  <p>Each source file with a known type (that is not ignored) is analysed by
+  the build system for dependencies and other information. Here is a list of
+  what the system looks for in each type of file:</p>
+
+  <dl>
+    <dt>c</dt>
+
+    <dd>
+      <p><dfn>main program</dfn>: e.g. <samp>int main()</samp>.</p>
+
+      <p><dfn>dependency on include</dfn>: e.g. <samp>#include
+      "name.h"</samp>.</p>
+
+      <p><dfn>dependency on object</dfn>: e.g. <samp>/* depends on: name.o
+      */</samp> (for <a href="#build.source-analysis.legacy">legacy
+      support</a>).</p>
+    </dd>
+
+    <dt>fortran</dt>
+
+    <dd>
+      <p><dfn>main program</dfn>: e.g. <samp>program name</samp>.</p>
+
+      <p><dfn>list of symbols</dfn>: i.e. names of top level program units
+      including blockdata, function, module, program and subroutine.</p>
+
+      <p><dfn>dependency on include</dfn>: e.g. <samp>#include "name.h"</samp>
+      and <samp>include 'name.f90'</samp>.</p>
+
+      <p><dfn>dependency on module</dfn>: e.g. <samp>use name</samp>.</p>
+
+      <p><dfn>dependency on object</dfn>: e.g. <samp>! depends on:
+      name.o</samp> (for <a href="#build.source-analysis.legacy">legacy
+      support</a>).</p>
+    </dd>
+
+    <dt>h</dt>
+
+    <dd>
+      <p><dfn>dependency on include</dfn>: e.g. <samp>#include
+      "file-name"</samp> (and <samp>include 'file-name'</samp> for <a href=
+      "#build.source-analysis.legacy">legacy support</a>).</p>
+    </dd>
+
+    <dt>script</dt>
+
+    <dd>
+      <p><dfn>dependency on executable</dfn>: e.g. <samp># calls: name</samp>
+      (for <a href="#build.source-analysis.legacy">legacy support</a>).</p>
+    </dd>
+  </dl>
+
+  <p>Note: The following features are for legacy support.</p>
+
+  <dl id="build.source-analysis.legacy">
+    <dt><code>DEPENDS ON: x</code> directives in C/Fortran source files</dt>
+
+    <dd>The <code>DEPENDS ON: x</code> directive can be used to identify
+    dependencies on other compiled objects. However, it is much better to
+    specify this kind of dependency information in the configuration for the
+    build where necessary. In any case, in modern Fortran code almost all
+    dependencies should be identified automatically via the use of modules
+    and/or interface files.</dd>
+
+    <dt><code>calls: x</code> directives in scripts</dt>
+
+    <dd>The <code>calls: x</code> directive can be used to identify a
+    dependency on another executable. However, it is much better to specify
+    this kind of dependency information in the configuration for the build, and
+    leave the source code to concentrate on the run time logic.</dd>
+
+    <dt><samp>*.h</samp> files as Fortran include files</dt>
+
+    <dd><samp>*.h</samp> files are normally identified as C header files.
+    However, they are also being used by some old Fortran programs as include
+    files. Therefore, when the system analyses a <samp>*.h</samp> file, it has
+    to detect the Fortran include syntax, i.e. <samp>include 'file-name'</samp>
+    as well as the regular C preprocessor include syntax.</dd>
+  </dl>
+
+  <p>There are some situations when it is not possible for the system to
+  identify a dependency. E.g. a Fortran source file may depend on external
+  objects that are not detected by the automatic analysis. Therefore, the
+  system allows you to specify manual dependencies in the configuration file
+  using the <code>build.prop{dep.type}</code> and
+  <code>build.prop{ns-dep.type}</code> declarations. E.g.:</p>
+  <pre>
+# Tell the system that (the object of) food/egg.c depends on chicken.o
+build.prop{dep.o}[food/egg.c] = chicken.o
+
+# Tell the system that (the object of) meal/big.c depends on all objects in the
+# "food" and "drink" name-spaces
+build.prop{ns-dep.o}[meal/big.c] = food drink
+</pre>
+
+  <p>Like all declarations that accept name-spaces, if you specify a name-space
+  in this declaration, the property will apply to all source files in the
+  name-space. If you do not specify a name-space, it applies to the root
+  name-space (i.e. globally to all relevant source files).</p>
+
+  <p>The following manual dependency declarations are recognised:</p>
+
+  <dl>
+    <dt><a href=
+    "annex_cfg.html#make.build.prop.dep.bin">build.prop{dep.bin}</a></dt>
+
+    <dd>Specifies a list of dependencies on a script or a binary
+    executable.</dd>
+
+    <dt><a href=
+    "annex_cfg.html#make.build.prop.dep.f.module">build.prop{dep.f.module}</a></dt>
+
+    <dd>Specifies a list of Fortran module import dependencies. Note: a
+    dependency on a Fortran module called <samp>module_1</samp> becomes an
+    <dfn>include</dfn> dependency on <samp>module_1.mod</samp> when the system
+    turns the source file into its targets.</dd>
+
+    <dt><a href=
+    "annex_cfg.html#make.build.prop.dep.include">build.prop{dep.include}</a></dt>
+
+    <dd>Specifies a list of include file dependencies.</dd>
+
+    <dt><a href=
+    "annex_cfg.html#make.build.prop.dep.o">build.prop{dep.o}</a></dt>
+
+    <dd>Specifies a list of link-time object dependencies.</dd>
+
+    <dt><a href=
+    "annex_cfg.html#make.build.prop.dep.o.special">build.prop{dep.o.special}</a></dt>
+
+    <dd>Specifies a list of special type of link-time object dependencies.
+    Normally, an object file can be put in an object archive before being
+    linked with the main object. There are special cases when an object file
+    must be specified on the command line of the linker. (E.g. an object file
+    containing a Fortran blockdata program unit.) This special behaviour must
+    be declared using this declaration.</dd>
+
+    <dt><a href=
+    "annex_cfg.html#make.build.prop.ns-dep.o">build.prop{ns-dep.o}</a></dt>
+
+    <dd>Specifies a list of link-time object dependencies on all objects in the
+    specified name-space.</dd>
+  </dl>
+
+  <p>There are times when you know that your source tree does not contain a
+  particular type of dependency, in which case you can switch off the automatic
+  analysis by using the <code>build.prop{no-dep.type}</code> declaration. E.g.
+  if you know that all include files in the <samp>food</samp> name-space are
+  provided outside of the source tree, you can do:</p>
+  <pre>
+# Do not check for "include" dependencies
+build.prop{no-dep.include}[food] = *
+</pre>
+
+  <p>All the types supported by the <code>build.prop{dep.type}</code>
+  declarations are supported by the <code>build.prop{no-dep.type}</code>,
+  except that there is no <code>build.prop{no-dep.o.special}</code>
+  (because this type of dependency is never automatic).</p>
+
+  <h3 id="build.target-source">Build Targets from Source Files</h3>
+
+  <p>The system derives the build targets from the source files. E.g. a C
+  source file <samp>egg.c</samp> is turned into a compile target to generate
+  <samp>egg.o</samp>.</p>
+
+  <p>The following is a list of what targets are available for each type of
+  file. The title of each item in the list is in the format <dfn>source type
+  -&gt; target key</dfn>. The <dfn>description</dfn> of each target describes
+  what the target is, and where appropriate, explains how the target keys are
+  named. The <dfn>task</dfn> is the action the target needs to perform to get
+  up to date. The <dfn>category and destination</dfn> is the sub-directory and
+  destination of the target. The <dfn>properties</dfn> are the list of
+  properties that may be used by the <dfn>task</dfn> to update the target. The
+  <dfn>dependencies</dfn> list the types of dependencies the target may have.
+  The <dfn>update if</dfn> is the condition when the target is considered out
+  of date. The <dfn>pass on</dfn> information is a list of dependeny types
+  which a target can pass on the status, (see <a href=
+  "#build.target-update">Build Targets Update in Incremental Mode</a> for an
+  explanation of what this means.)</p>
+
+  <dl>
+    <dt>c -&gt; name</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: source file as an include file.</p>
+
+      <p><dfn>task</dfn>: <a href="#build.task.install">install</a>.</p>
+
+      <p><dfn>category and destination</dfn>: <a href=
+      "#build.category.include">include</a> and include/name</p>
+
+      <p><dfn>dependencies</dfn>: include and o (object).</p>
+
+      <p><dfn>update if</dfn>: source file is modified.</p>
+
+      <p><dfn>pass on</dfn>: include, o and o.special.</p>
+    </dd>
+
+    <dt>c -&gt; name.o</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: object file. The file is named by mapping the
+      base name of the original source file in lower case characters, with the
+      file extension replaced by the first value of the <code><a href=
+      "annex_cfg.html#make.build.prop.file-ext.o">file-ext.o</a></code>
+      property.</p>
+
+      <p><dfn>task</dfn>: <a href="#build.task.compile">compile</a> (cc).</p>
+
+      <p><dfn>category and destination</dfn>: <a href="#build.category.o">o</a>
+      and o/name.o</p>
+
+      <p><dfn>properties</dfn>: <a href=
+      "annex_cfg.html#make.build.prop.cc">cc</a>, <a href=
+      "annex_cfg.html#make.build.prop.cc.flags">cc.flags</a>, <a href=
+      "annex_cfg.html#make.build.prop.cc.defs">cc.defs</a>, <a href=
+      "annex_cfg.html#make.build.prop.cc.flag-compile">cc.flag-compile</a>,
+      <a href=
+      "annex_cfg.html#make.build.prop.cc.flag-define">cc.flag-define</a>,
+      <a href=
+      "annex_cfg.html#make.build.prop.cc.flag-include">cc.flag-include</a>,
+      <a href=
+      "annex_cfg.html#make.build.prop.cc.flag-output">cc.flag-output</a></p>
+
+      <p><dfn>dependencies</dfn>: include and o (object).</p>
+
+      <p><dfn>update if</dfn>: source file or any of the required properties
+      are modified, or if any include dependencies are updated.</p>
+
+      <p><dfn>pass on</dfn>: o and o.special.</p>
+    </dd>
+
+    <dt>c (with main function) -&gt; name.exe</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: binary executable. The file is named after the
+      base name of the original source file, with the file extension replaced by
+      the first value of the <code><a href=
+      "annex_cfg.html#make.build.prop.file-ext.bin">file-ext.bin</a></code>
+      property.</p>
+
+      <p><dfn>task</dfn>: <a href="#build.task.link">link</a> (cc).</p>
+
+      <p><dfn>category and destination</dfn>: <a href=
+      "#build.category.bin">bin</a> and bin/name.exe</p>
+
+      <p><dfn>properties</dfn>: <a href=
+      "annex_cfg.html#make.build.prop.ar">ar</a>, <a href=
+      "annex_cfg.html#make.build.prop.ar.flags">ar.flags</a>, <a href=
+      "annex_cfg.html#make.build.prop.file-ext.a">file-ext.a</a>, <a href=
+      "annex_cfg.html#make.build.prop.cc">cc</a>, <a href=
+      "annex_cfg.html#make.build.prop.cc.flags-ld">cc.flags-ld</a>, <a href=
+      "annex_cfg.html#make.build.prop.cc.flag-lib">cc.flag-lib</a>, <a href=
+      "annex_cfg.html#make.build.prop.cc.flag-lib-path">cc.flag-lib-path</a>,
+      <a href=
+      "annex_cfg.html#make.build.prop.cc.flag-output">cc.flag-output</a></p>
+
+      <p><dfn>dependencies</dfn>: name.o and other objects (o and
+      o.special).</p>
+
+      <p><dfn>update if</dfn>: source file or any of the required properties
+      are modified, or if any dependencies are updated.</p>
+    </dd>
+
+    <dt>fortran -&gt; name</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: source file as an include file.</p>
+
+      <p><dfn>task</dfn>: <a href="#build.task.install">install</a>.</p>
+
+      <p><dfn>category and destination</dfn>: <a href=
+      "#build.category.include">include</a> and include/name</p>
+
+      <p><dfn>dependencies</dfn>: include and o (object). A source's f.module
+      dependency on a module called <samp>xyz</samp> is turned into an include
+      dependency on the <samp>xyz.mod</samp>.</p>
+
+      <p><dfn>update if</dfn>: source file is modified.</p>
+
+      <p><dfn>pass on</dfn>: include, o and o.special.</p>
+    </dd>
+
+    <dt>fortran (with a valid Fortran program unit) -&gt; unit.o</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: object file. The file is named by concatenating
+      the lower case characters of the name of the first program unit in the
+      source file and the first value of the <code><a href=
+      "annex_cfg.html#make.build.prop.file-ext.o">file-ext.o</a></code>
+      property.</p>
+
+      <p><dfn>task</dfn>: <a href="#build.task.compile">compile</a> (fc).</p>
+
+      <p><dfn>category and destination</dfn>: <a href="#build.category.o">o</a>
+      and o/unit.o</p>
+
+      <p><dfn>properties</dfn>: <a href=
+      "annex_cfg.html#make.build.prop.fc">fc</a>, <a href=
+      "annex_cfg.html#make.build.prop.fc.flags">fc.flags</a>, <a href=
+      "annex_cfg.html#make.build.prop.fc.defs">fc.defs</a>, <a href=
+      "annex_cfg.html#make.build.prop.fc.flag-compile">fc.flag-compile</a>,
+      <a href=
+      "annex_cfg.html#make.build.prop.fc.flag-define">fc.flag-define</a>,
+      <a href=
+      "annex_cfg.html#make.build.prop.fc.flag-include">fc.flag-include</a>,
+      <a href=
+      "annex_cfg.html#make.build.prop.fc.flag-module">fc.flag-module</a>,
+      <a href=
+      "annex_cfg.html#make.build.prop.fc.flag-output">fc.flag-output</a></p>
+
+      <p><dfn>dependencies</dfn>: include and o (object). A source's f.module
+      dependency on a module called <samp>xyz</samp> is turned into an include
+      dependency on the <samp>xyz.mod</samp>.</p>
+
+      <p><dfn>update if</dfn>: source file or any of the required properties
+      are modified, or if any include dependencies are updated.</p>
+
+      <p><dfn>pass on</dfn>: o and o.special.</p>
+
+      <p><dfn>remark</dfn>: trigger <samp>unit.mod</samp> targets if source
+      file contains a Fortran module.</p>
+    </dd>
+
+    <dt>fortran (with function or subroutine) -&gt; name.interface</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Fortran interface file. The file is named by
+      concatenating the base name of the source file with the file extension
+      replaced by the <code><a href=
+      "annex_cfg.html#make.build.prop.file-ext.f90-interface">file-ext.f90-interface</a></code>
+      property.</p>
+
+      <p><dfn>task</dfn>: <a href="#build.task.ext-iface">ext-iface</a></p>
+
+      <p><dfn>category and destination</dfn>: <a href=
+      "#build.category.include">include</a> and include/name.interface</p>
+
+      <p><dfn>dependencies</dfn>: unit.o</p>
+
+      <p><dfn>update if</dfn>: source file or unit.o is modified.</p>
+
+      <p><dfn>pass on</dfn>: include, o and o.special.</p>
+    </dd>
+
+    <dt>fortran (each module in source) -&gt; unit.mod</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Fortran module definition file. The file is
+      named by concatenating the lower case characters of the name of the
+      module and the first value of the <code><a href=
+      "annex_cfg.html#make.build.prop.file-ext.f90-mod">file-ext.f90-mod</a></code>
+      property.</p>
+
+      <p><dfn>task</dfn>: <a href="#build.task.compile-plus">compile+</a>.</p>
+
+      <p><dfn>category and destination</dfn>: <a href=
+      "#build.category.include">include</a> and include/unit.mod</p>
+
+      <p><dfn>dependencies</dfn>: unit.o</p>
+
+      <p><dfn>update if</dfn>: source file or unit.o is modified.</p>
+
+      <p><dfn>pass on</dfn>: o.</p>
+    </dd>
+
+    <dt>fortran (with program) -&gt; name.exe</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: binary executable. The object file is named
+      after the base name of the original source file, with the file extension
+      replaced by the first value of the <code><a href=
+      "annex_cfg.html#make.build.prop.file-ext.bin">file-ext.bin</a></code>
+      property.</p>
+
+      <p><dfn>task</dfn>: <a href="#build.task.link">link</a> (fc).</p>
+
+      <p><dfn>category and destination</dfn>: <a href=
+      "#build.category.bin">bin</a> and bin/name.exe</p>
+
+      <p><dfn>properties</dfn>: <a href=
+      "annex_cfg.html#make.build.prop.ar">ar</a>, <a href=
+      "annex_cfg.html#make.build.prop.ar.flags">ar.flags</a>, <a href=
+      "annex_cfg.html#make.build.prop.fc">fc</a>, <a href=
+      "annex_cfg.html#make.build.prop.fc.flags-ld">fc.flags-ld</a>, <a href=
+      "annex_cfg.html#make.build.prop.fc.flag-lib">fc.flag-lib</a>, <a href=
+      "annex_cfg.html#make.build.prop.fc.flag-lib-path">fc.flag-lib-path</a>,
+      <a href=
+      "annex_cfg.html#make.build.prop.fc.flag-output">fc.flag-output</a></p>
+
+      <p><dfn>dependencies</dfn>: unit.o and other objects (o and
+      o.special).</p>
+
+      <p><dfn>update if</dfn>: source file or any of the required properties
+      are modified, or if any dependencies are updated.</p>
+    </dd>
+
+    <dt>h -&gt; name</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: a header (include) file.</p>
+
+      <p><dfn>task</dfn>: <a href="#build.task.install">install</a>.</p>
+
+      <p><dfn>category and destination</dfn>: <a href=
+      "#build.category.include">include</a> and include/name</p>
+
+      <p><dfn>dependencies</dfn>: include and o (object).</p>
+
+      <p><dfn>update if</dfn>: source file is modified.</p>
+
+      <p><dfn>pass on</dfn>: include, o and o.special.</p>
+    </dd>
+
+    <dt>script -&gt; name</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: an executable script.</p>
+
+      <p><dfn>task</dfn>: <a href="#build.task.install">install</a>.</p>
+
+      <p><dfn>category and destination</dfn>: <a href=
+      "#build.category.bin">bin</a> and bin/name</p>
+
+      <p><dfn>dependencies</dfn>: bin (executable).</p>
+
+      <p><dfn>update if</dfn>: source file is modified.</p>
+
+      <p><dfn>pass on</dfn>: bin.</p>
+    </dd>
+
+    <dt>data -&gt; name-space</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: a data file.</p>
+
+      <p><dfn>task</dfn>: <a href="#build.task.install">install</a>.</p>
+
+      <p><dfn>category and destination</dfn>: <a href=
+      "#build.category.etc">etc</a> and etc/name-space</p>
+
+      <p><dfn>update if</dfn>: source file is modified.</p>
+    </dd>
+  </dl>
+
+  <p>Here is an explanation of what each build system <dfn>task</dfn> does:</p>
+
+  <dl>
+    <dt id="build.task.archive">archive</dt>
+
+    <dd>Creates an object archive by invoking an archiver command. (See
+    <a href="#build.target-ns">Build Targets from Name-space</a>.)</dd>
+
+    <dt id="build.task.compile">compile</dt>
+
+    <dd>Creates an object file by invoking the C/Fortran compiler on the source
+    file.</dd>
+
+    <dt id="build.task.compile-plus">compile+</dt>
+
+    <dd>Copies the Fortran module definition file created by a compile task to
+    the include sub-directory.</dd>
+
+    <dt id="build.task.ext-iface">ext-iface</dt>
+
+    <dd>Extracts the calling interfaces of all functions and subroutines in a
+    Fortran source file (free format only) and writes the results in an
+    interface block that can be included by other Fortran source files with an
+    <samp>INCLUDE 'name.interface'</samp> statement. In an incremental build,
+    if you have modified a Fortran source file, its interface file will only be
+    re-generated if the content of the interface has changed. This can make
+    incremental build very efficient, as non-interface changes in a function or
+    subroutine will only trigger a re-link of the executable.</dd>
+
+    <dt id="build.task.install">install</dt>
+
+    <dd>Copies the source file to the destination.</dd>
+
+    <dt id="build.task.link">link</dt>
+
+    <dd>Creates an executable by invoking the archiver to load all required
+    objects into an archive, and then the C/Fortran compiler on the object file
+    previously compiled using a source file containing a main program, with the
+    temporary archive.</dd>
+  </dl>
+
+  <h3 id="build.target-source-fortran">Build Targets from Source Files: Fortran
+  Specifics</h3>
+
+  <p>To ensure that a Fortran application is built automatically, its source
+  code should be designed with the following considerations:</p>
+
+  <p><dfn>The name of each compilable program unit should be unique</dfn> in
+  the source tree, bearing in mind that Fortran is NOT case sensitive.</p>
+
+  <p><dfn>Always supply an interface for functions and subroutines</dfn>,
+  i.e.:</p>
+
+  <ul>
+    <li>Use functions and subroutines from a module.</li>
+
+    <li>Use functions and subroutines in the CONTAINS section of a program
+    unit.</li>
+
+    <li>Use the build system's automatic interface file feature.</li>
+  </ul>
+
+  <p>For each free format Fortran source file, e.g. <samp>name.f90</samp>, with
+  1 or more top level function and/or subroutine, the system creates a target
+  with the <a href="#build.task.ext-iface">ext-iface</a> task in the
+  <a href="#build.category.include">include</a> category, e.g.
+  <samp>name.interface</samp>, to extract the calling interfaces of all
+  functions and subroutines into an interface block. Another Fortran source
+  file, e.g. <samp>caller.f90</samp> that relies on the functions and/or
+  subroutines in <samp>name.f90</samp> can have an <samp>INCLUDE
+  'name.interface'</samp> statement in its specification section, which serves
+  2 purposes:</p>
+
+  <ul>
+    <li>It allows <samp>caller.f90</samp> to call the functions and/or
+    subroutines in <samp>name.f90</samp> with explicit interfaces.</li>
+
+    <li>It introduces an <a href=
+    "annex_cfg.html#make.build.prop.dep.include">include</a> dependency for
+    <samp>caller.o</samp> on <samp>name.interface</samp>.</li>
+  </ul>
+
+  <p>In an incremental build, if you modify <samp>name.f90</samp>, the system
+  will only regenerate <samp>name.interface</samp> if only the calling
+  interfaces of the functions and/or subroutines in <samp>name.f90</samp> have
+  changed. Consequently, non-interface changes in <samp>name.f90</samp> will
+  not trigger the re-compile of <samp>caller.o</samp>, but will only trigger a
+  re-link of the executable.</p>
+
+  <h3 id="build.target-selection">Build Targets Selection and Rename</h3>
+
+  <p>You need to tell the build system what targets to build or it will do
+  nothing. The <code><a href=
+  "annex_cfg.html#make.build.target">build.target</a></code> declaration allows
+  you to select targets according to their categories, source name-spaces,
+  tasks and keys. The logic is demonstrated by the following example:</p>
+  <pre>
+# Selects targets matching these keys
+build.target = egg.bin ham.py bacon.sh
+# OR (
+#     those doing these tasks
+build.target{task} = install link
+#     AND in these categories
+build.target{category} = bin
+#     AND in these name-spaces
+build.target{ns} = foo bar/baz
+# )
+</pre>
+
+  <p>There are times when an automatic target name is not what you want. In
+  which case, you can rename a target using the <code><a href=
+  "annex_cfg.html#make.build.target-rename">build.target-rename</a></code>
+  declaration to specify an alternate name. E.g. if the target
+  <samp>bacon.sh</samp> should be called <samp>streaky</samp>, you can do:</p>
+  <pre>
+build.target-rename = bacon.sh:streaky
+</pre>
+
+  <p>In order for a target to build, all its dependencies must be satisfied. If
+  a target has a dependency that is not available in the list of targets, the
+  build will fail. Normally, you can avoid this by using one of the
+  <code>build.prop{no-dep.*}</code> declarations to switch off a non-existent
+  dependency, as described in the <a href="#build.source-analysis">Build Source
+  Analysis</a> section. However, there may be times when this is inefficient or
+  insufficient, in which case you can use the property <code><a href=
+  "annex_cfg.html#make.build.prop.ignore-missing-dep-ns">ignore-missing-dep-ns</a></code>
+  to specify a list of source name-spaces, in which targets can ignore missing
+  dependencies. E.g.:</p>
+  <pre>
+# Allows targets in the "foo" and "bar/baz"
+# name-spaces to ignore missing dependencies.
+build.prop{ignore-missing-dep-ns} = foo bar/baz
+</pre>
+
+  <h3 id="build.target-file-ext">Build Targets File Extensions</h3>
+
+  <p>You can rename the file name extension of the targets using
+  <code>build.prop{file-ext.type}</code> declaration (provided that the file
+  name extension is supported by your compiler, etc). E.g. if you want your
+  binary executables to have <samp>.bin</samp> extension rather than the
+  default <samp>.exe</samp>, you can do:</p>
+  <pre>
+build.prop{file-ext.bin} = .bin
+</pre>
+
+  <p>The following file extensions are currently used by the system:</p>
+
+  <dl>
+    <dt><a href="annex_cfg.html#make.build.prop.file-ext.a">a</a> (object
+    archive)</dt>
+
+    <dd>.a</dd>
+
+    <dt><a href="annex_cfg.html#make.build.prop.file-ext.bin">bin</a> (binary
+    executable)</dt>
+
+    <dd>.exe</dd>
+
+    <dt><a href=
+    "annex_cfg.html#make.build.prop.file-ext.f90-interface">f90-interface</a>
+    (Fortran free format interface file)</dt>
+
+    <dd>.interface</dd>
+
+    <dt><a href="annex_cfg.html#make.build.prop.file-ext.f90-mod">f90-mod</a>
+    (Fortran compiler module definition file)</dt>
+
+    <dd>.mod</dd>
+
+    <dt><a href="annex_cfg.html#make.build.prop.file-ext.o">o</a> (object
+    file)</dt>
+
+    <dd>.o</dd>
+  </dl>
+
+  <h3 id="build.target-ns">Build Targets from Name-space</h3>
+
+  <p>Apart from source file targets, the build system also generates targets
+  for each (directory-level) name-space. One target is for creating an object
+  archive to contain all object files in the name-space. The other target is a
+  convenient shorthand to allow all data files in the name-space to be
+  installed. The following is the full description:</p>
+
+  <dl>
+    <dt>name-space &gt; name-space/libo.a</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: object archive.</p>
+
+      <p><dfn>task</dfn>: <a href="#build.task.archive">archive</a>.</p>
+
+      <p><dfn>category and destination</dfn>: <a href=
+      "#build.category.lib">lib</a> and lib/name-space/libo.a</p>
+
+      <p><dfn>dependencies</dfn>: all o (object) targets in the name-space.</p>
+
+      <p><dfn>properties</dfn>: <a href=
+      "annex_cfg.html#make.build.prop.ar">ar</a>, <a href=
+      "annex_cfg.html#make.build.prop.ar.flags">ar.flags</a></p>
+
+      <p><dfn>update if</dfn>: any dependencies or properties are modified.</p>
+    </dd>
+
+    <dt>name-space &gt; name-space/.etc</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: dummy file.</p>
+
+      <p><dfn>task</dfn>: <a href="#build.task.install">install</a>.</p>
+
+      <p><dfn>category and destination</dfn>: <a href=
+      "#build.category.etc">etc</a> and etc/name-space/.etc</p>
+
+      <p><dfn>dependencies</dfn>: all data files in the name-space.</p>
+
+      <p><dfn>update if</dfn>: any dependencies are modified.</p>
+    </dd>
+  </dl>
+
+  <h3 id="build.target-update">Build Targets Update in Incremental Mode</h3>
+
+  <p>In incremental mode, a target is only updated if it is marked out of date.
+  A target is considered out of date if:</p>
+
+  <ul>
+    <li>the source file's MD5 checksum is changed.</li>
+
+    <li>a required property is modified.</li>
+
+    <li>a dependency is marked as modified, and the dependency is a type that
+    the target cannot pass on. E.g. If <samp>object_1.o</samp> depends on
+    <samp>object_2.o</samp>, and <samp>object_2.o</samp> is marked as modified,
+    the system does not need to re-compile <samp>object_1.o</samp> (as long as
+    its source file and properties remain unchanged). However,
+    <samp>object_1.o</samp> will have to pass the information up the dependency
+    tree, so that a target with a <samp><a href=
+    "#build.task.link">link</a></samp> task to build an executable (or an
+    <samp><a href="#build.task.archive">archive</a></samp> task to build a
+    library) will know that it needs to be updated.</li>
+
+    <li>a dependency is passing on a <q>modified</q> status for a dependency
+    type, which cannot be passed on by the target.</li>
+
+    <li>the target does not exist or its MD5 checksum is changed.</li>
+  </ul>
+
+  <p>If, after an update, the target's MD5 checksum is the same as before, the
+  target will be considered unchanged and up to date. In an incremental build,
+  the use of checksum ensures that any targets manually modified by the user
+  after the previous build is rebuilt accordingly. It also prevents unnecessary
+  updates of targets in incremental and inherited builds.</p>
+
+  <p>E.g. Consider an incremental build where the only change is the content of
+  a Fortran module <samp>my_mod.f90</samp>. The content change should trigger
+  an update of the <samp>my_mod.o</samp> and <samp>my_mod.mod</samp> targets,
+  and everything depending on them. However, if the source content is modified
+  in such a way that it does not affect the module's public interface, most
+  compilers will generate an identical <samp>my_mod.mod</samp>. The system can
+  detect this by comparing the checksums. If <samp>my_mod.mod</samp> is
+  unchanged, the build system will not need to trigger the re-compile of all
+  targets depending on <samp>my_mod.mod</samp>, and it will only need to
+  re-link the executable. This allows incremental builds to be more
+  efficient.</p>
+
+  <h3 id="build.inherit">Build Inheritance</h3>
+
+  <p>If a previous build with a similar configuration exists in another
+  location, it can be more efficient to inherit from this previous build in
+  your current build. This works like a normal incremental build, except that
+  your build will only contain the changes you have specified (compared with
+  the inherited build) instead of the full set of targets.</p>
+
+  <p>The current build inherits all properties and target settings, as well as
+  sources and targets from the inherited build. While properties and target
+  settings can be overridden with a corresponding declaration, source
+  inheritance can only be prevented by using a <code><a href=
+  "annex_cfg.html#make.build.prop.no-inherit-source">build.prop{no-inherit-source}</a></code>
+  declaration. E.g.:</p>
+  <pre>
+# Prevents inheritance from some name-spaces:
+build.prop{no-inherit-source} = food/mint drink/soft/cola.c
+</pre>
+
+  <p>For multiple inheritance, the last one takes precedence, and any search
+  for source files or targets are recursive and depth first. For instance, if
+  we have the following declarations in the current FCM make configuration:</p>
+  <pre>
+use = /path/to/a /path/to/b /path/to/c
+</pre>
+
+  <p>and the following in the FCM make configuration of
+  <samp>/path/to/b</samp>:</p>
+  <pre>
+use /path/to/d
+</pre>
+
+  <p>The relationship looks like:</p>
+  <pre>
+/path/to/current
+    /path/to/c
+    /path/to/b
+        /path/to/d
+    /path/to/a
+</pre>
+
+  <p>Therefore, we would expect the search path to follow the order:</p>
+  <pre>
+/path/to/current
+/path/to/c
+/path/to/b
+/path/to/d
+/path/to/a
+</pre>
+
+  <p>In its normal setting, the system does not inherit targets in the
+  <samp>bin</samp>, <samp>etc</samp> and <samp>lib</samp> categories. A target
+  in one of these categories is rebuilt in the current destination, whether the
+  inherited target is up to date or not. This allows someone to use the
+  executables of the build by setting the <var>PATH</var> environment variable
+  to point only to <samp>$DEST/build/bin/</samp> (where <var>$DEST</var> is the
+  destination of the current make). If this behaviour is undesirable for
+  whatever reason, it can be altered using the <code><a href=
+  "annex_cfg.html#make.build.prop.no-inherit-target-category">build.prop{no-inherit-target-category}</a></code>
+  declaration.</p>
+
+  <dl>
+    <dt>Build inheritance limitation: handling of include files</dt>
+
+    <dd>
+      <p>The build system uses the compiler's <code>-I</code> option to specify
+      the search path for include files. E.g. it uses this option to specify
+      the <samp>inc/</samp> sub-directories of the current build and its
+      inherited build.</p>
+
+      <p>However, some compilers (e.g. <code>cpp</code>) search for include
+      files from the container directory of the source file before searching
+      for the paths specified by the <code>-I</code> options. This behaviour
+      may cause the build to behave incorrectly.</p>
+
+      <p>Consider a source file <samp>egg/hen.c</samp> that includes
+      <samp>fried.h</samp>. If the directory structure looks like:</p>
+      <pre>
+# Sources in inherited build:
+egg/hen.c
+egg/fried.h
+
+# Sources in current build:
+egg/fried.h
+</pre>
+
+      <p>The system will correctly identify that <samp>fried.h</samp> is out of
+      date, and trigger a re-compilation of <samp>egg/hen.c</samp>. However, if
+      the compiler searches for the include files from the container directory
+      of the source file first, it will wrongly use the include file in the
+      inherited build instead of the current one.</p>
+
+      <p>If your directory structure does not have any include files in the same
+      directory as the source files that include them then you do not need to
+      worry. If it does then you need to check whether you are affected by this
+      problem before using an inherited build. The situation will vary
+      according to whether the affected code uses Fortran or preprocessor
+      include statements and also whether you are using the
+      <a href="#preprocess">preprocess system</a>. Some compilers (e.g.
+      <code>gfortran</code>) work fine for Fortran includes but not preprocessor
+      includes. Others (e.g. <code>ifort</code>) have options which can be used
+      (e.g. <code>-assume nosource_include</code>) to get the desired behaviour.
+      The FCM distribution includes some simple test code to help you test how
+      your chosen compilers behave. If you cannot ensure the correct behaviour
+      then it is safer not to use inherited builds.</p>
+    </dd>
+  </dl>
+
+  <h3 id="build.diagnostic">Build Diagnostic</h3>
+
+  <p>The amount of diagnostic messages generated by the build system is
+  dependent on the diagnostic verbosity level that can be modified by the
+  <code>-v</code> and <code>-q</code> options to the <code>fcm make</code>
+  command.</p>
+
+  <p>The following is a list of diagnostic output at each verbosity level:</p>
+
+  <dl>
+    <dt>-q</dt>
+
+    <dd>
+      <ul>
+        <li>Exceptions.</li>
+      </ul>
+    </dd>
+
+    <dt>default</dt>
+
+    <dd>
+      <ul>
+        <li>Everything at the -q level.</li>
+
+        <li>Start time of the build.</li>
+
+        <li>The summary of source analysis.</li>
+
+        <li>The summary of targets. Each row except the last reports the number
+        of modified and unchanged targets with a given type of task, and the
+        total time spent to perform the tasks. The last row reports the total
+        number of modified and unchanged targets, and the actual elapsed time.
+        It is worth noting that the elapsed time in a multi-process build
+        should be significant shorter than the sum of the total time for each
+        type of task. E.g.:
+          <pre>
+[info] compile   targets: modified=5, unchanged=0, total-time=0.5s
+[info] compile+  targets: modified=1, unchanged=0, total-time=0.0s
+[info] ext-iface targets: modified=2, unchanged=0, total-time=0.0s
+[info] install   targets: modified=1, unchanged=0, total-time=0.0s
+[info] link      targets: modified=1, unchanged=0, total-time=0.1s
+[info] TOTAL     targets: modified=10, unchanged=0, elapsed-time=0.7s
+</pre>
+        </li>
+
+        <li>Total time.</li>
+      </ul>
+    </dd>
+
+    <dt>-v</dt>
+
+    <dd>
+      <ul>
+        <li>Everything at the default level.</li>
+
+        <li>Elapsed time and name-space for each analysed source.</li>
+
+        <li>Task name, elapsed time, target status (<samp>M</samp> for modified
+        or <samp>U</samp> for unchanged), target key, and source name-space for
+        each modified target. E.g.:
+          <pre>
+[info] compile    0.0 M hello_func.o         &lt;- lib/function/hello_func.f90
+[info] ext-iface  0.0 M hello_func.interface &lt;- lib/function/hello_func.f90
+[info] install    0.0 M hello_inc.f90        &lt;- include/hello_inc.f90
+[info] compile    0.0 M hello_1.o            &lt;- bin/hello_1.f90
+[info] link       0.1 M hello_1.exe          &lt;- bin/hello_1.f90
+</pre>
+        </li>
+      </ul>
+    </dd>
+
+    <dt>-vv</dt>
+
+    <dd>
+      <ul>
+        <li>Everything at the -v level.</li>
+
+        <li>A list of dependencies (type and name) of each analysed source.
+        E.g.
+          <pre>
+[info] analyse  0.0 bin/hello_1.f90
+[info]              -&gt; (  include) hello_inc.f90
+[info]              -&gt; (        o) hello_void.o
+[info]              -&gt; ( f.module) hello_mod
+</pre>
+        </li>
+
+        <li>A list of the required targets for this build. Each row contains
+        the task, the category and the key of the target. E.g.:
+          <pre>
+[info] required-target: link      bin     hello_1.exe
+</pre>
+        </li>
+
+        <li>The dependency tree of all the required targets. (N.B. A
+        <samp>(n-deps=N)</samp> at the end of a line means that the target has
+        already appeared earlier and that it has <samp>N</samp> direct
+        dependencies, which will not be reported again.) E.g.:
+          <pre>
+[info] target hello_1.exe
+[info] target  - hello_void.o
+[info] target  - hello_1.o
+[info] target  -  - hello_mod.mod
+[info] target  -  -  - hello_mod.o
+[info] target  -  - hello_void.o
+[info] target  -  - hello_inc.f90
+[info] target  -  -  - hello_sub.interface
+[info] target  -  -  -  - hello_sub.o
+[info] target  -  -  -  -  - hello_func.interface
+[info] target  -  -  -  -  -  - hello_func.o
+[info] target  - hello_2.o
+[info] target  -  - hello_mod.mod (n-deps=1)
+</pre>
+        </li>
+
+        <li>Each shell command invoked with elapsed time and return code.</li>
+
+        <li>STDOUT and STDERR from shell commands invoked by the build
+        tasks, e.g. diagnostic output from compilers and linkers.</li>
+      </ul>
+    </dd>
+  </dl>
+
+  <h2 id="preprocess">Preprocess</h2>
+
+  <p>As most modern compilers can handle preprocessing, you should normally
+  leave preprocessing to the compiler. However, it is recognised that some code
+  is written with preprocessor directives that can alter the calling interface
+  of the procedure and/or their dependencies. If a source file requires
+  preprocessing in such a way, we have to preprocess it before feeding it to
+  the build system. The preprocess system can be used to do this. It is
+  typically run as a step before build.</p>
+
+  <p>The preprocess system works using the same logic as the build system, but
+  is configured primarily to preprocess C/C++ and Fortran source files. We
+  shall document only the main differences to the build system in the remainder
+  of this section.</p>
+
+  <h3 id="preprocess.basic">Preprocess: Basic</h3>
+
+  <p>A typical usage of the preprocess system may look like:</p>
+  <pre>
+steps = extract preprocess build
+
+# ... some extract configuration
+
+# Only preprocess source files in these name-spaces
+preprocess.target{ns} = foo/bar egg/fried.F90
+# Specifies the macro definitions for the Fortran preprocessor
+preprocess.prop{fpp.defs} = THING=stuff HIGH=tall
+# Specifies the macro definitions for the C preprocessor
+preprocess.prop{cpp.defs} = LOWER=lower UNDER LINUX
+
+# ... some build configuration
+</pre>
+
+  <p>The result of the preprocess can be found in the sub-directories of the
+  <samp>preprocess/</samp> sub-directory. There are only 2 target
+  categories:</p>
+
+  <dl>
+    <dt id="preprocess.category.include"><samp>include</samp></dt>
+
+    <dd>e.g. include files.</dd>
+
+    <dt id="preprocess.category.src"><samp>src</samp></dt>
+
+    <dd>e.g. preprocessed source files</dd>
+  </dl>
+
+  <h3 id="preprocess.source-type">Preprocess Source Types</h3>
+
+  <p>Only files in the following types (with the given file extensions) are
+  recognised by the preprocess system:</p>
+
+  <dl>
+    <dt><a href="annex_cfg.html#make.preprocess.prop.file-ext.cpp">cpp</a>
+    (C/C++ source file)</dt>
+
+    <dd>.c .cpp</dd>
+
+    <dt><a href="annex_cfg.html#make.preprocess.prop.file-ext.fpp">fpp</a>
+    (Fortran source file requiring preprocessing)</dt>
+
+    <dd>.F .FOR .FTN .F90 .F95</dd>
+
+    <dt><a href="annex_cfg.html#make.preprocess.prop.file-ext.h">h</a>
+    (Preprocessor header file)</dt>
+
+    <dd>.h</dd>
+  </dl>
+
+  <h3 id="preprocess.source-analysis">Preprocess Source Analysis</h3>
+
+  <p>The preprocess system only looks for include dependencies using the
+  pattern <samp>#include "name.h"</samp>. Macros using the angle brackets
+  syntax (e.g. <samp>#include &lt;name.h&gt;</samp>) are ignored.</p>
+
+  <h3 id="preprocess.target-source">Preprocess Targets from Source Files</h3>
+
+  <p>The preprocess system only generates targets from source files, (i.e.
+  targets are not generated by name-spaces). Targets of the preprocess system
+  perform one of the following <dfn>tasks</dfn>:</p>
+
+  <dl>
+    <dt id="preprocess.task.install">install</dt>
+
+    <dd>Copies the source file to the destination.</dd>
+
+    <dt id="preprocess.task.process">process</dt>
+
+    <dd>Creates a new source file by invoking the C/Fortran preprocessor on the
+    original source file.</dd>
+  </dl>
+
+  <p>By default, it attempts to build all targets with a <samp><a href=
+  "#preprocess.task.process">process</a></samp> task, i.e.:</p>
+  <pre>
+preprocess.target =
+preprocess.target{task} = process
+preprocess.target{category} =
+preprocess.target{ns} =
+</pre>
+
+  <p>Here is a list of what targets are available for each type of file:</p>
+
+  <dl>
+    <dt>c -&gt; name-space</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: the preprocessed version of the original
+      file.</p>
+
+      <p><dfn>task</dfn>: <a href="#preprocess.task.process">process</a>
+      (cpp).</p>
+
+      <p><dfn>category and destination</dfn>: <a href=
+      "#preprocess.category.src">src</a> and src/name-space</p>
+
+      <p><dfn>properties</dfn>: <a href=
+      "annex_cfg.html#make.preprocess.prop.cpp">cpp</a>, <a href=
+      "annex_cfg.html#make.preprocess.prop.cpp.flags">cpp.flags</a>, <a href=
+      "annex_cfg.html#make.preprocess.prop.cpp.defs">cpp.defs</a>, <a href=
+      "annex_cfg.html#make.preprocess.prop.cpp.flag-define">cpp.flag-define</a>,
+      <a href=
+      "annex_cfg.html#make.preprocess.prop.cpp.flag-include">cpp.flag-include</a></p>
+
+      <p><dfn>dependencies</dfn>: include.</p>
+
+      <p><dfn>update if</dfn>: source file or any of the required properties
+      are modified, or if any include dependencies are updated.</p>
+    </dd>
+
+    <dt>fortran -&gt; name-space</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: the preprocessed version of the original
+      file.</p>
+
+      <p><dfn>task</dfn>: <a href="#preprocess.task.process">process</a>
+      (fpp).</p>
+
+      <p><dfn>category and destination</dfn>: <a href=
+      "#preprocess.category.src">src</a> and src/name-space</p>
+
+      <p><dfn>properties</dfn>: <a href=
+      "annex_cfg.html#make.preprocess.prop.fpp">fpp</a>, <a href=
+      "annex_cfg.html#make.preprocess.prop.fpp.flags">fpp.flags</a>, <a href=
+      "annex_cfg.html#make.preprocess.prop.fpp.defs">fpp.defs</a>, <a href=
+      "annex_cfg.html#make.preprocess.prop.fpp.flag-define">fpp.flag-define</a>,
+      <a href=
+      "annex_cfg.html#make.preprocess.prop.fpp.flag-include">fpp.flag-include</a></p>
+
+      <p><dfn>dependencies</dfn>: include.</p>
+
+      <p><dfn>update if</dfn>: source file or any of the required properties
+      are modified, or if any include dependencies are updated.</p>
+    </dd>
+
+    <dt>h -&gt; name</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: a header (include) file.</p>
+
+      <p><dfn>task</dfn>: <a href="#preprocess.task.install">install</a>.</p>
+
+      <p><dfn>category and destination</dfn>: <a href=
+      "#preprocess.category.include">include</a> and include/name</p>
+
+      <p><dfn>dependencies</dfn>: include.</p>
+
+      <p><dfn>update if</dfn>: source file is modified.</p>
+    </dd>
+  </dl>
+</body>
+</html>

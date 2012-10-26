@@ -1,0 +1,16 @@
+=head1 NAME
+
+fcm switch (sw)
+
+=head1 SYNOPSIS
+
+Update the working copy to a different URL.
+
+    1. fcm switch URL[@REV1] [PATH]
+    2. fcm switch --relocate FROM TO [PATH...]
+
+Note: if --relocate is not specified, "fcm switch" will only support the options
+--non-interactive, --revision (-r) and --quiet (-q). For detail, see the output
+of "L<svn|svn> help switch".
+
+=cut

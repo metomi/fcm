@@ -1,0 +1,14 @@
+#!/bin/ksh
+
+if [[ -f control/hpc_batch.stderr ]]; then
+  echo "##### Control run stderr ############################################"
+  cat control/hpc_batch.stderr
+  echo "##### Control run stdout ############################################"
+  cat control/hpc_batch.stdout | sed -ne '1,/^SUMMARY/p'
+fi
+if [[ -f test/hpc_batch.stderr ]]; then
+  echo "##### Test run stderr ###############################################"
+  cat test/hpc_batch.stderr
+  echo "##### Test run stdout ###############################################"
+  cat test/hpc_batch.stdout | sed -ne '1,/^SUMMARY/p'
+fi

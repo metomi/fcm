@@ -1,0 +1,2 @@
+# Although this case works, the output from the extract system does not correctly
+# identify the file as added from branch1 (unlike in fcm1_add_file).

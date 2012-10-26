@@ -1,0 +1,37 @@
+=head1 NAME
+
+fcm branch (br)
+
+=head1 SYNOPSIS
+
+    1. fcm branch --create --name NAME [OPTIONS] [SOURCE]
+       fcm branch -c           -n NAME [OPTIONS] [SOURCE]
+    2. fcm branch --delete             [OPTIONS] [TARGET]
+       fcm branch -d                   [OPTIONS] [TARGET]
+    3. fcm branch --info               [OPTIONS] [TARGET]
+       fcm branch                      [OPTIONS] [TARGET]
+    4. fcm branch --list               [OPTIONS] [TARGET]
+       fcm branch -l                   [OPTIONS] [TARGET]
+
+This command is deprecated. The 4 usages are replaced by:
+
+=over 4
+
+=item 1.
+
+C<fcm branch-create>: Type C<fcm help branch-create> for detail.
+
+=item 2.
+
+C<fcm branch-delete>: Type C<fcm help branch-delete> for detail.
+
+=item 3.
+
+C<fcm branch-info>: Type C<fcm help branch-info> for detail.
+
+=item 4.
+
+C<fcm branch-list>: Type C<fcm help branch-list> for detail.
+
+=back
+=cut

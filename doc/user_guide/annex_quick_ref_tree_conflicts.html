@@ -1,0 +1,268 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for Linux (vers 14 June 2007), see www.w3.org" />
+
+  <title>FCM User Guide: Annex: Quick Reference: Tree Conflict
+  Resolution</title>
+  <meta name="author" content="FCM team" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" type="text/css" href="../etc/fcm.css" />
+  <script type="text/javascript" src="../etc/fcm.js">
+</script>
+<script type="text/javascript" src="../etc/fcm-version.js">
+</script>
+</head>
+
+<body>
+  <div id="body-header">
+    <a href="http://www.metoffice.gov.uk/research/collaboration/fcm/">
+    <img src="../etc/fcm.png" alt="FCM" />
+    </a>
+    <address>
+      &copy; British Crown Copyright 2006-12
+      <a href="http://www.metoffice.gov.uk">Met Office</a>.
+      See <a href="../etc/fcm-terms-of-use.html">Terms of Use</a>.<br />
+      This document is released under the <a href=
+      "http://www.nationalarchives.gov.uk/doc/open-government-licence/" rel=
+      "license">Open Government Licence</a>.<br />
+      <span id="fcm-version"></span><br />
+      <span id="fcm-js-trail"></span>
+    </address>
+  </div>
+
+  <h1>Annex: Quick Reference: Tree Conflict Resolution</h1>
+
+  <div id="fcm-content"></div>
+
+  <h2 id="tree:reference:intro">Introduction</h2>
+
+  <p>A tree conflict appears in <code>fcm status</code> like this:</p>
+  <pre>
+!     C subroutine/hello_sub_dummy.h
+      &gt;   local missing, incoming edit upon merge
+</pre>
+
+  <p>and can require complex action to solve, based on the situation. Happily,
+  <code>fcm conflicts</code> automates the resolution of most ordinary tree
+  conflicts.</p>
+
+  <p>This page is intended to give more information about the meaning of the
+  common tree conflicts, and to give guidance on those that aren't handled
+  automatically, such as directory tree conflicts.</p>
+
+  <p>The list below is ordered by output from <code>fcm status</code>. There
+  are two choices that the user must make:</p>
+
+  <ul>
+    <li><em>keep local</em>: Choose the local branch or revision version of a
+    file or directory. Answer <samp>y</samp> in <code>fcm
+    conflicts</code>.</li>
+
+    <li><em>discard local</em>: Choose the merge branch or other revision
+    version of a file or directory. Answer <samp>n</samp> in <code>fcm
+    conflicts</code>.</li>
+  </ul>
+
+  <p>For example, if you are merging the trunk into a working copy of a branch,
+  <em>keep local</em> would refer to <strong>keeping</strong> the changes as
+  they existed on the branch; <em>discard local</em> would refer to accepting
+  the trunk changes and <strong>discarding</strong> the branch ones.</p>
+
+  <p>In this page, we use the word <em>local</em> for your local working copy,
+  and <em>external</em> for the outside source you are updating or merging in
+  from. In the example above, <em>local</em> would mean your working copy of
+  the branch; <em>external</em> would mean the trunk.</p>
+
+  <p>Subversion implements rename as a copy-and-delete operation. This means a
+  rename can show up as a delete (or <em>missing</em>) in the tree conflict
+  information.</p>
+
+  <p>It's very important to find out if your tree conflict arises from a
+  rename, but this information has to be dug out of <code>fcm log</code>. A
+  rename can have occurred locally or externally. An external rename would show
+  up in <code>fcm status</code> as an addition with history (<samp>A</samp>
+  with <samp>+</samp>): for example:</p>
+  <pre>
+A   +   FILENAME
+</pre>
+
+  <p><code>fcm log -v FILENAME</code> can be used to examine if this is really
+  just a rename - it will show up as FILENAME (from ORIGINAL_FILENAME).</p>
+
+  <p>Local renames that have been committed won't show up in <code>fcm
+  status</code>. These can still be found using <code>fcm log -v</code> for
+  each filename, or you can try to remember what happened!</p>
+
+  <h2 id="tree:reference:list">Resolution List</h2>
+
+  <p>This section contains specific help on different types of tree
+  conflict.</p>
+
+  <p>Find the relevant section below by running <code>fcm status</code> and
+  looking up the information below the file in conflict - e.g.:</p>
+  <pre>
+!     C subroutine/hello_sub_dummy.h
+      &gt;   local delete, incoming delete upon merge
+</pre>
+
+  <p>in this case the <samp>local delete, incoming delete upon merge</samp> is
+  the correct section header.</p>
+
+  <p>There are some situations not covered below - <samp>local
+  obstruction</samp> is not covered here, as it is a case of the user
+  corrupting the working copy - try a new checkout. Similarly, <samp>local
+  unversioned</samp> is just a case of a problem with something in the working
+  copy - an unversioned file or directory exists where Subversion wants to put
+  the new stuff. Delete or move it, and try the merge again.</p>
+
+  <p>If you know that a rename has happened, use the <samp>(renaming)</samp>
+  suffix for your section below. Otherwise, choose the <samp>(no
+  renaming)</samp> suffix.</p>
+
+  <p><code>fcm resolve</code> always takes the form <code>fcm resolve --accept
+  working FILENAME</code> for tree conflicts.</p>
+
+  <dl>
+    <dt id="add:add"><samp>local add, incoming add upon merge</samp></dt>
+
+    <dd>
+      <p><dfn>what it means:</dfn>: files or directories added with the same
+      name independently</p>
+
+      <p><dfn>what keep local does</dfn>: uses rename to shuffle the old file
+      to a different name, copies the new file in, renames the new file to the
+      original name but with a temporary-style suffix (e.g. hello.F90 -&gt;
+      hello.F90.xD4r), and again renames the old file to the original name.
+      (Then runs <code>fcm resolve</code>).</p>
+
+      <p><dfn>what discarding local does</dfn>: renames the old file to give it
+      a temporary-style suffix (e.g. hello.F90 -&gt; hello.F90.r6Ys), and
+      copies the new file into the original name. (Then runs <code>fcm
+      resolve</code>).</p>
+    </dd>
+
+    <dt id="edit:delete:no_rename"><samp>local edit, incoming delete upon merge
+    (no renaming)</samp></dt>
+
+    <dd>
+      <p><dfn>meaning</dfn>: file or directory modified on the branch locally,
+      but deleted on the merge branch</p>
+
+      <p><dfn>what keep local does</dfn>:just runs <code>fcm
+      resolve</code>.</p>
+
+      <p><dfn>what discarding local does</dfn>:deletes the file or directory
+      and runs <code>fcm resolve</code>.</p>
+    </dd>
+
+    <dt id="edit:delete:rename"><samp>local edit, incoming delete upon merge
+    (renaming)</samp></dt>
+
+    <dd>
+      <p><dfn>meaning</dfn>: file modified on branch locally, but renamed on
+      merge branch</p>
+
+      <p><dfn>what keep local does</dfn>: copies over the renamed file, and the
+      common ancestor of the file on the branches, and uses them for a text
+      conflict style merge into the old (local) filename. It then removes the
+      renamed file and runs <code>fcm resolve</code>.</p>
+
+      <p><dfn>what discarding local does</dfn>: copies over the renamed file,
+      and the common ancestor of the file on the branches, and uses them for a
+      text conflict style merge into the new renamed file. It then deletes the
+      old file and runs <code>fcm resolve</code>.</p>
+    </dd>
+
+    <dt id="delete:delete:no_rename"><samp>local delete, incoming delete upon
+    merge (no renaming)</samp></dt>
+
+    <dd>
+      <p><dfn>meaning</dfn>: same filename deleted both locally and
+      externally.</p>
+
+      <p><dfn>in both cases</dfn>: just runs <code>fcm resolve</code>.</p>
+    </dd>
+
+    <dt id="delete:rename:rename"><samp>local delete, incoming delete upon
+    merge (just external renaming)</samp></dt>
+
+    <dd>
+      <p><dfn>meaning</dfn>: file deleted locally, but renamed externally</p>
+
+      <p><dfn>what keep local does</dfn>: just runs <code>fcm
+      resolve</code>.</p>
+
+      <p><dfn>what discarding local does</dfn>: just deletes the new renamed
+      file and runs <code>fcm resolve</code>.</p>
+    </dd>
+
+    <dt id="rename:delete:rename"><samp>local delete, incoming delete upon
+    merge (just local renaming)</samp></dt>
+
+    <dd>
+      <p><dfn>meaning</dfn>: file renamed locally, but deleted externally</p>
+
+      <p><dfn>what keep local does</dfn>: just runs <code>fcm
+      resolve</code>.</p>
+
+      <p><dfn>what discarding local does</dfn>: deletes the local renamed file
+      and runs <code>fcm resolve</code>.</p>
+    </dd>
+
+    <dt id="delete:delete:rename"><samp>local delete, incoming delete upon
+    merge (local renaming AND external renaming)</samp></dt>
+
+    <dd>
+      <p><dfn>meaning</dfn>: same file renamed locally AND externally, to two
+      different names.</p>
+
+      <p><dfn>what keep local does</dfn>: copies in the external file and
+      common ancestor file to construct a text-style merge using
+      <code>xxdiff</code> into the locally-renamed filename. Removes the
+      external rename and runs <code>fcm resolve</code>.</p>
+
+      <p><dfn>what discarding local does</dfn>: copies in the external file and
+      common ancestor file to construct a text-style merge using
+      <code>xxdiff</code> into the externally-renamed filename. Removes the
+      local rename and runs <code>fcm resolve</code>.</p>
+    </dd>
+
+    <dt id="missing:edit:no_rename"><samp>local missing, incoming edit upon
+    merge (no renaming)</samp></dt>
+
+    <dd>
+      <p><dfn>meaning</dfn>: locally deleted file, add newer file from merge
+      branch?</p>
+
+      <p><dfn>what keep local does</dfn>: just runs <code>fcm
+      resolve</code>.</p>
+
+      <p><dfn>what discarding local does</dfn>: copies in the external file
+      using its URL and runs <code>fcm resolve</code>.</p>
+    </dd>
+
+    <dt id="missing:edit:rename"><samp>local missing, incoming edit upon merge
+    (renaming)</samp></dt>
+
+    <dd>
+      <p><dfn>meaning</dfn>: locally renamed file, but external changes to the
+      old filename</p>
+
+      <p><dfn>what keep local does</dfn>: copies in the external file and
+      common ancestor to construct a text-style merge using
+      <code>xxdiff</code>, into the locally-renamed filename. Runs <code>fcm
+      resolve</code>.</p>
+
+      <p><dfn>what discarding local does</dfn>: copies in the external file and
+      common ancestor to construct a text-style merge using
+      <code>xxdiff</code>, into the original filename. Deletes the
+      locally-renamed file and adds the original filename, then runs <code>fcm
+      resolve</code>.</p>
+    </dd>
+  </dl>
+</body>
+</html>

@@ -1,0 +1,1190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for Linux/x86 (vers 1st December 2004), see www.w3.org" />
+
+  <title>FCM User Guide: Annex: FCM Configuration File</title>
+  <meta name="author" content="FCM team" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" type="text/css" href="../etc/fcm.css" />
+<script type="text/javascript" src="../etc/fcm.js">
+</script>
+<script type="text/javascript" src="../etc/fcm-version.js">
+</script>
+</head>
+
+<body>
+  <div id="body-header">
+    <a href="http://www.metoffice.gov.uk/research/collaboration/fcm/">
+    <img src="../etc/fcm.png" alt="FCM" />
+    </a>
+    <address>
+      &copy; British Crown Copyright 2006-12
+      <a href="http://www.metoffice.gov.uk">Met Office</a>.
+      See <a href="../etc/fcm-terms-of-use.html">Terms of Use</a>.<br />
+      This document is released under the <a href=
+      "http://www.nationalarchives.gov.uk/doc/open-government-licence/" rel=
+      "license">Open Government Licence</a>.<br />
+      <span id="fcm-version"></span><br />
+      <span id="fcm-js-trail"></span>
+    </address>
+  </div>
+
+  <h1>Annex: FCM Configuration File</h1>
+
+  <div id="fcm-content"></div>
+
+  <h2 id="syntax">Syntax</h2>
+
+  <h3 id="syntax.comment">Syntax: comment</h3>
+
+  <p>An empty line, a line with only space characters and a line beginning with
+  a <kbd>#</kbd> character is a comment line. For example:</p>
+  <pre>
+# This is a comment.
+    # This is also a comment.
+</pre>
+
+  <p>Also, if a line contains a space character followed by a <kbd>#</kbd>
+  character then this, and any following characters, are treated as an end of
+  line comment and are ignored.</p>
+
+  <h3 id="syntax.declaration">Syntax: declaration</h3>
+
+  <p>The general syntax of a declaration consists of a label, a set of
+  modifiers, a list of name-spaces, and a value:</p>
+  <pre>
+label{mod:mod-value}[ns] = value
+label{mod:mod-value} = value
+label[ns] = value
+label = value
+label = value\
+    value # "value    value"
+label = value\
+    \value # "valuevalue"
+</pre>
+
+  <p>The label is compulsory. It defines the declaration, and may have one or
+  more characters in the alpha-numeric, the underscore, the minus sign and the
+  full stop. The label cannot be substituted with a variable.</p>
+
+  <p>The modifier is an optional part of the syntax, but may be a compulsory
+  part of some declarations. The modifiers are embedded between a pair of curly
+  braces and must come after the label, but before the name-spaces and the
+  equal sign. It should be a comma-separated list of colon-separated key-value
+  pairs, (i.e. <kbd>{key1: value1, key2: value2, ...}</kbd>). The value in each
+  modifier is optional - if a key is set without a value, its value is assumed
+  to be 1. The contents of the modifiers can be substituted using a
+  variable.</p>
+
+  <p>The name-space is an optional part of the syntax, but may be a compulsory
+  part of some declarations. The name-spaces are embedded between a pair of
+  square braces and must come after the label and/or modifiers but before the
+  equal sign. It should be a space-separated list of names. If a name contains
+  space, the space character can be escaped using a backslash character or the
+  name can be quoted. The contents of the name-spaces can be substituted using
+  a variable.</p>
+
+  <p>The first non-space character after the equal sign begins the value of the
+  declaration. If there is nothing after the equal sign, the value is an empty
+  string. The contents of the value can be substituted using a variable.
+  Trailing space characters are ignored. The end of line can be escaped using a
+  backslash, and the value of the declaration will continue from the next
+  non-comment line. If the first non-space character on that line is a
+  backslash then the line contents up to and including that backslash are
+  ignored.</p>
+
+  <h3 id="syntax.variable">Syntax: variable</h3>
+
+  <p>A variable is used to substitute commonly used values in a declaration. It
+  can refer to an environment variable or can be defined locally using the
+  syntax:</p>
+  <pre>
+$var = value    # Sets "var" variable to "value"
+$var{?} = value # Sets "var" variable to "value" only if "var" is not defined
+# E.g.:
+$projects = foo bar baz
+$long_path = src/path/is/very/very/very/long
+$UMDIR{?} = /projects/um1
+# time passes...
+extract.ns = $projects
+extract.path-excl[$projects egg ham] = doc man ${long_path}_longer
+build.prop{cc.defs} = foo=\$foo # escape substitution
+</pre>
+
+  <p>The name of a variable must begin with an alphabet or an underscore and
+  followed by 0 or more alpha-numeric or underscore characters, (i.e. it must
+  match this regular expression: <var>^[A-Za-z_][A-Za-z0-9_]*$</var>).</p>
+
+  <p>Locally defined variables only apply in the context of the configuration
+  file and are not passed down, for instance, to the compiler. If there is an
+  environment variable with the same identifier, its value is normally
+  overridden (within the context of the configuration file) by any local
+  setting. However, if a <kbd>?</kbd> modifier is given, it assigns the value
+  to the variable only if the variable is not already defined (either as an
+  environment variable or locally). Substitution can be escaped using a
+  backslash character in front of the dollar sign. Any attempt to reference an
+  undefined variable will trigger an exception.</p>
+
+  <p>Note: <var>$HERE</var> is a reserved variable to indicate the parent
+  directory of the current configuration file. (The system ignores the $HERE
+  environment variable, if there is one.) Any attempt to assign a value to
+  <var>$HERE</var> will trigger an exception.</p>
+
+  <h3 id="syntax.include">Syntax: include</h3>
+
+  <p>An <code>include</code> declaration specifies the logical locations of a
+  list of configuration files, where contents are to be included inline:</p>
+  <pre>
+include{type:type} = location ...
+# E.g.:
+include = fcm:foo/path/to/config/file
+include = svn://server/path/to/config/file@1234
+include{type:svn} = http://server/path/to/config/file
+include = /path/to/config/file $HERE/another-config-file
+include = $HERE/another-config-file
+include = ~/path/to/config/file ~fred/path/to/config/file
+</pre>
+
+  <p>Currently, the location can be a path in the file system, a Subversion URL
+  or a FCM keyword pointing to a Subversion URL. The system will attempt to
+  make an intelligent guess of the location type. To allow for future
+  expansion, the declaration accepts a <var>type:TYPE</var> modifier (where
+  TYPE can currently be <samp>fs</samp> for a file system path or
+  <samp>svn</samp> for a Subversion location) to allow the location type to be
+  defined where it is ambiguous.</p>
+
+  <h2 id="keyword">FCM Keyword Configuration</h2>
+
+  <p>The keyword configuration files are mainly used to define FCM location
+  keywords and related settings. The <code>fcm</code> command searches for
+  keyword configuration files from the following locations:</p>
+
+  <ol>
+    <li><dfn>(Deprecated)</dfn> <samp>$HOME/.fcm</samp> - expects FCM 1
+    configuration file format. See <a href="annex_fcm_cfg.html">Annex:
+    Declarations in FCM 1 central/user configuration file</a> for detail.</li>
+
+    <li><samp>$FCM/etc/fcm/keyword.cfg</samp> where <var>$FCM/bin/</var> is the
+    path at which <code>fcm</code> is installed.</li>
+
+    <li><samp>$HOME/.met-um/fcm/keyword.cfg</samp>.</li>
+  </ol>
+
+  <p>The following are declarations recognised by the keyword configuration
+  files:</p>
+
+  <dl>
+    <dt id="keyword.location">location</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Associates a namespace with a location, and
+      allows the use of <samp>fcm:namespace</samp> as a substitute of the
+      location.</p>
+
+      <p><dfn>modifier</dfn>: <var>primary</var>: Optional. If specified, the
+      location is a primary location, i.e. the system will create the
+      <samp>_tr</samp>, <samp>_br</samp>, <samp>_tg</samp>, <samp>-tr</samp>,
+      <samp>-br</samp> and <samp>-tg</samp> keywords for this location.</p>
+
+      <p><dfn>modifier</dfn>: <var>type</var>: Optional. Specifies the type of
+      the location. The system currently supports <samp>svn</samp> for a
+      Subversion location and <samp>fs</samp> for a file system location. If
+      not specified, the system will make an intelligent guess based on the
+      given value.</p>
+
+      <p><dfn>namespace</dfn>: The namespace to be associated with the
+      location.</p>
+
+      <p><dfn>value</dfn>: A valid location of a type supported by the
+      system.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+location{primary}[var] = svn://fcm5/VAR_svn/VAR
+location{primary, type:svn}[egg] = http://chicken/egg
+</pre>
+    </dd>
+
+    <dt id="keyword.revision">revision</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Associates a keyword with a revision of a
+      location in a version control system.</p>
+
+      <p><dfn>namespace</dfn>: The namespace of a location (already defined
+      using the <code>location</code> declaration), followed by a colon and the
+      namespace of the revision.</p>
+
+      <p><dfn>value</dfn>: A valid revision of the location.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+revision[um:vn7.5] = 18479
+revision[egg:free-range] = 1
+</pre>
+    </dd>
+
+    <dt id="keyword.browser.comp-pat">browser.comp-pat</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Specifies a regular expression to capture
+      components in the scheme-specific part of a version control system
+      location (already defined using the <code>location{primary}</code>
+      declaration). These components can then be used in the
+      <code>browser.loc-tmpl</code> template string.</p>
+
+      <p><dfn>namespace</dfn>: Optional. The namespace of a location. If not
+      specified, the declaration applies globally.</p>
+
+      <p><dfn>value</dfn>: A valid regular expression.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+browser.comp-pat = (?msx-i:\A // ([^/]+) /+ ([^/]+)_svn /*(.*) \z) # default
+browser.comp-pat[egg] = (?msx-i:\A//([^/]+)/(.*)\z)
+</pre>
+    </dd>
+
+    <dt id="keyword.browser.loc-tmpl">browser.loc-tmpl</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Specifies a template string, in which the
+      components captured by the <code>browser.comp.pat</code> regular
+      expression are used to fill in the numbered fields. The template should
+      have one more field than the number of components captured by
+      <code>browser.comp-pat</code>. The final field is used to place the
+      revision, which is generated via the <code>browser.rev-tmpl</code>.</p>
+
+      <p><dfn>namespace</dfn>: Optional. The namespace of a location. If not
+      specified, the declaration applies globally.</p>
+
+      <p><dfn>value</dfn>: A valid template.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+browser.loc-tmpl = http://{1}/projects/{2}/intertrac/source:/{3}{4} # default
+browser.loc-tmpl[egg] = http://{1}/intertrac/source:/{3}{4}
+</pre>
+    </dd>
+
+    <dt id="keyword.browser.rev-tmpl">browser.rev-tmpl</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Specifies a template string, which should have
+      a single numbered field for filling in the revision number.</p>
+
+      <p><dfn>namespace</dfn>: Optional. The namespace of a location. If not
+      specified, the declaration applies globally.</p>
+
+      <p><dfn>value</dfn>: A valid template.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+browser.rev-tmpl = @{1} # default
+</pre>
+    </dd>
+  </dl>
+
+  <h2 id="external">FCM External Configuration</h2>
+
+  <p>The external configuration files are used to define the name of external
+  commands used by the FCM system. The <code>fcm</code> command searches for
+  external configuration files from the following locations:</p>
+
+  <ol>
+    <li><samp>$FCM/etc/fcm/external.cfg</samp> where <var>$FCM/bin/</var> is
+    the where <code>fcm</code> is invoked.</li>
+
+    <li><samp>$HOME/.met-um/fcm/external.cfg</samp>.</li>
+  </ol>
+
+  <p>The following are declarations recognised by the external configuration
+  files:</p>
+
+  <dl>
+    <dt id="external.browser">browser</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Specifies the command to invoke the web
+      browser. (default=<samp>firefox</samp>)</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+browser = konqueror
+</pre>
+    </dd>
+
+    <dt id="external.graphic-diff">graphic-diff</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Specifies the command to invoke the graphic
+      diff tool. (default=<samp>xxdiff</samp>)</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+graphic-diff = tkdiff
+</pre>
+    </dd>
+
+    <dt id="external.graphic-merge">graphic-merge</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Specifies the command to invoke the graphic
+      merge tool. (default=<samp>xxdiff</samp>)</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+graphic-merge = xxdiff
+</pre>
+    </dd>
+  </dl>
+
+  <h2 id="make">FCM Make Configuration</h2>
+
+  <p>A typical FCM make configuration consists of some top level declarations
+  to define the make, and specific declarations for each step. The top level
+  declarations are described below, and the specific declarations for each type
+  of step will be described in the sub-sections to follow.</p>
+
+  <p>Note:</p>
+
+  <ul>
+    <li>Unless stated otherwise, FCM make configuration declarations are
+    non-cumulative, i.e. if more than one declarations apply to the
+    <dfn>same</dfn> configuration, the value of the last declaration overrides
+    those of the earlier ones. E.g.:
+      <pre>
+# Sets the Fortran compiler flags for the root name-space
+build.prop{fc.flags} = -O3
+# build.prop{fc.flags}[/] = -O3
+
+# Sets the C/Fortran compiler flags for the "foo/bar" name-space
+build.prop{cc.flags, fc.flags}[foo/bar] = -g -C
+# build.prop{cc.flags}[foo/bar] = -g -C
+# build.prop{fc.flags}[/] = -O3
+# build.prop{fc.flags}[foo/bar] = -g -C
+
+# Sets the Fortran compiler flags for the root and "foo/bar" name-spaces
+build.prop{fc.flags}[/ foo/bar] = -O2
+# build.prop{cc.flags}[foo/bar] = -g -C
+# build.prop{fc.flags}[/] = -O2
+# build.prop{fc.flags}[foo/bar] = -O2
+
+# Sets the Fortran compiler flags for the "foo/bar" name-spaces
+build.prop{fc.flags}[foo/bar] = -O1
+# build.prop{cc.flags}[foo/bar] = -g -C
+# build.prop{fc.flags}[/] = -O2
+# build.prop{fc.flags}[foo/bar] = -O1
+</pre>
+    </li>
+
+    <li>Unless stated otherwise, declarations are inherited.</li>
+
+    <li>The default values of the property settings of each step class (e.g.
+    <code>build.prop{fc}</code>) can be modified in a site/user FCM make
+    configuration file:
+
+      <ol>
+        <li><samp>$FCM/etc/fcm/make.cfg</samp> where <var>$FCM/bin/</var> is
+        the where <code>fcm</code> is invoked.</li>
+
+        <li><samp>$HOME/.met-um/fcm/make.cfg</samp>.</li>
+      </ol>
+
+      <p>The syntax in a site/user FCM make configuration file is identical to
+      a normal FCM make configuration file except that:</p>
+
+      <ul>
+        <li>Only <samp>*.prop{*}</samp> declarations are accepted.</li>
+
+        <li>The settings apply to a step class, not an individual step.</li>
+
+        <li>Name-space is not allowed.</li>
+      </ul>
+    </li>
+  </ul>
+
+  <p>For further details, please refer to the chapter on <a href=
+  "make.html">FCM Make</a>.</p>
+
+  <dl>
+    <dt id="make.dest">dest</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Specifies the output destination of the make
+      system. If not specified, the system assumes the output destination to be
+      the current working directory. This setting is not inherited.</p>
+
+      <p><dfn>value</dfn>: A writable directory path.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+dest = path
+# E.g.:
+dest = $HERE
+</pre>
+    </dd>
+
+    <dt id="make.steps">steps</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Specifies a list of steps for the make system
+      to invoke. Each specified step can either be the ID of a known
+      sub-system, i.e. <samp>extract</samp>, <samp>mirror</samp>,
+      <samp>preprocess</samp> and <samp>build</samp>, or an ID defined using
+      the <code>step.class</code> declaration. (See below.)</p>
+
+      <p><dfn>value</dfn>: A list of steps for the make system to invoke.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+steps = id-1 id-2 ...
+# E.g.:
+steps = extract mirror
+</pre>
+    </dd>
+
+    <dt id="make.step.class">step.class</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Defines custom step IDs. This allows built-in
+      steps to be renamed, or re-used in multiple steps.</p>
+
+      <p><dfn>namespace</dfn>: Specifies the step IDs.</p>
+
+      <p><dfn>value</dfn>: An ID of a known sub-system, i.e.
+      <samp>extract</samp>, <samp>mirror</samp>, <samp>preprocess</samp> and
+      <samp>build</samp>.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+step.class[id ...] = id-of-class
+# E.g.:
+step.class[build-qxrecon build-ieee] = build
+</pre>
+    </dd>
+
+    <dt id="make.use">use</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Specifies inheritance locations. It is worth
+      noting that this declaration is cumulative, i.e. a <code>use</code>
+      declaration adds more inheritance locations rather than overrides the
+      inheritance locations of any previous <code>use</code> declarations.</p>
+
+      <p><dfn>value</dfn>: A list of paths where this make can inherit items
+      and properties from.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+use = path1 path2 ...
+E.g.:
+use = /path/to/inherit
+</pre>
+    </dd>
+  </dl>
+
+  <h3 id="make.extract">FCM Make Configuration: Extract</h3>
+
+  <p>All declarations are prefixed with <samp>extract.*</samp>. Where
+  appropriate, replace the leading <samp>extract</samp> with the appropriate
+  step ID. With the exception of the <code>extract.location{diff}</code>
+  declaration, any attempt to specify any extract declarations in an inherited
+  extract will result in an exception.</p>
+
+  <dl>
+    <dt id="make.extract.ns">extract.ns</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Specifies a list of names of the projects to
+      extract.</p>
+
+      <p><dfn>value</dfn>: A space-delimited list of names of the projects to
+      extract.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+extract.ns = gen ops um var ver
+</pre>
+    </dd>
+
+    <dt id="make.extract.location">extract.location</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Specifies the location of the base source tree
+      a project. If the base source tree is not specified for a Subversion
+      project, the system will try to use <samp>trunk@HEAD</samp>.</p>
+
+      <p><dfn>modifier</dfn>: <var>type</var>: Specifies the type of the
+      locations. The system currently supports <samp>svn</samp> for a
+      Subversion location and <samp>fs</samp> for a file system location.
+      (default=<samp>svn</samp> if the location if recognised as a URL,
+      otherwise <samp>fs</samp>)</p>
+
+      <p><dfn>namespace</dfn>: A space-delimited list of project IDs.</p>
+
+      <p><dfn>value</dfn>: A location, which can be a full path in the file
+      system, or a relative location of the project root.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+extract.location[um] = trunk@vn7.5
+extract.location[gen ops var] = trunk@HEAD
+</pre>
+    </dd>
+
+    <dt id="make.extract.location.diff">extract.location{diff}</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Specifies the location(s) of one or more diff
+      source trees of a project. It is OK to add more diff source trees in an
+      inheriting extract.</p>
+
+      <p><dfn>modifier</dfn>: <var>type</var>: -as above-</p>
+
+      <p><dfn>namespace</dfn>: A project ID.</p>
+
+      <p><dfn>value</dfn>: A space-delimited list of locations. A location can
+      be a full path in the file system, or a relative location of the project
+      root.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+extract.location{diff}[gen] = \
+    branches/dev/fred/r12345_678 \
+    branches/dev/free/r12345_678@123
+</pre>
+    </dd>
+
+    <dt id="make.extract.location.primary">extract.location{primary}</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Specifies the project locations for an
+      extract, if they are not already defined in the keyword
+      configuration.</p>
+
+      <p><dfn>modifier</dfn>: <var>type</var>: -as above-</p>
+
+      <p><dfn>namespace</dfn>: A project ID.</p>
+
+      <p><dfn>value</dfn>: A project location. The location can be a path in
+      the file system, a Subversion URL or a FCM keyword pointing to a
+      Subversion URL.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+extract.location{primary}[egg] = svn://server2/egg
+extract.location{primary,type:svn}[foo] = http://server1/foo
+</pre>
+    </dd>
+
+    <dt id="make.extract.path-excl">extract.path-excl / <span id=
+    "make.extract.path-incl">extract.path-incl</span></dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Specifies the paths in a project tree to
+      exclude/include. (A path-incl takes precedence over a path-excl
+      declaration.)</p>
+
+      <p><dfn>namespace</dfn>: A space-delimited list of project IDs.</p>
+
+      <p><dfn>value</dfn>: A space-delimited list of paths in a project
+      tree.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+extract.path-excl[foo] = / # everything
+extract.path-incl[foo] = bin lib src/code
+</pre>
+    </dd>
+
+    <dt id="make.extract.path-root">extract.path-root</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Specifies the root paths in the source trees
+      of the projects to be extracted. By default, the root path is the
+      root of a source tree. If this setting is specified, the system will only
+      extract source files under the specified root path. The system will also
+      adjust the name-space of each source file to be relative to the specified
+      root path. The <code>extract.path-excl</code> and
+      <code>extract.path-incl</code> declarations will apply from the level of
+      the specified root path.</p>
+
+      <p><dfn>namespace</dfn>: A space-delimited list of project IDs.</p>
+
+      <p><dfn>value</dfn>: A relative path in the project source trees.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+extract.path-root[gen] = src/code
+</pre>
+    </dd>
+
+    <dt id="make.extract.prop">extract.prop</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Sets or modifies a property.</p>
+
+      <p><dfn>modifier</dfn>: <var>diff3</var>: The shell command to perform a
+      3-way merge. (default=<samp>diff3</samp>)</p>
+
+      <p><dfn>modifier</dfn>: <var>diff3.flags</var>: The options used by the
+      3-way merge shell command. (default=<samp>-E -m</samp>)</p>
+
+      <p><dfn>value</dfn>: The value of the property.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+extract.prop{diff3} = diff3
+extract.prop{diff3.flags} = -E -m
+</pre>
+    </dd>
+  </dl>
+
+  <h3 id="make.mirror">FCM Make Configuration: Mirror</h3>
+
+  <p>All declarations are prefixed with <samp>mirror.*</samp>. Where
+  appropriate, replace the leading <samp>mirror</samp> with the appropriate
+  ID.</p>
+
+  <dl>
+    <dt id="make.mirror.target">mirror.target</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Specifies the mirror target. This setting is
+      not inherited.</p>
+
+      <p><dfn>value</dfn>: The mirror target.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+mirror.target = fred@server:/path/of/dest
+# Or if the current user ID is "fred"
+mirror.target = server:/path/of/dest
+# Or if the current user ID is "fred" and local host is "server"
+mirror.target = /path/of/dest
+</pre>
+    </dd>
+
+    <dt id="make.mirror.prop">mirror.prop</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Sets or modifies a property.</p>
+
+      <p><dfn>modifier</dfn>: See below.</p>
+
+      <p><dfn>value</dfn>: The value of the property.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+mirror.prop{rsync} = cnysr
+</pre>
+    </dd>
+  </dl>
+
+  <p>The following is a list of properties accepted by the
+  <code>mirror.prop</code> declaration:</p>
+
+  <dl>
+    <dt id="make.mirror.prop.config-file.steps">config-file.steps</dt>
+
+    <dd>The steps to be included in the generated configuration file in the
+    mirror destination.</dd>
+
+    <dt id="make.mirror.prop.no-config-file">no-config-file</dt>
+
+    <dd>If specified, do not generate a <samp>fcm-make.cfg</samp> in the mirror
+    target.</dd>
+
+    <dt id="make.mirror.prop.ssh">ssh</dt>
+
+    <dd>The secure remote shell command to execute commands on a remote
+    machine. (default=<samp>ssh</samp>)</dd>
+
+    <dt id="make.mirror.prop.ssh.flags">ssh.flags</dt>
+
+    <dd>The flags used by the remote shell command to execute commands on a
+    remote machine. (default=<samp>-n -oBatchMode=yes</samp>)</dd>
+
+    <dt id="make.mirror.prop.mkdir">ssh.mkdir</dt>
+
+    <dd>The <code>mkdir</code> shell command to run on the remote machine.
+    (default=<samp>mkdir</samp>)</dd>
+
+    <dt id="make.mirror.prop.mkdir.flags">ssh.mkdir.flags</dt>
+
+    <dd>The flags used by the <code>mkdir</code> shell command on the remote
+    machine. (default=<samp>-p</samp>)</dd>
+
+    <dt id="make.mirror.prop.pwd">ssh.pwd</dt>
+
+    <dd>The <code>pwd</code> shell command to run on the remote machine.
+    (default=<samp>pwd</samp>)</dd>
+
+    <dt id="make.mirror.prop.pwd.flags">ssh.pwd.flags</dt>
+
+    <dd>The flags used by the <code>pwd</code> shell command on the remote
+    machine.</dd>
+
+    <dt id="make.mirror.prop.rsync">rsync</dt>
+
+    <dd>The <code>rsync</code> command. (default=<samp>rsync</samp>)</dd>
+
+    <dt id="make.mirror.prop.rsync.flags">rsync.flags</dt>
+
+    <dd>The options used by the <code>rsync</code> command. (default=<samp>-a
+    --exclude='.*' --delete-excluded --timeout=900 --rsh='ssh
+    -oBatchMode=yes'</samp>)</dd>
+  </dl>
+
+  <h3 id="make.build">FCM Make Configuration: Build</h3>
+
+  <p>All declarations are prefixed with <samp>build.*</samp>. Where
+  appropriate, replace the leading <samp>build</samp> with the appropriate
+  ID.</p>
+
+  <dl>
+    <dt id="make.build.source">build.source</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Specifies one or more source files and/or
+      directories.</p>
+
+      <p><dfn>namespace</dfn>: Optional. Specifies the namespace of the
+      specified paths.</p>
+
+      <p><dfn>value</dfn>: A list of space-delimited file system paths.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+build.source[foo] = $HOME/foo $DATADIR/foo
+</pre>
+    </dd>
+
+    <dt id="make.build.ns-excl">build.ns-excl / <span id=
+    "make.build.ns-incl">build.ns-incl</span></dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Specifies the name-spaces in the source tree
+      to exclude/include. (A <code>build.ns-incl</code> takes precedence over a
+      <code>build.ns-excl</code> declaration.)</p>
+
+      <p><dfn>value</dfn>: A list of space-delimited items. Each item is a
+      name-space to exclude/include.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+build.ns-excl = / # exclude everything
+build.ns-incl = foo bar/baz # include items in these name-spaces
+</pre>
+    </dd>
+
+    <dt id="make.build.target">build.target</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Selects targets to build according to their
+      keys, categories, name-spaces and tasks.</p>
+
+      <p><dfn>modifier</dfn>: <samp>key</samp> (default if no modifier
+      specified), <samp>category</samp>, <samp>ns</samp> (i.e. name-space) or
+      <samp>task</samp></p>
+
+      <p><dfn>value</dfn>: A list of space-delimited items (according to the
+      modifier).</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+build.target{category} = bin lib
+build.target{ns} = egg/fried ham
+build.target{task} = archive install link
+build.target = egg.sh mince.py
+</pre>
+    </dd>
+
+    <dt id="make.build.target-rename">build.target-rename</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Rename targets.</p>
+
+      <p><dfn>value</dfn>: A list of space-delimited items. Each item should be
+      the (automatic) key of a target, followed by a colon and its preferred
+      key.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+build.target-rename = hello.exe:hello
+</pre>
+    </dd>
+
+    <dt id="make.build.prop">build.prop</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Sets or modifies a property.</p>
+
+      <p><dfn>modifier</dfn>: The name of one (or more) property. See
+      below.</p>
+
+      <p><dfn>namespace</dfn>: Optional. A list of space-delimited namespaces
+      to which this setting applies. If not specified, the setting applies to
+      the global/root namespace. N.B. Not all build properties accept a
+      namespace. See below for detail.</p>
+
+      <p><dfn>value</dfn>: The value of the property.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+build.prop{fc} = gfortran
+build.prop{cc.flags,fc.flags} = -C -g
+build.prop{fc.flags}[foo/bar] = -C -g -W
+build.prop{fc.flags}[egg ham bacon] = -C -W
+build.prop{fc.flag-define} = -D%s
+build.prop{cc.defs,fc.defs}[gen] = LOWERCASE UNDERSCORE
+</pre>
+    </dd>
+  </dl>
+
+  <p>The following is a list of properties accepted by the
+  <code>build.prop</code> declaration. The default value is an empty string
+  unless given otherwise. Properties that do not accept a namespace are marked
+  with an asterisk (*).</p>
+
+  <dl>
+    <dt id="make.build.prop.ar">ar</dt>
+
+    <dd>The archive command. (default=<samp>ar</samp>)</dd>
+
+    <dt id="make.build.prop.ar.flags">ar.flags</dt>
+
+    <dd>The options used by the archive command. (default=<samp>rs</samp>)</dd>
+
+    <dt id="make.build.prop.cc">cc</dt>
+
+    <dd>The C/C++ compiler and linker. (default=<samp>gcc</samp>)</dd>
+
+    <dt id="make.build.prop.cc.defs">cc.defs</dt>
+
+    <dd>The C/C++ compiler will pre-define each word in this setting as a
+    macro.</dd>
+
+    <dt id="make.build.prop.cc.flags">cc.flags</dt>
+
+    <dd>The options used by the C/C++ compiler at compile time.</dd>
+
+    <dt id="make.build.prop.cc.flags-ld">cc.flags-ld</dt>
+
+    <dd>The options used by the C/C++ compiler at link time.</dd>
+
+    <dt id="make.build.prop.cc.flag-compile">cc.flag-compile</dt>
+
+    <dd>The option used by the C/C++ compiler to suppress the linking stage.
+    (default=<samp>-c</samp>)</dd>
+
+    <dt id="make.build.prop.cc.flag-define">cc.flag-define</dt>
+
+    <dd>The option used by the C/C++ compiler to define a macro.
+    (default=<samp>-D%s</samp>)</dd>
+
+    <dt id="make.build.prop.cc.flag-include">cc.flag-include</dt>
+
+    <dd>The option used by the C/C++ compiler to specify an include search
+    path. (default=<samp>-I%s</samp>)</dd>
+
+    <dt id="make.build.prop.cc.flag-lib">cc.flag-lib</dt>
+
+    <dd>The option used by the C/C++ compiler at link time to specify a
+    library. (default=<samp>-l%s</samp>)</dd>
+
+    <dt id="make.build.prop.cc.flag-lib-path">cc.flag-lib-path</dt>
+
+    <dd>The option used by the C/C++ compiler at link time to specify a library
+    search path. (default=<samp>-L%s</samp>)</dd>
+
+    <dt id="make.build.prop.cc.flag-output">cc.flag-output</dt>
+
+    <dd>The option used by the C/C++ compiler to specify the output file name.
+    (default=<samp>-o%s</samp>)</dd>
+
+    <dt id="make.build.prop.dep.bin">dep.bin</dt>
+
+    <dd>Specifies a list of manual dependencies on external executable
+    commands.</dd>
+
+    <dt id="make.build.prop.dep.f.module">dep.f.module</dt>
+
+    <dd>Specifies a list of manual Fortran module dependencies.</dd>
+
+    <dt id="make.build.prop.dep.include">dep.include</dt>
+
+    <dd>Specifies a list of manual include dependencies.</dd>
+
+    <dt id="make.build.prop.dep.o">dep.o</dt>
+
+    <dd>Specifies a list of manual object dependencies.</dd>
+
+    <dt id="make.build.prop.dep.o.special">dep.o.special</dt>
+
+    <dd>Specifies a list of manual object dependencies, which must appear on
+    the command line of the linker, (e.g. an object containing a Fortran
+    blockdata program unit).</dd>
+
+    <dt id="make.build.prop.fc">fc</dt>
+
+    <dd>The Fortran compiler and linker. (default=<samp>gfortran</samp>)</dd>
+
+    <dt id="make.build.prop.fc.defs">fc.defs</dt>
+
+    <dd>The Fortran compiler will pre-define each word in this setting as a
+    macro.</dd>
+
+    <dt id="make.build.prop.fc.flags">fc.flags</dt>
+
+    <dd>The options used by the Fortran compiler at compile time.</dd>
+
+    <dt id="make.build.prop.fc.flags-ld">fc.flags-ld</dt>
+
+    <dd>The options used by the Fortran compiler at link time.</dd>
+
+    <dt id="make.build.prop.fc.flag-compile">fc.flag-compile</dt>
+
+    <dd>The option used by the Fortran compiler to suppress the linking stage.
+    (default=<samp>-c</samp>)</dd>
+
+    <dt id="make.build.prop.fc.flag-define">fc.flag-define</dt>
+
+    <dd>The option used by the Fortran compiler to define a macro.
+    (default=<samp>-D%s</samp>)</dd>
+
+    <dt id="make.build.prop.fc.flag-include">fc.flag-include</dt>
+
+    <dd>The option used by the Fortran compiler to specify an include search
+    path. (default=<samp>-I%s</samp>)</dd>
+
+    <dt id="make.build.prop.fc.flag-lib">fc.flag-lib</dt>
+
+    <dd>The option used by the Fortran compiler at link time to specify a
+    library. (default=<samp>-l%s</samp>)</dd>
+
+    <dt id="make.build.prop.fc.flag-lib-path">fc.flag-lib-path</dt>
+
+    <dd>The option used by the Fortran compiler at link time to specify a
+    library search path. (default=<samp>-L%s</samp>)</dd>
+
+    <dt id="make.build.prop.fc.flag-module">fc.flag-module</dt>
+
+    <dd>The option used by the Fortran compiler to specify a module search
+    path.</dd>
+
+    <dt id="make.build.prop.fc.flag-output">fc.flag-output</dt>
+
+    <dd>The option used by the Fortran compiler to specify the output file
+    name. (default=<samp>-o%s</samp>)</dd>
+
+    <dt id="make.build.prop.file-ext.a">file-ext.a *</dt>
+
+    <dd>Specifies the extension of an object archive file.
+    (default=<samp>.a</samp>)</dd>
+
+    <dt id="make.build.prop.file-ext.bin">file-ext.bin *</dt>
+
+    <dd>Specifies the extension of a binary executable file.
+    (default=<samp>.exe</samp>)</dd>
+
+    <dt id="make.build.prop.file-ext.c">file-ext.c *</dt>
+
+    <dd>Specifies the extensions of a C/C++ source file. (default=<samp>.c
+    .cpp</samp>)</dd>
+
+    <dt id="make.build.prop.file-ext.fortran">file-ext.fortran *</dt>
+
+    <dd>Specifies the extensions of a Fortran source file. (default=<samp>.F
+    .FOR .FTN .F90 .F95 .f .for .ftn .f90 .f95 .inc</samp>)</dd>
+
+    <dt id="make.build.prop.file-ext.f90-interface">file-ext.f90-interface
+    *</dt>
+
+    <dd>Specifies the extension of a Fortran interface file.
+    (default=<samp>.interface</samp>)</dd>
+
+    <dt id="make.build.prop.file-ext.f90-mod">file-ext.f90-mod *</dt>
+
+    <dd>Specifies the extension of a compiled Fortran module file.
+    (default=<samp>.mod</samp>)</dd>
+
+    <dt id="make.build.prop.file-ext.h">file-ext.h *</dt>
+
+    <dd>Specifies the extensions of a C/C++ header file.
+    (default=<samp>.h</samp>)</dd>
+
+    <dt id="make.build.prop.file-ext.o">file-ext.o *</dt>
+
+    <dd>Specifies the extension of a compiled object file.
+    (default=<samp>.o</samp>)</dd>
+
+    <dt id="make.build.prop.file-ext.script">file-ext.script *</dt>
+
+    <dd>Specifies the extensions of script files.</dd>
+
+    <dt id="make.build.prop.file-name-option.f90-mod">file-name-option.f90-mod
+    *</dt>
+
+    <dd>Specifies other options for naming a compiled Fortran module file.
+    Accepts <samp>case=upper</samp> or <samp>case=lower</samp> (default).</dd>
+
+    <dt id="make.build.prop.file-pat.script">file-pat.script *</dt>
+
+    <dd>Specifies a regular expression for matching the name of script
+    files.</dd>
+
+    <dt id="make.build.prop.ignore-missing-dep-ns">ignore-missing-dep-ns *</dt>
+
+    <dd>Specifies a list of source name-spaces, in which targets can ignore
+    missing dependencies.</dd>
+
+    <dt id="make.build.prop.no-dep.bin">no-dep.bin</dt>
+
+    <dd>Switches off a list of automatic dependencies on external executable.
+    If the value is a <samp>*</samp>, switches off all automatic external
+    executable dependencies.</dd>
+
+    <dt id="make.build.prop.no-dep.f.module">no-dep.f.module</dt>
+
+    <dd>Switches off a list of automatic Fortran module dependencies. If the
+    value is a <samp>*</samp>, switches off all automatic Fortran module
+    dependencies.</dd>
+
+    <dt id="make.build.prop.no-dep.include">no-dep.include</dt>
+
+    <dd>Switches off a list of automatic include dependencies. If the value is
+    a <samp>*</samp>, switches off all automatic include dependencies.</dd>
+
+    <dt id="make.build.prop.no-dep.o">no-dep.o</dt>
+
+    <dd>Switches off a list of automatic object dependencies. If the value is a
+    <samp>*</samp>, switches off all automatic object dependencies.</dd>
+
+    <dt id="make.build.prop.no-inherit-source">no-inherit-source *</dt>
+
+    <dd>If a list of values is specified, the system will not inherit sources
+    with the name-spaces matching the specified values. If the value is a
+    <samp>*</samp>, the system will not inherit any sources.</dd>
+
+    <dt id="make.build.prop.no-inherit-target-category">
+    no-inherit-target-category *</dt>
+
+    <dd>If a list of values is specified, the system will not inherit a target
+    in a category matching a specified value. (default=<samp>bin etc
+    lib</samp>)</dd>
+
+    <dt id="make.build.prop.no-step-source">no-step-source *</dt>
+
+    <dd>If a list of make steps is specified, the system will not search for
+    source files from the specified make steps.</dd>
+
+    <dt id="make.build.prop.ns-dep.o">ns-dep.o</dt>
+
+    <dd>Specifies a list of link-time object dependencies on all objects in the
+    list of name-spaces in the value.</dd>
+  </dl>
+
+  <h3 id="make.preprocess">FCM Make Configuration: Preprocess</h3>
+
+  <p>The preprocess system uses the same declarations as the build system (see
+  <a href="#make.build">FCM Make Configuration: Build</a>), although their
+  prefixes should be replaced with <samp>preprocess.*</samp> or the appropriate
+  step ID. The following is a list of modifiers accepted by the
+  <code>preprocess.prop</code> declaration. The default value of a property is
+  an empty string unless given otherwise. Properties that do not accept a
+  namespace are marked with an asterisk (*).</p>
+
+  <dl>
+    <dt id="make.preprocess.prop.cpp">cpp</dt>
+
+    <dd>The command of the C/C++ pre-processor. (default=<samp>cpp</samp>)</dd>
+
+    <dt id="make.preprocess.prop.cpp.defs">cpp.defs</dt>
+
+    <dd>The C/C++ pre-processor will pre-define each word in this setting as a
+    macro.</dd>
+
+    <dt id="make.preprocess.prop.cpp.flags">cpp.flags</dt>
+
+    <dd>The options used by the C/C++ pre-processor.</dd>
+
+    <dt id="make.preprocess.prop.cpp.flag-define">cpp.flag-define</dt>
+
+    <dd>The option used by the C/C++ pre-processor to define a macro.
+    (default=<samp>-D%s</samp>)</dd>
+
+    <dt id="make.preprocess.prop.cpp.flag-include">cpp.flag-include</dt>
+
+    <dd>The option used by the C/C++ pre-processor to specify the include
+    search path. (default=<samp>-I%s</samp>)</dd>
+
+    <dt id="make.preprocess.prop.dep.include">dep.include</dt>
+
+    <dd>Specifies a list of manual include dependencies.</dd>
+
+    <dt id="make.preprocess.prop.file-ext.cpp">file-ext.cpp *</dt>
+
+    <dd>Specifies the extensions of C/C++ source file. (default=<samp>.c
+    .cpp</samp>)</dd>
+
+    <dt id="make.preprocess.prop.file-ext.fpp">file-ext.fpp *</dt>
+
+    <dd>Specifies the extensions of Fortran source file requiring
+    preprocessing. (default=<samp>.F .FOR .FTN .F90 .F95</samp>)</dd>
+
+    <dt id="make.preprocess.prop.file-ext.h">file-ext.h *</dt>
+
+    <dd>Specifies the extensions of a C/C++ header file.
+    (default=<samp>.h</samp>)</dd>
+
+    <dt id="make.preprocess.prop.fpp">fpp</dt>
+
+    <dd>The command of the Fortran pre-processor.
+    (default=<samp>cpp</samp>)</dd>
+
+    <dt id="make.preprocess.prop.fpp.defs">fpp.defs</dt>
+
+    <dd>The Fortran pre-processor will pre-define each word in this setting as
+    a macro.</dd>
+
+    <dt id="make.preprocess.prop.fpp.flags">fpp.flags</dt>
+
+    <dd>The options used by the Fortran pre-processor. (default=<samp>-P
+    -traditional</samp>)</dd>
+
+    <dt id="make.preprocess.prop.fpp.flag-define">fpp.flag-define</dt>
+
+    <dd>The option used by the Fortran pre-processor to define a macro.
+    (default=<samp>-D%s</samp>)</dd>
+
+    <dt id="make.preprocess.prop.fpp.flag-include">fpp.flag-include</dt>
+
+    <dd>The option used by the Fortran pre-processor to specify the include
+    search path. (default=<samp>-I%s</samp>)</dd>
+
+    <dt id="make.preprocess.prop.no-dep.include">no-dep.include</dt>
+
+    <dd>Switches off a list of automatic include dependencies. If the value is
+    a <samp>*</samp>, it switches off all automatic include dependencies.</dd>
+
+    <dt id="make.preprocess.prop.no-inherit-source">no-inherit-source *</dt>
+
+    <dd>Same as the build property of the same name.</dd>
+
+    <dt id="make.preprocess.prop.no-inherit-target-category">
+    no-inherit-target-category *</dt>
+
+    <dd>Same as the build property of the same name.</dd>
+
+    <dt id="make.preprocess.prop.no-step-source">no-step-source *</dt>
+
+    <dd>Same as the build property of the same name.</dd>
+  </dl>
+</body>
+</html>

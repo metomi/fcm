@@ -1,0 +1,79 @@
+#!/bin/bash
+#-------------------------------------------------------------------------------
+# (C) British Crown Copyright 2006-2012 Met Office.
+#
+# This file is part of FCM, tools for managing and building source code.
+#
+# FCM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FCM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FCM. If not, see <http://www.gnu.org/licenses/>.
+#-------------------------------------------------------------------------------
+set -eu
+
+REPOS="$1"
+REV="$2"
+USER="$3"
+PROPNAME="$4"
+ACTION="$5"
+
+REPOS_NAME=${REPOS##*/}
+LOG=~fcm/svn/revprop-change/${REPOS_NAME}.post.log
+mkdir -p $(dirname $LOG) || true
+
+function FINALLY() {
+    local SIGNAL=$1
+    if [[ $SIGNAL == 'ERR' ]]; then
+        local SUBJECT="[FAIL] $(basename $0) $REPOS $REV $USER $PROPNAME $ACTION"
+        mail -s "$SUBJECT" $(whoami) <$LOG
+    fi
+}
+trap 'FINALLY ERR'  ERR
+trap 'FINALLY EXIT' EXIT
+
+# Log the change
+SUBJECT="$REPOS_NAME -r$REV: $PROPNAME modified by $USER."
+{
+    echo "$SUBJECT"
+    echo "------------------------------------------------------------"
+    echo "OLD VALUE"
+    echo "------------------------------------------------------------"
+    cat
+    echo "------------------------------------------------------------"
+    echo "NEW VALUE"
+    echo "------------------------------------------------------------"
+    svnlook pg -r$REV --revprop $REPOS $PROPNAME 2>&1
+    echo "------------------------------------------------------------"
+} >$LOG
+
+# Resync Trac
+TRAC_ENV_PATH=${REPOS%/svn/live/*}/trac/live/${REPOS_NAME%_svn}
+if [[ -d $TRAC_ENV_PATH ]]; then
+    trac-admin $TRAC_ENV_PATH resync $REV 1>>$LOG 2>&1
+fi
+
+# Email to cc list and to original author (if required)
+CC_LIST_FILE=$0-cc.list
+ADDRESSES=
+if [[ -f $CC_LIST_FILE && -r $CC_LIST_FILE ]]; then
+    while read; do
+        ADDRESSES="$REPLY,$ADDRESSES"
+    done <$CC_LIST_FILE
+fi
+AUTHOR=$(svnlook author -r$REV $REPOS)
+if [[ $AUTHOR != $USER ]]; then
+    ADDRESSES="$AUTHOR,$ADDRESSES"
+fi
+if [[ -n $ADDRESSES ]]; then
+    mail -s "$SUBJECT" $ADDRESSES <$LOG 1>>$LOG 2>&1
+fi
+
+exit

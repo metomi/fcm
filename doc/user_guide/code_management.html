@@ -1,0 +1,1227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for Linux (vers 14 June 2007), see www.w3.org" />
+
+  <title>FCM User Guide: Code Management</title>
+  <meta name="author" content="FCM team" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" type="text/css" href="../etc/fcm.css" />
+  <script type="text/javascript" src="../etc/fcm.js">
+</script>
+<script type="text/javascript" src="../etc/fcm-version.js">
+</script>
+</head>
+
+<body>
+  <div id="body-header">
+    <a href="http://www.metoffice.gov.uk/research/collaboration/fcm/">
+    <img src="../etc/fcm.png" alt="FCM" />
+    </a>
+    <address>
+      &copy; British Crown Copyright 2006-12
+      <a href="http://www.metoffice.gov.uk">Met Office</a>.
+      See <a href="../etc/fcm-terms-of-use.html">Terms of Use</a>.<br />
+      This document is released under the <a href=
+      "http://www.nationalarchives.gov.uk/doc/open-government-licence/" rel=
+      "license">Open Government Licence</a>.<br />
+      <span id="fcm-version"></span><br />
+      <span id="fcm-js-trail"></span>
+    </address>
+  </div>
+
+  <h1>Code Management</h1>
+
+  <div id="fcm-content"></div>
+
+  <h2 id="svn">Using Subversion</h2>
+
+  <p>One of the key strengths of Subversion is its documentation. <a href=
+  "http://svnbook.red-bean.com/en/1.6/">Version Control with Subversion</a>
+  (which we'll just refer to as the <cite>Subversion book</cite> from now on)
+  is an excellent book which explains in detail how to use Subversion and also
+  provides a good introduction to all the basic concepts of version control.
+  Rather than trying to write our own explanations (and not doing as good a
+  job) we will simply refer you to the <cite>Subversion book</cite>, where
+  appropriate, for the relevant information.</p>
+
+  <p>In general, the approach taken in this section is to make sure that you
+  first understand how to perform a particular action using the Subversion
+  tools and then describe how this differs using FCM.</p>
+
+  <h3 id="svn_concepts">Basic Concepts</h3>
+
+  <p>In order to use FCM you need to have a basic understanding of version
+  control. If you're not already familiar with Subversion or CVS then please
+  read the chapter <a href=
+  "http://svnbook.red-bean.com/en/1.6/svn.basic.html">Fundamental Concepts</a>
+  from the <cite>Subversion book</cite>. In particular, make sure that you
+  understand:</p>
+
+  <ul>
+    <li>The <q title=
+    "http://svnbook.red-bean.com/en/1.6/svn.basic.version-control-basics.html#svn.basic.vsn-models.copy-merge">
+    Copy-Modify-Merge</q> approach to file sharing.</li>
+
+    <li>Global Revision Numbers.</li>
+  </ul>
+
+  <p>Note that this chapter states that <q title=
+  "http://svnbook.red-bean.com/en/1.6/svn.basic.in-action.html#svn.basic.in-action.wc">
+  working copies do not always correspond to any single revision in the
+  repository</q>. However, the FCM working practices do not encourage this and
+  the wrapper scripts provided by FCM should ensure that your working copy (a
+  local copy of the repository's files and directories where you can prepare
+  changes) always corresponds to exactly one revision.</p>
+
+  <p><acronym title="Concurrent Versions System">CVS</acronym> users should
+  already be familiar with all the basic concepts. This is not surprising since
+  Subversion was designed as a replacement for CVS and it uses the same
+  development model. However, there are some important differences which may
+  confuse those more familiar with CVS. Fortunately, the appendix in the
+  <cite>Subversion book</cite> <a href=
+  "http://svnbook.red-bean.com/en/1.6/svn.forcvs.html">Subversion for CVS
+  Users</a> is specifically written for those moving from CVS to Subversion and
+  you should read this if you are a CVS user.</p>
+
+  <h3 id="svn_basic">Basic Command Line Usage</h3>
+
+  <p>Before we discuss the FCM system you need to have a good understanding of
+  how to perform most of the normal day-to-day tasks using Subversion.
+  Therefore, unless you are already familiar with Subversion, please read the
+  chapter <a href="http://svnbook.red-bean.com/en/1.6/svn.tour.html">Basic
+  Usage</a> from the <cite>Subversion book</cite>.</p>
+
+  <p>So, now you have an understanding of how to do basic tasks using
+  Subversion (you did read the <cite>Basic Usage</cite> chapter didn't you?),
+  how is using FCM different? Well, the key thing to remember is that, instead
+  of using the command <code>svn</code> you need to use the command
+  <code>fcm</code>. The advantages of this are as follows:</p>
+
+  <ul>
+    <li><code>fcm</code> implements all of the commands that <code>svn</code>
+    does (including all the command abbreviations).</li>
+
+    <li>In some cases <code>fcm</code> does very little and basically passes on
+    the command to <code>svn</code>.</li>
+
+    <li>In other cases <code>fcm</code> has a lot of additional functionality
+    compared with the equivalent <code>svn</code> command.</li>
+
+    <li><code>fcm</code> also implements several commands not provided by
+    <code>svn</code>.</li>
+
+    <li><code>fcm</code> provides support for URL and revision keywords.</li>
+
+    <li>Most of the additional features and commands are discussed later in
+    this section or in the following sections.</li>
+  </ul>
+
+  <p>Full details of all the <code>fcm</code> commands available are provided
+  in the <a href="command_ref.html">FCM Command Reference</a> section.</p>
+
+  <h4 id="svn_basic_keywords">URL &amp; Revision Keywords</h4>
+
+  <p>URL keywords can be used to specify URLs in <code>fcm</code> commands. The
+  syntax is <code>fcm:&lt;keyword&gt;</code>. Keywords can be defined in the
+  FCM keyword configuration file (i.e. <samp>$FCM/etc/fcm/keyword.cfg</samp>
+  and <samp>$HOME/.met-um/fcm/keyword.cfg</samp>).</p>
+
+  <p>For example, if you define a keyword in your configuration file as
+  follows:</p>
+  <pre>
+location{primary}[um] = svn://fcm2/UM_svn/UM
+</pre>
+
+  <p>then you can abbreviate the URL as in the following examples:</p>
+  <pre>
+# fcm ls svn://fcm2/UM_svn/UM
+fcm ls fcm:um
+
+# fcm ls svn://fcm2/UM_svn/UM/trunk
+fcm ls fcm:um_tr  # OR: fcm ls fcm:um-tr
+
+# fcm ls svn://fcm2/UM_svn/UM/branches
+fcm ls fcm:um_br  # OR: fcm ls fcm:um-br
+
+# fcm ls svn://fcm2/UM_svn/UM/tags
+fcm ls fcm:um_tg  # OR: fcm ls fcm:um-tg
+</pre>
+
+  <p>Using URL keywords has two advantages.</p>
+
+  <ul>
+    <li>They are shorter and easier to remember.</li>
+
+    <li>If the repository needs to be moved then only the keyword definitions
+    need to be updated (although any working copies you have will still need to
+    be <em>relocated</em> by issuing a <a href=
+    "http://svnbook.red-bean.com/en/1.6/svn.ref.svn.c.switch.html"><code>fcm
+    switch --relocate</code></a> command).</li>
+  </ul>
+
+  <p>In a similar way, revision keywords can be used to specify revision
+  numbers in <code>fcm</code> commands. The keyword can be used anywhere a
+  revision number can be used. Each keyword is associated with a URL keyword
+  and can only be used when referring to that repository.</p>
+
+  <p>For example, if you define a keyword in your configuration file as
+  follows:</p>
+  <pre>
+revision[fcm:vn1.0] = 112
+</pre>
+
+  <p>then the following commands are equivalent:<br />
+  <code>fcm log -r 112 svn://fcm1/FCM_svn/trunk</code><br />
+  <code>fcm log -r vn1.0 fcm:fcm_tr</code></p>
+
+  <p>You can use the <code>fcm keyword-print</code> command to print all
+  registered location keywords. You can also print the location keyword and the
+  revision keywords of a particular project. For example, to print the keywords
+  for the <samp>UM</samp> project, you can type <code>fcm keyword-print
+  fcm:um</code>.</p>
+
+  <h4 id="svn_basic_diff">Examining Changes</h4>
+
+  <p>Code differences can be displayed graphically using <code>xxdiff</code> by
+  using the <code>--graphical</code> (or <code>-g</code>) option to <code>fcm
+  diff</code>. This option can be used in combination with any other options
+  which are accepted by <code>svn diff</code>.</p>
+
+  <p>An example display from <code>xxdiff</code> is shown below.</p>
+
+  <p class="image"><img src="xxdiff1.png" alt="xxdiff 2-way display" /><br />
+  <code>xxdiff</code> 2-way display</p>
+
+  <p>Points to note:</p>
+
+  <ul>
+    <li>By default <code>xxdiff</code> is configured to show horizontal
+    differences. This means that the parts of the line which have changed are
+    highlighted (e.g. the text <samp>useful</samp> is highlighted in the
+    example above).</li>
+
+    <li>The number shown to the right of each file name shows the current line
+    number. The number on the far right is the number of differences found (2
+    in the example above).</li>
+
+    <li>You may find the following keyboard shortcuts useful.
+
+      <ul>
+        <li><kbd>N</kbd> - move to the next difference</li>
+
+        <li><kbd>P</kbd> - move to the previous difference</li>
+
+        <li><kbd>Ctrl-Q</kbd> - exit</li>
+      </ul>
+    </li>
+
+    <li>If you want to use another diff tool instead of <code>xxdiff</code> to
+    examine changes, you can define the <code>graphic-diff</code> setting in a
+    FCM external configuration file (i.e.<samp>$FCM/etc/fcm/external.cfg</samp>
+    or <samp>$HOME/.met-um/fcm/external.cfg</samp>). For example, to use <code>
+      tkdiff</code>, you can do:
+      <pre>
+# in your site's $FCM/etc/fcm/external.cfg:
+# OR: in your $HOME/.met-um/fcm/external.cfg:
+graphic-diff = tkdiff
+</pre>
+    </li>
+  </ul>
+
+  <h4 id="svn_basic_conflicts">Resolving Conflicts</h4>
+
+  <p>Your working copy may contain files or directories <em>in conflict</em> as
+  a result of an update or a merge (covered later). Conflicts arise from the
+  situation where two changes being applied to a file <em>overlap</em>. These
+  can be text-based, as in two changes to the same line of text in a file, or
+  filesystem-based, as in two different renamings of the same file.</p>
+
+  <p>For conflicts in normal (text) files, the command <code>fcm
+  conflicts</code> can be used to help resolve them. (A discussion on binary
+  files is given in the section <a href="working_practices.html#binary">Working
+  with Binary Files</a> later in this document.). For each file in <em>text
+  conflict</em>, the <code>fcm conflicts</code> command calls a graphical merge
+  tool (i.e. <code>xxdiff</code> by default) to display a 3-way diff.</p>
+
+  <p>An example display from <code>xxdiff</code> is shown below.</p>
+
+  <p class="image"><img src="xxdiff2.png" alt="xxdiff 3-way display" /><br />
+  <code>xxdiff</code> 3-way display</p>
+
+  <p>Points to note:</p>
+
+  <ul>
+    <li>The file in the middle is the common ancestor from the merge. The file
+    on the left is your original file and the file on the right is the file
+    containing the changes which you are merging in.</li>
+
+    <li><code>xxdiff</code> is configured to automatically select regions that
+    would end up being selected by an automatic merge (e.g. there are only
+    changes in one of the files). Any difference <em>hunks</em> which cannot be
+    resolved automatically are left <em>unselected</em>.</li>
+
+    <li>Before you can save a merged version you need to go through each
+    unselected difference hunk and decide which text you wish to use.
+
+      <ul>
+        <li>Selecting a diff hunk can be carried out by clicking on it with the
+        left mouse button (or refer to the keyboard shortcuts shown under the
+        <kbd>Region</kbd> menu). The colours update to display which side is
+        selected for output. You can select individual lines with the middle
+        mouse button.</li>
+
+        <li>If you want to select more than one side, you have to invoke the
+        <kbd>Region-&gt;Split/swap/join</kbd> command (keyboard shortcut:
+        <kbd>S</kbd>). This will split the current diff hunk so you can select
+        the pieces you want from both sides. Further invocations of this
+        command will cause swapping of the regions, looping through all the
+        different ordering possibilities, and finally joining the regions again
+        (preserving selections where it is possible).</li>
+      </ul>
+    </li>
+
+    <li>The number on the far right is the number of unselected difference
+    hunks (1 in the example above). Once this number is 0 then you are ready to
+    save the merged file.</li>
+
+    <li>If you want to see how the merged file will look with the current
+    selections then select <kbd>Windows-&gt;Toggle Merged View</kbd> (keyboard
+    shortcut: <kbd>Alt+Y</kbd>). An extra window then appears showing the
+    merged output that updates interactively as you make selections.</li>
+
+    <li>You may find the following keyboard shortcuts useful.
+
+      <ul>
+        <li><kbd>B</kbd> - move to the next unselected hunk</li>
+
+        <li><kbd>O</kbd> - move to the previous unselected hunk</li>
+      </ul>
+    </li>
+
+    <li>There are several different ways to exit the 3-way diff (available from
+    the <kbd>File</kbd> menu):
+
+      <ul>
+        <li>Exit with MERGE (keyboard shortcut: <kbd>M</kbd>) - This saves the
+        merge result. If there are any unselected difference hunks remaining
+        then you will be warned and given the option of saving the file with
+        conflict markers.</li>
+
+        <li>Exit with ACCEPT (keyboard shortcut: <kbd>A</kbd>) - This saves the
+        file you are merging in (i.e. the right one) as the merge result (i.e.
+        you have <em>accepted</em> all the changes).</li>
+
+        <li>Exit with REJECT (keyboard shortcut: <kbd>R</kbd>) - This saves the
+        original working copy file (i.e. the left one) as the merge result
+        (i.e. you have <em>rejected</em> all the changes).</li>
+      </ul>
+
+      <p>If you just want to exit without making any decisions you can also
+      just close the window.</p>
+    </li>
+
+    <li>For further details please read the <a href=
+    "http://furius.ca/xxdiff/doc/xxdiff-doc.html"><code>xxdiff</code> users
+    manual</a> (available from the <kbd>Help</kbd> menu). In particular, read
+    the section <a href=
+    "http://furius.ca/xxdiff/doc/xxdiff-doc.html#merging-files-and-resolving-conflicts">
+    <em>Merging files and resolving conflicts</em></a>.</li>
+  </ul>
+
+  <p>If you have resolved all the conflicts in a file then you will be prompted
+  on whether to run <code>svn resolved</code> on the file to signal that the
+  file is no longer in conflict.</p>
+  <pre>
+(SHELL PROMPT)$ fcm conflicts
+Conflicts in file: Gen_setup_local1.proc
+You have chosen to ACCEPT all the changes
+Would you like to run "svn resolved"?
+Enter "y" or "n" (or just press &lt;return&gt; for "n"): y
+Resolved conflicted state of 'Gen_setup_local1.proc'
+Conflicts in file: Gen_setup_remote2.proc
+Merge conflicts were not all resolved
+Conflicts in file: Gen_setup_remote3.proc
+All merge conflicts resolved
+Would you like to run "svn resolved"?
+Enter "y" or "n" (or just press &lt;return&gt; for "n"): y
+Resolved conflicted state of 'Gen_setup_remote3.proc'
+</pre>
+
+  <p>It is important to realise that there are some types of merge that
+  <code>xxdiff</code> will not be able to help you with.</p>
+
+  <ul>
+    <li>It you have 2 versions of a file, both with substantial changes to the
+    same piece of code, then the <code>xxdiff</code> display will be extremely
+    colourful and not very helpful.</li>
+
+    <li>In these cases it is often easier to start with one version of the file
+    and manually re-apply the changes from the other version. It might not be
+    obvious how to do this and you may need to speak to the author of the other
+    change to agree how this can be done. Fortunately this situation should be
+    very rare.</li>
+
+    <li>For a more detailed discussion please refer to <a href=
+    "http://software.ericsink.com/scm/scm_file_merge.html">Chapter 3: File
+    Merge</a> in the online book called <a href=
+    "http://software.ericsink.com/scm/source_control.html">Source Control
+    HOWTO</a>.</li>
+  </ul>
+
+  <p>For files in <em>tree conflict</em>, which is otherwise known as a
+  structural or filesystem-based conflict, the command <code>fcm
+  conflicts</code> will manually resolve the problem by prompting you to choose
+  a course of action. You can either keep the file as it was before the merge
+  (<em>keep local</em>), or accept the external changes to the file.</p>
+
+  <p>The most common way to generate a tree conflict after a merge is when a
+  file has been deleted or renamed on one branch, and modified on another.
+  These are incompatible changes, to Subversion, and it doesn't know which
+  action to take. This is the cause of the tree conflict dilemma which the user
+  must solve.</p>
+
+  <p>In the following example, the branch in the working copy has had a
+  deletion of a file. The branch that is being merged in has subsequently
+  modified the file, which means that you may want to incorporate these
+  changes. A tree conflict is therefore flagged up.</p>
+  <pre>
+(SHELL PROMPT)$ fcm merge fcm:tutorial_br/dev/bfitz/r1_366
+Merge(s) available from /tutorial/branches/dev/bfitz/r1_366: 1257
+About to merge in changes from /tutorial/branches/dev/bfitz/r1_366@1257 compared with /tutorial/trunk@1
+This merge will result in the following change:
+--------------------------------------------------------------------------------
+--- Merging r2 through r1257 into '.':
+   C src/subroutine/hello_sub.f90
+Summary of conflicts:
+  Tree conflicts: 1
+--------------------------------------------------------------------------------
+Would you like to go ahead with the merge?
+Enter "y" or "n" (or just press &lt;return&gt; for "n"): y
+Performing merge ...
+--- Merging r2 through r1257 into '.':
+   C src/subroutine/hello_sub.f90
+Summary of conflicts:
+  Tree conflicts: 1
+(SHELL PROMPT)$ fcm status
+ M      .
+!     C src/subroutine/hello_sub.f90
+      &gt;   local missing, incoming edit upon merge
+(SHELL PROMPT)$ fcm info src/subroutine/hello_sub.f90
+Path: src/subroutine/hello_sub.f90
+Name: hello_sub.f90
+Node Kind: none
+Tree conflict: local missing, incoming edit upon merge
+  Source  left: (file) svn://fcm1/tutorial_svn/tutorial/trunk/src/subroutine/hello_sub.f90@1
+  Source right: (file) svn://fcm1/tutorial_svn/tutorial/branches/dev/bfitz/r1_366/src/subroutine/hello_sub.f90@1257
+</pre>
+
+  <p>In this example, running <code>fcm conflicts</code> would give:</p>
+  <pre>
+(SHELL PROMPT)$ fcm conflicts
+[info] src/subroutine/hello_sub.f90: in tree conflict.
+Locally: deleted
+Externally: modified.
+Answer (y) to leave the file deleted.
+Answer (n) to add the file with the changes.
+Keep the local version?
+Enter "y" or "n" (or just press &lt;return&gt; for "n") 
+</pre>
+
+  <p>In this example, to keep the file as it was before (in a deleted state),
+  enter <samp>y</samp>.</p>
+
+  <p>Otherwise, to accept the merge branch version of the file (adding it with
+  the edited changes), enter <samp>n</samp>.</p>
+
+  <p>There are many other types of tree conflicts that can occur, and <code>fcm
+  conflicts</code> does not cover all of them. Tree conflicts arising from
+  updates and switches are not covered (which should be rare under FCM working
+  practice). More importantly, tree conflicts on directories are not covered,
+  because of the potential nesting of conflicts within the directories. It can
+  often be difficult to identify the problem and figure out the solution in the
+  case of directory conflicts, and the easiest solution may be to try to
+  resolve the discrepancy before the merge.</p>
+
+  <p>For further details, see the <a href=
+  "annex_quick_ref_tree_conflict.html">Tree Conflict</a> annex</p>
+
+  <h4 id="svn_basic_check">Adding and Removing Files</h4>
+
+  <p>If your working copy contains files which are not under version control
+  then you can use the command <code>fcm add --check</code> to add them. This
+  will go through each of the files and prompt to see if you wish to put that
+  file under version control using <code>svn add</code>. For each file you can
+  enter <kbd>y</kbd> for yes, <kbd>n</kbd> for no or <kbd>a</kbd> to assume yes
+  for all following files.</p>
+  <pre>
+(SHELL PROMPT)$ fcm add -c
+?      xxdiff1.png
+?      xxdiff2.png
+?      xxdiff3.png
+?      xxdiff4.png
+Add file 'xxdiff1.png'?
+Enter "y", "n" or "a" (or just press &lt;return&gt; for "n"): y
+A         xxdiff1.png
+Add file 'xxdiff2.png'?
+Enter "y", "n" or "a" (or just press &lt;return&gt; for "n"): n
+Add file 'xxdiff3.png'?
+Enter "y", "n" or "a" (or just press &lt;return&gt; for "n"): a
+A         xxdiff3.png
+A         xxdiff4.png
+</pre>
+
+  <p>Similarly, if your working copy contains files which are missing (i.e. you
+  have deleted them without using <code>svn delete</code>) then you can use the
+  command <code>fcm delete --check</code> to delete them. This will go through
+  each of the files and prompt to see if you wish to remove that file from
+  version control using <code>svn delete</code>.</p>
+
+  <p>As noted in the <a href=
+  "http://subversion.apache.org/faq.html#wc-change-detection">Subversion
+  FAQ</a>, it can be dangerous using these commands. If you have moved or
+  copied a file then simply adding them would cause the history to be lost.
+  Therefore take care to only use these commands on files which really are new
+  or deleted.</p>
+
+  <h4 id="svn_basic_commit">Committing Changes</h4>
+
+  <p>The command <code>fcm commit</code> should be used for committing changes
+  back to the repository. It differs from the <code>svn commit</code> command
+  in a number of important ways:</p>
+
+  <ul>
+    <li>Your working copy <em>must</em> be up to date. <code>fcm commit</code>
+    will abort if it finds that any files are out of date with respect to the
+    repository. This ensures that your working copy reflects how the repository
+    will be after you have committed your changes.
+
+      <ul>
+        <li>This helps to ensure that any tests you have done prior to
+        committing are valid.</li>
+
+        <li><code>fcm commit</code> is not suitable if you need to commit
+        changes from a working copy containing mixed revisions. However, you
+        are very unlikely to need to do this.</li>
+
+        <li>Actually there is a small chance that your working copy might not
+        be up to date when you commit if someone else is committing some
+        changes at the same time. However, this should very seldom happen and,
+        even if it does, the commit would fail if any of the files being
+        changed became out of date (i.e. it is not possible to lose any
+        changes).</li>
+      </ul>
+    </li>
+
+    <li>If it discovers a file named <samp>#commit_message#</samp> in the top
+    level of your working copy it uses this to provide a template commit
+    message (which you can then edit).
+
+      <ul>
+        <li>If you have performed a merge then a message describing the merge
+        will have been added to this file. It is important that you leave this
+        included in the commit message and do not change its format, as it is
+        used by the <code>fcm branch-info</code> command.</li>
+
+        <li>You can, if you wish, add entries to this file as you go along to
+        record what changes you have prepared in your working copy. You can
+        also use the command <code>fcm commit --dry-run</code> to allow you to
+        edit the commit message without committing any changes.</li>
+
+        <li><samp>#commit_message#</samp> is ignored by Subversion (so you
+        won't see it show up as an unversioned files when you run <code>fcm
+        status</code>).</li>
+      </ul>
+    </li>
+
+    <li>It always operates from the top of your working copy. If you issue the
+    <code>fcm commit</code> command from a sub-directory of your working copy
+    then it will automatically work out the top directory and work from there.
+
+      <ul>
+        <li>This ensures that any template commit message gets picked up and
+        that you do not, for example, accidently commit a partial set of
+        changes from a merge.</li>
+      </ul>
+    </li>
+
+    <li>It always commits <em>all</em> the changes in your working copy (it
+    does not accept a list of files to commit).
+
+      <ul>
+        <li>Once again, this avoids any danger of accidently committing a
+        partial set of changes.</li>
+
+        <li>You should only work on one change within a working copy. If you
+        need to prepare another, unrelated change then use a separate working
+        copy.</li>
+      </ul>
+    </li>
+
+    <li>It runs <code>svn update</code> after the commit to ensure that your
+    working copy is at the latest revision and to avoid any confusion caused by
+    your working copy containing mixed revisions.</li>
+  </ul>
+  <pre>
+(SHELL PROMPT)$ fcm commit
+Starting editor to create commit message ...
+Change summary:
+------------------------------------------------------------------------
+[Project: GEN]
+[Branch : branches/test/frsn/r123_foo_bar]
+[Sub-dir: &lt;top&gt;]
+
+M      src/code/GenMod_Control/GenMod_Control.f90
+M      src/code/GenMod_Control/Gen_SetupControl.f90
+------------------------------------------------------------------------
+Commit message is as follows:
+------------------------------------------------------------------------
+An example commit.
+------------------------------------------------------------------------
+Would you like to commit this change?
+Enter "y" or "n" (or just press &lt;return&gt; for "n"): y
+Sending        src/code/GenMod_Control/GenMod_Control.f90
+Sending        src/code/GenMod_Control/Gen_SetupControl.f90
+Transmitting file data ..
+Committed revision 170.
+=&gt; svn update
+At revision 170.
+</pre>
+
+  <h3 id="svn_branching">Branching &amp; Merging</h3>
+
+  <p>Branching is a fundamental concept common to most version control systems.
+  For a good introduction please read the chapter <a href=
+  "http://svnbook.red-bean.com/en/1.6/svn.branchmerge.html">Branching and
+  Merging</a> from the <cite>Subversion book</cite>. Even if you are already
+  familiar with branching using other version control systems you should still
+  read this chapter to see how branching is implemented in Subversion.</p>
+
+  <p>Having read this chapter from the <cite>Subversion book</cite> you should
+  understand:</p>
+
+  <ul>
+    <li>Why each project directory has sub-directories called <em>trunk</em>,
+    <em>branches</em> and <em>tags</em>. This structure is assumed by
+    <code>fcm</code> (Subversion recommends it but doesn't insist on it).</li>
+
+    <li>That when you make a branch you are taking a copy of the entire project
+    file tree. Fortunately, the design of the Subversion repository means that
+    these copies are <q title=
+    "http://svnbook.red-bean.com/en/1.6/svn.branchmerge.using.html#svn.branchmerge.using.create">
+    cheap</q> - they are quick to create and take very little space.</li>
+
+    <li>That Subversion has only implemented merge tracking recently,
+    long after FCM has implemented its own solution optimised for our
+    recommended working practice.</li>
+
+    <li>That each revision of your repository can also be thought of as a
+    <em>changeset</em>.</li>
+
+    <li>That once a change is committed to a repository it cannot be removed
+    (only reversed). Therefore you must take care not to committ a sensitive
+    document or a large data file unintentionally.</li>
+  </ul>
+
+  <p>FCM provides various commands which make working with branches easier (as
+  described in the following sections).</p>
+
+  <h4 id="svn_branching_create">Creating Branches</h4>
+
+  <p>The command <code>fcm branch-create</code> (or simply <code>fcm
+  bcreate</code> or even <code>fcm bc</code>) should be used for creating new
+  branches. It provides a number of features:</p>
+
+  <ul>
+    <li>It applies a standard naming convention for branches. The branch name
+    is automatically constructed for you depending on the option(s) supplied to
+    the command. The full detail of these options are described in the <a href=
+    "command_ref.html#fcm-branch-create">FCM Command Reference &gt; fcm
+    branch-create</a> section.</li>
+
+    <li>By default, it assumes that you are branching from the last changed
+    revision of the <em>trunk</em>.
+
+      <ul>
+        <li>You can use the <code>--branch-of-branch</code> option if you need
+        to create a branch of a branch. A branch of a branch can be useful in
+        many situations. For example, consider a shared branch used by several
+        members of your team to develop, say, a new science scheme, and you
+        have come up with some different ideas of implementing the scheme. You
+        may want to create a branch of the shared branch to develop your idea
+        before merging it back to the shared branch. Note that you can only
+        merge a branch of a branch with it's parent or with another branch
+        created from the same parent. You can't, for example, merge it with the
+        trunk.</li>
+
+        <li>You can do <code>fcm bc NAME SOURCE@REV</code> if you
+        need to create a branch from an earlier revision of the SOURCE.</li>
+      </ul>
+    </li>
+
+    <li>Each branch always contains a full copy of the trunk (or its parent
+    branch) - you cannot create a branch from a sub-tree.
+
+      <ul>
+        <li>There would be no reason to only include a sub-tree in a
+        branch.</li>
+      </ul>
+    </li>
+
+    <li>It applies a standard commit message which defines how the branch has
+    been created. If a Trac ticket is specified using the <code>--ticket
+    &lt;number&gt;</code> option, it is added to the commit log message. If you
+    need to add anything to the commit log message, please do so
+    <strong>above</strong> the line that says <samp>--Add your commit message
+    ABOVE - do not alter this line or those below--</samp>.</li>
+  </ul>
+
+  <p>The following is a list of the different types of branches available:</p>
+
+  <dl>
+    <dt>User development branches</dt>
+
+    <dd><samp>branches/dev/&lt;Userid&gt;/&lt;Branch_Name&gt;</samp> These are
+    for changes which are intended to be merged back to the trunk once they are
+    complete. Most branches will belong to this type. e.g.
+    branches/dev/frdm/vn6.1_ImprovedDeepConvection,
+    branches/dev/frdm/r2134_NewBranchNamingConvention.</dd>
+
+    <dt>Shared development branches</dt>
+
+    <dd><samp>branches/dev/Share/&lt;Branch_Name&gt;</samp></dd>
+
+    <dt>User test branches</dt>
+
+    <dd><samp>branches/test/&lt;Userid&gt;/&lt;Branch_Name&gt;</samp> These are
+    for changes which are <em>not</em> intended for the trunk. e.g. Proof of
+    concept work, temporary code written for dealing with a one-off problem,
+    etc.</dd>
+
+    <dt>Shared test branches</dt>
+
+    <dd><samp>branches/test/Share/&lt;Branch_Name&gt;</samp></dd>
+
+    <dt>User packages</dt>
+
+    <dd><samp>branches/pkg/&lt;Userid&gt;/&lt;Branch_Name&gt;</samp> These are
+    branches which combine together a number of different development branches.
+    Sometimes this will simply be for testing purposes (i.e. for testing a
+    branch in combination with other branches). Other times it may be the
+    package which eventually gets merged to the trunk (rather than the
+    development branches). e.g.
+    branches/pkg/frdm/vn6.1_TestImprovedDeepConvection</dd>
+
+    <dt>Shared packages</dt>
+
+    <dd><samp>branches/pkg/Share/&lt;Branch_Name&gt;</samp> E.g.
+    branches/pkg/Share/vn6.1_NewConvectionScheme.</dd>
+
+    <dt>Configurations</dt>
+
+    <dd><samp>branches/pkg/Config/&lt;Branch_Name&gt;</samp> These are major
+    packages which combine together a number of different packages and
+    development branches. e.g. branches/pkg/Config/vn6.1_HadGEM1a.</dd>
+
+    <dt>Releases</dt>
+
+    <dd><samp>branches/pkg/Rel/&lt;Branch_Name&gt;</samp> These may be bug-fix
+    branches for system releases, if required. They can also be branches on
+    which stable releases are prepared if you don't do this on the trunk
+    (although you lose the ability to branch from stable releases if you work
+    this way). e.g. branches/pkg/Rel/vn6.1_BugFixes.</dd>
+  </dl>
+  <pre>
+(SHELL PROMPT)$ fcm bcreate -k 23 my_test_branch fcm:test
+Starting nedit to create commit message ...
+Change summary:
+------------------------------------------------------------------------
+A    svn://fcm1/repos/OPS/branches/dev/frsn/r118_my_test_branch
+------------------------------------------------------------------------
+Commit message is as follows:
+------------------------------------------------------------------------
+Create an example branch to demonstrate branch creation for the user guide.
+#23: Created /OPS/branches/dev/frsn/r118_my_test_branch from /OPS/trunk@118.
+------------------------------------------------------------------------
+Would you like to go ahead and create this branch?
+Enter "y" or "n" (or just press &lt;return&gt; for "n"): y
+Creating branch svn://fcm1/repos/OPS/branches/dev/frsn/r118_my_test_branch ...
+
+Committed revision 169.
+</pre>
+
+  <h4 id="svn_branching_list">Listing Branches Created by You or Other
+  Users</h4>
+
+  <p>The command <code>fcm branch-list</code> (or simply <code>fcm bls</code>)
+  can be used to list the branches you have created at the HEAD of a
+  repository. If you specify the <code>--user &lt;userid&gt;</code> option, the
+  branches created by &lt;userid&gt; are listed instead. You can specify
+  multiple users with multiple <code>--user &lt;userid&gt;</code> options, or
+  with a colon (:) separated list to a single <code>--user
+  &lt;userid:list&gt;</code> option. Note that you can also list shared
+  branches by specifying &lt;userid&gt; as <code>Share</code>, configuration
+  branches by specifying &lt;userid&gt; as <code>Config</code> and release
+  branches by specifying &lt;userid&gt; as <code>Rel</code>. The command
+  returns 0 (success) if one or more branches is found for the specified users,
+  or 1 (failure) if no branch is found.</p>
+  <pre>
+(SHELL PROMPT)$ fcm branch-list fcm:gen
+1 branch found for frsn in svn://fcm1/GEN_svn/GEN
+fcm:GEN-br/dev/frsn/r1191_clean_up/
+(SHELL PROMPT)$ echo $?
+0
+(SHELL PROMPT)$ fcm branch-list --user frbj --user frsn fcm:gen
+2 branches found for frbj, frsn in svn://fcm1/GEN_svn/GEN
+fcm:GEN-br/dev/frbj/r1177_gen_ui_for_scs/
+fcm:GEN-br/dev/frsn/r1191_clean_up/
+(SHELL PROMPT)$ echo $?
+0
+(SHELL PROMPT)$ fcm branch-list --user frva fcm:gen
+0 branch found for frva in svn://fcm1/GEN_svn/GEN
+(SHELL PROMPT)$ echo $?
+1
+</pre>
+
+  <h4 id="svn_branching_info">Getting Information About Branches</h4>
+
+  <p>The command <code>fcm branch-info</code> (or simply <code>fcm
+  binfo</code>) can be used to get various information about a branch. In
+  particular, it summarises information about merges to and from the branch and
+  its parent.</p>
+  <pre>
+(SHELL PROMPT)$ fcm branch-info
+URL: svn://fcm1/FCM_svn/FCM/branches/dev/frsn/r1346_merge
+Repository Root: svn://fcm1/FCM_svn
+Revision: 1385
+Last Changed Author: frsn
+Last Changed Rev: 1385
+Last Changed Date: 2006-04-20 11:08:45 +0100 (Thu, 20 Apr 2006)
+--------------------------------------------------------------------------------
+Branch Create Author: frsn
+Branch Create Rev: 1354
+Branch Create Date: 2006-04-04 14:27:47 +0100 (Tue, 04 Apr 2006)
+Branch Parent: svn://fcm1/FCM_svn/FCM/trunk@1346
+Last Merge From Parent, Revision: 1444
+Last Merge From Parent, Delta: /FCM/trunk@1439 cf. /FCM/trunk@1395
+Merges Avail From Parent: 1445
+Merges Avail Into Parent: 1453 1452 1449 1446 1444 1443 1441 1434 1397 1396 ...
+</pre>
+
+  <p>If you need information on the current children of the branch, use the
+  <code>--show-children</code> option of the <code>fcm branch-info</code>
+  command. If you need information on recent merges to and from the branch and
+  its siblings, use the <code>--show-siblings</code> option of the <code>fcm
+  branch-info</code> command.</p>
+
+  <p>To find out what changes have been made on a branch relative to its parent
+  you can use the command <code>fcm branch-diff</code> (or simply <code>fcm
+  bdi</code>.</p>
+
+  <ul>
+    <li>You can combine this with the options:
+
+      <dl>
+        <dt><code>--graphical</code></dt>
+
+        <dd>to display the differences using a graphical <em>diff</em>
+        tool</dd>
+
+        <dt><code>--trac</code></dt>
+
+        <dd>to display the differences using Trac</dd>
+
+        <dt><code>--wiki</code></dt>
+
+        <dd>to print a wiki syntax suitable for inserting into Trac</dd>
+      </dl>
+    </li>
+
+    <li>The base of the difference is adjusted to account for any merges from
+    the branch to its parent or vice-versa.</li>
+  </ul>
+
+  <h4 id="svn_branching_switch">Switching your working copy to point to another
+  branch</h4>
+
+  <p>The command <code>fcm switch</code> can be used to switch your working
+  copy to point to another branch. For example, if you have a working copy at
+  <samp>$HOME/work</samp>, currently pointing to the trunk or a branch of a
+  project at <samp>svn://fcm1/FCM_svn/FCM/trunk</samp>, you can switch the
+  working copy to point to another branch of same project:</p>
+  <pre>
+(Shell prompt)$ cd $HOME/work
+(Shell prompt)$ fcm sw dev/frsn/r959_blockdata
+-&gt; svn switch --revision HEAD svn://fcm1/FCM_svn/FCM/branches/dev/frsn/r959_blockdata
+U    doc/user_guide/getting_started.html
+U    doc/user_guide/code_management.html
+U    doc/user_guide/command_ref.html
+U    src/lib/Fcm/SrcFile.pm
+U    src/lib/Fcm/Util.pm
+U    src/lib/Fcm/Build.pm
+U    src/lib/Fcm/Cm.pm
+U    src/lib/Fcm/SrcPackage.pm
+U    src/bin/fcm_internal
+U    src/bin/fcm_gui
+Updated to revision 1009.
+</pre>
+
+  <p>Unlike <code>svn switch</code>, <code>fcm switch</code> does extra
+  checking to ensure that your whole working copy is switched to the new branch
+  at the correct level of sub-directory. In addition, you can specify only the
+  <em>branch</em> part of the URL, such as <samp>trunk</samp>,
+  <samp>branches/dev/fred/r1234_bob</samp> or even
+  <samp>dev/fred/r1234_bob</samp> and the command will work out the full URL
+  for you.</p>
+
+  <h4 id="svn_branching_delete">Deleting Branches</h4>
+
+  <p>The command <code>fcm branch-delete</code> (or simply <code>fcm
+  bdel</code>) can be used to delete branches which are no longer required.
+  Before being asked to confirm that you want to delete the branch, you will
+  first see the same output as from <code>fcm branch-info</code>. This allows
+  you to check, for example, whether your branch is being used anywhere else or
+  whether the latest changes on your branch have been merged to the trunk. You
+  will be prompted to edit your commit log message. If you need to add anything
+  to the commit log message, please do so <strong>above</strong> the line that
+  says <samp>--Add your commit message ABOVE - do not alter this line or those
+  below--</samp>.</p>
+
+  <h4 id="svn_branching_merge">Merging</h4>
+
+  <p>As mentioned earlier, <code>fcm</code> has its own merge tracking solution
+  which is optimised for our recommended working practice. The solution assumes
+  the following:</p>
+
+  <ul>
+    <li>That all merges are performed using FCM and are identified using a
+    standard template in the commit log message.</li>
+
+    <li>That you only ever merge all the changes available on the source branch
+    up to a chosen point (i.e. you can't only include a subset of the changes
+    made to the branch).</li>
+
+    <li>That the source and target are both branches (or the trunk) in the same
+    FCM project.</li>
+
+    <li>That the source and target are directly related, i.e. they must either
+    have a parent/child relationship or they are siblings from the same parent
+    branch.</li>
+  </ul>
+
+  <p>Note that the term <em>source branch</em> and <em>target branch</em>
+  referred to above can also mean the trunk.</p>
+
+  <p>To perform a merge, use the command <code>fcm merge &lt;source&gt;</code>.
+  This includes a number of important features:</p>
+
+  <ul>
+    <li>If it finds any local modifications in your working copy then it checks
+    whether you wish to continue (in most cases you won't want to mix a merge
+    with other changes).</li>
+
+    <li>It determines the base revision and path of the <em>common
+    ancestor</em> to be used for the merge, taking into account any merges from
+    the <em>source</em> to the <em>target</em> or vice-versa.</li>
+
+    <li>Before doing the merge, (unless you specify the
+    <code>--non-interactive</code> option), it reports what changes will result
+    from performing the merge and checks that you wish to continue.</li>
+
+    <li>It adds details of the merge, using a standard template, into the
+    commit message file (<samp>#commit_message#</samp>). If you need to add any
+    extra comment, you should do so <strong>above</strong> the line that says
+    <samp>--Add your commit message ABOVE - do not alter this line or those
+    below--</samp>.
+
+      <ul>
+        <li>If you decide to revert the merge, you should remove the template
+        line manually from the commit message file, making sure that you do not
+        alter the standard template by accident.</li>
+
+        <li>If the <code>--auto-log</code> option is specified, it adds the log
+        messages of the merged revisions as well as the standard template. This
+        is particularly useful when a small change is prepared in a branch, and
+        often the same commit log messages have to be repeated when the change is
+        merged and committed to the trunk. The option does not work very well if
+        the branch contains merges from another branch.</li>
+      </ul>
+    </li>
+  </ul>
+  <pre>
+(SHELL PROMPT)$ fcm merge trunk # merge changes from the trunk into the branch
+Eligible merge(s) from FCM/trunk: 1383 1375
+Enter a revision (or just press &lt;return&gt; for "1383"):
+Merge: /FCM/trunk@1383
+ c.f.: /FCM/trunk@1371
+-------------------------------------------------------------------------dry-run
+A    doc/fortran_standards/index.html
+U    src/lib/Fcm/ReposBranch.pm
+-------------------------------------------------------------------------dry-run
+Would you like to go ahead with the merge?
+Enter "y" or "n" (or just press &lt;return&gt; for "n"): y
+Merge succeeded.
+</pre>
+
+  <h3 id="svn_gui">Using the GUI</h3>
+
+  <p>So far, all the tools described have been command line tools. Many people
+  will be happy with these but, for those who prefer it, there is also a simple
+  Graphical User Interface (GUI).</p>
+
+  <h4 id="svn_gui_start">Starting the GUI</h4>
+
+  <p>To run the GUI simply issue the command <code>fcm gui</code> from the
+  directory you want as your working directory.</p>
+
+  <p>The GUI consists of several sections:</p>
+
+  <ul>
+    <li>The top section contains a row of buttons to allow you to select which
+    command you want to run.</li>
+
+    <li>Beneath this is shown the current working directory and the top level
+    directory of your working copy (these may be the same).</li>
+
+    <li>Beneath this come various buttons and entry boxes to allow you to
+    configure the command you have selected. These vary according to the
+    command.</li>
+
+    <li>Beneath this comes a further row of buttons
+
+      <ul>
+        <li><em>Quit</em> - this exits the GUI.</li>
+
+        <li><em>Help</em> - this displays the help message for the selected
+        command.</li>
+
+        <li><em>Clear</em> - this empties the text window.</li>
+
+        <li><em>Run</em> - this allows you to run your command.</li>
+      </ul>
+    </li>
+
+    <li>Beneath this comes a scrolling text window where the output from the
+    commands is displayed.</li>
+
+    <li>The bottom section displays help information when you position the
+    cursor over various parts of the GUI.</li>
+  </ul>
+
+  <p class="image"><img src="gui1.png" alt=
+  "Example GUI screen with the Status commands selected" /><br />
+  Example GUI screen with the <kbd>Status</kbd> commands selected</p>
+
+  <p>If you run a more complicated command, like <code>fcm
+  branch-create</code>, which prompts for input then extra entry windows will
+  pop up.</p>
+
+  <p class="image"><img src="gui2.png" alt="Example GUI pop-up window" /><br />
+  Example GUI pop-up window</p>
+
+  <h4 id="svn_gui_commands">GUI Commands</h4>
+
+  <p>The commands available from the GUI should be self explanatory. A few
+  points to note:</p>
+
+  <ul>
+    <li>If the current directory is not a working copy, you will only be able
+    to Checkout a working copy or create a branch from the GUI.</li>
+
+    <li>The <kbd>Checkout</kbd> command is only available if you start the GUI
+    in a directory which is not already a working copy. After successfully
+    running a checkout the GUI automatically sets the working directory to the
+    top of this new working copy.</li>
+
+    <li>With some commands (Status, Diff, Add, Delete, Conflicts) you can
+    choose whether to run from the top level of your working copy or from your
+    working directory. With the remaining commands this would not make sense
+    and they can only be run from the top level.</li>
+
+    <li>You can only issue commands from the GUI if they do not need to prompt
+    you for authentication (i.e. the Subversion command can be run with the
+    <code>--non-interactive</code> option).
+
+      <ul>
+        <li>If authentication is required then the command issued by the GUI
+        will fail. For the <code>branch-create</code>,
+        <code>branch-delete</code> and <code>commit</code> commands, which
+        support the <code>--password</code> option, you should specify your
+        password in <kbd>Other options</kbd> and click <kbd>Run</kbd> again.
+        For other commands, you should run the command in interactive mode on
+        the command line. Use the command displayed in the GUI text window but
+        remove the <code>--non-interactive</code> option.</li>
+
+        <li>Most repositories will be configured so that you only need
+        authentication for writing (not reading). Therefore, the first command
+        requiring authentication will probably be creating a branch or
+        commiting to the trunk.</li>
+
+        <li>You should only need to do this the first time you ever issue such
+        a command on a each repository (unless the repository is moved to a new
+        location) since the Subversion client caches this information for
+        future comamnds .</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h3 id="svn_problems">Known Problems with Subversion</h3>
+
+  <p>There is a limitation with Subversion which you should be aware of. The
+  <code>svn rename</code> command is not a true rename/move operation, but is
+  implemented as a copy and delete. As a result, if you rename an item in a
+  branch, and later attempt to merge it back to the trunk, the operation may
+  not be handled correctly by <code>svn merge</code> (see <a href=
+  "http://subversion.tigris.org/issues/show_bug.cgi?id=898">subversion issue
+  898</a> for further details). Until such time as support for a <q title=
+  "http://subversion.tigris.org/issues/show_bug.cgi?id=898">true rename</q> is
+  implemented in Subversion, you should avoid renaming of files or directories
+  unless you can ensure that no-one is working in parallel on the affected
+  areas of the project.</p>
+
+  <h2 id="trac">Using Trac</h2>
+
+  <p><cite>Trac</cite> has a simple and intuitive web interface which is
+  relatively easy to pick up. It also includes a <a href=
+  "http://trac.edgewall.org/wiki/TracGuide">User and Administration Guide</a>
+  which is full of helpful information (and is referred to extensively in this
+  section).</p>
+
+  <p>Trac contains a menu bar at the top of each page (which we will refer to
+  as the <cite>Trac menu</cite>). This provides access to all the main
+  features.</p>
+
+  <h3 id="trac_login">Logging In</h3>
+
+  <p>Although different projects may choose their own rules, we expect that
+  most systems will have Trac configured so that all the information is
+  viewable by anyone. However, in order to make any changes you will need to
+  login. This ensures that any changes are identified with the appropriate
+  userid.</p>
+
+  <p>In the rest of this section it is assumed that you have logged in to Trac
+  and are therefore able to make changes.</p>
+
+  <p>If you haven't yet got a Trac userid (which should be the same as the
+  userid you use for committing changes to Subversion) then please contact your
+  system manager.</p>
+
+  <h3 id="trac_wiki">Using the Wiki Pages</h3>
+
+  <p>A wiki enables documents to be written in a simple markup language using a
+  web browser. See the Trac Guide for information on the <a href=
+  "http://trac.edgewall.org/wiki/TracWiki">Trac Wiki Engine</a>. Make sure that
+  you read the information provided on:</p>
+
+  <ul>
+    <li><a href="http://trac.edgewall.org/wiki/WikiFormatting">Wiki
+    Formatting</a> which explains how to format your wiki pages.</li>
+
+    <li><a href="http://trac.edgewall.org/wiki/WikiPageNames">Wiki Page
+    Names</a> which explains how <em>CamelCase</em> is used to create <a href=
+    "http://trac.edgewall.org/wiki/WikiNewPage">New Wiki Pages</a>.</li>
+
+    <li><a href="http://trac.edgewall.org/wiki/TracLinks">Trac Links</a> which
+    allow hyperlinking between Trac entities (tickets, reports, changesets,
+    Wiki pages, milestones and source files). This is a fundamental feature of
+    Trac which makes it easy, for example, to link a bug report (ticket) to the
+    changeset which fixed the bug (and vice-versa).</li>
+  </ul>
+
+  <p>Whenever you are viewing a wiki page in Trac you should see several
+  buttons at the bottom of the page:</p>
+
+  <ul>
+    <li><kbd>Edit This Page</kbd> - Clicking this will bring up a page where
+    you can edit the page contents. Before saving your changes you can preview
+    how the modified page will appear. You can also leave a comment explaining
+    what changes you made.</li>
+
+    <li><kbd>Attach File</kbd> - Allows you to attach files to a page, e.g. an
+    image.</li>
+
+    <li>If you have admin rights then you will also see
+
+      <ul>
+        <li><kbd>Delete This Version</kbd> - Delete the particular version of
+        the page you are viewing.</li>
+
+        <li><kbd>Delete Page</kbd> - Delete the page and all its history.</li>
+      </ul>Use with care - these operations are irreversible!
+    </li>
+  </ul>
+
+  <p>At the top of each wiki page at the right hand side you can select
+  <kbd>Page History</kbd>. This shows you the full history of each page with
+  details of when each change was made, who made the change and what the
+  changes were.</p>
+
+  <h3 id="trac_browser">Using the Repository Browser</h3>
+
+  <p>The <a href="http://trac.edgewall.org/wiki/TracBrowser">Trac Browser</a>
+  is used to view the contents of your repository. To get to it just select
+  <kbd>Browse Source</kbd> from the Trac menu. You can view directories and
+  files at any version, see their revision histories and view <a href=
+  "http://trac.edgewall.org/wiki/TracChangeset">changesets</a>. Any wiki
+  formatting in log messages is recognised and interpreted so you can easily
+  link a changeset to a Trac ticket by using <a href=
+  "http://trac.edgewall.org/wiki/TracLinks">Trac Links</a>.</p>
+
+  <h3 id="trac_tickets">Using the Issue Tracker</h3>
+
+  <p>The Trac issue database provides a way of tracking issues within a project
+  (e.g. bug reports, feature requests, software support issues, project tasks).
+  Within Trac an issue is often referred to as a <em>Ticket</em>.</p>
+
+  <p>Please refer to the Trac Guide for the following information:</p>
+
+  <ul>
+    <li>
+      <a href="http://trac.edgewall.org/wiki/TracTickets">The Trac Ticket
+      System</a> - Creating and modifying tickets.
+
+      <ul>
+        <li>Only Trac accounts with admin rights can modify ticket
+        descriptions.</li>
+      </ul>
+    </li>
+
+    <li><a href="http://trac.edgewall.org/wiki/TracQuery">Trac Ticket
+    Queries</a> - List tickets matching your chosen criterion.</li>
+  </ul>
+
+  <h3 id="trac_roadmap">Using the Roadmap</h3>
+
+  <p>Each ticket can be assigned to a milestone. The Trac Roadmap can then be
+  used to provide a view on the ticket system. This can useful to see what
+  changes went into a particular system release or what changes are outstanding
+  before a milestone can be reached.</p>
+
+  <p>Please refer to the Trac Guide for further information on the <a href=
+  "http://trac.edgewall.org/wiki/TracRoadmap">Trac Roadmap</a>.</p>
+
+  <ul>
+    <li>Only Trac accounts with admin rights can add, modify and remove
+    milestones using the web interface.</li>
+  </ul>
+
+  <h3 id="trac_timeline">Using the Timeline</h3>
+
+  <p>The <a href="http://trac.edgewall.org/wiki/TracTimeline">Trac Timeline</a>
+  allows you to list all the activity on a project over any given period. It
+  can list:</p>
+
+  <ul>
+    <li>Creation and changes to wiki pages.</li>
+
+    <li>Creation, closure and changes to tickets.</li>
+
+    <li>Commits to the Subversion repository.</li>
+
+    <li>Milestones reached.</li>
+  </ul>
+</body>
+</html>

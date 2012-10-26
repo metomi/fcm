@@ -1,0 +1,91 @@
+=head1 NAME
+
+fcm build (bld)
+
+=head1 SYNOPSIS
+
+Invokes the deprecated FCM 1 build system.
+
+    fcm build [OPTIONS] [CFGFILE]
+
+=head1 ARGUMENTS
+
+The path to a CFGFILE may be provided. Otherwise, the build system searches the
+default locations for a bld cfg file.
+
+=head1 OPTIONS
+
+If no option is specified, the options "-s 5 -t all -j 1 -v 1" are assumed.
+
+=over 4
+
+=item --archive, -a
+
+Archive sub-directories on success. If archive mode is switched on, build
+sub-directories that are only used in the build process will be archived to
+TAR-GZIP files.
+
+=item --clean
+
+Clean the destination.
+
+=item --full, -f
+
+Run in full mode. If the option for full build is specified, the
+sub-directories created by previous builds will be removed, so that the current
+build can start cleanly.
+
+=item --ignore-lock
+
+Ignore lock file. When a build is invoked, it sets up a lock file in the build
+root directory.  The lock is normally removed at the end of the build. While the
+lock file is in place, the build commands invoked in the same root directory
+will fail. If you need to bypass this check for whatever reason, you can invoke
+the build system with this option.
+
+=item --jobs=N, -j N
+
+Specify the number of parallel jobs.
+
+=item --stage=N, -s N
+
+Run command up to a named stage. The stages are:
+
+=over 4
+
+=item "1", "s" or "setup"
+
+Stage 1, setup.
+
+=item "2", "pp" or "pre_process"
+
+Stage 2, pre-process.
+
+=item "3", "gd" or "generate_dependency"
+
+Stage 3, generate dependency.
+
+=item "4", "gi" or "generate_interface"
+
+Stage 4, generate Fortran 9X interface.
+
+=item "5", "m", "make"
+
+Stage 5, make.
+
+=back
+
+=item --targets=TARGETS, -t TARGETS
+
+List of build targets, delimited by (:). If specified, the default targets
+declared in the configuration file will not be used.
+
+=item --verbose=N, -v N
+
+Specify the verbosity level. If specified, the verbosity level must be an
+integer greater than 0. Verbosity level 0 is the quiet mode. Increasing the
+verbosity level will increase the amount of diagnostic output.
+
+=back
+
+=cut

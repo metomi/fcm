@@ -1,0 +1,3 @@
+svn co -q $REPOS_URL/branches/dev/Share/exe_rename $BASE_DIR/work
+chmod 644 $BASE_DIR/work/script/hello.sh
+run_1=fail

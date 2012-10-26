@@ -1,0 +1,217 @@
+#!/bin/ksh
+
+TEST_NAME=$1
+BASE_DIR=$PWD
+DIFF=${DIFF:-diff}
+
+if [[ ! -f control/$TEST_NAME/.tests.complete ]]; then
+  echo "WARNING: Control tests did not complete, skipping comparisons"
+  exit
+fi
+
+DIFF_OUTPUT=$BASE_DIR/$TEST_NAME.diff
+
+# Compare directory contents
+for DIR in done .cache/.bld etc flags src
+do
+  if [[ -d test/$TEST_NAME/$DIR ]]; then
+    if [[ $DEBUG == true ]]; then
+      echo "Comparing $DIR directory contents ..."
+    fi
+    $DIFF -r control/$TEST_NAME/$DIR test/$TEST_NAME/$DIR >$DIFF_OUTPUT
+    if [[ $? != 0 ]]; then
+      echo "FAILED: $TEST_NAME - $DIR directory contents differ from control"
+      exit 1
+    fi
+  fi
+done
+
+# Compare file listings from directories
+for DIR in .cache/.ext bin obj lib inc ppsrc
+do
+  if [[ -d test/$TEST_NAME/$DIR ]]; then
+    if [[ $DEBUG == true ]]; then
+      echo "Comparing $DIR directory listings ..."
+    fi
+    cd $BASE_DIR/control/$TEST_NAME
+    ls -R -1 $DIR >$BASE_DIR/$TEST_NAME.control_files
+    cd $BASE_DIR/test/$TEST_NAME
+    ls -R -1 $DIR >$BASE_DIR/$TEST_NAME.test_files
+    cd $BASE_DIR
+    $DIFF $TEST_NAME.control_files $TEST_NAME.test_files >$DIFF_OUTPUT
+    if [[ $? != 0 ]]; then
+      echo "FAILED: $TEST_NAME - $DIR file listing differs from control"
+      exit 1
+    fi
+    rm $TEST_NAME.control_files $TEST_NAME.test_files
+  fi
+done
+
+# Compare file listings from directories (non-recursive)
+for DIR in .
+do
+  if [[ -d test/$TEST_NAME/$DIR ]]; then
+    if [[ $DEBUG == true ]]; then
+      echo "Comparing $DIR directory listings ..."
+    fi
+    cd $BASE_DIR/control/$TEST_NAME
+    ls -1 $DIR >$BASE_DIR/$TEST_NAME.control_files
+    cd $BASE_DIR/test/$TEST_NAME
+    ls -1 $DIR >$BASE_DIR/$TEST_NAME.test_files
+    cd $BASE_DIR/
+    $DIFF $TEST_NAME.control_files $TEST_NAME.test_files >$DIFF_OUTPUT
+    if [[ $? != 0 ]]; then
+      echo "FAILED: $TEST_NAME - $DIR file listing differs from control"
+      exit 1
+    fi
+    rm $TEST_NAME.control_files $TEST_NAME.test_files
+  fi
+done
+
+# Compare files in inc directory (except *.mod)
+if [[ -d test/$TEST_NAME/inc ]]; then
+  if [[ $DEBUG == true ]]; then
+    echo "Comparing inc directory contents ..."
+  fi
+  cd test/$TEST_NAME/inc
+  for FILE in $(ls -1 | grep -v "\.mod$")
+  do
+    $DIFF $BASE_DIR/control/$TEST_NAME/inc/$FILE $FILE >$DIFF_OUTPUT
+    if [[ $? != 0 ]]; then
+      echo "FAILED: $TEST_NAME - $FILE contents differ from control"
+      exit 1
+    fi
+  done
+fi
+cd $BASE_DIR
+
+# Compare files in ppsrc directory (ignoring RUN_DIR in *.c files)
+if [[ -d test/$TEST_NAME/ppsrc ]]; then
+  if [[ $DEBUG == true ]]; then
+    echo "Comparing ppsrc directory contents ..."
+  fi
+  cd test/$TEST_NAME
+  FILES=$(find ppsrc -type f)
+  cd $BASE_DIR
+  for FILE in $FILES
+  do
+    if [[ $FILE == ${FILE%.c} ]]; then
+      $DIFF control/$TEST_NAME/$FILE test/$TEST_NAME/$FILE >$DIFF_OUTPUT
+    else
+      cat control/$TEST_NAME/$FILE | sed "s#/.*/fcm_test_suite/control/##g" >$TEST_NAME.control_file
+      cat test/$TEST_NAME/$FILE | sed "s#/.*/fcm_test_suite/test/##g" >$TEST_NAME.test_file
+      $DIFF $TEST_NAME.control_file $TEST_NAME.test_file >$DIFF_OUTPUT
+    fi
+    if [[ $? != 0 ]]; then
+      echo "FAILED: $TEST_NAME - $FILE contents differ from control"
+      exit 1
+    fi
+    rm -f $TEST_NAME.control_file $TEST_NAME.test_file
+  done
+fi
+
+# Compare build command files
+cd test
+unset TEST_FILES CONTROL_FILES
+if [[ -f $TEST_NAME.build.commands.1 ]]; then
+  TEST_FILES=$(ls -1 $TEST_NAME.build.commands.*)
+fi
+cd $BASE_DIR/control
+if [[ -f $TEST_NAME.build.commands.1 ]]; then
+  CONTROL_FILES=$(ls -1 $TEST_NAME.build.commands.*)
+fi
+if [[ $TEST_FILES != $CONTROL_FILES ]]; then
+  echo "FAILED: $TEST_NAME - number of build command files differs from control"
+  exit 1
+fi
+cd $BASE_DIR
+for FILE in $TEST_FILES
+do
+  if [[ $DEBUG == true ]]; then
+    echo "Comparing $FILE contents ..."
+  fi
+  if [[ $NPROC = 1 ]]; then
+    $DIFF control/$FILE test/$FILE >$DIFF_OUTPUT
+  else
+    cat control/$FILE | grep -v wrap_ar | sort >$TEST_NAME.control_file
+    cat test/$FILE | grep -v wrap_ar | sort >$TEST_NAME.test_file
+    $DIFF $TEST_NAME.control_file $TEST_NAME.test_file >$DIFF_OUTPUT
+  fi
+  if [[ $? != 0 ]]; then
+    echo "FAILED: $TEST_NAME - $FILE contents differ from control"
+    exit 1
+  fi
+  rm -f $TEST_NAME.control_file $TEST_NAME.test_file
+done
+
+# Compare run output files
+cd test
+unset TEST_FILES CONTROL_FILES
+if [[ -f $TEST_NAME.exe.stdout.1 ]]; then
+  TEST_FILES="$TEST_FILES $(ls -1 $TEST_NAME.exe.stdout.*)"
+fi
+cd $BASE_DIR/control
+if [[ -f $TEST_NAME.exe.stdout.1 ]]; then
+  CONTROL_FILES="$CONTROL_FILES $(ls -1 $TEST_NAME.exe.stdout.*)"
+fi
+if [[ $TEST_FILES != $CONTROL_FILES ]]; then
+  echo "FAILED: $TEST_NAME - number of run output files differs from control"
+  exit 1
+fi
+cd $BASE_DIR
+for FILE in $TEST_FILES
+do
+  if [[ $DEBUG == true ]]; then
+    echo "Comparing $FILE contents ..."
+  fi
+  $DIFF control/$FILE test/$FILE >$DIFF_OUTPUT
+  if [[ $? != 0 ]]; then
+    echo "FAILED: $TEST_NAME - $FILE contents differ from control"
+    exit 1
+  fi
+done
+
+# Compare file contents ignoring RUN_DIR
+for FILE in Makefile fcm_env.sh cfg/bld.cfg cfg/parsed_bld.cfg cfg/ext.cfg cfg/parsed_ext.cfg
+do
+  if [[ -f test/$TEST_NAME/$FILE ]]; then
+    if [[ $DEBUG == true ]]; then
+      echo "Comparing $FILE contents ..."
+    fi
+    cat control/$TEST_NAME/$FILE | sed "s#/.*/fcm_test_suite/control/##g" >$TEST_NAME.control_file
+    cat test/$TEST_NAME/$FILE | sed "s#/.*/fcm_test_suite/test/##g" >$TEST_NAME.test_file
+    $DIFF $TEST_NAME.control_file $TEST_NAME.test_file >$DIFF_OUTPUT
+    if [[ $? != 0 ]]; then
+      echo "FAILED: $TEST_NAME - $FILE file contents differ from control"
+      exit 1
+    fi
+    rm $TEST_NAME.control_file $TEST_NAME.test_file
+  fi
+done
+
+if [[ $COMPARE_TIMES == true ]]; then
+  cd control
+  if [[ -f $TEST_NAME.extract.stdout.1 ]]; then
+    for FILE in $(ls -1 $TEST_NAME.extract.stdout.*)
+    do
+      echo "Extract times:"
+      cat $FILE | grep "\->.*second" > $TEST_NAME.control_extract_times
+      cat $BASE_DIR/test/$FILE | grep "\->.*second" > $TEST_NAME.test_extract_times
+      $DIFF --side-by-side $TEST_NAME.control_extract_times $TEST_NAME.test_extract_times
+      rm $TEST_NAME.control_extract_times $TEST_NAME.test_extract_times
+    done
+  fi
+  if [[ -f $TEST_NAME.build.stdout.1 ]]; then
+    for FILE in $(ls -1 $TEST_NAME.build.stdout.*)
+    do
+      echo "Build times:"
+      cat $FILE | grep "\->.*second" > $TEST_NAME.control_build_times
+      cat $BASE_DIR/test/$FILE | grep "\->.*second" > $TEST_NAME.test_build_times
+      $DIFF --side-by-side $TEST_NAME.control_build_times $TEST_NAME.test_build_times
+      rm $TEST_NAME.control_build_times $TEST_NAME.test_build_times
+    done
+  fi
+fi
+
+rm -f $DIFF_OUTPUT
+exit 0

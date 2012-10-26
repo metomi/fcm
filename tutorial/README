@@ -1,0 +1,14 @@
+This directory contains the files necessary to set up a Subversion repository
+for the FCM tutorial.
+
+For example (in bash/ksh):
+
+(shell)$ cd fcm-release/tutorial/ # to this directory
+(shell)$ ./fcm-tutorial-repos-create /path/to/tutorial/repos
+
+The repository should be configured to allow users write access. You may find
+it easiest to simply allow anonymous access.
+
+A Trac environment should be configured to be associated with the tutorial
+repository. You then need to allow users write access. You may find it easiest
+to set up a number of guest accounts for this purpose.

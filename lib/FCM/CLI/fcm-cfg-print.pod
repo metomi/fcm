@@ -1,0 +1,23 @@
+=head1 NAME
+
+fcm cfg-print (cfg)
+
+=head1 SYNOPSIS
+
+Parses each FCM configuration file specified in the argument list, and prints
+the result to STDOUT.
+
+    fcm cfg-print [OPTIONS] [TARGET ...]
+
+=head1 OPTIONS
+
+=over 4
+
+=item --fcm1, -1
+
+If specified, targets should be in FCM 1 format. Otherwise, they should be in
+FCM 2 format.
+
+=back
+
+=cut

@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for Linux (vers 14 June 2007), see www.w3.org" />
+
+  <title>FCM 2-3 Release Notes</title>
+  <meta name="author" content="FCM team" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" type="text/css" href="../etc/fcm.css" />
+<script type="text/javascript" src="../etc/fcm.js">
+</script>
+<script type="text/javascript" src="../etc/fcm-version.js">
+</script>
+</head>
+
+<body onload="javascript: FCM.load();">
+  <div id="body-header">
+    <a href="http://www.metoffice.gov.uk/research/collaboration/fcm/">
+    <img src="../etc/fcm.png" alt="FCM" />
+    </a>
+    <address>
+      &copy; British Crown Copyright 2006-2012
+      <a href="http://www.metoffice.gov.uk">Met Office</a>.
+      See <a href="../etc/fcm-terms-of-use.html">Terms of Use</a>.<br />
+      This document is released under the <a href=
+      "http://www.nationalarchives.gov.uk/doc/open-government-licence/" rel=
+      "license">Open Government Licence</a>.<br />
+      <span id="fcm-version"></span>
+    </address>
+  </div>
+
+  <h1>FCM 2-3 Release Notes<br />
+  26 October 2012</h1>
+
+  <p>These are the release notes for FCM 2-3. This release of FCM is distributed
+  under the terms of the <a href="http://www.gnu.org/licenses/gpl.html"
+  rel=license">GNU General Public License</a>. See <a href=
+  "../etc/fcm-terms-of-use.html">Terms of Use</a> for detail.</p>
+
+  <p>If FCM is not yet installed at your site, please refer to <a href=
+  "../installation/">FCM: Installation</a> for detail.</p>
+
+  <h2>Contents</h2>
+
+  <div id="fcm-content"></div>
+
+  <h2 id="changes-highlight">Highlight Changes</h2>
+
+  <dl>
+    <dt><a href="http://www.gnu.org/licenses/gpl.html" rel=license">GNU General
+    Public License</a></dt>
+
+    <dd>
+      <p>From this release onwards, FCM will be released under the terms of the
+      GNU General Public License.</p>
+    </dd>
+
+    <dt><code>fcm make</code></dt>
+
+    <dd>
+      <p>Build system now recognises all text files starting with a
+      <code>#!</code> line as scripts.</p>
+
+      <p>Build system target selection logic has been improved to work more
+      efficiently, and to work correctly with a complex case of non-fatal cyclic
+      dependency.</p>
+    </dd>
+  </dl>
+
+  <h2 id="changes-minor">Minor Changes and Bug Fixes</h2>
+
+  <dl>
+    <dt><code>fcm branch-create</code></dt>
+
+    <dd>
+      <p>Fixed: no longer issue an incorrect error when creating a branch for a
+      project that resides at the root level of a repository.</p>
+    </dd>
+
+    <dt><code>fcm make</code></dt>
+
+    <dd>
+      <p>The behaviour of the <code>--new</code> option is modified to remove
+      only step directories defined in the <code>steps</code> declaration
+      instead of all known steps in the configuration.</p>
+
+      <p>Mirror: write to the mirror target a <samp>fcm-make.cfg.orig</samp> file
+      containing the configuration of the original <code>fcm make</code>
+      invocation.</p>
+    </dd>
+
+    <dt><code>fcm loc-layout</code></dt>
+
+    <dd>
+      <p>New command to parse a Subversion target and print the FCM layout
+      information of its URL.</p>
+
+    <dt><code>fcm mkpatch</code></dt>
+
+    <dd>
+      <p>Import scripts now uses <code>/bin/bash</code> instead of
+      <code>/bin/sh</code>.</p>
+    </dd>
+  </dl>
+
+  <h2 id="issues">Known Issues</h2>
+
+  <dl>
+    <dt>Build inheritance limitation: handling of include files</dt>
+
+    <dd>See the <a href="../user_guide/make.html#build.inherit">User Guide &gt;
+    FCM Make &gt; Build &gt; Build Inheritance</a> for detail.</dd>
+  </dl>
+</body>
+</html>

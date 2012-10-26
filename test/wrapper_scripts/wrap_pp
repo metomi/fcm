@@ -1,0 +1,2 @@
+echo "wrap_pp $@" | sed "s#$RUN_DIR##g" | sed "s#-I\./#-I#g" >>$command_file
+cpp  "$@"

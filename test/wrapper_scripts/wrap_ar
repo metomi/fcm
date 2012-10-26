@@ -1,0 +1,2 @@
+echo "wrap_ar $@" | sed "s#$RUN_DIR##g" | sed "s#/var/tmp/[^/]*/lib#/lib#" >>$command_file
+ar  "$@"

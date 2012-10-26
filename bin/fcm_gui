@@ -1,0 +1,1346 @@
+#!/usr/bin/env perl
+#-------------------------------------------------------------------------------
+# (C) British Crown Copyright 2006-2012 Met Office.
+#
+# This file is part of FCM, tools for managing and building source code.
+#
+# FCM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FCM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FCM. If not, see <http://www.gnu.org/licenses/>.
+#-------------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+use Cwd qw{cwd};
+use FCM::Context::Event;
+use FCM::Util;
+use Fcm::Config;
+use Fcm::Keyword;
+use Fcm::Timer qw{timestamp_command};
+use Fcm::Util qw{get_url_of_wc get_wct is_wc};
+use File::Basename qw{basename};
+use File::Spec::Functions qw{catfile rel2abs};
+use Tk;
+use Tk::ROText;
+
+# ------------------------------------------------------------------------------
+
+# Argument
+if (@ARGV) {
+  my $dir = shift @ARGV;
+  chdir $dir if -d $dir;
+}
+
+Fcm::Keyword::set_util(FCM::Util->new());
+
+# Get configuration settings
+my $config = Fcm::Config->new ();
+$config->get_config ();
+
+# ------------------------------------------------------------------------------
+
+# FCM subcommands
+my @subcmds = qw/CHECKOUT BRANCH STATUS DIFF ADD DELETE MERGE CONFLICTS COMMIT
+                 UPDATE SWITCH/;
+
+# Subcommands allowed when CWD is not a WC
+my @nwc_subcmds = qw/CHECKOUT BRANCH/;
+
+# Subcommands allowed, when CWD is a WC
+my @wc_subcmds = qw/STATUS BRANCH DIFF ADD DELETE MERGE CONFLICTS COMMIT UPDATE
+                    SWITCH/;
+
+# Subcommands that apply to WC only
+my @wco_subcmds = qw/BRANCH STATUS DIFF ADD DELETE MERGE CONFLICTS COMMIT UPDATE
+                     SWITCH/;
+
+# Subcommands that apply to top level WC only
+my @wcto_subcmds = qw/BRANCH MERGE COMMIT UPDATE SWITCH/;
+
+# Selected subcommand
+my $selsubcmd = '';
+
+# Selected subcommand is running?
+my $cmdrunning = 0;
+
+# PID of running subcommand
+my $cmdpid = undef;
+
+# List of subcommand frames
+my %subcmd_f;
+
+# List of subcommand buttons
+my %subcmd_b;
+
+# List of subcommand button help strings
+my %subcmd_help = (
+  BRANCH    => 'list information about, create or delete a branch.',
+  CHECKOUT  => 'check out a working copy from a repository.',
+  STATUS    => 'print the status of working copy files and directories.',
+  DIFF      => 'display the differences in modified files.',
+  ADD       => 'put files and directories under version control.',
+  DELETE    => 'remove files and directories from version control.',
+  MERGE     => 'merge changes into your working copy.',
+  CONFLICTS => 'use a graphical tool to resolve conflicts in your working copy.',
+  COMMIT    => 'send changes from your working copy to the repository.',
+  UPDATE    => 'bring changes from the repository into your working copy.',
+  SWITCH    => 'update your working copy to a different URL.',
+);
+
+for (keys %subcmd_help) {
+  $subcmd_help{$_} = 'Select the "' . lc ($_) . '" sub-command - ' .
+                     $subcmd_help{$_};
+}
+
+# List of subcommand button bindings (key name and underline position)
+my %subcmd_bind = (
+  BRANCH    => {KEY => '<Alt-Key-b>', U => 0},
+  CHECKOUT  => {KEY => '<Alt-Key-o>', U => 5},
+  STATUS    => {KEY => '<Alt-Key-s>', U => 0},
+  DIFF      => {KEY => '<Alt-Key-d>', U => 0},
+  ADD       => {KEY => '<Alt-Key-a>', U => 0},
+  DELETE    => {KEY => '<Alt-Key-t>', U => 4},
+  MERGE     => {KEY => '<Alt-Key-m>', U => 0},
+  CONFLICTS => {KEY => '<Alt-Key-f>', U => 3},
+  COMMIT    => {KEY => '<Alt-Key-c>', U => 0},
+  UPDATE    => {KEY => '<Alt-Key-u>', U => 0},
+  SWITCH    => {KEY => '<Alt-Key-w>', U => 1},
+);
+
+# List of subcommand variables
+my %subcmdvar = (
+  CWD       => cwd (),
+  WCT       => '',
+  CWD_URL   => '',
+  WCT_URL   => '',
+
+  BRANCH    => {
+    OPT     => 'info',
+    URL     => '',
+    NAME    => '',
+    TYPE    => 'DEV',
+    REVFLAG => 'NORMAL',
+    TICKET  => '',
+    SRCTYPE => 'trunk',
+    S_CHD   => 0,
+    S_SIB   => 0,
+    S_OTH   => 0,
+    VERBOSE => 0,
+    OTHER   => '',
+  },
+
+  CHECKOUT  => {
+    URL     => '',
+    REV     => 'HEAD',
+    PATH    => '',
+    OTHER   => '',
+  },
+
+  STATUS    => {
+    USEWCT  => 0,
+    UPDATE  => 0,
+    VERBOSE => 0,
+    OTHER   => '',
+  },
+
+  DIFF      => {
+    USEWCT  => 0,
+    TOOL    => 'graphical',
+    BRANCH  => 0,
+    URL     => '',
+    OTHER   => '',
+  },
+
+  ADD       => {
+    USEWCT  => 0,
+    CHECK   => 1,
+    OTHER   => '',
+  },
+
+  DELETE    => {
+    USEWCT  => 0,
+    CHECK   => 1,
+    OTHER   => '',
+  },
+
+  MERGE     => {
+    USEWCT  => 1,
+    SRC     => '',
+    MODE    => 'automatic',
+    DRYRUN  => 0,
+    VERBOSE => 0,
+    REV     => '',
+    OTHER   => '',
+  },
+
+  CONFLICTS => {
+    USEWCT  => 0,
+    OTHER   => '',
+  },
+
+  COMMIT    => {
+    USEWCT  => 1,
+    DRYRUN  => 0,
+    OTHER   => '',
+  },
+
+  UPDATE    => {
+    USEWCT  => 1,
+    OTHER   => '',
+  },
+
+  SWITCH    => {
+    USEWCT  => 1,
+    URL     => '',
+    OTHER   => '',
+  },
+);
+
+# List of action buttons
+my %action_b;
+
+# List of action button help strings
+my %action_help = (
+  QUIT  => 'Quit fcm gui',
+  HELP  => 'Print help to the output text box for the selected sub-command',
+  CLEAR => 'Clear the output text box',
+  RUN   => 'Run the selected sub-command',
+);
+
+# List of action button bindings
+my %action_bind = (
+  QUIT  => {KEY => '<Control-Key-q>', U => undef},
+  HELP  => {KEY => '<F1>'           , U => undef},
+  CLEAR => {KEY => '<Alt-Key-l>'    , U => 1},
+  RUN   => {KEY => '<Alt-Key-r>'    , U => 0},
+);
+
+# List of branch subcommand options
+my %branch_opt = (
+  INFO   => undef,
+  CREATE => undef,
+  DELETE => undef,
+  LIST   => undef,
+);
+
+# List of branch create types
+my %branch_type = (
+  'DEV'         => undef,
+  'DEV::SHARE'  => undef,
+  'TEST'        => undef,
+  'TEST::SHARE' => undef,
+  'PKG'         => undef,
+  'PKG::SHARE'  => undef,
+  'PKG::CONFIG' => undef,
+  'PKG::REL'    => undef,
+);
+
+# List of branch create source type
+my %branch_srctype = (
+  TRUNK  => undef,
+  BRANCH => undef,
+);
+
+# List of branch create revision prefix option
+my %branch_revflag = (
+  NORMAL => undef,
+  NUMBER => undef,
+  NONE   => undef,
+);
+
+# List of branch info/delete options
+my %branch_info_opt = (
+  S_CHD   => 'Show children',
+  S_SIB   => 'Show siblings',
+  S_OTH   => 'Show other',
+  VERBOSE => 'Print extra information',
+);
+
+# List of diff display options
+my %diff_display_opt = (
+  default   => 'Default mode',
+  graphical => 'Graphical tool',
+  trac      => 'Trac (only for diff relative to the base of the branch)',
+);
+
+# Text in the status bar
+my $statustext = '';
+
+# ------------------------------------------------------------------------------
+
+my $mw = MainWindow->new ();
+
+my $mw_title = 'FCM GUI';
+$mw->title ($mw_title);
+
+# Frame containing subcommand selection buttons
+my $top_f = $mw->Frame ()->grid (
+  '-row'    => 0,
+  '-column' => 0,
+  '-sticky' => 'w',
+);
+
+# Frame containing subcommand options
+my $mid_f = $mw->Frame ()->grid (
+  '-row'    => 1,
+  '-column' => 0,
+  '-sticky' => 'ew',
+);
+
+# Frame containing action buttons
+my $bot_f = $mw->Frame ()->grid (
+  '-row'    => 2,
+  '-column' => 0,
+  '-sticky' => 'ew',
+);
+
+# Text box to display output
+my $out_t  = $mw->Scrolled ('ROText', '-scrollbars' => 'osow')->grid (
+  '-row'    => 3,
+  '-column' => 0,
+  '-sticky' => 'news',
+);
+
+# Text box - allow scroll with mouse wheel
+$out_t->bind (
+  '<4>' => sub {
+    $_[0]->yview ('scroll', -1, 'units') unless $Tk::strictMotif;
+  },
+);
+
+$out_t->bind (
+  '<5>' => sub {
+    $_[0]->yview ('scroll', +1, 'units') unless $Tk::strictMotif;
+  },
+);
+
+# Status bar
+$mw->Label (
+  '-textvariable' => \$statustext,
+  '-relief'       => 'groove',
+)->grid (
+  '-row'    => 4,
+  '-column' => 0,
+  '-sticky' => 'ews',
+);
+
+# Main window grid configure
+{
+  my ($cols, $rows) = $mw->gridSize ();
+  $mw->gridColumnconfigure ($_, '-weight' => 1) for (0 .. $cols - 1);
+  $mw->gridRowconfigure    ( 3, '-weight' => 1);
+}
+
+# Frame grid configure
+{
+  my ($cols, $rows) = $mid_f->gridSize ();
+  $bot_f->gridColumnconfigure (3, '-weight' => 1);
+}
+
+$mid_f->gridRowconfigure    (0, '-weight' => 1);
+$mid_f->gridColumnconfigure (0, '-weight' => 1);
+
+# ------------------------------------------------------------------------------
+
+# Buttons to select subcommands
+{
+  my $col = 0;
+  for my $name (@subcmds) {
+    $subcmd_b{$name} = $top_f->Button (
+      '-text'    => uc (substr ($name, 0, 1)) . lc (substr ($name, 1)),
+      '-command' => [\&button_clicked, $name],
+      '-width'   => 8,
+    )->grid (
+      '-row'    => 0,
+      '-column' => $col++,
+      '-sticky' => 'w',
+    );
+
+    $subcmd_b{$name}->bind ('<Enter>', sub {$statustext = $subcmd_help{$name}});
+    $subcmd_b{$name}->bind ('<Leave>', sub {$statustext = ''});
+
+    $subcmd_b{$name}->configure ('-underline' => $subcmd_bind{$name}{U})
+      if defined $subcmd_bind{$name}{U};
+
+    $mw->bind ($subcmd_bind{$name}{KEY}, sub {$subcmd_b{$name}->invoke});
+  }
+}
+
+# ------------------------------------------------------------------------------
+
+# Frames to contain subcommands options
+{
+  my %row = ();
+
+  for my $name (@subcmds) {
+    $subcmd_f{$name} = $mid_f->Frame ();
+    $subcmd_f{$name}->gridColumnconfigure (1, '-weight' => 1);
+
+    $row{$name} = 0;
+
+    # Widgets common to all sub-commands
+    $subcmd_f{$name}->Label ('-text' => 'Current working directory: ')->grid (
+      '-row'    => $row{$name},
+      '-column' => 0,
+      '-sticky' => 'w',
+    );
+    $subcmd_f{$name}->Label ('-textvariable' => \($subcmdvar{CWD}))->grid (
+      '-row'    => $row{$name}++,
+      '-column' => 1,
+      '-sticky' => 'w',
+    );
+  }
+
+  # Widgets common to all sub-commands that apply to working copies
+  for my $name (@wco_subcmds) {
+    my @labtxts = (
+      'Corresponding URL: ',
+      'Working copy top: ',
+      'Corresponding URL: ',
+    );
+    my @varrefs = \(
+      $subcmdvar{URL_CWD},
+      $subcmdvar{WCT},
+      $subcmdvar{URL_WCT},
+    );
+
+    for my $i (0 .. $#varrefs) {
+      $subcmd_f{$name}->Label ('-text' => $labtxts[$i])->grid (
+        '-row'    => $row{$name},
+        '-column' => 0,
+        '-sticky' => 'w',
+      );
+      $subcmd_f{$name}->Label ('-textvariable' => $varrefs[$i])->grid (
+        '-row'    => $row{$name}++,
+        '-column' => 1,
+        '-sticky' => 'w',
+      );
+    }
+
+    $subcmd_f{$name}->Checkbutton (
+      '-text'     => 'Apply sub-command to working copy top',
+      '-variable' => \($subcmdvar{$name}{USEWCT}),
+      '-state'    => (grep ({$_ eq $name} @wcto_subcmds) ? 'disabled' : 'normal'),
+    )->grid (
+      '-row'        => $row{$name}++,
+      '-column'     => 0,
+      '-columnspan' => 2,
+      '-sticky'     => 'w',
+    );
+  }
+
+  # Widget for the Branch sub-command
+  {
+    my $name = 'BRANCH';
+
+    # Radio buttons to select the sub-option of the branch sub-command
+    my $opt_f = $subcmd_f{$name}->Frame ()->grid (
+      '-row'        => $row{$name}++,
+      '-column'     => 0,
+      '-columnspan' => 2,
+      '-sticky'     => 'w',
+    );
+
+    my $col = 0;
+    for my $key (sort keys %branch_opt) {
+      my $opt = lc $key;
+
+      $branch_opt{$key} = $opt_f->Radiobutton (
+        '-text'     => $opt,
+        '-value'    => $opt,
+        '-variable' => \($subcmdvar{$name}{OPT}),
+        '-state'    => 'normal',
+      )->grid (
+        '-row'      => 0,
+        '-column'   => $col++,
+        '-sticky'   => 'w',
+      );
+    }
+
+    # Label and entry box for specifying URL
+    $subcmd_f{$name}->Label ('-text' => 'URL: ')->grid (
+      '-row'    => $row{$name},
+      '-column' => 0,
+      '-sticky' => 'w',
+    );
+    $subcmd_f{$name}->Entry (
+      '-textvariable' => \($subcmdvar{$name}{URL}),
+    )->grid (
+      '-row'    => $row{$name}++,
+      '-column' => 1,
+      '-sticky' => 'ew',
+    );
+
+    # Label and entry box for specifying create branch name
+    $subcmd_f{$name}->Label (
+      '-text' => 'Branch name (create only): ',
+    )->grid (
+      '-row'    => $row{$name},
+      '-column' => 0,
+      '-sticky' => 'w',
+    );
+    $subcmd_f{$name}->Entry (
+      '-textvariable' => \($subcmdvar{$name}{NAME}),
+    )->grid (
+      '-row'    => $row{$name}++,
+      '-column' => 1,
+      '-sticky' => 'ew',
+    );
+
+    # Label and radio buttons box for specifying create branch type
+    $subcmd_f{$name}->Label (
+      '-text' => 'Branch type (create only): ',
+    )->grid (
+      '-row'    => $row{$name},
+      '-column' => 0,
+      '-sticky' => 'w',
+    );
+
+    {
+      my $opt_f = $subcmd_f{$name}->Frame ()->grid (
+        '-row'    => $row{$name}++,
+        '-column' => 1,
+        '-sticky' => 'w',
+      );
+
+      my $col = 0;
+      for my $key (sort keys %branch_type) {
+        my $txt = lc $key;
+        my $opt = $key;
+
+        $branch_opt{$key} = $opt_f->Radiobutton (
+          '-text'     => $txt,
+          '-value'    => $opt,
+          '-variable' => \($subcmdvar{$name}{TYPE}),
+          '-state'    => 'normal',
+        )->grid (
+          '-row'      => 0,
+          '-column'   => $col++,
+          '-sticky'   => 'w',
+        );
+      }
+    }
+
+    # Label and radio buttons box for specifying create source type
+    $subcmd_f{$name}->Label (
+      '-text' => 'Source type (create only): ',
+    )->grid (
+      '-row'    => $row{$name},
+      '-column' => 0,
+      '-sticky' => 'w',
+    );
+
+    {
+      my $opt_f = $subcmd_f{$name}->Frame ()->grid (
+        '-row'    => $row{$name}++,
+        '-column' => 1,
+        '-sticky' => 'w',
+      );
+
+      my $col = 0;
+      for my $key (sort keys %branch_srctype) {
+        my $txt = lc $key;
+        my $opt = lc $key;
+
+        $branch_opt{$key} = $opt_f->Radiobutton (
+          '-text'     => $txt,
+          '-value'    => $opt,
+          '-variable' => \($subcmdvar{$name}{SRCTYPE}),
+          '-state'    => 'normal',
+        )->grid (
+          '-row'      => 0,
+          '-column'   => $col++,
+          '-sticky'   => 'w',
+        );
+      }
+    }
+
+    # Label and radio buttons box for specifying create prefix option
+    $subcmd_f{$name}->Label (
+      '-text' => 'Prefix option (create only): ',
+    )->grid (
+      '-row'    => $row{$name},
+      '-column' => 0,
+      '-sticky' => 'w',
+    );
+
+    {
+      my $opt_f = $subcmd_f{$name}->Frame ()->grid (
+        '-row'    => $row{$name}++,
+        '-column' => 1,
+        '-sticky' => 'w',
+      );
+
+      my $col = 0;
+      for my $key (sort keys %branch_revflag) {
+        my $txt = lc $key;
+        my $opt = $key;
+
+        $branch_opt{$key} = $opt_f->Radiobutton (
+          '-text'     => $txt,
+          '-value'    => $opt,
+          '-variable' => \($subcmdvar{$name}{REVFLAG}),
+          '-state'    => 'normal',
+        )->grid (
+          '-row'      => 0,
+          '-column'   => $col++,
+          '-sticky'   => 'w',
+        );
+      }
+    }
+
+    # Label and entry box for specifying ticket number
+    $subcmd_f{$name}->Label (
+      '-text' => 'Related Trac ticket(s) (create only): ',
+    )->grid (
+      '-row'    => $row{$name},
+      '-column' => 0,
+      '-sticky' => 'w',
+    );
+    $subcmd_f{$name}->Entry (
+      '-textvariable' => \($subcmdvar{$name}{TICKET}),
+    )->grid (
+      '-row'    => $row{$name}++,
+      '-column' => 1,
+      '-sticky' => 'ew',
+    );
+
+    # Check button for info/delete
+    # --show-children, --show-siblings, --show-other, --verbose
+    $subcmd_f{$name}->Label (
+      '-text' => 'Options for info/delete only: ',
+    )->grid (
+      '-row'    => $row{$name},
+      '-column' => 0,
+      '-sticky' => 'w',
+    );
+
+    {
+      my $opt_f = $subcmd_f{$name}->Frame ()->grid (
+        '-row'    => $row{$name}++,
+        '-column' => 1,
+        '-sticky' => 'w',
+      );
+
+      my $col = 0;
+
+      for my $key (sort keys %branch_info_opt) {
+        $opt_f->Checkbutton (
+          '-text'     => $branch_info_opt{$key},
+          '-variable' => \($subcmdvar{$name}{$key}),
+        )->grid (
+          '-row'    => 0,
+          '-column' => $col++,
+          '-sticky' => 'w',
+        );
+      }
+    }
+  }
+
+  # Widget for the Checkout sub-command
+  {
+    my $name = 'CHECKOUT';
+
+    # Label and entry boxes for specifying URL and revision
+    my @labtxts = (
+      'URL: ',
+      'Revision: ',
+      'Path: ',
+    );
+    my @varrefs = \(
+      $subcmdvar{$name}{URL},
+      $subcmdvar{$name}{REV},
+      $subcmdvar{$name}{PATH},
+    );
+
+    for my $i (0 .. $#varrefs) {
+      $subcmd_f{$name}->Label ('-text' => $labtxts[$i])->grid (
+        '-row'    => $row{$name},
+        '-column' => 0,
+        '-sticky' => 'w',
+      );
+      $subcmd_f{$name}->Entry (
+        '-textvariable' => $varrefs[$i],
+      )->grid (
+        '-row'    => $row{$name}++,
+        '-column' => 1,
+        '-sticky' => 'ew',
+      );
+    }
+  }
+
+  # Widget for the Status sub-command
+  {
+    my $name = 'STATUS';
+
+    # Checkbuttons for various options
+    my @labtxts = (
+      'Display update information',
+      'Print extra information',
+    );
+    my @varrefs = \(
+      $subcmdvar{$name}{UPDATE},
+      $subcmdvar{$name}{VERBOSE},
+    );
+
+    for my $i (0 .. $#varrefs) {
+      $subcmd_f{$name}->Checkbutton (
+        '-text'     => $labtxts[$i],
+        '-variable' => $varrefs[$i],
+      )->grid (
+        '-row'        => $row{$name}++,
+        '-column'     => 0,
+        '-columnspan' => 2,
+        '-sticky'     => 'w',
+      );
+    }
+  }
+
+  # Widget for the Diff sub-command
+  {
+    my $name = 'DIFF';
+
+    my $entry;
+    $subcmd_f{$name}->Checkbutton (
+      '-text'     => 'Show differences relative to the base of the branch',
+      '-variable' => \($subcmdvar{$name}{BRANCH}),
+      '-command'  => sub {
+        $entry->configure (
+          '-state' => ($subcmdvar{$name}{BRANCH} ? 'normal' : 'disabled'),
+        );
+      },
+    )->grid (
+      '-row'        => $row{$name}++,
+      '-column'     => 0,
+      '-columnspan' => 2,
+      '-sticky'     => 'w',
+    );
+
+    # Label and radio buttons box for specifying tool
+    $subcmd_f{$name}->Label (
+      '-text' => 'Display diff in: ',
+    )->grid (
+      '-row'    => $row{$name},
+      '-column' => 0,
+      '-sticky' => 'w',
+    );
+
+    {
+      my $opt_f = $subcmd_f{$name}->Frame ()->grid (
+        '-row'    => $row{$name}++,
+        '-column' => 1,
+        '-sticky' => 'w',
+      );
+
+      my $col = 0;
+      for my $key (qw/default graphical trac/) {
+        my $txt = $diff_display_opt{$key};
+        my $opt = $key;
+
+        $branch_opt{$key} = $opt_f->Radiobutton (
+          '-text'     => $txt,
+          '-value'    => $opt,
+          '-variable' => \($subcmdvar{$name}{TOOL}),
+          '-state'    => 'normal',
+        )->grid (
+          '-row'      => 0,
+          '-column'   => $col++,
+          '-sticky'   => 'w',
+        );
+      }
+    }
+
+    $subcmd_f{$name}->Label ('-text' => 'Branch URL')->grid (
+      '-row'    => $row{$name},
+      '-column' => 0,
+      '-sticky' => 'w',
+    );
+
+    $entry = $subcmd_f{$name}->Entry (
+      '-textvariable' => \($subcmdvar{$name}{URL}),
+      '-state'        => ($subcmdvar{$name}{BRANCH} ? 'normal' : 'disabled'),
+    )->grid (
+      '-row'    => $row{$name}++,
+      '-column' => 1,
+      '-sticky' => 'ew',
+    );
+  }
+
+  # Widget for the Add/Delete sub-command
+  for my $name (qw/ADD DELETE/) {
+
+    # Checkbuttons for various options
+    $subcmd_f{$name}->Checkbutton (
+      '-text'     => 'Check for files or directories not under version control',
+      '-variable' => \($subcmdvar{$name}{CHECK}),
+    )->grid (
+      '-row'        => $row{$name}++,
+      '-column'     => 0,
+      '-columnspan' => 2,
+      '-sticky'     => 'w',
+    );
+  }
+
+  # Widget for the Merge sub-command
+  {
+    my $name = 'MERGE';
+
+    # Label and radio buttons box for specifying merge mode
+    $subcmd_f{$name}->Label (
+      '-text' => 'Mode: ',
+    )->grid (
+      '-row'    => $row{$name},
+      '-column' => 0,
+      '-sticky' => 'w',
+    );
+
+    {
+      my $opt_f = $subcmd_f{$name}->Frame ()->grid (
+        '-row'    => $row{$name}++,
+        '-column' => 1,
+        '-sticky' => 'w',
+      );
+
+      my $col = 0;
+      for my $key (qw/automatic custom reverse/) {
+        my $txt = lc $key;
+        my $opt = $key;
+
+        $branch_opt{$key} = $opt_f->Radiobutton (
+          '-text'     => $txt,
+          '-value'    => $opt,
+          '-variable' => \($subcmdvar{$name}{MODE}),
+          '-state'    => 'normal',
+        )->grid (
+          '-row'      => 0,
+          '-column'   => $col++,
+          '-sticky'   => 'w',
+        );
+      }
+    }
+
+    # Check buttons for dry-run
+    $subcmd_f{$name}->Checkbutton (
+      '-text'     => 'Dry run',
+      '-variable' => \($subcmdvar{$name}{DRYRUN}),
+    )->grid (
+      '-row'        => $row{$name}++,
+      '-column'     => 0,
+      '-columnspan' => 2,
+      '-sticky'     => 'w',
+    );
+
+    # Check buttons for verbose mode
+    $subcmd_f{$name}->Checkbutton (
+      '-text'     => 'Print extra information',
+      '-variable' => \($subcmdvar{$name}{VERBOSE}),
+    )->grid (
+      '-row'        => $row{$name}++,
+      '-column'     => 0,
+      '-columnspan' => 2,
+      '-sticky'     => 'w',
+    );
+
+    # Label and entry boxes for specifying merge source
+    $subcmd_f{$name}->Label (
+      '-text' => 'Source (automatic/custom only): ',
+    )->grid (
+      '-row'    => $row{$name},
+      '-column' => 0,
+      '-sticky' => 'w',
+    );
+    $subcmd_f{$name}->Entry (
+      '-textvariable' => \($subcmdvar{$name}{SRC}),
+    )->grid (
+      '-row'    => $row{$name}++,
+      '-column' => 1,
+      '-sticky' => 'ew',
+    );
+
+    # Label and entry boxes for specifying merge revision (range)
+    $subcmd_f{$name}->Label (
+      '-text' => 'Revision (custom/reverse only): ',
+    )->grid (
+      '-row'    => $row{$name},
+      '-column' => 0,
+      '-sticky' => 'w',
+    );
+    $subcmd_f{$name}->Entry (
+      '-textvariable' => \($subcmdvar{$name}{REV}),
+    )->grid (
+      '-row'    => $row{$name}++,
+      '-column' => 1,
+      '-sticky' => 'ew',
+    );
+  }
+
+  # Widget for the Commit sub-command
+  {
+    my $name = 'COMMIT';
+
+    # Checkbuttons for various options
+    $subcmd_f{$name}->Checkbutton (
+      '-text'     => 'Dry run',
+      '-variable' => \($subcmdvar{$name}{DRYRUN}),
+    )->grid (
+      '-row'        => $row{$name}++,
+      '-column'     => 0,
+      '-columnspan' => 2,
+      '-sticky'     => 'w',
+    );
+  }
+
+  # Widget for the Switch sub-command
+  {
+    my $name = 'SWITCH';
+
+    # Label and entry boxes for specifying switch URL
+    $subcmd_f{$name}->Label ('-text' => 'URL: ')->grid (
+      '-row'    => $row{$name},
+      '-column' => 0,
+      '-sticky' => 'w',
+    );
+    $subcmd_f{$name}->Entry (
+      '-textvariable' => \($subcmdvar{$name}{URL}),
+    )->grid (
+      '-row'    => $row{$name}++,
+      '-column' => 1,
+      '-sticky' => 'ew',
+    );
+  }
+
+  # Widgets common to all sub-commands
+  for my $name (@subcmds) {
+    $subcmd_f{$name}->Label ('-text' => 'Other options: ')->grid (
+      '-row'    => $row{$name},
+      '-column' => 0,
+      '-sticky' => 'w',
+    );
+    $subcmd_f{$name}->Entry (
+      '-textvariable' => \($subcmdvar{$name}{OTHER}),
+    )->grid (
+      '-row'    => $row{$name}++,
+      '-column' => 1,
+      '-sticky' => 'ew',
+    );
+  }
+}
+
+# ------------------------------------------------------------------------------
+
+# Buttons to perform main actions
+{
+  my $col = 0;
+  for my $name (qw/QUIT HELP CLEAR RUN/) {
+    $action_b{$name} = $bot_f->Button (
+      '-text'    => uc (substr ($name, 0, 1)) . lc (substr ($name, 1)),
+      '-command' => [\&button_clicked, $name],
+      '-width'   => 8,
+    )->grid (
+      '-row'    => 0,
+      '-column' => $col++,
+      '-sticky' => ($name eq 'RUN' ? 'ew' : 'w'),
+    );
+
+    $action_b{$name}->bind ('<Enter>', sub {$statustext = $action_help{$name}});
+    $action_b{$name}->bind ('<Leave>', sub {$statustext = ''});
+
+    $action_b{$name}->configure ('-underline' => $action_bind{$name}{U})
+      if defined $action_bind{$name}{U};
+
+    $mw->bind ($action_bind{$name}{KEY}, sub {$action_b{$name}->invoke});
+  }
+}
+
+&change_cwd ($subcmdvar{CWD});
+
+# ------------------------------------------------------------------------------
+
+# Handle the situation when the user attempts to quit the window while a
+# sub-command is running
+
+$mw->protocol ('WM_DELETE_WINDOW', sub {
+  if (defined $cmdpid) {
+    my $ans = $mw->messageBox (
+      '-title'   => $mw_title,
+      '-message' => $selsubcmd . ' is still running. Really quit?',
+      '-type'    => 'YesNo',
+      '-default' => 'No',
+    );
+
+    if ($ans eq 'Yes') {
+      kill 9, $cmdpid; # Need to kill the sub-process before quitting
+
+    } else {
+      return; # Do not quit
+    }
+  }
+
+  exit;
+});
+
+MainLoop;
+
+# ------------------------------------------------------------------------------
+# SYNOPSIS
+#   &change_cwd ($dir);
+#
+# DESCRIPTION
+#   Change current working directory to $dir
+# ------------------------------------------------------------------------------
+
+sub change_cwd {
+  my $dir = $_[0];
+  my @allowed_subcmds = (&is_wc ($dir) ? @wc_subcmds : @nwc_subcmds);
+
+  for my $subcmd (@subcmds) {
+    if (grep {$_ eq $subcmd} @allowed_subcmds) {
+      $subcmd_b{$subcmd}->configure ('-state' => 'normal');
+
+    } else {
+      $subcmd_b{$subcmd}->configure ('-state' => 'disabled');
+    }
+  }
+
+  &display_subcmd_frame ($allowed_subcmds[0])
+    if not grep {$_ eq $selsubcmd} @allowed_subcmds;
+
+  chdir $dir;
+  $subcmdvar{CWD} = $dir;
+
+  if (&is_wc ($dir)) {
+    $subcmdvar{WCT}     = &get_wct ($dir);
+    $subcmdvar{URL_CWD} = &get_url_of_wc ($dir);
+    $subcmdvar{URL_WCT} = &get_url_of_wc ($subcmdvar{WCT});
+
+    $branch_opt{INFO}  ->configure ('-state' => 'normal');
+    $branch_opt{DELETE}->configure ('-state' => 'normal');
+    $subcmdvar{BRANCH}{OPT} = 'info';
+
+  } else {
+    $branch_opt{INFO}  ->configure ('-state' => 'disabled');
+    $branch_opt{DELETE}->configure ('-state' => 'disabled');
+    $subcmdvar{BRANCH}{OPT} = 'create';
+  }
+
+  return;
+}
+
+# ------------------------------------------------------------------------------
+# SYNOPSIS
+#   &button_clicked ($name);
+#
+# DESCRIPTION
+#   Call back function to handle a click on a command button named $name.
+# ------------------------------------------------------------------------------
+
+sub button_clicked {
+  my $name = $_[0];
+
+  if (grep {$_ eq $name} keys %subcmd_b) {
+    &display_subcmd_frame ($name);
+
+  } elsif ($name eq 'CLEAR') {
+    $out_t->delete ('1.0', 'end');
+
+  } elsif ($name eq 'QUIT') {
+    exit;
+
+  } elsif ($name eq 'HELP') {
+    &invoke_cmd ('help ' . lc ($selsubcmd));
+
+  } elsif ($name eq 'RUN') {
+    &invoke_cmd (&setup_cmd ($selsubcmd));
+
+  } else {
+    $out_t->insert ('end', $name . ': function to be implemented' . "\n");
+    $out_t->yviewMoveto (1);
+  }
+
+  return;
+}
+
+# ------------------------------------------------------------------------------
+# SYNOPSIS
+#   &display_subcmd_frame ($name);
+#
+# DESCRIPTION
+#   Change selected subcommand to $name, and display the frame containing the
+#   widgets for configuring the options and arguments of that subcommand.
+# ------------------------------------------------------------------------------
+
+sub display_subcmd_frame {
+  my $name = $_[0];
+
+  if ($selsubcmd ne $name and not $cmdrunning) {
+    $subcmd_b{$name     }->configure ('-relief' => 'sunken');
+    $subcmd_b{$selsubcmd}->configure ('-relief' => 'raised') if $selsubcmd;
+
+    $subcmd_f{$name     }->grid ('-sticky' => 'new');
+    $subcmd_f{$selsubcmd}->gridForget if $selsubcmd;
+
+    $selsubcmd = $name;
+  }
+
+  return;
+}
+
+# ------------------------------------------------------------------------------
+# SYNOPSIS
+#   $pos = &get_wm_pos ();
+#
+# DESCRIPTION
+#   Returns the position part of the geometry string of the main window.
+# ------------------------------------------------------------------------------
+
+sub get_wm_pos {
+  my $geometry = $mw->geometry ();
+  $geometry =~ /^=?(?:\d+x\d+)?([+-]\d+[+-]\d+)$/;
+  return $1;
+}
+
+# ------------------------------------------------------------------------------
+# SYNOPSIS
+#   $command = &setup_cmd ($name);
+#
+# DESCRIPTION
+#   Setup the system command for the sub-command $name.
+# ------------------------------------------------------------------------------
+
+sub setup_cmd {
+  my $name = $_[0];
+  my $cmd  = '';
+
+  if ($name eq 'BRANCH') {
+    if ($subcmdvar{$name}{OPT} eq 'create') {
+      $cmd .= 'branch-create';
+      $cmd .= ' --svn-non-interactive';
+      $cmd .= ' -t '     . $subcmdvar{$name}{TYPE};
+      $cmd .= ' --rev-flag ' . $subcmdvar{$name}{REVFLAG};
+      $cmd .= ' -k ' . $subcmdvar{$name}{TICKET} if $subcmdvar{$name}{TICKET};
+      $cmd .= ' --branch-of-branch ' if $subcmdvar{$name}{SRCTYPE} eq 'branch';
+      $cmd .= ' ' . $subcmdvar{$name}{NAME};
+
+    } elsif ($subcmdvar{$name}{OPT} eq 'delete') {
+      $cmd .= 'branch-delete';
+      $cmd .= ' -v' if $subcmdvar{$name}{VERBOSE};
+      $cmd .= ' --svn-non-interactive';
+
+    } elsif ($subcmdvar{$name}{OPT} eq 'list') {
+      $cmd .= 'branch-list';
+
+    } else {
+      $cmd .= 'branch-info';
+      $cmd .= ' --show-children' if $subcmdvar{$name}{S_CHD};
+      $cmd .= ' --show-siblings' if $subcmdvar{$name}{S_SIB};
+      $cmd .= ' --show-other'    if $subcmdvar{$name}{S_OTH};
+      $cmd .= ' -v' if $subcmdvar{$name}{VERBOSE};
+    }
+    $cmd .= ' ' . $subcmdvar{$name}{URL}   if $subcmdvar{$name}{URL};
+    $cmd .= ' ' . $subcmdvar{$name}{OTHER} if $subcmdvar{$name}{OTHER};
+
+  } elsif ($name eq 'CHECKOUT') {
+    $cmd .= lc ($name);
+    $cmd .= ' -r' . $subcmdvar{$name}{REV} if $subcmdvar{$name}{REV};
+    $cmd .= ' ' . $subcmdvar{$name}{OTHER} if $subcmdvar{$name}{OTHER};
+    $cmd .= ' ' . $subcmdvar{$name}{URL};
+    $cmd .= ' ' . $subcmdvar{$name}{PATH} if $subcmdvar{$name}{PATH};
+
+  } elsif ($name eq 'STATUS') {
+    $cmd .= lc ($name);
+    $cmd .= ' -u' if $subcmdvar{$name}{UPDATE};
+    $cmd .= ' -v' if $subcmdvar{$name}{VERBOSE};
+    $cmd .= ' ' . $subcmdvar{$name}{OTHER} if $subcmdvar{$name}{OTHER};
+
+  } elsif ($name eq 'DIFF') {
+    if ($subcmdvar{$name}{BRANCH}) {
+      $cmd .= 'branch-diff';
+      $cmd .= ' -t' if $subcmdvar{$name}{TOOL} eq 'trac';
+      $cmd .= ' ' . $subcmdvar{$name}{URL} if $subcmdvar{$name}{URL};
+    }
+    else {
+      $cmd .= 'diff';
+    }
+
+    $cmd .= ' -g' if $subcmdvar{$name}{TOOL} eq 'graphical';
+    $cmd .= ' ' . $subcmdvar{$name}{OTHER} if $subcmdvar{$name}{OTHER};
+
+  } elsif ($name eq 'ADD' or $name eq 'DELETE') {
+    $cmd .= lc ($name);
+    $cmd .= ' -c' if $subcmdvar{$name}{CHECK};
+    $cmd .= ' --non-interactive'
+      if $name eq 'DELETE' and not $subcmdvar{$name}{CHECK};
+    $cmd .= ' ' . $subcmdvar{$name}{OTHER} if $subcmdvar{$name}{OTHER};
+
+  } elsif ($name eq 'MERGE') {
+    $cmd .= lc ($name);
+
+    if ($subcmdvar{$name}{MODE} ne 'automatic') {
+      $cmd .= ' --' . $subcmdvar{$name}{MODE};
+      $cmd .= ' --revision ' . $subcmdvar{$name}{REV} if $subcmdvar{$name}{REV};
+    }
+
+    $cmd .= ' --dry-run' if $subcmdvar{$name}{DRYRUN};
+    $cmd .= ' -v'        if $subcmdvar{$name}{VERBOSE};
+    $cmd .= ' ' . $subcmdvar{$name}{SRC}   if $subcmdvar{$name}{SRC};
+    $cmd .= ' ' . $subcmdvar{$name}{OTHER} if $subcmdvar{$name}{OTHER};
+
+  } elsif ($name eq 'CONFLICTS') {
+    $cmd .= lc ($name);
+    $cmd .= ' ' . $subcmdvar{$name}{OTHER} if $subcmdvar{$name}{OTHER};
+
+  } elsif ($name eq 'COMMIT') {
+    $cmd .= lc ($name);
+    $cmd .= ' --dry-run' if $subcmdvar{$name}{DRYRUN};
+    $cmd .= ' --svn-non-interactive';
+    $cmd .= ' ' . $subcmdvar{$name}{OTHER} if $subcmdvar{$name}{OTHER};
+
+  } elsif ($name eq 'SWITCH') {
+    $cmd .= lc ($name);
+    $cmd .= ' ' . $subcmdvar{$name}{URL}   if $subcmdvar{$name}{URL};
+    $cmd .= ' ' . $subcmdvar{$name}{OTHER} if $subcmdvar{$name}{OTHER};
+
+  } elsif ($name eq 'UPDATE') {
+    $cmd .= lc ($name);
+    $cmd .= ' ' . $subcmdvar{$name}{OTHER} if $subcmdvar{$name}{OTHER};
+
+  }
+
+  return $cmd;
+}
+
+# ------------------------------------------------------------------------------
+# SYNOPSIS
+#   &invoke_cmd ($cmd);
+#
+# DESCRIPTION
+#   Invoke the command $cmd.
+# ------------------------------------------------------------------------------
+
+sub invoke_cmd {
+  my $cmd      = $_[0];
+  return unless $cmd;
+
+  my $disp_cmd = 'fcm ' . $cmd;
+  $cmd         = (index ($cmd, 'help ') == 0)
+                 ? $disp_cmd
+                 : ('fcm gui-internal ' . &get_wm_pos () . ' ' . $cmd);
+
+  # Change directory to working copy top if necessary
+  if ($subcmdvar{$selsubcmd}{USEWCT} and $subcmdvar{WCT} ne $subcmdvar{CWD}) {
+    chdir $subcmdvar{WCT};
+    $out_t->insert ('end', 'cd ' . $subcmdvar{WCT} . "\n");
+    $out_t->yviewMoveto (1);
+  }
+
+  # Report start of command
+  $out_t->insert ('end', timestamp_command ($disp_cmd, 'Start'));
+  $out_t->yviewMoveto (1);
+
+  # Open the command as a pipe
+  if ($cmdpid = open CMD, '-|', $cmd . ' 2>&1') {
+    # Disable all action buttons
+    $action_b{$_}->configure ('-state' => 'disabled') for (keys %action_b);
+    $cmdrunning = 1;
+
+    # Set up a file event to read output from the command
+    $mw->fileevent (\*CMD, readable => sub {
+      if (sysread CMD, my ($buf), 1024) {
+        # Insert text into the output text box as it becomes available
+        $out_t->insert ('end', $buf);
+        $out_t->yviewMoveto (1);
+
+      } else {
+        # Delete the file event and close the file when the command finishes
+        $mw->fileevent(\*CMD, readable => '');
+        close CMD;
+        $cmdpid = undef;
+
+        # Check return status
+        if ($?) {
+          $out_t->insert (
+            'end', '"' . $disp_cmd . '" failed (' . $? . ')' . "\n",
+          );
+          $out_t->yviewMoveto (1);
+        }
+
+        # Report end of command
+        $out_t->insert ('end', timestamp_command ($disp_cmd, 'End'));
+        $out_t->yviewMoveto (1);
+
+        # Change back to CWD if necessary
+        if ($subcmdvar{$selsubcmd}{USEWCT} and
+            $subcmdvar{WCT} ne $subcmdvar{CWD}) {
+          chdir $subcmdvar{CWD};
+          $out_t->insert ('end', 'cd ' . $subcmdvar{CWD} . "\n");
+          $out_t->yviewMoveto (1);
+        }
+
+        # Enable all action buttons again
+        $action_b{$_}->configure ('-state' => 'normal') for (keys %action_b);
+        $cmdrunning = 0;
+
+        # If the command is "checkout", change directory to working copy
+        if (lc ($selsubcmd) eq 'checkout' && $subcmdvar{CHECKOUT}{URL}) {
+          my $url = Fcm::Keyword::expand($subcmdvar{CHECKOUT}{URL});
+          my $dir = $subcmdvar{CHECKOUT}{PATH}
+                  ? $subcmdvar{CHECKOUT}{PATH}
+                  : basename($url);
+          $dir    = rel2abs($dir);
+          &change_cwd ($dir);
+
+        # If the command is "switch", change URL
+        } elsif (lc ($selsubcmd) eq 'switch') {
+          $subcmdvar{URL_CWD} = &get_url_of_wc ($subcmdvar{CWD}, 1);
+          $subcmdvar{URL_WCT} = &get_url_of_wc ($subcmdvar{WCT}, 1);
+        }
+      }
+      1;
+    });
+
+  } else {
+    $mw->messageBox (
+      '-title'   => 'Error',
+      '-message' => 'Error running "' . $cmd . '"',
+      '-icon'    => 'error',
+    );
+  }
+
+  return;
+}
+
+# ------------------------------------------------------------------------------
+
+__END__
+
+=head1 NAME
+
+fcm_gui
+
+=head1 SYNOPSIS
+
+fcm_gui [DIR]
+
+=head1 DESCRIPTION
+
+The fcm_gui command is a simple graphical user interface for some of the
+commands of the FCM system. The optional argument DIR modifies the initial
+working directory.
+
+=head1 COPYRIGHT
+
+(C) Crown copyright Met Office. All rights reserved.
+
+=cut
