@@ -25,6 +25,7 @@ use base qw{FCM::Class::CODE};
 
 use File::Temp;
 use HTTP::Date qw{str2time};
+use POSIX qw{setlocale LC_ALL};
 
 our %ACTION_OF = (
     as_invariant      => \&_as_invariant,
@@ -252,7 +253,10 @@ sub _run_svn_command {
 # Runs "svn", sending standard output to a file handle.
 sub _run_svn_handle {
     my ($attrib_ref, $key, $args_ref, $option_ref) = @_;
-    local($ENV{LANG}) = 'en_GB';
+    local($ENV{LANG}) = $ENV{LANG};
+    if (setlocale(LC_ALL, 'en_GB')) {
+        $ENV{LANG} = 'en_GB';
+    }
     my $handle = File::Temp->new();
     my $rc = $attrib_ref->{util}->shell(
         _run_svn_command(@_),
@@ -269,7 +273,10 @@ sub _run_svn_handle {
 # Runs a simple "svn" command.
 sub _run_svn_simple {
     my ($attrib_ref, $key, $args_ref, $option_ref) = @_;
-    local($ENV{LANG}) = 'en_GB';
+    local($ENV{LANG}) = $ENV{LANG};
+    if (setlocale(LC_ALL, 'en_GB')) {
+        $ENV{LANG} = 'en_GB';
+    }
     my $value_hash_ref
         = $attrib_ref->{util}->shell_simple(_run_svn_command(@_));
     if ($value_hash_ref->{rc}) {

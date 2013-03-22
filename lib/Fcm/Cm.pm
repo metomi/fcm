@@ -1403,7 +1403,9 @@ fcm_patches_dir=\$PWD
 cd \$fcm_working_copy || exit 1
 
 # Set the language to avoid encoding problems
-export LANG=en_GB
+if locale -a | grep -q en_GB; then
+  export LANG=en_GB
+fi
 
 # Commands to apply patches
 EOF
