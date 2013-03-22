@@ -29,8 +29,11 @@ use FCM::System::Exception;
 use File::Basename qw{dirname};
 use File::Path qw{mkpath rmtree};
 use File::Spec::Functions qw{catfile rel2abs};
+use IO::File;
+use IO::Uncompress::Gunzip qw{gunzip};
+use IO::Compress::Gzip qw{gzip};
 use Scalar::Util qw{blessed};
-use Storable qw{nfreeze thaw};
+use Storable qw{fd_retrieve nstore_fd};
 use Sys::Hostname qw{hostname};
 
 # The relative paths for locating files in a destination
@@ -72,16 +75,10 @@ __PACKAGE__->class(
 sub _ctx_load {
     my ($attrib_ref, $path, $expected_class) = @_;
     my $ctx = eval {
-        my @command = (qw{gunzip -c -d}, $path);
-        my %value_of = %{$attrib_ref->{util}->shell_simple(\@command)};
-        if ($value_of{rc}) {
-            return $E->throw(
-                $E->SHELL,
-                {command_list => \@command, %value_of},
-                $value_of{e},
-            );
-        }
-        thaw($value_of{o});
+        my $handle = IO::File->new_tmpfile();
+        gunzip($path, $handle) || die($!);
+        $handle->seek(0, 0);
+        fd_retrieve($handle);
     };
     if (my $e = $@) {
         return $E->throw($E->CACHE_LOAD, $path, $e);
@@ -102,16 +99,10 @@ sub _dest_done {
     my $dest_parent = dirname($dest);
     if (-d $dest_parent && -w $dest_parent) {
         eval {
-            $attrib_ref->{util}->file_save($dest, nfreeze($m_ctx));
-            my @command = (qw{gzip --force}, $dest);
-            my %value_of = %{$attrib_ref->{util}->shell_simple(\@command)};
-            if ($value_of{rc}) {
-                return $E->throw(
-                    $E->SHELL,
-                    {command_list => \@command, %value_of},
-                    $value_of{e},
-                );
-            }
+            my $handle = IO::File->new_tmpfile();
+            nstore_fd($m_ctx, $handle) || die($!);
+            $handle->seek(0, 0) || die($!);
+            gzip($handle, _path($attrib_ref, $m_ctx, 'sys-ctx')) || die($!);
         };
         if (my $e = $@) {
             return $E->throw($E->DEST_CREATE, $dest, $e);
