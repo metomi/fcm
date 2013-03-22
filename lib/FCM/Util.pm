@@ -100,6 +100,7 @@ our @FCM1_KEYWORD_FILES = (
 our @CFG_PATHS = (
     catfile($FindBin::Bin, qw{.. etc fcm}),
     catfile((getpwuid($<))[7], qw{.met-um fcm}),
+    catfile((getpwuid($<))[7], qw{.metomi fcm}),
 );
 our %CFG_BASENAME_OF = (
     external => 'external.cfg',

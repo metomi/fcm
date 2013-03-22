@@ -63,7 +63,7 @@ sub instance {
     my ($class) = @_;
     if (!$INSTANCE) {
         $INSTANCE = bless({%DEFAULT_R, %DEFAULT_RW}, $class);
-        # Load $FCM_HOME/etc/fcm/admin.cfg and $HOME/.met-um/fcm/admin.cfg
+        # Load $FCM_HOME/etc/fcm/admin.cfg and $HOME/.metomi/fcm/admin.cfg
         my $UTIL = FCM::Util->new();
         my @paths = map {catfile($_, 'admin.cfg')} ($UTIL->cfg_paths());
         for my $path (grep {-f $_ && -r _} @paths) {
@@ -129,7 +129,7 @@ admininstration scripts.
 Returns a unique instance of this class. On first call, creates the instance
 with the configurations set to their default values; and loads from the
 site/user configuration at $FCM_HOME/etc/fcm/admin.cfg and
-$HOME/.met-um/fcm/admin.cfg.
+$HOME/.metomi/fcm/admin.cfg.
 
 =item $config->get_admin_email()
 
