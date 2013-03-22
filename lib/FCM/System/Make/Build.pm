@@ -1259,11 +1259,19 @@ sub _target_prep {
     my ($state, $ctx) = @_;
     my $target = $state->get_target();
     # Creates the container directory, where necessary
-    my $path_of_dir = dirname($target->get_path());
-    if (!-d $path_of_dir) {
-        eval {mkpath($path_of_dir)};
-        if ($@) {
-            return $E->throw($E->DEST_CREATE, $path_of_dir);
+    my %paths_of_dirs_set;
+    for my $t (
+        $target,
+        map {$ctx->get_target_of($_)} @{$target->get_triggers()},
+    ) {
+        $paths_of_dirs_set{dirname($t->get_path())} = 1;
+    }
+    for my $path_of_dir (keys(%paths_of_dirs_set)) {
+        if (!-d $path_of_dir) {
+            eval {mkpath($path_of_dir)};
+            if ($@) {
+                return $E->throw($E->DEST_CREATE, $path_of_dir);
+            }
         }
     }
     # Put in required info
