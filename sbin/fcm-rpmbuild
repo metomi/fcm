@@ -21,18 +21,25 @@
 #     fcm-rpmbuild
 #
 # SYNOPSIS
-#     fcm-rpmbuild [--no-vcs] [SOURCE]
+#     fcm-rpmbuild [--no-vcs] [SOURCE] [SOURCE_SITE]
+#     E.g.:
+#     fcm rpmbuild fcm:fcm/trunk fcm:fcm-site/trunk
 #
 # DESCRIPTION
-#     Build an rpm for distributing fcm on production servers managed by
-#     the  Met Office Linux Team.
+#     Build an RPM for distributing FCM.
 #
 # OPTIONS
 #     --no-vcs - do not add subversion and related dependencies to RPM.
 #
 # ARGUMENTS
-#     SOURCE - The source of the distribution. (default = fcm:fcm/trunk)
+#     SOURCE - The source tree of the distribution. (default = fcm:fcm/trunk)
+#     SOURCE_SITE - The source tree with site specific settings in "etc/fcm/".
 #-------------------------------------------------------------------------------
+
+function get_last_changed_rev() {
+    fcm info "$@" | awk -F': ' '$1 ~ /^Last Changed Rev$/ {print $2}'
+}
+
 set -eu
 THIS=$(basename $0)
 
@@ -66,9 +73,18 @@ fi
 # Create the source tree
 SOURCE=${1:-fcm:fcm/trunk}
 fcm export -q $SOURCE SOURCES/fcm
-REV=$(fcm info $SOURCE | awk -F': ' '$1 ~ /^Last Changed Rev$/ {print $2}')
+REV_SOURCE="r$(get_last_changed_rev $SOURCE)"
+SOURCE_SITE=${2:-}
+REV_SOURCE_SITE=
+if [[ -n $SOURCE_SITE ]]; then
+    mkdir -p SOURCES/fcm-site/etc
+    fcm export -q $SOURCE_SITE/etc/fcm SOURCES/fcm-site/etc/fcm
+    cp -p SOURCES/fcm-site/etc/fcm/* SOURCES/fcm/etc/fcm/
+    rm -r SOURCES/fcm-site
+    REV_SOURCE_SITE="r$(get_last_changed_rev $SOURCE_SITE)"
+fi
 mkdir -p SOURCES/fcm/usr/local/bin
-echo "FCM (r$REV)" >SOURCES/fcm/etc/fcm/version
+sed -i "s/\";$/$REV_SOURCE$REV_SOURCE_SITE\";/" SOURCES/fcm/doc/etc/fcm-version.js
 cat >SOURCES/fcm/usr/local/bin/fcm <<'__FCM_WRAPPER__'
 #!/bin/bash
 FCM_HOME=${FCM_HOME:-/opt/fcm}
@@ -80,13 +96,11 @@ chmod +x SOURCES/fcm/usr/local/bin/fcm
 cat >SPECS/fcm.spec <<__SPEC__
 Summary: FCM is a set of tools for managing and building source code.
 Name: fcm
-Version: $REV
+Version: $REV_SOURCE$REV_SOURCE_SITE
 Release: 1
 URL: http://www.metoffice.gov.uk/research/collaboration/fcm/
-License: http://collab.metoffice.gov.uk/twiki/pub/Support/FCM/LICENSE.html
+License: GPLv3
 Group: Development/Tools
-Vendor: http://www.metoffice.gov.uk/
-Packager: fcm-team@metoffice.gov.uk
 BuildRoot: $PWD/BUILD/%{name}-%{version}
 BuildArch: noarch
 Source: $PWD/SOURCES/fcm
@@ -104,20 +118,17 @@ rm -rf \$RPM_BUILD_ROOT
 mkdir -p \$RPM_BUILD_ROOT/opt/fcm
 mkdir -p \$RPM_BUILD_ROOT/usr/local/bin
 cd \$RPM_SOURCE_DIR
-find fcm/{bin,etc,lib} -type d -exec install -Dd {} \$RPM_BUILD_ROOT/opt/{} \;
-find fcm/{bin,etc,lib} -type f -exec install -D {} \$RPM_BUILD_ROOT/opt/{} \;
+find fcm -type d -exec install -Dd {} \$RPM_BUILD_ROOT/opt/{} \;
+find fcm -type f -exec install -D {} \$RPM_BUILD_ROOT/opt/{} \;
 install \$RPM_SOURCE_DIR/fcm/usr/local/bin/fcm \$RPM_BUILD_ROOT/usr/local/bin/
 
 %clean 
 rm -rf \$RPM_BUILD_ROOT
 
 %files
-%defattr(0755,root,root)
-%dir /opt/fcm
-/opt/fcm/bin/
-/opt/fcm/etc/
-/opt/fcm/lib/
+%defattr(-,root,root,-)
 /usr/local/bin/fcm
+/opt/fcm
 __SPEC__
 
 # Build the rpm
