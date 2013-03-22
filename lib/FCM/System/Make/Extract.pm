@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# (C) British Crown Copyright 2006-2012 Met Office.
+# (C) British Crown Copyright 2006-2013 Met Office.
 #
 # This file is part of FCM, tools for managing and building source code.
 #
