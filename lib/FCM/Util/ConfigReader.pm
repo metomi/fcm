@@ -89,6 +89,13 @@ my %PATTERN_OF = (
         (.*)            (?# capture 7, rest of string)
         \z              (?# end)
     /xms,
+    # Config: a $HERE, ${HERE} in the beginning of a string
+    here => qr/
+        \A                  (?# start)
+        (\$HERE|\$\{HERE\}) (?# capture 1, \$HERE)
+        (\/.*)?             (?# capture 2, rest of string)
+        \z                  (?# end)
+    /xms,
     # Config: an empty or comment line
     ignore => qr/\A \s* (?:\#|\z)/xms,
     # Config: comma separator
@@ -324,16 +331,26 @@ sub _parse_value {
 # Expands the leading $HERE variable in the value of a configuration entry.
 sub _parse_var_here {
     my ($state_ref) = @_;
-    my ($pre, $esc, $sigil, $br_open, $name, $br_close, $post)
-        = map {defined($_) ? $_ : q{}}
-            $state_ref->{ctx}->get_value() =~ $PATTERN_OF{fcm2_var};
-    if (!$pre && !$esc && $name && $name eq $HERE) {
-        $post = index($post, '/') == 0 ? substr($post, 1) : q{}; # FIXME
+    my @values = shellwords($state_ref->{ctx}->get_value());
+    if (!grep {$_ =~ $PATTERN_OF{here}} @values) {
+        return;
+    }
+    VALUE:
+    for my $value (@values) {
+        my ($head, $tail)
+            = map {defined($_) ? $_ : q{}} $value =~ $PATTERN_OF{here};
+        if (!$head) {
+            next VALUE;
+        }
+        $tail = index($tail, '/') == 0 ? substr($tail, 1) : q{}; # FIXME
         my ($locator, $here_func)
             = @{$state_ref->{stack}->[-1]}[$I_LOCATOR, $I_HERE_FUNC];
-        $state_ref->{ctx}->set_value($here_func->($post)->get_value());
-        $state_ref->{ctx}->get_modifier_of()->{type} = $locator->get_type();
+        $value = $here_func->($tail)->get_value();
     }
+    $state_ref->{ctx}->set_value(join(
+        q{ },
+        map {my $s = $_; $s =~ s{(['"\s])}{\\$1}gmsx; $s} @values,
+    ));
 }
 
 # Returns a function to process a variable assignment. If
