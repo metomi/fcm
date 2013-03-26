@@ -22,7 +22,7 @@ use warnings;
 package FCM::System::Make::Build;
 use base qw{FCM::Class::CODE};
 
-use Cwd qw{cwd};
+use Cwd qw{cwd realpath};
 use FCM::Context::ConfigEntry;
 use FCM::Context::Event;
 use FCM::Context::Make::Build;
@@ -334,7 +334,7 @@ sub _sources_locate {
     # From specified input
     while (my ($ns, $input_sources_ref) = each(%{$ctx->get_input_source_of()})) {
         for my $input_source (@{$input_sources_ref}) {
-            my $path = rel2abs($input_source, $m_ctx->get_dest());
+            my $path = realpath(rel2abs($input_source, $m_ctx->get_dest()));
             _sources_locate_by_find($attrib_ref, $m_ctx, $ctx, $ns, $path);
         }
     }
