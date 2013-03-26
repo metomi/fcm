@@ -862,7 +862,7 @@ sub _targets_from_sources {
         my $cat = $target->get_category();
         if ($cat && exists($deps_in_ns_in_cat_of{$cat})) {
             my $ns_iter = $UTIL->ns_iter($target->get_ns(), $UTIL->NS_ITER_UP);
-            $ns_iter->(); # discard
+            # $ns_iter->(); # discard
             while (defined(my $ns = $ns_iter->())) {
                 $deps_in_ns_in_cat_of{$cat}{$ns} ||= [];
                 push(@{$deps_in_ns_in_cat_of{$cat}{$ns}}, $target->get_key());
@@ -870,22 +870,32 @@ sub _targets_from_sources {
         }
     }
     # Adds categorised name-space dependencies.
+    TARGET:
     for my $target (@{$targets_ref}) {
-        if (exists($target->get_info_of()->{'deps'})) {
-            while (my ($cat, $deps_in_ns_ref) = each(%deps_in_ns_in_cat_of)) {
-                if (exists($target->get_info_of()->{'deps'}{$cat})) {
-                    my @ns_list = _props(
-                        $attrib_ref, 'ns-dep.' . $cat, $ctx, $target->get_ns(),
+        if (!exists($target->get_info_of()->{'deps'})) {
+            next TARGET;
+        }
+        CATEGORY:
+        while (my ($cat, $deps_in_ns_ref) = each(%deps_in_ns_in_cat_of)) {
+            if (!exists($target->get_info_of()->{'deps'}{$cat})) {
+                next CATEGORY;
+            }
+            my $name = 'ns-dep.' . $cat;
+            my @ns_list = map {$_ eq q{/} ? q{} : $_}
+                _props($attrib_ref, $name, $ctx, $target->get_ns());
+            for my $ns (@ns_list) {
+                if (exists($deps_in_ns_ref->{$ns})) {
+                    push(
+                        @{$target->get_deps()},
+                        (   map  {[$_, $cat]}
+                            grep {$_ ne $target->get_key()}
+                            @{$deps_in_ns_ref->{$ns}}
+                        ),
                     );
-                    for my $ns (grep {exists($deps_in_ns_ref->{$_})} @ns_list) {
-                        push(
-                            @{$target->get_deps()},
-                            (   map  {[$_, $cat]}
-                                grep {$_ ne $target->get_key()}
-                                @{$deps_in_ns_ref->{$ns}}
-                            ),
-                        );
-                    }
+                }
+                else {
+                    # This will be reported later as missing dependency
+                    push(@{$target->get_deps()}, [$ns, $cat]);
                 }
             }
         }

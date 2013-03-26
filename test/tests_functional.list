@@ -93,6 +93,9 @@ fcm2_delete_pp_file_inherit
 fcm2_delete_ppinc_file
 fcm2_delete_ppinc_file_inherit
 fcm2_delete_ppinc_file_inherit_force
+fcm2_dep_o
+#fcm2_dep_o_all
+fcm2_dep_o_invalid
 fcm2_duplicate_target
 fcm2_exclude_dependency
 fcm2_extract_path_excl_no_ns
@@ -133,6 +136,10 @@ fcm2_multiple_build_inherit
 fcm2_multiple_pp-build
 fcm2_multiple_pp-build_inherit
 fcm2_no_dep
+fcm2_ns-dep_o
+fcm2_ns-dep_o_all
+fcm2_ns-dep_o_file
+fcm2_ns-dep_o_invalid
 fcm2_override_variable
 fcm2_pp_change_include
 fcm2_pp_change_include_inherit

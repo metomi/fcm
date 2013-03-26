@@ -186,5 +186,12 @@ cp $REPOS_FILES/cyclic_dependency/hello_sub2.f90 subroutine
 svn add subroutine/hello_sub2.f90
 svn ci -m" "
 
+# Create a dependency which needs to be defined manually
+branch=f77_dep
+fcm bc -t SHARE --rev-flag NONE --non-interactive $branch $REPOS_URL@1
+svn sw $REPOS_URL/branches/dev/Share/$branch
+perl -pi -e 's/INCLUDE /!INCLUDE /' program/hello.F90
+svn ci -m" "
+
 rm -rf $BASE_DIR/work
 echo "$(date): Finished"

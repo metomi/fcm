@@ -69,6 +69,12 @@
       targets of Fortran source files containing modules. Some compilers will
       put the <var>*.mod</var> files directly into the <var>include/</var>
       sub-directory.</p>
+
+      <p>Build: <var>ns-dep.o</var> property improved. Its value will now accept
+      namespaces at the source file level. It will also accept <kbd>/</kbd> as
+      the root namespace. (Previously, it required a pair of quotes
+      <kbd>""</kbd>.) A bad namespace in the value will now trigger a missing
+      dependency error.</p>
     </dd>
   </dl>
 
