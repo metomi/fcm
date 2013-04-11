@@ -212,7 +212,7 @@ sub expand_revision {
         # Ensure that this is the same branch by checking its history
         my @lines = &run_command (
           [qw/svn log -q --incremental -r/, $lc_rev, $self->repos . '@HEAD'],
-          METHOD => 'qx', TIME => $self->verbose > 2,
+          METHOD => 'qx', TIME => $self->verbose > 2, ERROR => 'ignore',
         );
 
         print 'INFO: ', $self->repos, '@', $rev,
