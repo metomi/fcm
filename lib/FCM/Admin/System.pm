@@ -365,12 +365,12 @@ sub distribute_wc {
     my $RUNNER = FCM::Admin::Runner->instance();
     my @RSYNC_OPTS = qw{--timeout=1800 --exclude=.*};
     for my $path ($CONFIG->get_fcm_wc(), $CONFIG->get_fcm_site_wc()) {
-        for my $host (shellwords($CONFIG->get_mirror_hosts())) {
+        for my $dest (shellwords($CONFIG->get_mirror_dests())) {
             $rc = $RUNNER->run_continue(
-                "distributing FCM to $host",
+                "distributing FCM to $dest",
                 sub {
                     run_rsync(
-                        [$path], $host . ':',
+                        [$path], $dest,
                         [@RSYNC_OPTS, qw{-a --delete-excluded}],
                     );
                 },

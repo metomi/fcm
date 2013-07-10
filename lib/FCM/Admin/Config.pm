@@ -36,7 +36,7 @@ my %DEFAULT_R = (
     fcm_home        => $HOME,
     fcm_wc          => catfile($HOME, qw{fcm}),
     fcm_site_wc     => catfile($HOME, qw{fcm_admin}),
-    mirror_hosts    => q{},
+    mirror_dests    => q{},
     trac_gid        => scalar(getgrnam(q{apache})),
     user_number_min => 500,
 );
@@ -139,9 +139,9 @@ Returns the e-mail address of the FCM administrator.
 
 Returns the HOME directory of the FCM administrator.
 
-=item $config->get_mirror_hosts()
+=item $config->get_mirror_dests()
 
-Returns a string containing a list of hosts to mirror FCM installation.
+Returns a string containing a list of destinations to mirror FCM installation.
 
 =item $config->get_fcm_wc()
 
