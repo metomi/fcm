@@ -34,6 +34,10 @@ if (!caller()) {
 # ------------------------------------------------------------------------------
 sub main {
     my @args = @_;
+    local $ENV{'PATH'} = $ENV{'PATH'};
+    if (index($ENV{'PATH'}, $FindBin::Bin . ':') != 0) {
+        $ENV{'PATH'} = $FindBin::Bin . ':' . $ENV{'PATH'};
+    }
     my $gui;
     if (@args && $args[0] eq 'gui-internal') {
         (undef, $gui, @args) = @args;
