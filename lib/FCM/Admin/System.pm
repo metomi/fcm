@@ -364,18 +364,21 @@ sub distribute_wc {
     my $CONFIG = FCM::Admin::Config->instance();
     my $RUNNER = FCM::Admin::Runner->instance();
     my @RSYNC_OPTS = qw{--timeout=1800 --exclude=.*};
-    for my $path ($CONFIG->get_fcm_wc(), $CONFIG->get_fcm_site_wc()) {
-        for my $dest (shellwords($CONFIG->get_mirror_dests())) {
-            $rc = $RUNNER->run_continue(
-                "distributing FCM to $dest",
-                sub {
-                    run_rsync(
-                        [$path], $dest,
-                        [@RSYNC_OPTS, qw{-a --delete-excluded}],
-                    );
-                },
-            ) && $rc;
-        }
+    my @sources;
+    for my $source_key (shellwords($CONFIG->get_mirror_keys())) {
+        my $method = "get_$source_key";
+        push(@sources, $CONFIG->$method());
+    }
+    for my $dest (shellwords($CONFIG->get_mirror_dests())) {
+        $rc = $RUNNER->run_continue(
+            "distributing FCM to $dest",
+            sub {
+                run_rsync(
+                    \@sources, $dest,
+                    [@RSYNC_OPTS, qw{-a --delete-excluded}],
+                );
+            },
+        ) && $rc;
     }
     return $rc;
 }

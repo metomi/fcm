@@ -25,7 +25,6 @@ package FCM::Admin::Config;
 use FCM::Context::Locator;
 use FCM::Util;
 use File::Spec::Functions qw{catfile};
-use Text::ParseWords qw{shellwords};
 
 my $USER = (getpwuid($<))[0];
 my $HOME = (getpwuid($<))[7];
@@ -37,6 +36,7 @@ my %DEFAULT_R = (
     fcm_wc          => catfile($HOME, qw{fcm}),
     fcm_site_wc     => catfile($HOME, qw{fcm_admin}),
     mirror_dests    => q{},
+    mirror_keys     => q{fcm_wc fcm_site_wc},
     trac_gid        => scalar(getgrnam(q{apache})),
     user_number_min => 500,
 );
@@ -142,6 +142,12 @@ Returns the HOME directory of the FCM administrator.
 =item $config->get_mirror_dests()
 
 Returns a string containing a list of destinations to mirror FCM installation.
+
+=item $config->get_mirror_keys()
+
+Returns a string containing a list of source keys. Each source key should point
+to a source location in this $config. The source locations will be distributed
+to the list of destinations in $config->get_mirror_dests().
 
 =item $config->get_fcm_wc()
 

@@ -43,6 +43,7 @@ use FCM::Admin::Util qw{
 };
 use Getopt::Long qw{GetOptions};
 use Pod::Usage qw{pod2usage};
+use Text::ParseWords qw{shellwords};
 
 # ------------------------------------------------------------------------------
 my $CONFIG = FCM::Admin::Config->instance();
@@ -76,50 +77,31 @@ sub main {
     my $is_force = $option{'force'};
     UPDATE:
     while (1) {
-        my @updates_in_fcm      = run_svn_update($CONFIG->get_fcm_wc());
-        my @updates_in_fcm_site = run_svn_update($CONFIG->get_fcm_site_wc());
-        if (!$is_force && !@updates_in_fcm && !@updates_in_fcm_site) {
+        my @updates;
+        for my $source_key (shellwords($CONFIG->get_mirror_keys())) {
+            my $method = "get_$source_key";
+            push(@updates, run_svn_update($CONFIG->$method()));
+        }
+        if (!$is_force && !@updates) {
             last UPDATE;
         }
-        for my $task ((
-            {   name => '(re-)installing hook scripts',
-                main => sub {
+        if ($is_force || grep {$_ =~ $PATTERN_OF{'SRC_HOOK'}} @updates) {
+            $RUNNER->run(
+                '(re-)installing hook scripts',
+                sub {
                     for my $project (get_projects_from_svn_live()) {
                         install_svn_hook($project);
                     }
                     return 1;
-                },
-                want => get_pattern_grepper('SRC_HOOK', 1),
-            },
-            {   name => 'distributing FCM to standard locations',
-                main => \&distribute_wc,
-                want => get_pattern_grepper(q{}, 1),
-            },
-        )) {
-            if (    $is_force
-                ||  $task->{want}->(\@updates_in_fcm, \@updates_in_fcm_site)
-            ) {
-                $RUNNER->run($task->{name}, $task->{main});
-            }
+                }
+            );
+        }
+        if ($is_force || grep {$_ =~ $PATTERN_OF{q{}}} @updates) {
+            $RUNNER->run(
+                'distributing FCM to standard locations', \&distribute_wc);
         }
         $is_force = 0;
     }
-}
-
-# ------------------------------------------------------------------------------
-# Returns a function that "grep" for a known pattern ($pattern_key). The
-# returned function expects a list reference in the 0th element of its argument
-# list.
-sub get_pattern_grepper {
-    my ($pattern_key, $should_grep_fcm_site) = @_;
-    sub {
-        my ($updates_in_fcm_ref, $updates_in_fcm_site_ref) = @_;
-        my @updates = @{$updates_in_fcm_ref};
-        if ($should_grep_fcm_site) {
-            push(@updates, @{$updates_in_fcm_site_ref});
-        }
-        grep({$_ =~ $PATTERN_OF{$pattern_key}} @updates);
-    };
 }
 
 # ------------------------------------------------------------------------------
