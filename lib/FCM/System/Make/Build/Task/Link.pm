@@ -24,17 +24,22 @@ use base qw{FCM::Class::CODE};
 
 use FCM::Context::Event;
 use FCM::System::Exception;
+use FCM::System::Make::Build::Task::Archive;
 use FCM::System::Make::Build::Task::Share qw{_props_to_opts};
 use File::Basename qw{basename};
-use File::Path qw{rmtree};
+use File::Path qw{mkpath rmtree};
 use File::Spec::Functions qw{abs2rel catfile};
 use File::Temp qw{tempdir};
 use List::Util qw{first};
 use Text::ParseWords qw{shellwords};
 
-use FCM::System::Exception;
-
 my $E = 'FCM::System::Exception';
+
+our %PROP_OF = (
+    %FCM::System::Make::Build::Task::Archive::PROP_OF,
+    'ld' => '',
+    'keep-lib-o' => '',
+);
 
 __PACKAGE__->class(
     {name => '$', prop_of => '%', util => '&'},
@@ -60,10 +65,18 @@ sub _main {
         }
     }
     my $path_of_main_o = shift(@{$paths_of{o}});
-    my $temp_dir = tempdir(CLEANUP => 1);
+    my $keep_lib_o = $P->('keep-lib-o');
+    my $lib_o_dir;
+    if ($keep_lib_o) {
+        $lib_o_dir = $target->CT_LIB;
+        mkpath($lib_o_dir);
+    }
+    else {
+        $lib_o_dir = tempdir(CLEANUP => 1);
+    }
     my ($extension, $root)
         = $attrib_ref->{util}->file_ext(basename($target->get_key()));
-    my $lib_of_main = catfile($temp_dir, "lib$root.a");
+    my $lib_o = catfile($lib_o_dir, "lib$root.a");
     my %opt_of = (
         o => $P->($NAME . '.flag-output'),
         L => $P->($NAME . '.flag-lib-path'),
@@ -74,18 +87,18 @@ sub _main {
         (   @{$paths_of{o}}
             ?   [   shellwords($P->('ar')),
                     shellwords($P->('ar.flags')),
-                    $lib_of_main,
+                    $lib_o,
                     @{$paths_of{o}},
                 ]
             :   ()
         ),
         # Link
-        [   shellwords($P->($NAME)),
+        [   ($P->('ld') ? shellwords($P->('ld')) : shellwords($P->($NAME))),
             _props_to_opts($opt_of{o}, $abs2rel_func->($target->get_path())),
             $path_of_main_o,
             @{$paths_of{'o.special'}},
             (   @{$paths_of{o}}
-                ?   (   _props_to_opts($opt_of{L}, $temp_dir),
+                ?   (   _props_to_opts($opt_of{L}, $lib_o_dir),
                         _props_to_opts($opt_of{l}, $root),
                     )
                 :   ()
@@ -105,8 +118,10 @@ sub _main {
             FCM::Context::Event->MAKE_BUILD_SHELL_OUT, @value_of{qw{o e}},
         );
     }
-    unlink($lib_of_main);
-    rmtree($temp_dir);
+    if (!$keep_lib_o) {
+        unlink($lib_o);
+        rmtree($lib_o_dir);
+    }
     $target;
 }
 
