@@ -1,6 +1,14 @@
-(C) British Crown Copyright 2006-2013 Met Office.
+# FCM
 
 FCM is a set of tools for managing and building source code.
+
+See <http://metomi.github.io/fcm/>.
+
+## Copyright
+
+(C) British Crown Copyright 2006-2013 Met Office.
+
+## Terms of Use
 
 FCM is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,3 +26,17 @@ along with FCM. If not, see <http://www.gnu.org/licenses/>.
 FCM documentation is licensed under the British Open Government
 Licence. See doc/etc/fcm-terms-of-use.html and
 <http://www.nationalarchives.gov.uk/doc/open-government-licence/>
+
+See <http://metomi.github.io/fcm/doc/etc/fcm-terms-of-use.html>.
+
+## Installation
+
+See <http://metomi.github.io/fcm/doc/installation/>.
+
+## Acknowledgement
+
+Code contributors:
+* Jim Bolton (Met Office, UK)
+* Ben Fitzpatrick (Met Office, UK)
+* Dave Matthews (Met Office, UK)
+* Matt Shin (Met Office, UK)
