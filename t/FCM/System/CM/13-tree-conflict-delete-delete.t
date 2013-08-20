@@ -62,10 +62,9 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: delete, delete, discard local (status)
 TEST_KEY=$TEST_KEY_BASE-discard-status
-run_pass "$TEST_KEY" svn status
+run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
-?       #commit_message#
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
@@ -94,10 +93,9 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: delete, delete, keep local (status)
 TEST_KEY=$TEST_KEY_BASE-keep-status
-run_pass "$TEST_KEY" svn status
+run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
-?       #commit_message#
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------

@@ -49,11 +49,10 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests svn status result of fcm merge (1)
 TEST_KEY=$TEST_KEY_BASE-trunk-into-branch-1-status
-run_pass "$TEST_KEY" svn status
+run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 ?       unversioned_file
-?       #commit_message#
 M       lib/python/info/__init__.py
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
@@ -163,10 +162,9 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests svn status result of fcm merge (1)
 TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-1-status
-run_pass "$TEST_KEY" svn status
+run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
-?       #commit_message#
 M       subroutine/hello_sub_dummy.h
 A  +    added_file
 A  +    module/tree_conflict_file
@@ -367,10 +365,9 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests svn status result of fcm merge branch-into-trunk (2)
 TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-2-status
-run_pass "$TEST_KEY" svn status
+run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
-?       #commit_message#
 M       added_file
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
@@ -484,10 +481,9 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests svn status result of fcm merge trunk-into-branch (2)
 TEST_KEY=$TEST_KEY_BASE-trunk-into-branch-2-status
-run_pass "$TEST_KEY" svn status
+run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
-?       #commit_message#
 M       added_file
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
@@ -613,10 +609,9 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests svn status result of fcm merge branch-into-trunk (3)
 TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-3-status
-run_pass "$TEST_KEY" svn status
+run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
-?       #commit_message#
 D       added_directory/hello_constants_dummy.inc
 A  +    added_file.add
 __OUT__
@@ -817,10 +812,9 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests svn status result of fcm merge branch-into-branch (1)
 TEST_KEY=$TEST_KEY_BASE-branch-into-branch-1-status
-run_pass "$TEST_KEY" svn status
+run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
-?       #commit_message#
 M       subroutine/hello_sub_dummy.h
 A  +    added_file
 A  +    module/tree_conflict_file

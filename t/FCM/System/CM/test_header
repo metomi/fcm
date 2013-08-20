@@ -156,6 +156,7 @@ function run_fail() {
 }
 
 function setup() {
+    mkdir -p $TEST_DIR/.subversion
     mkdir -p $TEST_DIR/run
     cd $TEST_DIR/run
 }
@@ -165,4 +166,5 @@ function teardown() {
     rm -rf $TEST_DIR/test_repos
     rm -rf $TEST_DIR/wc
     rm -rf $TEST_DIR/run
+    rm -rf $TEST_DIR/.subversion
 }

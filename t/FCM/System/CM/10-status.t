@@ -47,12 +47,11 @@ run_pass "$TEST_KEY" fcm merge --non-interactive branches/dev/Share/merge1
 #-------------------------------------------------------------------------------
 # Tests fcm status result of fcm merge (1)
 TEST_KEY=$TEST_KEY_BASE-status
-run_pass "$TEST_KEY" fcm status
+run_pass "$TEST_KEY" fcm status --config-dir=$TEST_DIR/.subversion
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 ?       unversioned_file
 ?       added_file
-?       #commit_message#
 !       subroutine/hello_sub.h
 M       subroutine/hello_sub_dummy.h
 A     C module/tree_conflict_file

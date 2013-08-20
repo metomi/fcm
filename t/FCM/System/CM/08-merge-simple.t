@@ -61,7 +61,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests svn status result of fcm merge --dry-run
 TEST_KEY=$TEST_KEY_BASE-dry-run-status
-run_pass "$TEST_KEY" svn status
+run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 ?       unversioned_file
 __OUT__
@@ -89,11 +89,10 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests svn status result of fcm merge --non-interactive
 TEST_KEY=$TEST_KEY_BASE-non-interactive-status
-run_pass "$TEST_KEY" svn status
+run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 ?       unversioned_file
-?       #commit_message#
 M       subroutine/hello_sub_dummy.h
 A  +    added_file
 A  +    module/tree_conflict_file
