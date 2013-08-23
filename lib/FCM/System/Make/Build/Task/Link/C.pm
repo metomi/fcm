@@ -22,11 +22,10 @@ use warnings;
 package FCM::System::Make::Build::Task::Link::C;
 use base qw{FCM::System::Make::Build::Task::Link};
 
-use FCM::System::Make::Build::Task::Archive;
 use FCM::System::Make::Build::Task::Compile::C;
 
 our %PROP_OF = (
-    %FCM::System::Make::Build::Task::Archive::PROP_OF,
+    %FCM::System::Make::Build::Task::Link::PROP_OF,
     (   map {$_ => $FCM::System::Make::Build::Task::Compile::C::PROP_OF{$_}}
         qw{cc cc.flag-output}
     ),
