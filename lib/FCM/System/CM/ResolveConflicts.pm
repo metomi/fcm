@@ -51,13 +51,19 @@ our %TREE_CONFLICT_GET_GRAPHIC_SOURCES_FUNC_FOR = (
 our %TREE_CONFLICT_GET_FINAL_ACTIONS_FUNC_FOR = (
     LAIA => \&_cm_tree_conflict_get_actions_for_laia,
     LDID => sub {},
+    LDIE => \&_cm_tree_conflict_get_actions_for_ldie,
     LDIR => \&_cm_tree_conflict_get_actions_for_ldir,
     LEID => \&_cm_tree_conflict_get_actions_for_leid,
     LEIR => \&_cm_tree_conflict_get_actions_for_leir,
-    LMIE => \&_cm_tree_conflict_get_actions_for_lmie,
     LRID => \&_cm_tree_conflict_get_actions_for_lrid,
     LRIE => \&_cm_tree_conflict_get_actions_for_lrie,
     LRIR => \&_cm_tree_conflict_get_actions_for_lrir,
+);
+
+# Handle aliases for actions.
+our %TREE_CONFLICT_GET_UNALIAS_FOR = (
+    'obstruction' => 'add',
+    'missing' => 'delete',
 );
 
 # Number of renamed files that triggers a time warning.
@@ -182,8 +188,13 @@ sub _cm_resolve_tree_conflict {
         $UTIL->event(FCM::Context::Event->CM_CONFLICT_TREE_SKIP, $path);
         return;
     }
+    
+    my $tree_reason = $info{'tree-conflict:reason'};
+    if (grep {$tree_reason eq $_} keys(%TREE_CONFLICT_GET_UNALIAS_FOR)) {
+        $tree_reason = $TREE_CONFLICT_GET_UNALIAS_FOR{$tree_reason};
+    }
     my $tree_key = FCM::System::CM::TreeConflictKey->new(
-        {   'local'    => $info{'tree-conflict:reason'},
+        {   'local'    => $tree_reason,
             'incoming' => $info{'tree-conflict:action'},
             'type'     => $info{'tree-conflict:operation'},
         },
@@ -239,9 +250,8 @@ sub _cm_resolve_tree_conflict {
     }
 
     # Check for local renaming of the tree conflict file
-    my $tree_reason = $info{'tree-conflict:reason'};
     my $local_renamed_file = '';
-    if (grep {$info{'tree-conflict:reason'} eq $_} qw{delete missing}) {
+    if (grep {$tree_reason eq $_} qw{delete missing}) {
         $local_renamed_file = _cm_tree_conflict_get_local_rename(
             $attrib_ref,
             $wc_branch,
@@ -521,6 +531,20 @@ sub _cm_tree_conflict_get_actions_for_laia {
     };
 }
 
+
+# Return the actions needed to resolve 'local missing, incoming edit'
+sub _cm_tree_conflict_get_actions_for_ldie {
+    my ($attrib_ref, $keep_local, $files_ref) = @_;
+    my ($cfile) = @{$files_ref};
+    my ($url, $url_peg) = _cm_tree_conflict_source($attrib_ref, 'right', $cfile);
+    my $cdir = dirname($cfile);
+    sub {
+        if (!$keep_local) {
+            $attrib_ref->{svn}->call('copy', $url, "$cdir/");
+        }
+    };
+}
+
 # Return the actions needed to resolve 'local delete, incoming rename'
 sub _cm_tree_conflict_get_actions_for_ldir {
     my ($attrib_ref, $keep_local, $files_ref) = @_;
@@ -555,19 +579,6 @@ sub _cm_tree_conflict_get_actions_for_leir {
         }
         else {
             $attrib_ref->{svn}->call('delete', $cfile);
-        }
-    };
-}
-
-# Return the actions needed to resolve 'local missing, incoming edit'
-sub _cm_tree_conflict_get_actions_for_lmie {
-    my ($attrib_ref, $keep_local, $files_ref) = @_;
-    my ($cfile) = @{$files_ref};
-    my ($url, $url_peg) = _cm_tree_conflict_source($attrib_ref, 'right', $cfile);
-    my $cdir = dirname($cfile);
-    sub {
-        if (!$keep_local) {
-            $attrib_ref->{svn}->call('copy', $url, "$cdir/");
         }
     };
 }
