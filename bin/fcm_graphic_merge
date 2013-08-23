@@ -21,7 +21,8 @@
 use strict;
 use warnings;
 
-my %IMPL = ('xxdiff' => \&_xxdiff);
+my %IMPL = ('fcm-dummy-diff' => \&_fcm_dummy_diff,
+            'xxdiff' => \&_xxdiff);
 
 my %UNRESOLVED = (
     'nodecision' => "You have made no decision.\n",
@@ -37,13 +38,24 @@ if (!caller()) {
 
 sub main {
     my $command = 'xxdiff';
-    #if (exists($ENV{FCM_GRAPHIC_MERGE}) && $ENV{FCM_GRAPHIC_MERGE}) {
-    #    $command = $ENV{FCM_GRAPHIC_MERGE};
-    #}
-    #if (!exists($IMPL{$command})) {
-    #    die("$command: merge tool not yet supported.\n");
-    #}
+    if (exists($ENV{FCM_GRAPHIC_MERGE}) && $ENV{FCM_GRAPHIC_MERGE}) {
+        $command = $ENV{FCM_GRAPHIC_MERGE};
+    }
+    if (!exists($IMPL{$command})) {
+        die("$command: merge tool not yet supported.\n");
+    }
     $IMPL{$command}->(@_);
+}
+
+sub _fcm_dummy_diff {
+    my ($base, $mine, $older, $yours) = @_;
+    my @command = (qw{diff3}, $mine, $older, $yours);
+    print(join(" ", @command) . "\n");
+    my @out_lines = qx{@command};
+    for my $line (@out_lines) {
+        print($line);
+    }
+    return 0;
 }
 
 sub _xxdiff {
