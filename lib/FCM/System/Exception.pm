@@ -25,6 +25,7 @@ use Scalar::Util qw{blessed};
 
 use constant {
     BUILD_SOURCE     => 'BUILD_SOURCE',
+    BUILD_SOURCE_SYN => 'BUILD_SOURCE_SYN',
     BUILD_TARGET     => 'BUILD_TARGET',
     BUILD_TARGET_BAD => 'BUILD_TARGET_BAD',
     BUILD_TARGET_CYC => 'BUILD_TARGET_CYC',
@@ -107,6 +108,12 @@ The following are known error code:
 
 The build sub-system fails because a specified source does not exist. Expects
 $e->get_ctx() to return the source path.
+
+=item FCM::System::Exception->BUILD_SOURCE_SYN
+
+The build sub-system fails because a specified source has a syntax error.
+Expects $e->get_ctx() to return an ARRAY reference containing the source path
+and the line number where the error occurs.
 
 =item FCM::System::Exception->BUILD_TARGET
 

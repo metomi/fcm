@@ -23,8 +23,12 @@ use warnings;
 package FCM::System::Make::Build::Task::ExtractInterface;
 use base qw{FCM::Class::CODE};
 
+use FCM::System::Exception;
 use Text::Balanced qw{extract_bracketed extract_delimited};
 use Text::ParseWords qw{shellwords};
+
+# Alias
+my $E = 'FCM::System::Exception';
 
 # Regular expressions
 my $RE_ATTR = qr{
@@ -80,13 +84,22 @@ sub _main {
     my ($attrib_ref, $target) = @_;
     my $handle
         = $attrib_ref->{util}->file_load_handle($target->get_path_of_source());
-    $attrib_ref->{util}->file_save(
-        $target->get_path(),
-        [   map { s{\s+}{ }gmsx; s{\s+\z}{\n}msx; $_ }
-                map { @{$_->{lines}} }
-                @{_reduce_to_interface(_extract_statements($handle))}
-        ],
-    );
+    eval {
+        $attrib_ref->{util}->file_save(
+            $target->get_path(),
+            [   map { s{\s+}{ }gmsx; s{\s+\z}{\n}msx; $_ }
+                    map { @{$_->{lines}} }
+                    @{_reduce_to_interface(_extract_statements($handle))}
+            ],
+        );
+    };
+    if ($@) {
+        my $e = $@;
+        if ($E->caught($e) && $e->get_code() eq $E->BUILD_SOURCE_SYN) {
+            unshift(@{$e->get_ctx()}, $target->get_path_of_source());
+        }
+        die($e);
+    }
     close($handle);
     $target;
 }
@@ -127,7 +140,6 @@ LINE:
             push(@{$statement->{lines}}, $line);
             $statement->{value} .= $value;
             if (rindex($value, '\\') != length($value) - 1) {
-
                 #push(@{$context->{statements}}, $statement);
                 $statement = undef;
             }
@@ -409,10 +421,20 @@ STATEMENT:
             my @tokens;
             while ($tail) {
                 if ($tail =~ qr{\A\s*['"]}msx) {
+                    my $old_tail = $tail;
                     extract_delimited($tail, q{'"}, qr{\A[^'"]*}msx, q{});
+                    if ($old_tail eq $tail) {
+                        return $E->throw(
+                            $E->BUILD_SOURCE_SYN, [$statement->{line_number}]);
+                    }
                 }
                 elsif ($tail =~ qr{\A\s*\(}msx) {
+                    my $old_tail = $tail;
                     extract_bracketed($tail, '()', qr{\A[^(]*}msx);
+                    if ($old_tail eq $tail) {
+                        return $E->throw(
+                            $E->BUILD_SOURCE_SYN, [$statement->{line_number}]);
+                    }
                 }
                 else {
                     my $token;
