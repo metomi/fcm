@@ -55,7 +55,7 @@ svn switch $ROOT_URL/branches/dev/Share/branch_test
 TEST_KEY=$TEST_KEY_BASE-fcm-branch-diff
 run_pass "$TEST_KEY" fcm branch-diff
 if $SVN_VERSION_IS_16; then
-    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Index: added_file
 ===================================================================
 --- added_file	(.../$ROOT_URL/trunk)	(revision 0)
@@ -147,7 +147,7 @@ Index: lib/python/info/poems.py
 +prINt "\n",  __doc__
 __OUT__
 else
-    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Index: module/hello_constants_dummy.inc
 ===================================================================
 --- module/hello_constants_dummy.inc	($ROOT_URL/trunk)	(revision 1)
@@ -239,13 +239,13 @@ Index: added_file
 +INCLUDE 'hello_constants.INc'
 __OUT__
 fi
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm bdi
 TEST_KEY=$TEST_KEY_BASE-bdi
 run_pass "$TEST_KEY" fcm bdi
 if $SVN_VERSION_IS_16; then
-    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Index: added_file
 ===================================================================
 --- added_file	(.../$ROOT_URL/trunk)	(revision 0)
@@ -337,7 +337,7 @@ Index: lib/python/info/poems.py
 +prINt "\n",  __doc__
 __OUT__
 else
-    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Index: module/hello_constants_dummy.inc
 ===================================================================
 --- module/hello_constants_dummy.inc	($ROOT_URL/trunk)	(revision 1)
@@ -429,30 +429,30 @@ Index: added_file
 +INCLUDE 'hello_constants.INc'
 __OUT__
 fi
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm branch-diff --wiki
 TEST_KEY=$TEST_KEY_BASE-wiki
 run_pass "$TEST_KEY" fcm branch-diff --wiki
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 diff:/trunk@1///branches/dev/Share/branch_test@6
 __OUT__
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm bdi --wiki
 TEST_KEY=$TEST_KEY_BASE-bdi-wiki
 run_pass "$TEST_KEY" fcm bdi --wiki
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 diff:/trunk@1///branches/dev/Share/branch_test@6
 __OUT__
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm bdi on the trunk
 svn switch $ROOT_URL/trunk
 TEST_KEY=$TEST_KEY_BASE-bdi-trunk
 run_fail "$TEST_KEY" fcm bdi
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" </dev/null
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" <<__ERR__
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" <<__ERR__
 [FAIL] $ROOT_URL/trunk@6: not a valid URL of a standard FCM branch.
 
 __ERR__
@@ -465,7 +465,7 @@ svn add added_directory/foo$TEST_KEY
 echo "bar" > added_directory/bar$TEST_KEY
 run_pass "$TEST_KEY" fcm bdi
 if $SVN_VERSION_IS_16; then
-    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Index: added_file
 ===================================================================
 --- added_file	(.../$ROOT_URL/trunk)	(revision 0)
@@ -563,7 +563,7 @@ Index: lib/python/info/poems.py
 +prINt "\n",  __doc__
 __OUT__
 else
-    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Index: module/hello_constants_dummy.inc
 ===================================================================
 --- module/hello_constants_dummy.inc	($ROOT_URL/trunk)	(revision 1)
@@ -661,6 +661,6 @@ Index: added_file
 +INCLUDE 'hello_constants.INc'
 __OUT__
 fi
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 teardown
 #-------------------------------------------------------------------------------

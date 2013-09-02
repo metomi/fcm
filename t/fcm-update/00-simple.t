@@ -41,7 +41,7 @@ run_pass "$TEST_KEY" fcm update -r PREV <<__IN__
 y
 __IN__
 if $SVN_VERSION_IS_16; then
-    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 update: status of ".":
 ?       unversioned_file
 update: continue?
@@ -56,7 +56,7 @@ U    lib/python/info/poems.py
 Updated to revision 4.
 __OUT__
 else
-    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 update: status of ".":
 ?       unversioned_file
 update: continue?
@@ -72,7 +72,7 @@ U    lib/python/info/poems.py
 Updated to revision 4.
 __OUT__
 fi
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm update
 rm unversioned_file
@@ -81,7 +81,7 @@ run_pass "$TEST_KEY" fcm update <<__IN__
 y
 __IN__
 if $SVN_VERSION_IS_16; then
-    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 update: status of ".":
         *        4   subroutine/hello_sub_dummy.h
         *            added_directory/hello_constants.f90
@@ -113,7 +113,7 @@ __OUT__
 else
     # The output is now not deterministic for svn update!!
     sort $TEST_DIR/"$TEST_KEY.out" -o $TEST_DIR/"$TEST_KEY.out"
-    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
         *            added_directory
         *            added_directory/hello_constants.f90
         *            added_directory/hello_constants.inc
@@ -144,5 +144,5 @@ update: continue?
 update: status of ".":
 __OUT__
 fi
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------

@@ -42,7 +42,7 @@ if $SVN_VERSION_IS_16; then
 else
     START_REV=4
 fi
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Eligible merge(s) from /branches/dev/Share/merge1@9: 5
 --------------------------------------------------------------------------------
 Merge: /branches/dev/Share/merge1@5
@@ -62,29 +62,29 @@ U    module/hello_constants.f90
 U    lib/python/info/poems.py
 -------------------------------------------------------------------------dry-run
 __OUT__
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests svn status result of fcm merge --dry-run
 TEST_KEY=$TEST_KEY_BASE-dry-run-status
 run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 ?       unversioned_file
 __OUT__
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests svn diff result of fcm merge --dry-run
 TEST_KEY=$TEST_KEY_BASE-dry-run-diff
 run_pass "$TEST_KEY" svn diff
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 __OUT__
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm merge --non-interactive
 TEST_KEY=$TEST_KEY_BASE-non-interactive
 export SVN_EDITOR="sed -i 1i\foo" 
 run_pass "$TEST_KEY" fcm merge --non-interactive $ROOT_URL/branches/dev/Share/merge1
 if $SVN_VERSION_IS_16; then
-    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Eligible merge(s) from /branches/dev/Share/merge1@9: 5
 --------------------------------------------------------------------------------
 Merge: /branches/dev/Share/merge1@5
@@ -92,7 +92,7 @@ Merge: /branches/dev/Share/merge1@5
 Merge succeeded.
 __OUT__
 else
-    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Eligible merge(s) from /branches/dev/Share/merge1@9: 5
 --------------------------------------------------------------------------------
 Merge: /branches/dev/Share/merge1@5
@@ -116,14 +116,14 @@ U    lib/python/info/poems.py
 --------------------------------------------------------------------------actual
 __OUT__
 fi
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests svn status result of fcm merge --non-interactive
 TEST_KEY=$TEST_KEY_BASE-non-interactive-status
 run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
 sort $TEST_DIR/"$TEST_KEY.out" -o $TEST_DIR/"$TEST_KEY.out"
 if $SVN_VERSION_IS_16; then
-    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 ?       unversioned_file
 A  +    added_directory
@@ -139,7 +139,7 @@ M       module/hello_constants_dummy.inc
 M       subroutine/hello_sub_dummy.h
 __OUT__
 else
-    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 ?       unversioned_file
 A  +    added_directory
@@ -152,13 +152,13 @@ M       module/hello_constants_dummy.inc
 M       subroutine/hello_sub_dummy.h
 __OUT__
 fi
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests svn diff result of fcm merge --non-interactive
 TEST_KEY=$TEST_KEY_BASE-non-interactive-diff
 run_pass "$TEST_KEY" svn diff
 if $SVN_VERSION_IS_16; then
-    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 
 Property changes on: .
 ___________________________________________________________________
@@ -238,7 +238,7 @@ Index: lib/python/info/poems.py
 +prINt "\n",  __doc__
 __OUT__
 else
-    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Index: lib/python/info/poems.py
 ===================================================================
 --- lib/python/info/poems.py	(revision 9)
@@ -321,6 +321,6 @@ Added: svn:mergeinfo
    Merged /branches/dev/Share/merge1:r4-5
 __OUT__
 fi
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 teardown
 #-------------------------------------------------------------------------------

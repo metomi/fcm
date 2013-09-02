@@ -49,7 +49,7 @@ fcm merge --non-interactive $ROOT_URL/branches/dev/Share/del_del
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 n
 __IN__
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] pro/hello.pro: in tree conflict.
 Locally: deleted.
 Externally: deleted.
@@ -58,15 +58,15 @@ Answer (n) to accept the external delete.
 Keep the local version?
 Enter "y" or "n" (or just press <return> for "n") Resolved conflicted state of 'pro/hello.pro'
 __OUT__
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: delete, delete, discard local (status)
 TEST_KEY=$TEST_KEY_BASE-discard-status
 run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 __OUT__
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 cd $TEST_DIR
 rm -rf $TEST_DIR/wc
@@ -80,7 +80,7 @@ fcm merge --non-interactive $ROOT_URL/branches/dev/Share/del_del
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 y
 __IN__
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] pro/hello.pro: in tree conflict.
 Locally: deleted.
 Externally: deleted.
@@ -89,13 +89,13 @@ Answer (n) to accept the external delete.
 Keep the local version?
 Enter "y" or "n" (or just press <return> for "n") Resolved conflicted state of 'pro/hello.pro'
 __OUT__
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: delete, delete, keep local (status)
 TEST_KEY=$TEST_KEY_BASE-keep-status
 run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 __OUT__
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------

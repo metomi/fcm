@@ -47,7 +47,7 @@ svn delete --force -q $FILE_DIR
 TEST_KEY=$TEST_KEY_BASE-fcm-diff
 run_pass "$TEST_KEY" fcm diff
 if $SVN_VERSION_IS_16; then
-    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Index: added_file
 ===================================================================
 --- added_file	(revision 4)
@@ -143,7 +143,7 @@ Index: lib/python/info/poems.py
 +prINt "\n",  __doc__
 __OUT__
 else
-    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Index: added_directory/hello_constants.f90
 ===================================================================
 --- added_directory/hello_constants.f90	(revision 4)
@@ -239,6 +239,6 @@ Index: module/hello_constants_dummy.inc
 -INCLUDE 'hello_constants.inc'
 __OUT__
 fi
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 teardown
 #-------------------------------------------------------------------------------

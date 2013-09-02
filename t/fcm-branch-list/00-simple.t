@@ -58,11 +58,11 @@ svn switch -q $ROOT_URL/branches/dev/Share/branch_test
 # Tests fcm branch-list
 TEST_KEY=$TEST_KEY_BASE-list
 run_pass "$TEST_KEY" fcm branch-list
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] $ROOT_URL@9: 1 match(es)
 $ROOT_URL/branches/dev/$LOGNAME/my_branch_test@9
 __OUT__
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm branch-list -a
 TEST_KEY=$TEST_KEY_BASE-a
@@ -76,62 +76,62 @@ $ROOT_URL/branches/dev/Share/sibling_branch_test@9
 $ROOT_URL/branches/dev/$LOGNAME/my_branch_test@9
 $ROOT_URL/branches/dev/drfooeybar/donuts@9
 __OUT__
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <$TMPFILE
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <$TMPFILE
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm branch-list --user
 TEST_KEY=$TEST_KEY_BASE-a
 run_pass "$TEST_KEY" fcm branch-list --user=drfooeybar
 sed -i "/ Date/d;" $TEST_DIR/$TEST_KEY.out
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] $ROOT_URL@9: 1 match(es)
 $ROOT_URL/branches/dev/drfooeybar/donuts@9
 __OUT__
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm branch-list --only (1)
 TEST_KEY=$TEST_KEY_BASE-only-1
 run_pass "$TEST_KEY" fcm branch-list --only=3:donut
 sed -i "/ Date/d;" $TEST_DIR/$TEST_KEY.out
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] $ROOT_URL@9: 1 match(es)
 $ROOT_URL/branches/dev/drfooeybar/donuts@9
 __OUT__
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm branch-list --only (2)
 TEST_KEY=$TEST_KEY_BASE-only-2
 run_pass "$TEST_KEY" fcm branch-list --only=2:Share
 sed -i "/ Date/d;" $TEST_DIR/$TEST_KEY.out
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] $ROOT_URL@9: 2 match(es)
 $ROOT_URL/branches/dev/Share/branch_test@9
 $ROOT_URL/branches/dev/Share/sibling_branch_test@9
 __OUT__
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm branch-list --only (3)
 TEST_KEY=$TEST_KEY_BASE-only-3
 run_pass "$TEST_KEY" fcm branch-list --only=2:Share --only=3:sibling
 sed -i "/ Date/d;" $TEST_DIR/$TEST_KEY.out
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] $ROOT_URL@9: 1 match(es)
 $ROOT_URL/branches/dev/Share/sibling_branch_test@9
 __OUT__
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm branch-list --only (4)
 TEST_KEY=$TEST_KEY_BASE-only-4
 run_pass "$TEST_KEY" fcm branch-list --only=1:something-not-right
 sed -i "/ Date/d;" $TEST_DIR/$TEST_KEY.out
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] $ROOT_URL@9: 0 match(es)
 __OUT__
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm branch-list --only (5)
 TEST_KEY=$TEST_KEY_BASE-only-5
 run_fail "$TEST_KEY" fcm branch-list --only=1:\)
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" </dev/null
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" </dev/null
 teardown
 #-------------------------------------------------------------------------------

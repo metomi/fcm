@@ -49,7 +49,7 @@ svn delete -q --force lib/python/info/poems.py
 TEST_KEY=$TEST_KEY_BASE-status
 run_pass "$TEST_KEY" fcm status --config-dir=$TEST_DIR/.subversion
 if $SVN_VERSION_IS_16; then
-    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 ?       unversioned_file
 !       subroutine/hello_sub.h
@@ -67,7 +67,7 @@ A  +    added_directory/hello_constants.f90
 D       lib/python/info/poems.py
 __OUT__
 else
-    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 A  +    added_directory
       C added_file
@@ -84,5 +84,5 @@ Summary of conflicts:
   Tree conflicts: 1
 __OUT__
 fi
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------

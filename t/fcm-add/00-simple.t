@@ -44,19 +44,19 @@ cd $TEST_DIR/wc
 # Tests fcm add unversioned file
 TEST_KEY=$TEST_KEY_BASE-fcm-add-file
 run_pass "$TEST_KEY" fcm add added_directory1/added_file1
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
 A         added_directory1/added_file1
 __OUT__
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm add unversioned directory
 TEST_KEY=$TEST_KEY_BASE-fcm-add-dir
 run_pass "$TEST_KEY" fcm add added_directory2
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
 A         added_directory2
 A         added_directory2/added_file2
 __OUT__
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 cd $TEST_DIR
 teardown
 #-------------------------------------------------------------------------------
@@ -80,25 +80,25 @@ TEST_KEY=$TEST_KEY_BASE-fcm-add-c-file
 run_pass "$TEST_KEY" fcm add -c unversioned_file <<'__EOF__'
 y
 __EOF__
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
 ?       unversioned_file
 Would you like to run "svn add unversioned_file"?
 Enter "y", "n" or "a" (or just press <return> for "n"): A         unversioned_file
 __OUT__
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm add -c unversioned directory
 TEST_KEY=$TEST_KEY_BASE-fcm-add-c-dir
 run_pass "$TEST_KEY" fcm add -c unversioned_directory <<'__EOF__'
 y
 __EOF__
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
 ?       unversioned_directory
 Would you like to run "svn add unversioned_directory"?
 Enter "y", "n" or "a" (or just press <return> for "n"): A         unversioned_directory
 A         unversioned_directory/unversioned_file_2
 __OUT__
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm add -c versioned directory
 TEST_KEY=$TEST_KEY_BASE-fcm-add-c-versioned-dir
@@ -106,20 +106,20 @@ run_pass "$TEST_KEY" fcm add -c versioned_directory <<'__EOF__'
 n
 __EOF__
 file_test "$TEST_KEY.out" "$TEST_KEY.out" -s
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm status after above tests
 TEST_KEY=$TEST_KEY_BASE-fcm-add-c-status
 run_pass "$TEST_KEY" fcm st
 sort $TEST_DIR/"$TEST_KEY.out" -o $TEST_DIR/"$TEST_KEY.out"
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
 ?       versioned_directory/unversioned_file_3
 A       unversioned_directory
 A       unversioned_directory/unversioned_file_2
 A       unversioned_file
 A       versioned_directory
 __OUT__
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm add -c with no arguments
 TEST_KEY=$TEST_KEY_BASE-fcm-add-c-no-args
@@ -131,19 +131,19 @@ y
 y
 __EOF__
 file_test "$TEST_KEY.out" "$TEST_KEY.out" -s
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm status after above tests
 TEST_KEY=$TEST_KEY_BASE-fcm-add-c-no-args-status
 run_pass "$TEST_KEY" fcm status
 sort $TEST_DIR/"$TEST_KEY.out" -o $TEST_DIR/"$TEST_KEY.out"
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
 A       unversioned_directory
 A       unversioned_directory/unversioned_file_2
 A       unversioned_file
 A       versioned_directory
 A       versioned_directory/unversioned_file_3
 __OUT__
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 teardown
 #-------------------------------------------------------------------------------

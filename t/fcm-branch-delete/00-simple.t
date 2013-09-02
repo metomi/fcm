@@ -39,13 +39,13 @@ TEST_KEY=$TEST_KEY_BASE-delete
 run_pass "$TEST_KEY" fcm branch-delete --non-interactive $ROOT_URL/branches/dev/Share/branch_test
 file_grep "$TEST_KEY.out" "Deleting branch $ROOT_URL/branches/dev/Share/branch_test ..." \
           "$TEST_KEY.out"
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests existence of branch
 TEST_KEY=$TEST_KEY_BASE-delete-branch-exists
 run_fail "$TEST_KEY" svn info \
                $ROOT_URL/branches/dev/Share/branch_test
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" </dev/null
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" </dev/null
 file_test "$TEST_KEY.err" "$TEST_KEY.err" -s
 teardown
 #-------------------------------------------------------------------------------
@@ -64,13 +64,13 @@ TEST_KEY=$TEST_KEY_BASE-brm
 run_pass "$TEST_KEY" fcm brm --non-interactive $ROOT_URL/branches/dev/Share/branch_test
 file_grep "$TEST_KEY.out" "Deleting branch $ROOT_URL/branches/dev/Share/branch_test ..." \
           "$TEST_KEY.out"
-file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm brm disappearance of branch
 TEST_KEY=$TEST_KEY_BASE-brm-branch-exists
 run_fail "$TEST_KEY" svn info \
                $ROOT_URL/branches/dev/Share/branch_test
-file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" </dev/null
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" </dev/null
 file_test "$TEST_KEY.err" "$TEST_KEY.err" -s
 teardown
 #-------------------------------------------------------------------------------
