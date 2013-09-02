@@ -3,6 +3,9 @@ set -u
 trap "echo Received signal ERR; exit 1"  ERR
 trap "echo Received signal TERM; exit 1" TERM
 
+export MY_BIN=$(cd $(dirname $0) && pwd)
+PATH=$MY_BIN:$PATH
+
 export DEBUG=false
 FCM1=true
 FCM2=true
@@ -78,7 +81,7 @@ fi
 
 export BASE_DIR=$LOCALTEMP/fcm_test_suite
 if [[ ${DELETE:-} == true ]]; then
-  if [[ $DEBUG == true ]]; then
+  if $DEBUG; then
     echo "Removing any previous test directory ..."
   fi
   rm -rf $BASE_DIR
@@ -92,11 +95,11 @@ export REPOS_DIR=$BASE_DIR/test_svn
 export REPOS_URL="file://$REPOS_DIR"
 if [[ ! -d $REPOS_DIR ]]; then
   echo "$(date): Creating test repository ..."
-  ./create_repos > $BASE_DIR/repos.stdout 2> $BASE_DIR/repos.stderr
+  $MY_BIN/create_repos > $BASE_DIR/repos.stdout 2> $BASE_DIR/repos.stderr
 fi
 
-cp compare_*_fcm* $BASE_DIR
-PATH_BASE=$PWD/wrapper_scripts:$PATH:~opsrc/ops0/mpi/mpich2-1.4-ukmo-v1/ifort-12/bin
+cp $MY_BIN/compare_*_fcm* $BASE_DIR
+PATH_BASE=$MY_BIN/wrapper_scripts:$PATH:~opsrc/ops0/mpi/mpich2-1.4-ukmo-v1/ifort-12/bin
 
 trap ""  ERR
 export TEST
@@ -108,25 +111,17 @@ do
   else
     URL=$CONTROL_URL
   fi
-  URL_BASE=${URL%@*}
-  REV=${URL#$URL_BASE}
-  fcm ls $URL_BASE/bin/fcm$REV >/dev/null 2>&1
-  if [[ $? != 0 ]]; then
-    echo 'URL must be a URL or the path to a working copy of the FCM project tree'
-    exit 1
-  fi
-  echo FCM version to be used:
-  fcm info $URL | grep URL
-  fcm info $URL | grep Revision
+  REV=$(git describe $URL) || exit $RC
+  echo "FCM version to be used: $REV"
 
   export RUN_DIR=$BASE_DIR/$TYPE
   rm -rf $RUN_DIR
   mkdir $RUN_DIR
 
-  if [[ $DEBUG == true ]]; then
+  if $DEBUG; then
     echo "Creating local copy of FCM ..."
   fi
-  fcm export -q $URL $RUN_DIR/fcm
+  (cd $MY_BIN/.. && git archive --format=tar --prefix=fcm/ $REV) | (cd $RUN_DIR && tar xf -)
   if [[ -a $RUN_DIR/fcm/etc/fcm.cfg ]]; then
     echo "set::url::test_suite $REPOS_URL" >>$RUN_DIR/fcm/etc/fcm.cfg
   else
@@ -135,13 +130,13 @@ do
   export PATH=$RUN_DIR/fcm/bin:$PATH_BASE
 
   if [[ ${FUNC_TESTS:-} == true ]]; then
-    . ./tests_functional.list
+    . $MY_BIN/tests_functional.list
     export COMPARE_TIMES=false
     let failed=0
     if [[ $FCM1 == true ]]; then
       for TEST in $TESTS_FCM1
       do
-        ./perform_test_fcm1
+        $MY_BIN/perform_test_fcm1
         if [[ $? != 0 ]]; then
           let failed=failed+1
         fi
@@ -150,7 +145,7 @@ do
     if [[ $FCM2 == true ]]; then
       for TEST in $TESTS_FCM2
       do
-        ./perform_test_fcm2
+        $MY_BIN/perform_test_fcm2
         if [[ $? != 0 ]]; then
           let failed=failed+1
         fi
@@ -166,7 +161,7 @@ do
   fi
 
   if [[ ${LOCAL_TESTS:-} == true ]]; then
-    . ./tests_perf_local.list
+    . $MY_BIN/tests_perf_local.list
     export COMPARE_TIMES=true
     export run_1=no
     export run_2=no
@@ -174,7 +169,7 @@ do
     if [[ $FCM1 == true ]]; then
       for TEST in $TESTS_FCM1
       do
-        ./perform_test_fcm1
+        $MY_BIN/perform_test_fcm1
         if [[ $? != 0 ]]; then
           let failed=failed+1
         fi
@@ -183,7 +178,7 @@ do
     if [[ $FCM2 == true ]]; then
       for TEST in $TESTS_FCM2
       do
-        ./perform_test_fcm2
+        $MY_BIN/perform_test_fcm2
         if [[ $? != 0 ]]; then
           let failed=failed+1
         fi
@@ -200,7 +195,7 @@ do
   fi
 
   if [[ ${REMOTE_TESTS:-} == true ]]; then
-    if [[ $DEBUG == true ]]; then
+    if $DEBUG; then
       echo "Copying files to HPC platform ..."
     fi
     export RUN_DIR_HPC=$BASE_DIR_HPC/$TYPE
@@ -212,10 +207,10 @@ do
     BATCH_SCRIPT_NAME=hpc_batch.sh
     export BATCH_DIRS_NAME=hpc_dirs.sh
     export BATCH_SCRIPT=$RUN_DIR/$BATCH_SCRIPT_NAME
-    ./create_hpc_batch_script
+    $MY_BIN/create_hpc_batch_script
     export BATCH_DIRS=$RUN_DIR/$BATCH_DIRS_NAME
 
-    . ./tests_perf_remote.list
+    . $MY_BIN/tests_perf_remote.list
     export COMPARE_TIMES=true
     export mirror=remote
     let failed=0
@@ -223,7 +218,7 @@ do
     if [[ $FCM1 == true ]]; then
       for TEST in $TESTS_FCM1
       do
-        ./perform_test_fcm1
+        $MY_BIN/perform_test_fcm1
         if [[ $? != 0 ]]; then
           let failed=failed+1
         else
@@ -237,7 +232,7 @@ do
       export NPROC=6
       for TEST in $TESTS_FCM2
       do
-        ./perform_test_fcm2
+        $MY_BIN/perform_test_fcm2
         if [[ $? != 0 ]]; then
           let failed=failed+1
         else
