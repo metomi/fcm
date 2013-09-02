@@ -16,7 +16,7 @@ export PATH=$RUN_DIR_HPC/fcm/bin:\$PATH
 export DIFF="/opt/freeware/bin/diff"
 export DEBUG=$DEBUG
 
-. \$PWD/$BATCH_DIRS_NAME
+. \$MY_BIN/$BATCH_DIRS_NAME
 let failed=0
 for TEST in \$TESTS_FCM1
 do
@@ -37,7 +37,7 @@ else
   cat <<EOF >>$BATCH_SCRIPT
     export COMPARE_TIMES=true
     cd $BASE_DIR_HPC
-    ./compare_results_fcm1 \$TEST
+    $MY_BIN/compare_results_fcm1 \$TEST
     if [[ \$? != 0 ]]; then
       let failed=failed+1
     fi
@@ -64,13 +64,13 @@ if [[ $TYPE == control ]]; then
   cat <<EOF >>$BATCH_SCRIPT
     touch .tests.complete
     cd ..
-    ../compare_times_fcm1-2 \$TEST
+    $MY_BIN/compare_times_fcm1-2 \$TEST
 EOF
 else
   cat <<EOF >>$BATCH_SCRIPT
     export COMPARE_TIMES=true
     cd $BASE_DIR_HPC
-    ./compare_results_fcm2 \$TEST
+    $MY_BIN/compare_results_fcm2 \$TEST
     if [[ \$? != 0 ]]; then
       let failed=failed+1
     fi

@@ -1,7 +1,7 @@
 #!/bin/ksh
 set -eu
 
-REPOS_FILES=$PWD/repos
+REPOS_FILES=$MY_BIN/repos
 
 echo "$(date): Creating repository ..."
 rm -rf $REPOS_DIR

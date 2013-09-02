@@ -4,8 +4,8 @@ set -u
 echo "$(date): Running $TEST ..."
 
 cfg_name=$TEST
-if [[ -a test_config/$TEST ]]; then
- . test_config/$TEST
+if [[ -a $MY_BIN/test_config/$TEST ]]; then
+ . $MY_BIN/test_config/$TEST
 fi
 
 export THIS_RUN_DIR=$RUN_DIR/$TEST
@@ -195,10 +195,10 @@ if [[ $TYPE == control ]]; then
       done
     fi
     if [[ $COMPARE_TIMES == true ]]; then
-      ../compare_times_fcm1-2 $TEST
+      $MY_BIN/compare_times_fcm1-2 $TEST
     fi
   fi
 else
   cd $BASE_DIR
-  ./compare_results_fcm2 $TEST
+  $MY_BIN/compare_results_fcm2 $TEST
 fi

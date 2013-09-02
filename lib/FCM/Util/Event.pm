@@ -114,6 +114,7 @@ our %E_CM_FORMAT_FOR = (
 # Helper for "_format_e_sys", formatters based on exception code.
 our %E_SYS_FORMATTER_FOR = (
     BUILD_SOURCE     => _format_e_func('e_sys_build_source'),
+    BUILD_SOURCE_SYN => _format_e_func('e_sys_build_source_syn'),
     BUILD_TARGET     => \&_format_e_sys_build_target,
     BUILD_TARGET_BAD => _format_e_func('e_sys_build_target_bad', $IS_MULTI_LINE),
     BUILD_TARGET_CYC => \&_format_e_sys_build_target_cyc,
@@ -189,6 +190,7 @@ our %S = (
     e_cli_opt                    => '%s: incorrect usage,'
                                     . ' type \'%s help %1$s\' for help',
     e_sys_build_source           => '%s: source does not exist',
+    e_sys_build_source_syn       => '%s(%d): syntax error',
     e_sys_build_target           => '%s: target not found after an update:',
     e_sys_build_target_1         => '%s: expect target file',
     e_sys_build_target_bad       => '%s: don\'t know how to build specified'

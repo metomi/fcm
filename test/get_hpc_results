@@ -26,7 +26,7 @@ if [[ $HELP == true ]]; then
 fi
 
 export HPC=$(rose host-select -q hpc)
-ssh $HPC "cd working/fcm_test_suite; ./report_hpc_results" | tee $LOCALTEMP/fcm_test_suite/hpc.summary
+ssh $HPC "cd working/fcm_test_suite; $MY_BIN/report_hpc_results" | tee $LOCALTEMP/fcm_test_suite/hpc.summary
 
 if [[ $COPY == true ]]; then
   echo "Mirroring results from HPC ..."

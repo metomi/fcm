@@ -1,0 +1,4 @@
+interface
+subroutine t2()
+end subroutine t2
+end interface
