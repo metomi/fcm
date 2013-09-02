@@ -38,7 +38,7 @@ TEST_KEY=$TEST_KEY_BASE-fcm-bc
 run_pass "$TEST_KEY" fcm branch-create -t SHARE --rev-flag=NONE \
                                         --non-interactive \
                                         my_branch_test
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] Source: $ROOT_URL/trunk@1 (4)
 Change summary:
 --------------------------------------------------------------------------------
@@ -52,16 +52,16 @@ Created /branches/dev/Share/my_branch_test from /trunk@1.
 Committed revision 5.
 [info] Created: $ROOT_URL/branches/dev/Share/my_branch_test
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests existence of branch
 TEST_KEY=$TEST_KEY_BASE-fcm-bc-branch-exists-sw
 run_pass "$TEST_KEY" svn switch \
                $ROOT_URL/branches/dev/Share/my_branch_test
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
 At revision 5.
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 teardown
 #-------------------------------------------------------------------------------
 init_repos ${TEST_PROJECT:-}
@@ -78,7 +78,7 @@ TEST_KEY=$TEST_KEY_BASE-fcm-bc-branch-of-branch
 run_pass "$TEST_KEY" fcm branch-create -t SHARE --rev-flag=NONE \
                                        --non-interactive \
                                        --branch-of-branch my_branch_test
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] Source: $ROOT_URL/branches/dev/Share/branch_test@4 (4)
 Change summary:
 --------------------------------------------------------------------------------
@@ -92,15 +92,15 @@ Created /branches/dev/Share/my_branch_test from /branches/dev/Share/branch_test@
 Committed revision 5.
 [info] Created: $ROOT_URL/branches/dev/Share/my_branch_test
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests existence of branch
 TEST_KEY=$TEST_KEY_BASE-fcm-bc-branch-of-branch-exists-sw
 run_pass "$TEST_KEY" svn switch \
                $ROOT_URL/branches/dev/Share/my_branch_test
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
 At revision 5.
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 teardown
 #-------------------------------------------------------------------------------

@@ -54,7 +54,8 @@ svn switch $ROOT_URL/branches/dev/Share/branch_test
 # Tests fcm branch-diff
 TEST_KEY=$TEST_KEY_BASE-fcm-branch-diff
 run_pass "$TEST_KEY" fcm branch-diff
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+if $SVN_VERSION_IS_16; then
+    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Index: added_file
 ===================================================================
 --- added_file	(.../$ROOT_URL/trunk)	(revision 0)
@@ -145,12 +146,106 @@ Index: lib/python/info/poems.py
 -print "\n",  __doc__
 +prINt "\n",  __doc__
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+else
+    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+Index: module/hello_constants_dummy.inc
+===================================================================
+--- module/hello_constants_dummy.inc	($ROOT_URL/trunk)	(revision 1)
++++ module/hello_constants_dummy.inc	(working copy)
+@@ -1 +0,0 @@
+-INCLUDE 'hello_constants.inc'
+Index: module/hello_constants.inc
+===================================================================
+--- module/hello_constants.inc	($ROOT_URL/trunk)	(revision 1)
++++ module/hello_constants.inc	(working copy)
+@@ -1 +0,0 @@
+-CHARACTER (LEN=80), PARAMETER :: hello_string = 'Hello Earth!'
+Index: module/hello_constants.f90
+===================================================================
+--- module/hello_constants.f90	($ROOT_URL/trunk)	(revision 1)
++++ module/hello_constants.f90	(working copy)
+@@ -1,5 +0,0 @@
+-MODULE Hello_Constants
+-
+-INCLUDE 'hello_constants_dummy.inc'
+-
+-END MODULE Hello_Constants
+Index: lib/python/info/poems.py
+===================================================================
+--- lib/python/info/poems.py	($ROOT_URL/trunk)	(revision 1)
++++ lib/python/info/poems.py	(working copy)
+@@ -1,24 +1,23 @@
+-#!/usr/bin/env python
+-# -*- coding: utf-8 -*-
+ """The Python, by Hilaire Belloc
+ 
+ A Python I should not advise,--
+-It needs a doctor for its eyes,
++It needs a doctor FOR its eyes,
+ And has the measles yearly.
+-However, if you feel inclined
+-To get one (to improve your mind,
++However, if you feel INclINed
++To get one (
++to improve your mINd,
+ And not from fashion merely),
+ Allow no music near its cage;
+-And when it flies into a rage
++And when it flies INto a rage
+ Chastise it, most severely.
+-I had an aunt in Yucatan
++I had an aunt IN Yucatan
+ Who bought a Python from a man
+-And kept it for a pet.
++And kept it FOR a pet.
+ She died, because she never knew
+ These simple little rules and few;--
+-The Snake is living yet.
++The Snake is livINg yet.
+ """
+ 
+ import this
+ 
+-print "\n",  __doc__
++prINt "\n",  __doc__
+Index: added_directory/hello_constants.f90
+===================================================================
+--- added_directory/hello_constants.f90	($ROOT_URL/trunk)	(revision 0)
++++ added_directory/hello_constants.f90	(revision 6)
+@@ -0,0 +1,5 @@
++MODULE Hello_Constants
++
++INCLUDE 'hello_constants_dummy.INc'
++
++END MODULE Hello_Constants
+Index: added_directory/hello_constants.inc
+===================================================================
+--- added_directory/hello_constants.inc	($ROOT_URL/trunk)	(revision 0)
++++ added_directory/hello_constants.inc	(revision 6)
+@@ -0,0 +1,2 @@
++CHARACTER (
++LEN=80), PARAMETER :: hello_strINg = 'Hello Earth!!'
+Index: added_directory/hello_constants_dummy.inc
+===================================================================
+--- added_directory/hello_constants_dummy.inc	($ROOT_URL/trunk)	(revision 0)
++++ added_directory/hello_constants_dummy.inc	(revision 6)
+@@ -0,0 +1 @@
++INCLUDE 'hello_constants.INc'
+Index: added_file
+===================================================================
+--- added_file	($ROOT_URL/trunk)	(revision 0)
++++ added_file	(revision 6)
+@@ -0,0 +1 @@
++INCLUDE 'hello_constants.INc'
+__OUT__
+fi
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm bdi
 TEST_KEY=$TEST_KEY_BASE-bdi
 run_pass "$TEST_KEY" fcm bdi
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+if $SVN_VERSION_IS_16; then
+    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Index: added_file
 ===================================================================
 --- added_file	(.../$ROOT_URL/trunk)	(revision 0)
@@ -241,30 +336,123 @@ Index: lib/python/info/poems.py
 -print "\n",  __doc__
 +prINt "\n",  __doc__
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+else
+    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+Index: module/hello_constants_dummy.inc
+===================================================================
+--- module/hello_constants_dummy.inc	($ROOT_URL/trunk)	(revision 1)
++++ module/hello_constants_dummy.inc	(working copy)
+@@ -1 +0,0 @@
+-INCLUDE 'hello_constants.inc'
+Index: module/hello_constants.inc
+===================================================================
+--- module/hello_constants.inc	($ROOT_URL/trunk)	(revision 1)
++++ module/hello_constants.inc	(working copy)
+@@ -1 +0,0 @@
+-CHARACTER (LEN=80), PARAMETER :: hello_string = 'Hello Earth!'
+Index: module/hello_constants.f90
+===================================================================
+--- module/hello_constants.f90	($ROOT_URL/trunk)	(revision 1)
++++ module/hello_constants.f90	(working copy)
+@@ -1,5 +0,0 @@
+-MODULE Hello_Constants
+-
+-INCLUDE 'hello_constants_dummy.inc'
+-
+-END MODULE Hello_Constants
+Index: lib/python/info/poems.py
+===================================================================
+--- lib/python/info/poems.py	($ROOT_URL/trunk)	(revision 1)
++++ lib/python/info/poems.py	(working copy)
+@@ -1,24 +1,23 @@
+-#!/usr/bin/env python
+-# -*- coding: utf-8 -*-
+ """The Python, by Hilaire Belloc
+ 
+ A Python I should not advise,--
+-It needs a doctor for its eyes,
++It needs a doctor FOR its eyes,
+ And has the measles yearly.
+-However, if you feel inclined
+-To get one (to improve your mind,
++However, if you feel INclINed
++To get one (
++to improve your mINd,
+ And not from fashion merely),
+ Allow no music near its cage;
+-And when it flies into a rage
++And when it flies INto a rage
+ Chastise it, most severely.
+-I had an aunt in Yucatan
++I had an aunt IN Yucatan
+ Who bought a Python from a man
+-And kept it for a pet.
++And kept it FOR a pet.
+ She died, because she never knew
+ These simple little rules and few;--
+-The Snake is living yet.
++The Snake is livINg yet.
+ """
+ 
+ import this
+ 
+-print "\n",  __doc__
++prINt "\n",  __doc__
+Index: added_directory/hello_constants.f90
+===================================================================
+--- added_directory/hello_constants.f90	($ROOT_URL/trunk)	(revision 0)
++++ added_directory/hello_constants.f90	(revision 6)
+@@ -0,0 +1,5 @@
++MODULE Hello_Constants
++
++INCLUDE 'hello_constants_dummy.INc'
++
++END MODULE Hello_Constants
+Index: added_directory/hello_constants.inc
+===================================================================
+--- added_directory/hello_constants.inc	($ROOT_URL/trunk)	(revision 0)
++++ added_directory/hello_constants.inc	(revision 6)
+@@ -0,0 +1,2 @@
++CHARACTER (
++LEN=80), PARAMETER :: hello_strINg = 'Hello Earth!!'
+Index: added_directory/hello_constants_dummy.inc
+===================================================================
+--- added_directory/hello_constants_dummy.inc	($ROOT_URL/trunk)	(revision 0)
++++ added_directory/hello_constants_dummy.inc	(revision 6)
+@@ -0,0 +1 @@
++INCLUDE 'hello_constants.INc'
+Index: added_file
+===================================================================
+--- added_file	($ROOT_URL/trunk)	(revision 0)
++++ added_file	(revision 6)
+@@ -0,0 +1 @@
++INCLUDE 'hello_constants.INc'
+__OUT__
+fi
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm branch-diff --wiki
 TEST_KEY=$TEST_KEY_BASE-wiki
 run_pass "$TEST_KEY" fcm branch-diff --wiki
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 diff:/trunk@1///branches/dev/Share/branch_test@6
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm bdi --wiki
 TEST_KEY=$TEST_KEY_BASE-bdi-wiki
 run_pass "$TEST_KEY" fcm bdi --wiki
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 diff:/trunk@1///branches/dev/Share/branch_test@6
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm bdi on the trunk
 svn switch $ROOT_URL/trunk
 TEST_KEY=$TEST_KEY_BASE-bdi-trunk
 run_fail "$TEST_KEY" fcm bdi
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" </dev/null
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" <<__ERR__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" <<__ERR__
 [FAIL] $ROOT_URL/trunk@6: not a valid URL of a standard FCM branch.
 
 __ERR__
@@ -276,7 +464,8 @@ echo "foo" > added_directory/foo$TEST_KEY
 svn add added_directory/foo$TEST_KEY
 echo "bar" > added_directory/bar$TEST_KEY
 run_pass "$TEST_KEY" fcm bdi
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+if $SVN_VERSION_IS_16; then
+    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Index: added_file
 ===================================================================
 --- added_file	(.../$ROOT_URL/trunk)	(revision 0)
@@ -373,6 +562,105 @@ Index: lib/python/info/poems.py
 -print "\n",  __doc__
 +prINt "\n",  __doc__
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+else
+    file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+Index: module/hello_constants_dummy.inc
+===================================================================
+--- module/hello_constants_dummy.inc	($ROOT_URL/trunk)	(revision 1)
++++ module/hello_constants_dummy.inc	(working copy)
+@@ -1 +0,0 @@
+-INCLUDE 'hello_constants.inc'
+Index: module/hello_constants.inc
+===================================================================
+--- module/hello_constants.inc	($ROOT_URL/trunk)	(revision 1)
++++ module/hello_constants.inc	(working copy)
+@@ -1 +0,0 @@
+-CHARACTER (LEN=80), PARAMETER :: hello_string = 'Hello Earth!'
+Index: module/hello_constants.f90
+===================================================================
+--- module/hello_constants.f90	($ROOT_URL/trunk)	(revision 1)
++++ module/hello_constants.f90	(working copy)
+@@ -1,5 +0,0 @@
+-MODULE Hello_Constants
+-
+-INCLUDE 'hello_constants_dummy.inc'
+-
+-END MODULE Hello_Constants
+Index: lib/python/info/poems.py
+===================================================================
+--- lib/python/info/poems.py	($ROOT_URL/trunk)	(revision 1)
++++ lib/python/info/poems.py	(working copy)
+@@ -1,24 +1,23 @@
+-#!/usr/bin/env python
+-# -*- coding: utf-8 -*-
+ """The Python, by Hilaire Belloc
+ 
+ A Python I should not advise,--
+-It needs a doctor for its eyes,
++It needs a doctor FOR its eyes,
+ And has the measles yearly.
+-However, if you feel inclined
+-To get one (to improve your mind,
++However, if you feel INclINed
++To get one (
++to improve your mINd,
+ And not from fashion merely),
+ Allow no music near its cage;
+-And when it flies into a rage
++And when it flies INto a rage
+ Chastise it, most severely.
+-I had an aunt in Yucatan
++I had an aunt IN Yucatan
+ Who bought a Python from a man
+-And kept it for a pet.
++And kept it FOR a pet.
+ She died, because she never knew
+ These simple little rules and few;--
+-The Snake is living yet.
++The Snake is livINg yet.
+ """
+ 
+ import this
+ 
+-print "\n",  __doc__
++prINt "\n",  __doc__
+Index: added_directory/foo00-simple-bdi-wc-changes
+===================================================================
+--- added_directory/foo00-simple-bdi-wc-changes	($ROOT_URL/trunk)	(revision 0)
++++ added_directory/foo00-simple-bdi-wc-changes	(working copy)
+@@ -0,0 +1 @@
++foo
+Index: added_directory/hello_constants.f90
+===================================================================
+--- added_directory/hello_constants.f90	($ROOT_URL/trunk)	(revision 0)
++++ added_directory/hello_constants.f90	(revision 6)
+@@ -0,0 +1,5 @@
++MODULE Hello_Constants
++
++INCLUDE 'hello_constants_dummy.INc'
++
++END MODULE Hello_Constants
+Index: added_directory/hello_constants.inc
+===================================================================
+--- added_directory/hello_constants.inc	($ROOT_URL/trunk)	(revision 0)
++++ added_directory/hello_constants.inc	(revision 6)
+@@ -0,0 +1,2 @@
++CHARACTER (
++LEN=80), PARAMETER :: hello_strINg = 'Hello Earth!!'
+Index: added_directory/hello_constants_dummy.inc
+===================================================================
+--- added_directory/hello_constants_dummy.inc	($ROOT_URL/trunk)	(revision 0)
++++ added_directory/hello_constants_dummy.inc	(revision 6)
+@@ -0,0 +1 @@
++INCLUDE 'hello_constants.INc'
+Index: added_file
+===================================================================
+--- added_file	($ROOT_URL/trunk)	(revision 0)
++++ added_file	(revision 6)
+@@ -0,0 +1 @@
++INCLUDE 'hello_constants.INc'
+__OUT__
+fi
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 teardown
 #-------------------------------------------------------------------------------

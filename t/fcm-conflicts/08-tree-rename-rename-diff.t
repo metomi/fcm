@@ -46,7 +46,7 @@ echo "Local contents (1)" >>pro/hello.pro.renamed-local
 svn commit -q -m "Modified conflict file (local)"
 svn update -q
 svn switch -q $ROOT_URL/branches/dev/Share/ren_ren
-echo "Merge contents (1)" >> pro/hello.pro
+echo "Merge contents (1)" >>pro/hello.pro
 svn commit -q -m "Modified conflict file  (merge)"
 svn update -q
 svn rename -q pro/hello.pro pro/hello.pro.renamed-merge
@@ -57,7 +57,7 @@ fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ren_ren
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 n
 __IN__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] pro/hello.pro: in tree conflict.
 Locally: renamed to pro/hello.pro.renamed-local.
 Externally: renamed to pro/hello.pro.renamed-merge.
@@ -75,27 +75,27 @@ Enter "y" or "n" (or just press <return> for "n") diff3 pro/hello.pro.renamed-me
 D         pro/hello.pro.renamed-local
 Resolved conflicted state of 'pro/hello.pro'
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: rename, rename, diff rename, discard local (status)
 TEST_KEY=$TEST_KEY_BASE-discard-status
 run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 D       pro/hello.pro.renamed-local
 A  +    pro/hello.pro.renamed-merge
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: rename, rename, diff rename, discard local (cat)
 TEST_KEY=$TEST_KEY_BASE-discard-cat
 run_pass "$TEST_KEY" cat pro/hello.pro.renamed-merge
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 PRO HELLO
 END
 Merge contents (1)
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 cd $TEST_DIR
 rm -rf $TEST_DIR/wc
@@ -109,7 +109,7 @@ fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ren_ren
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 y
 __IN__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] pro/hello.pro: in tree conflict.
 Locally: renamed to pro/hello.pro.renamed-local.
 Externally: renamed to pro/hello.pro.renamed-merge.
@@ -127,23 +127,23 @@ Enter "y" or "n" (or just press <return> for "n") diff3 pro/hello.pro.renamed-lo
 Reverted 'pro/hello.pro.renamed-merge'
 Resolved conflicted state of 'pro/hello.pro'
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: rename, rename, diff rename, keep local (status)
 TEST_KEY=$TEST_KEY_BASE-keep-status
 run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: rename, rename, diff rename, keep local (cat)
 TEST_KEY=$TEST_KEY_BASE-keep-cat
 run_pass "$TEST_KEY" cat pro/hello.pro.renamed-local
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 PRO HELLO
 END
 Local contents (1)
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 teardown

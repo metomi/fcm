@@ -42,7 +42,6 @@ my %S = (
     'TC_ACTION'         => 'accept the %s %s',
     'TC_ACTION_ADD'     => 'keep the %s file filename',
     'TC_ACTION_EDIT'    => 'keep the file',
-    'TC_ACTION_DELETE'  => 'delete the file',
     'TC_FROM_LOC'       => 'local',
     'TC_FROM_INC'       => 'external',
     'TC_MERGE'          => "You can then merge in changes.\n",
@@ -116,7 +115,6 @@ sub _q_tree_conflict {
                 my $from = $S{'TC_FROM_' . uc($location_key)};
                 my $key = $opt_of{$location_key}->{'key'};
                   $key eq 'add'     ? sprintf($S{'TC_ACTION_ADD'}, $from)
-                : $key eq 'delete'  ? $S{'TC_ACTION_DELETE'}
                 : $key eq 'edit'    ? $S{'TC_ACTION_EDIT'}
                 :                     sprintf($S{'TC_ACTION'}, $from, $key)
                 ;

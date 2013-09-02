@@ -50,7 +50,7 @@ svn switch $ROOT_URL/branches/dev/Share/branch_test
 TEST_KEY=$TEST_KEY_BASE-info
 run_pass "$TEST_KEY" fcm branch-info
 sed -i "/ Date/d;" $TEST_DIR/$TEST_KEY.out
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 URL: $ROOT_URL/branches/dev/Share/branch_test
 Repository Root: $REPOS_URL
 Revision: 7
@@ -63,13 +63,13 @@ Branch Create Rev: 5
 Branch Parent: $ROOT_URL/trunk@1
 Merges Avail From Parent: 7
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm branch-info -a
 TEST_KEY=$TEST_KEY_BASE-a
 run_pass "$TEST_KEY" fcm branch-info -a
 sed -i "/ Date/d;" $TEST_DIR/$TEST_KEY.out
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 URL: $ROOT_URL/branches/dev/Share/branch_test
 Repository Root: $REPOS_URL
 Revision: 7
@@ -91,13 +91,13 @@ Current children:
   $ROOT_URL/branches/dev/Share/my_branch_test
   Child Create Rev: 6
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm branch-info --show-children
 TEST_KEY=$TEST_KEY_BASE-show-children
 run_pass "$TEST_KEY" fcm branch-info --show-children
 sed -i "/ Date/d;" $TEST_DIR/$TEST_KEY.out
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 URL: $ROOT_URL/branches/dev/Share/branch_test
 Repository Root: $REPOS_URL
 Revision: 7
@@ -116,7 +116,7 @@ Current children:
   $ROOT_URL/branches/dev/Share/my_branch_test
   Child Create Rev: 6
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm branch-info --show-siblings
 TEST_KEY=$TEST_KEY_BASE-show-siblings
@@ -137,7 +137,7 @@ svn commit -q -m "Add sibling commit"
 svn switch $ROOT_URL/branches/dev/Share/branch_test
 run_pass "$TEST_KEY" fcm branch-info --show-siblings
 sed -i "/ Date/d;" $TEST_DIR/$TEST_KEY.out
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 URL: $ROOT_URL/branches/dev/Share/branch_test
 Repository Root: $REPOS_URL
 Revision: 9
@@ -154,6 +154,6 @@ Merges Avail Into Parent: 9
 Searching for siblings ... 1 sibling found.
 No merges with existing siblings.
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 teardown
 #-------------------------------------------------------------------------------

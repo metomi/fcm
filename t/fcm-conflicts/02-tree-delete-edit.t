@@ -52,32 +52,32 @@ fcm merge --non-interactive $ROOT_URL/branches/dev/Share/del_ed
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 n
 __IN__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] pro/hello.pro: in tree conflict.
 Locally: deleted.
 Externally: edited.
-Answer (y) to delete the file.
+Answer (y) to accept the local delete.
 Answer (n) to keep the file.
 Keep the local version?
 Enter "y" or "n" (or just press <return> for "n") A         pro/hello.pro
 Resolved conflicted state of 'pro/hello.pro'
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: delete, edit, discard local (status)
 TEST_KEY=$TEST_KEY_BASE-discard-status
 run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 A  +    pro/hello.pro
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: delete, edit, discard local (info)
 TEST_KEY=$TEST_KEY_BASE-discard-info
 run_pass "$TEST_KEY" svn info pro/hello.pro
-sed -i "/Date:\|Updated:\|UUID:/d" $TEST_DIR/$TEST_KEY.out
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+sed -i "/Date:\|Updated:\|UUID:\|Checksum\|Relative URL:\|Working Copy Root Path:/d" $TEST_DIR/"$TEST_KEY.out"
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Path: pro/hello.pro
 Name: hello.pro
 URL: $ROOT_URL/branches/dev/Share/ctrl/pro/hello.pro
@@ -89,20 +89,19 @@ Copied From URL: $ROOT_URL/branches/dev/Share/del_ed/pro/hello.pro
 Copied From Rev: 7
 Last Changed Author: $LOGNAME
 Last Changed Rev: 7
-Checksum: af5a9590b95de9b3cc03dbdbe6365e56
 
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: delete, edit, discard local (cat)
 TEST_KEY=$TEST_KEY_BASE-discard-cat
 run_pass "$TEST_KEY" cat pro/hello.pro
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 PRO HELLO
 END
 Merge contents (1)
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 cd $TEST_DIR
 rm -rf $TEST_DIR/wc
@@ -116,23 +115,23 @@ fcm merge --non-interactive $ROOT_URL/branches/dev/Share/del_ed
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 y
 __IN__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] pro/hello.pro: in tree conflict.
 Locally: deleted.
 Externally: edited.
-Answer (y) to delete the file.
+Answer (y) to accept the local delete.
 Answer (n) to keep the file.
 Keep the local version?
 Enter "y" or "n" (or just press <return> for "n") Resolved conflicted state of 'pro/hello.pro'
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: delete, edit, keep local (status)
 TEST_KEY=$TEST_KEY_BASE-keep-status
 run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 teardown
 #-------------------------------------------------------------------------------

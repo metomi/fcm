@@ -150,6 +150,10 @@ function file_grep() {
 
 FCM_HOME=${FCM_HOME:-$(cd $(dirname $BASH_SOURCE)/../../.. && pwd)}
 PATH=$FCM_HOME/bin:$PATH
+SVN_VERSION_IS_16=false
+if [[ $(svn --version | head -1 | grep "^svn, version 1.6") ]]; then
+    SVN_VERSION_IS_16=true
+fi
 
 TEST_KEY_BASE=$(basename $0 .t)
 TEST_SOURCE_DIR=$(cd $(dirname $0) && pwd)

@@ -184,6 +184,10 @@ sub _cm_resolve_tree_conflict {
     # Get basic information about the tree conflict, and the filename.
     my %info = %{$attrib_ref->{svn}->get_info($path)->[0]};
 
+    # Skip non-existent or unhandled tree conflicts.
+    if (!exists($info{'tree-conflict:operation'})) {
+        return
+    }
     if ($info{'tree-conflict:operation'} ne 'merge') {
         $UTIL->event(FCM::Context::Event->CM_CONFLICT_TREE_SKIP, $path);
         return;
@@ -199,8 +203,8 @@ sub _cm_resolve_tree_conflict {
             'type'     => $info{'tree-conflict:operation'},
         },
     );
-
     my $tree_filename = $info{'path'};
+
     my %wc_info = %{$attrib_ref->{svn}->get_info()->[0]};
 
     my $repos_root = $wc_info{'repository:root'};
@@ -251,7 +255,7 @@ sub _cm_resolve_tree_conflict {
 
     # Check for local renaming of the tree conflict file
     my $local_renamed_file = '';
-    if (grep {$tree_reason eq $_} qw{delete missing}) {
+    if ($tree_reason eq 'delete') {
         $local_renamed_file = _cm_tree_conflict_get_local_rename(
             $attrib_ref,
             $wc_branch,

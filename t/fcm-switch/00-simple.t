@@ -40,7 +40,7 @@ TEST_KEY=$TEST_KEY_BASE-trunk
 run_pass "$TEST_KEY" fcm switch trunk <<__IN__
 y
 __IN__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 switch: status of "$TEST_DIR/wc":
 ?       unversioned_file
 switch: continue?
@@ -55,7 +55,7 @@ U    lib/python/info/__init__.py
 U    lib/python/info/poems.py
 Updated to revision 9.
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm switch merge1 branch
 rm unversioned_file
@@ -63,7 +63,7 @@ TEST_KEY=$TEST_KEY_BASE-branch-1
 run_pass "$TEST_KEY" fcm switch branches/dev/Share/merge1 <<__IN__
 y
 __IN__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 U    subroutine/hello_sub_dummy.h
 A    added_file
 A    added_directory
@@ -78,12 +78,12 @@ U    lib/python/info/__init__.py
 U    lib/python/info/poems.py
 Updated to revision 9.
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm switch merge2 branch
 TEST_KEY=$TEST_KEY_BASE-branch-2
 run_pass "$TEST_KEY" fcm switch --non-interactive dev/Share/merge2
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 D    added_file
 D    added_directory
  U   subroutine/hello_sub.h
@@ -96,5 +96,5 @@ U    lib/python/info/poems.py
 A    renamed_added_file
 Updated to revision 9.
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------

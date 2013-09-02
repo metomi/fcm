@@ -22,7 +22,7 @@
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
-tests 36
+tests 33
 #-------------------------------------------------------------------------------
 setup
 init_repos ${TEST_PROJECT:-}
@@ -47,7 +47,7 @@ echo "Local contents (1)" >>pro/hello.pro.renamed
 svn commit -q -m "Modified conflict file (local)"
 svn update -q
 svn switch -q $ROOT_URL/branches/dev/Share/ren_ren
-echo "Merge contents (1)" >> pro/hello.pro
+echo "Merge contents (1)" >>pro/hello.pro
 svn commit -q -m "Modified conflict file  (merge)"
 svn update -q
 svn rename -q pro/hello.pro pro/hello.pro.renamed
@@ -59,7 +59,8 @@ run_pass "$TEST_KEY" fcm conflicts <<__IN__
 n
 n
 __IN__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+sed -i -n "1,8p" $TEST_DIR/"$TEST_KEY.out"
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] pro/hello.pro: in tree conflict.
 Locally: renamed to pro/hello.pro.renamed.
 Externally: deleted.
@@ -68,34 +69,17 @@ Answer (n) to accept the external delete.
 Keep the local version?
 Enter "y" or "n" (or just press <return> for "n") D         pro/hello.pro.renamed
 Resolved conflicted state of 'pro/hello.pro'
-[info] pro/hello.pro.renamed: in tree conflict.
-Locally: added.
-Externally: added.
-Answer (y) to keep the local file filename.
-Answer (n) to keep the external file filename.
-Keep the local version?
-Enter "y" or "n" (or just press <return> for "n") Resolved conflicted state of 'pro/hello.pro.renamed'
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: rename, rename, diff rename, discard local, discard local (status)
 TEST_KEY=$TEST_KEY_BASE-discard-discard-status
 run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 D       pro/hello.pro.renamed
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
-#-------------------------------------------------------------------------------
-# Tests fcm conflicts: rename, rename, diff rename, discard local, discard local (cat)
-TEST_KEY=$TEST_KEY_BASE-discard-discard-cat
-run_pass "$TEST_KEY" cat pro/hello.pro.renamed
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-PRO HELLO
-END
-Merge contents (1)
-__OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 cd $TEST_DIR
 rm -rf $TEST_DIR/wc
@@ -110,7 +94,8 @@ run_pass "$TEST_KEY" fcm conflicts <<__IN__
 n
 y
 __IN__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+sed -i -n "1,8p" $TEST_DIR/"$TEST_KEY.out"
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] pro/hello.pro: in tree conflict.
 Locally: renamed to pro/hello.pro.renamed.
 Externally: deleted.
@@ -119,30 +104,23 @@ Answer (n) to accept the external delete.
 Keep the local version?
 Enter "y" or "n" (or just press <return> for "n") D         pro/hello.pro.renamed
 Resolved conflicted state of 'pro/hello.pro'
-[info] pro/hello.pro.renamed: in tree conflict.
-Locally: added.
-Externally: added.
-Answer (y) to keep the local file filename.
-Answer (n) to keep the external file filename.
-Keep the local version?
-Enter "y" or "n" (or just press <return> for "n") Resolved conflicted state of 'pro/hello.pro.renamed'
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: rename, rename, diff rename, discard local, keep local (status)
 TEST_KEY=$TEST_KEY_BASE-discard-keep-status
 run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 D       pro/hello.pro.renamed
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: rename, rename, diff rename, discard local, keep local (cat)
 TEST_KEY=$TEST_KEY_BASE-discard-keep-cat
 run_fail "$TEST_KEY" cat pro/hello.pro.renamed
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" </dev/null
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" <<__ERR__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" <<__ERR__
 cat: pro/hello.pro.renamed: No such file or directory
 __ERR__
 #-------------------------------------------------------------------------------
@@ -159,7 +137,7 @@ run_pass "$TEST_KEY" fcm conflicts <<__IN__
 y
 n
 __IN__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] pro/hello.pro: in tree conflict.
 Locally: renamed to pro/hello.pro.renamed.
 Externally: deleted.
@@ -175,26 +153,26 @@ Answer (n) to keep the external file filename.
 Keep the local version?
 Enter "y" or "n" (or just press <return> for "n") Resolved conflicted state of 'pro/hello.pro.renamed'
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: rename, rename, diff rename, keep local (status)
 TEST_KEY=$TEST_KEY_BASE-keep-discard-status
 run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 M       pro/hello.pro.renamed
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: rename, rename, diff rename, keep local (cat)
 TEST_KEY=$TEST_KEY_BASE-keep-discard-cat
 run_pass "$TEST_KEY" cat pro/hello.pro.renamed
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 PRO HELLO
 END
 Merge contents (1)
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 cd $TEST_DIR
 rm -rf $TEST_DIR/wc
@@ -209,7 +187,7 @@ run_pass "$TEST_KEY" fcm conflicts <<__IN__
 y
 y
 __IN__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] pro/hello.pro: in tree conflict.
 Locally: renamed to pro/hello.pro.renamed.
 Externally: deleted.
@@ -225,23 +203,23 @@ Answer (n) to keep the external file filename.
 Keep the local version?
 Enter "y" or "n" (or just press <return> for "n") Resolved conflicted state of 'pro/hello.pro.renamed'
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: rename, rename, diff rename, keep local, keep local (status)
 TEST_KEY=$TEST_KEY_BASE-keep-keep-status
 run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: rename, rename, diff rename, keep local, keep local (cat)
 TEST_KEY=$TEST_KEY_BASE-keep-keep-cat
 run_pass "$TEST_KEY" cat pro/hello.pro.renamed
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_xxdiff "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 PRO HELLO
 END
 Local contents (1)
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+file_xxdiff "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 teardown
