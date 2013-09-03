@@ -42,14 +42,16 @@ FILE_DIR=$(dirname $FILE)
 svn copy -q $FILE added_file
 svn copy -q $FILE_DIR added_directory
 svn delete --force -q $FILE_DIR
-svn commit -m "make branch diff"
-svn switch $ROOT_URL/trunk
+svn commit -q -m "make branch diff"
+svn switch -q $ROOT_URL/trunk
 TMPFILE=$(mktemp)
 for FILE in $FILE_LIST; do
-    tac $FILE > $TMPFILE && mv $TMPFILE $FILE
+    if [[ -e $FILE ]]; then
+        tac $FILE > $TMPFILE && mv $TMPFILE $FILE
+    fi
 done
-svn commit -m "make trunk diff"
-svn switch $ROOT_URL/branches/dev/Share/branch_test
+svn commit -q -m "make trunk diff"
+svn switch -q $ROOT_URL/branches/dev/Share/branch_test
 #-------------------------------------------------------------------------------
 # Tests fcm branch-diff
 TEST_KEY=$TEST_KEY_BASE-fcm-branch-diff
@@ -448,7 +450,7 @@ __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm bdi on the trunk
-svn switch $ROOT_URL/trunk
+svn switch -q $ROOT_URL/trunk
 TEST_KEY=$TEST_KEY_BASE-bdi-trunk
 run_fail "$TEST_KEY" fcm bdi
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" </dev/null
@@ -458,10 +460,10 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" <<__ERR__
 __ERR__
 #-------------------------------------------------------------------------------
 # Tests fcm bdi with working copy changes
-svn switch $ROOT_URL/branches/dev/Share/branch_test
+svn switch -q $ROOT_URL/branches/dev/Share/branch_test
 TEST_KEY=$TEST_KEY_BASE-bdi-wc-changes
 echo "foo" > added_directory/foo$TEST_KEY
-svn add added_directory/foo$TEST_KEY
+svn add -q added_directory/foo$TEST_KEY
 echo "bar" > added_directory/bar$TEST_KEY
 run_pass "$TEST_KEY" fcm bdi
 if $SVN_VERSION_IS_16; then

@@ -52,7 +52,7 @@ echo "Merge contents (2)" >>pro/hello.pro.renamed
 svn commit -q -m "Modified the merge copy of renamed conflict file"
 svn update -q
 svn switch -q $ROOT_URL/branches/dev/Share/ctrl
-fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ed_ren
+fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ed_ren >/dev/null
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 n
 __IN__

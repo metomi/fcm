@@ -123,7 +123,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm add -c with no arguments
 TEST_KEY=$TEST_KEY_BASE-fcm-add-c-no-args
-fcm revert -R $TEST_DIR/wc/
+fcm revert -q -R $TEST_DIR/wc/
 run_pass "$TEST_KEY" fcm add -c <<'__EOF__'
 y
 y

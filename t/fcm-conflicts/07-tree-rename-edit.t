@@ -50,7 +50,7 @@ echo "Merge contents (1)" >>pro/hello.pro
 svn commit -q -m "Modified conflict file  (merge)"
 svn update -q
 svn switch -q $ROOT_URL/branches/dev/Share/ctrl
-fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ren_ed
+fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ren_ed >/dev/null
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 n
 __IN__

@@ -54,7 +54,7 @@ svn rename -q pro/hello.pro pro/hello.pro.renamed
 svn commit -q -m "Renamed conflict file (merge)"
 svn update -q
 svn switch -q $ROOT_URL/branches/dev/Share/ctrl
-fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ren_ren
+fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ren_ren >/dev/null
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 n
 n

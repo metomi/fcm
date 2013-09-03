@@ -48,7 +48,7 @@ svn delete -q pro/hello.pro
 svn commit -q -m "Deleted merge copy of conflict file"
 svn update -q
 svn switch -q $ROOT_URL/branches/dev/Share/ctrl
-fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ed_del 
+fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ed_del >/dev/null
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 n
 __IN__

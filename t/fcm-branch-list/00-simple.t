@@ -35,7 +35,7 @@ init_branch_wc branch_test $REPOS_URL
 cd $TEST_DIR/wc
 fcm branch-create --rev-flag=NONE \
                   --non-interactive \
-                  --branch-of-branch my_branch_test
+                  --branch-of-branch my_branch_test >/dev/null
 ROOT_PATH=
 if [[ -n ${TEST_PROJECT:-} ]]; then
     ROOT_PATH=/$TEST_PROJECT
@@ -52,7 +52,7 @@ for FILE in $FILE_LIST; do
     sed -i "s/!/!!/g; s/q/\nq/g; s/[(]/(\n/g" $FILE
 done
 svn commit -q -m "add branch commit"
-svn update
+svn update -q
 svn switch -q $ROOT_URL/branches/dev/Share/branch_test
 #-------------------------------------------------------------------------------
 # Tests fcm branch-list

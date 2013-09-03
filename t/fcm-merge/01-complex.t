@@ -218,7 +218,7 @@ svn update -q
 cd $TEST_DIR
 rm -rf $TEST_DIR/wc
 mkdir $TEST_DIR/wc
-svn checkout $ROOT_URL/trunk $TEST_DIR/wc
+svn checkout -q $ROOT_URL/trunk $TEST_DIR/wc
 cd $TEST_DIR/wc
 run_pass "$TEST_KEY" fcm merge --non-interactive branches/dev/Share/merge1
 if $SVN_VERSION_IS_16; then
@@ -743,7 +743,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 echo "# trunk modification" >>$MOD_FILE
 svn commit -q -m "Made trunk change - a simple edit of $MOD_FILE"
 svn update -q
-svn switch $ROOT_URL/branches/dev/Share/merge1
+svn switch -q $ROOT_URL/branches/dev/Share/merge1
 TEST_KEY=$TEST_KEY_BASE-trunk-into-branch-2
 echo "# added another line for simple repeat testing" >>$BRANCH_MOD_FILE
 svn commit -q -m "Made branch change for merge repeat test"
@@ -913,7 +913,7 @@ svn delete -q $BRANCH_MOD_FILE
 svn copy -q $MOD_FILE $MOD_FILE.add
 svn commit -q -m "Made branch change - deleted $BRANCH_MOD_FILE, copied $MOD_FILE"
 svn update -q
-svn switch $ROOT_URL/trunk
+svn switch -q $ROOT_URL/trunk
 TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-3
 run_pass "$TEST_KEY" fcm merge --non-interactive branches/dev/Share/merge1
 if $SVN_VERSION_IS_16; then
@@ -1131,7 +1131,7 @@ TEST_KEY=$TEST_KEY_BASE-branch-into-branch-1
 cd $TEST_DIR
 rm -rf $TEST_DIR/wc
 mkdir $TEST_DIR/wc
-svn checkout $ROOT_URL/branches/dev/Share/merge2 $TEST_DIR/wc
+svn checkout -q $ROOT_URL/branches/dev/Share/merge2 $TEST_DIR/wc
 cd $TEST_DIR/wc
 BRANCH_2_MOD_FILE=$(find . -type f | sed "/\.svn/d" | sort | head -3| tail -1)
 echo "Second branch change" >>$BRANCH_2_MOD_FILE

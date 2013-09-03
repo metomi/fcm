@@ -48,7 +48,7 @@ svn add -q new_file
 svn commit -q -m "Added duplicated-name copy of conflict file"
 svn update -q
 svn switch -q $ROOT_URL/branches/dev/Share/ctrl
-fcm merge --non-interactive $ROOT_URL/branches/dev/Share/add_add
+fcm merge --non-interactive $ROOT_URL/branches/dev/Share/add_add >/dev/null
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 n
 __IN__
