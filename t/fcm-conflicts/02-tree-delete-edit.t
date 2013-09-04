@@ -48,7 +48,7 @@ echo "Merge contents (1)" >>pro/hello.pro
 svn commit -q -m "Modified merge copy of conflict file"
 svn update -q
 svn switch -q $ROOT_URL/branches/dev/Share/ctrl
-fcm merge --non-interactive $ROOT_URL/branches/dev/Share/del_ed 
+fcm merge --non-interactive $ROOT_URL/branches/dev/Share/del_ed >/dev/null
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 n
 __IN__
@@ -56,7 +56,7 @@ file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] pro/hello.pro: in tree conflict.
 Locally: deleted.
 Externally: edited.
-Answer (y) to delete the file.
+Answer (y) to accept the local delete.
 Answer (n) to keep the file.
 Keep the local version?
 Enter "y" or "n" (or just press <return> for "n") A         pro/hello.pro
@@ -76,7 +76,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 # Tests fcm conflicts: delete, edit, discard local (info)
 TEST_KEY=$TEST_KEY_BASE-discard-info
 run_pass "$TEST_KEY" svn info pro/hello.pro
-sed -i "/Date:\|Updated:\|UUID:/d" $TEST_DIR/$TEST_KEY.out
+sed -i "/Date:\|Updated:\|UUID:\|Checksum\|Relative URL:\|Working Copy Root Path:/d" $TEST_DIR/"$TEST_KEY.out"
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Path: pro/hello.pro
 Name: hello.pro
@@ -89,7 +89,6 @@ Copied From URL: $ROOT_URL/branches/dev/Share/del_ed/pro/hello.pro
 Copied From Rev: 7
 Last Changed Author: $LOGNAME
 Last Changed Rev: 7
-Checksum: af5a9590b95de9b3cc03dbdbe6365e56
 
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
@@ -120,7 +119,7 @@ file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] pro/hello.pro: in tree conflict.
 Locally: deleted.
 Externally: edited.
-Answer (y) to delete the file.
+Answer (y) to accept the local delete.
 Answer (n) to keep the file.
 Keep the local version?
 Enter "y" or "n" (or just press <return> for "n") Resolved conflicted state of 'pro/hello.pro'

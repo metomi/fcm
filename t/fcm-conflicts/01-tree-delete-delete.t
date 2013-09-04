@@ -45,7 +45,7 @@ svn delete -q pro/hello.pro
 svn commit -q -m "Deleted conflict file (merge)"
 svn update -q
 svn switch -q $ROOT_URL/branches/dev/Share/ctrl
-fcm merge --non-interactive $ROOT_URL/branches/dev/Share/del_del
+fcm merge --non-interactive $ROOT_URL/branches/dev/Share/del_del >/dev/null
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 n
 __IN__
@@ -98,4 +98,5 @@ file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+teardown
 #-------------------------------------------------------------------------------

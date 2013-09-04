@@ -42,7 +42,6 @@ my %S = (
     'TC_ACTION'         => 'accept the %s %s',
     'TC_ACTION_ADD'     => 'keep the %s file filename',
     'TC_ACTION_EDIT'    => 'keep the file',
-    'TC_ACTION_MISSING' => 'delete the file',
     'TC_FROM_LOC'       => 'local',
     'TC_FROM_INC'       => 'external',
     'TC_MERGE'          => "You can then merge in changes.\n",
@@ -50,7 +49,6 @@ my %S = (
     'TC_ST_DELETE'      => 'deleted',
     'TC_ST_EDIT'        => 'edited',
     'TC_ST_RENAME'      => 'renamed to %s',
-    'TC_ST_MISSING'     => 'deleted',
 );
 
 # Configuration for questions
@@ -68,7 +66,7 @@ my %Q_CONF = (
     # M => missing,
     # R => rename
     (   map {('TC_' . $_ => {'format' => \&_q_tree_conflict, 'type' => $TYPE_YN})}
-            qw(LAIA LDID LDIR LEID LEIR LMIE LRID LRIE LRIR)
+            qw(LAIA LDID LDIE LDIR LEID LEIR LRID LRIE LRIR)
     ),
 );
 
@@ -118,7 +116,6 @@ sub _q_tree_conflict {
                 my $key = $opt_of{$location_key}->{'key'};
                   $key eq 'add'     ? sprintf($S{'TC_ACTION_ADD'}, $from)
                 : $key eq 'edit'    ? $S{'TC_ACTION_EDIT'}
-                : $key eq 'missing' ? $S{'TC_ACTION_MISSING'}
                 :                     sprintf($S{'TC_ACTION'}, $from, $key)
                 ;
             }

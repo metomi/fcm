@@ -46,11 +46,11 @@ echo "Local contents (1)" >>pro/hello.pro.renamed
 svn commit -q -m "Modified conflict file (local)"
 svn update -q
 svn switch -q $ROOT_URL/branches/dev/Share/ren_ed
-echo "Merge contents (1)" >> pro/hello.pro
+echo "Merge contents (1)" >>pro/hello.pro
 svn commit -q -m "Modified conflict file  (merge)"
 svn update -q
 svn switch -q $ROOT_URL/branches/dev/Share/ctrl
-fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ren_ed
+fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ren_ed >/dev/null
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 n
 __IN__
@@ -78,6 +78,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 # Tests fcm conflicts: rename, edit, discard local (status)
 TEST_KEY=$TEST_KEY_BASE-discard-status
 run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
+sed -i "/^ \{8\}> moved /d" $TEST_DIR/"$TEST_KEY.out"
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 A  +    pro/hello.pro

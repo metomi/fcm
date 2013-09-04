@@ -115,7 +115,7 @@ function init_merge_branches() {
     svn copy -q module added_directory
     touch module/tree_conflict_file
     svn add -q $file_dir/tree_conflict_file
-    echo "Modified a line" >> $other_file
+    echo "Modified a line" >>$other_file
     svn commit -q -m "Made changes for future merge of this branch"
     svn update -q
     init_branch $OTHER_BRANCH_NAME $REPOS_URL
@@ -127,10 +127,10 @@ function init_merge_branches() {
     svn commit -q -m "Made changes for future merge"
     svn update -q
     svn switch -q $ROOT_URL/trunk
-    echo "trunk change" >> $(find . -type f | sed "/\.svn/d" | sort | head -1)
+    echo "trunk change" >>$(find . -type f | sed "/\.svn/d" | sort | head -1)
     svn commit -q -m "Made trunk change"
     svn update -q
-    echo "another trunk change" >> $(find . -type f | sed "/\.svn/d" | sort | head -1)
+    echo "another trunk change" >>$(find . -type f | sed "/\.svn/d" | sort | head -1)
     svn commit -q -m "Made another trunk change"
     svn update -q
 }
