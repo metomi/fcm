@@ -44,11 +44,11 @@ svn switch -q $ROOT_URL/branches/dev/Share/del_ren
 svn rename -q pro/hello.pro pro/hello.pro.renamed
 svn commit -q -m "Renamed conflict file (merge)"
 svn update -q
-echo "Merge changes (1)" >> pro/hello.pro.renamed
+echo "Merge changes (1)" >>pro/hello.pro.renamed
 svn commit -q -m "Modified conflict file (merge)"
 svn update -q
 svn switch -q $ROOT_URL/branches/dev/Share/ctrl
-fcm merge --non-interactive $ROOT_URL/branches/dev/Share/del_ren
+fcm merge --non-interactive $ROOT_URL/branches/dev/Share/del_ren >/dev/null
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 n
 __IN__

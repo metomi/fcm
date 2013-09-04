@@ -24,7 +24,7 @@ if [[ $? -ne 0 ]]; then
     exit 1
 fi
 #-------------------------------------------------------------------------------
-tests 27
+tests 24
 #-------------------------------------------------------------------------------
 setup
 init_repos ${TEST_PROJECT:-}
@@ -57,14 +57,6 @@ A         added_directory2
 A         added_directory2/added_file2
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
-#-------------------------------------------------------------------------------
-# Tests fcm add invalid path
-TEST_KEY=$TEST_KEY_BASE-fcm-add-err-file
-run_pass "$TEST_KEY" fcm add made_up_file
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" </dev/null
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" <<'__ERR__'
-svn: warning: 'made_up_file' not found
-__ERR__
 cd $TEST_DIR
 teardown
 #-------------------------------------------------------------------------------
@@ -111,54 +103,43 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 # Tests fcm add -c versioned directory
 TEST_KEY=$TEST_KEY_BASE-fcm-add-c-versioned-dir
 run_pass "$TEST_KEY" fcm add -c versioned_directory <<'__EOF__'
-y
-y
+n
 __EOF__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
-?       versioned_directory/unversioned_file_3
-Would you like to run "svn add versioned_directory/unversioned_file_3"?
-Enter "y", "n" or "a" (or just press <return> for "n"): A         versioned_directory/unversioned_file_3
-__OUT__
+file_test "$TEST_KEY.out" "$TEST_KEY.out" -s
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm status after above tests
 TEST_KEY=$TEST_KEY_BASE-fcm-add-c-status
 run_pass "$TEST_KEY" fcm st
+sort $TEST_DIR/"$TEST_KEY.out" -o $TEST_DIR/"$TEST_KEY.out"
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
-A       unversioned_file
-A       versioned_directory
-A       versioned_directory/unversioned_file_3
+?       versioned_directory/unversioned_file_3
 A       unversioned_directory
 A       unversioned_directory/unversioned_file_2
+A       unversioned_file
+A       versioned_directory
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm add -c with no arguments
 TEST_KEY=$TEST_KEY_BASE-fcm-add-c-no-args
-fcm revert -R $TEST_DIR/wc/
+fcm revert -q -R $TEST_DIR/wc/
 run_pass "$TEST_KEY" fcm add -c <<'__EOF__'
 y
 y
-n
+y
+y
 __EOF__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
-?       unversioned_file
-?       versioned_directory
-?       unversioned_directory
-Would you like to run "svn add unversioned_file"?
-Enter "y", "n" or "a" (or just press <return> for "n"): Would you like to run "svn add versioned_directory"?
-Enter "y", "n" or "a" (or just press <return> for "n"): Would you like to run "svn add unversioned_directory"?
-Enter "y", "n" or "a" (or just press <return> for "n"): A         unversioned_file
-A         versioned_directory
-A         versioned_directory/unversioned_file_3
-__OUT__
+file_test "$TEST_KEY.out" "$TEST_KEY.out" -s
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm status after above tests
 TEST_KEY=$TEST_KEY_BASE-fcm-add-c-no-args-status
 run_pass "$TEST_KEY" fcm status
+sort $TEST_DIR/"$TEST_KEY.out" -o $TEST_DIR/"$TEST_KEY.out"
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
-?       unversioned_directory
+A       unversioned_directory
+A       unversioned_directory/unversioned_file_2
 A       unversioned_file
 A       versioned_directory
 A       versioned_directory/unversioned_file_3

@@ -38,18 +38,35 @@ cd $TEST_DIR/wc
 svn switch -q $ROOT_URL/branches/dev/Share/merge1
 TEST_KEY=$TEST_KEY_BASE-trunk-into-branch-1
 run_pass "$TEST_KEY" fcm merge --non-interactive trunk
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+if $SVN_VERSION_IS_16; then
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Eligible merge(s) from /trunk@9: 9 8
 --------------------------------------------------------------------------------
 Merge: /trunk@9
  c.f.: /trunk@1
 Merge succeeded.
 __OUT__
+else
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+Eligible merge(s) from /trunk@9: 9 8
+--------------------------------------------------------------------------------
+Merge: /trunk@9
+ c.f.: /trunk@1
+Merge succeeded.
+--------------------------------------------------------------------------actual
+--- Merging r2 through r9 into '.':
+U    lib/python/info/__init__.py
+--- Recording mergeinfo for merge of r2 through r9 into '.':
+ U   .
+--------------------------------------------------------------------------actual
+__OUT__
+fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests svn status result of fcm merge (1)
 TEST_KEY=$TEST_KEY_BASE-trunk-into-branch-1-status
 run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
+sort $TEST_DIR/"$TEST_KEY.out" -o $TEST_DIR/"$TEST_KEY.out"
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 ?       unversioned_file
@@ -60,7 +77,8 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 # Tests svn diff result of fcm merge (1)
 TEST_KEY=$TEST_KEY_BASE-trunk-into-branch-1-diff
 run_pass "$TEST_KEY" svn diff
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+if $SVN_VERSION_IS_16; then
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 
 Property changes on: .
 ___________________________________________________________________
@@ -75,6 +93,26 @@ Index: lib/python/info/__init__.py
 +trunk change
 +another trunk change
 __OUT__
+else
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+Index: lib/python/info/__init__.py
+===================================================================
+--- lib/python/info/__init__.py	(revision 9)
++++ lib/python/info/__init__.py	(working copy)
+@@ -0,0 +1,2 @@
++trunk change
++another trunk change
+Index: .
+===================================================================
+--- .	(revision 9)
++++ .	(working copy)
+
+Property changes on: .
+___________________________________________________________________
+Added: svn:mergeinfo
+   Merged /trunk:r2-9
+__OUT__
+fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm commit of fcm merge (1)
@@ -82,7 +120,8 @@ TEST_KEY=$TEST_KEY_BASE-trunk-into-branch-1-commit
 run_pass "$TEST_KEY" fcm commit <<__IN__
 y
 __IN__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+if $SVN_VERSION_IS_16; then
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] sed -i 1i\foo: starting commit message editor...
 Change summary:
 --------------------------------------------------------------------------------
@@ -110,6 +149,37 @@ Transmitting file data .
 Committed revision 10.
 At revision 10.
 __OUT__
+else
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+[info] sed -i 1i\foo: starting commit message editor...
+Change summary:
+--------------------------------------------------------------------------------
+[Root   : $REPOS_URL]
+[Project: ${TEST_PROJECT:-}]
+[Branch : branches/dev/Share/merge1]
+[Sub-dir: ]
+
+ M      .
+M       lib/python/info/__init__.py
+--------------------------------------------------------------------------------
+Commit message is as follows:
+--------------------------------------------------------------------------------
+foo
+Merged into /branches/dev/Share/merge1: /trunk@9 cf. /trunk@1
+--------------------------------------------------------------------------------
+
+*** WARNING: YOU ARE COMMITTING TO A Share BRANCH.
+*** Please ensure that you have the owner's permission.
+
+Would you like to commit this change?
+Enter "y" or "n" (or just press <return> for "n"): Sending        .
+Sending        lib/python/info/__init__.py
+Transmitting file data .
+Committed revision 10.
+Updating '.':
+At revision 10.
+__OUT__
+fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm log of fcm merge (1)
@@ -142,28 +212,55 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 # Tests fcm merge of branch-into-trunk (1)
 TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-1
 BRANCH_MOD_FILE=$(find . -type f | sed "/\.svn/d" | sort | head -3| tail -1)
-echo "# added this line for simple repeat testing" >> $BRANCH_MOD_FILE
+echo "# added this line for simple repeat testing" >>$BRANCH_MOD_FILE
 svn commit -q -m "edit on branch for merge repeat test"
 svn update -q
 cd $TEST_DIR
 rm -rf $TEST_DIR/wc
 mkdir $TEST_DIR/wc
-svn checkout $ROOT_URL/trunk $TEST_DIR/wc
+svn checkout -q $ROOT_URL/trunk $TEST_DIR/wc
 cd $TEST_DIR/wc
 run_pass "$TEST_KEY" fcm merge --non-interactive branches/dev/Share/merge1
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+if $SVN_VERSION_IS_16; then
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Eligible merge(s) from /branches/dev/Share/merge1@11: 11 10
 --------------------------------------------------------------------------------
 Merge: /branches/dev/Share/merge1@11
  c.f.: /trunk@9
 Merge succeeded.
 __OUT__
+else
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+Eligible merge(s) from /branches/dev/Share/merge1@11: 11 10
+--------------------------------------------------------------------------------
+Merge: /branches/dev/Share/merge1@11
+ c.f.: /trunk@9
+Merge succeeded.
+--------------------------------------------------------------------------actual
+--- Merging differences between repository URLs into '.':
+U    subroutine/hello_sub_dummy.h
+A    added_file
+A    added_directory
+A    added_directory/hello_constants_dummy.inc
+A    added_directory/hello_constants.inc
+A    added_directory/hello_constants.f90
+A    module/tree_conflict_file
+U    module/hello_constants_dummy.inc
+U    module/hello_constants.inc
+U    module/hello_constants.f90
+U    lib/python/info/poems.py
+--- Recording mergeinfo for merge between repository URLs into '.':
+ U   .
+--------------------------------------------------------------------------actual
+__OUT__
+fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests svn status result of fcm merge (1)
 TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-1-status
 run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+if $SVN_VERSION_IS_16; then
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 M       subroutine/hello_sub_dummy.h
 A  +    added_file
@@ -177,12 +274,26 @@ A  +    added_directory/hello_constants.inc
 A  +    added_directory/hello_constants.f90
 M       lib/python/info/poems.py
 __OUT__
+else
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+ M      .
+A  +    added_directory
+A  +    added_file
+M       lib/python/info/poems.py
+M       module/hello_constants.f90
+M       module/hello_constants.inc
+M       module/hello_constants_dummy.inc
+A  +    module/tree_conflict_file
+M       subroutine/hello_sub_dummy.h
+__OUT__
+fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests svn diff result of fcm merge (1)
 TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-1-diff
 run_pass "$TEST_KEY" svn diff
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+if $SVN_VERSION_IS_16; then
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 
 Property changes on: .
 ___________________________________________________________________
@@ -261,6 +372,90 @@ Index: lib/python/info/poems.py
 -print "\n",  __doc__
 +prINt "\n",  __doc__
 __OUT__
+else
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+Index: lib/python/info/poems.py
+===================================================================
+--- lib/python/info/poems.py	(revision 11)
++++ lib/python/info/poems.py	(working copy)
+@@ -1,24 +1,23 @@
+-#!/usr/bin/env python
+-# -*- coding: utf-8 -*-
+ """The Python, by Hilaire Belloc
+ 
+ A Python I should not advise,--
+-It needs a doctor for its eyes,
++It needs a doctor FOR its eyes,
+ And has the measles yearly.
+-However, if you feel inclined
+-To get one (to improve your mind,
++However, if you feel INclINed
++To get one (
++to improve your mINd,
+ And not from fashion merely),
+ Allow no music near its cage;
+-And when it flies into a rage
++And when it flies INto a rage
+ Chastise it, most severely.
+-I had an aunt in Yucatan
++I had an aunt IN Yucatan
+ Who bought a Python from a man
+-And kept it for a pet.
++And kept it FOR a pet.
+ She died, because she never knew
+ These simple little rules and few;--
+-The Snake is living yet.
++The Snake is livINg yet.
+ """
+ 
+ import this
+ 
+-print "\n",  __doc__
++prINt "\n",  __doc__
+Index: module/hello_constants.f90
+===================================================================
+--- module/hello_constants.f90	(revision 11)
++++ module/hello_constants.f90	(working copy)
+@@ -1,5 +1,5 @@
+ MODULE Hello_Constants
+ 
+-INCLUDE 'hello_constants_dummy.inc'
++INCLUDE 'hello_constants_dummy.INc'
+ 
+ END MODULE Hello_Constants
+Index: module/hello_constants.inc
+===================================================================
+--- module/hello_constants.inc	(revision 11)
++++ module/hello_constants.inc	(working copy)
+@@ -1 +1,2 @@
+-CHARACTER (LEN=80), PARAMETER :: hello_string = 'Hello Earth!'
++CHARACTER (
++LEN=80), PARAMETER :: hello_strINg = 'Hello Earth!!'
+Index: module/hello_constants_dummy.inc
+===================================================================
+--- module/hello_constants_dummy.inc	(revision 11)
++++ module/hello_constants_dummy.inc	(working copy)
+@@ -1 +1 @@
+-INCLUDE 'hello_constants.inc'
++INCLUDE 'hello_constants.INc'
+Index: subroutine/hello_sub_dummy.h
+===================================================================
+--- subroutine/hello_sub_dummy.h	(revision 11)
++++ subroutine/hello_sub_dummy.h	(working copy)
+@@ -1 +1,2 @@
+ #include "hello_sub.h"
++Modified a line
+Index: .
+===================================================================
+--- .	(revision 11)
++++ .	(working copy)
+
+Property changes on: .
+___________________________________________________________________
+Added: svn:mergeinfo
+   Merged /branches/dev/Share/merge1:r4-11
+__OUT__
+fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm commit of fcm merge (1)
@@ -268,7 +463,8 @@ TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-1-commit
 run_pass "$TEST_KEY" fcm commit <<__IN__
 y
 __IN__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+if $SVN_VERSION_IS_16; then
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] sed -i 1i\foo: starting commit message editor...
 Change summary:
 --------------------------------------------------------------------------------
@@ -316,6 +512,51 @@ Transmitting file data .....
 Committed revision 12.
 At revision 12.
 __OUT__
+else
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+[info] sed -i 1i\foo: starting commit message editor...
+Change summary:
+--------------------------------------------------------------------------------
+[Root   : $REPOS_URL]
+[Project: ${TEST_PROJECT:-}]
+[Branch : trunk]
+[Sub-dir: ]
+
+ M      .
+A  +    added_directory
+A  +    added_file
+M       lib/python/info/poems.py
+M       module/hello_constants.f90
+M       module/hello_constants.inc
+M       module/hello_constants_dummy.inc
+A  +    module/tree_conflict_file
+M       subroutine/hello_sub_dummy.h
+--------------------------------------------------------------------------------
+Commit message is as follows:
+--------------------------------------------------------------------------------
+foo
+Merged into /trunk: /branches/dev/Share/merge1@11 cf. /trunk@9
+--------------------------------------------------------------------------------
+
+*** WARNING: YOU ARE COMMITTING TO THE TRUNK.
+*** Please ensure that your change conforms to your project's working practices.
+
+Would you like to commit this change?
+Enter "y" or "n" (or just press <return> for "n"): Sending        .
+Adding         added_directory
+Adding         added_file
+Sending        lib/python/info/poems.py
+Sending        module/hello_constants.f90
+Sending        module/hello_constants.inc
+Sending        module/hello_constants_dummy.inc
+Adding         module/tree_conflict_file
+Sending        subroutine/hello_sub_dummy.h
+Transmitting file data .....
+Committed revision 12.
+Updating '.':
+At revision 12.
+__OUT__
+fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm log of fcm merge branch-into-trunk (1)
@@ -354,13 +595,29 @@ svn update -q
 svn switch -q $ROOT_URL/trunk
 TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-2
 run_pass "$TEST_KEY" fcm merge --non-interactive branches/dev/Share/merge1
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+if $SVN_VERSION_IS_16; then
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Eligible merge(s) from /branches/dev/Share/merge1@13: 13
 --------------------------------------------------------------------------------
 Merge: /branches/dev/Share/merge1@13
  c.f.: /branches/dev/Share/merge1@11
 Merge succeeded.
 __OUT__
+else
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+Eligible merge(s) from /branches/dev/Share/merge1@13: 13
+--------------------------------------------------------------------------------
+Merge: /branches/dev/Share/merge1@13
+ c.f.: /branches/dev/Share/merge1@11
+Merge succeeded.
+--------------------------------------------------------------------------actual
+--- Merging r12 through r13 into '.':
+U    added_file
+--- Recording mergeinfo for merge of r12 through r13 into '.':
+ U   .
+--------------------------------------------------------------------------actual
+__OUT__
+fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests svn status result of fcm merge branch-into-trunk (2)
@@ -375,7 +632,8 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 # Tests svn diff result of fcm merge branch-into-trunk (2)
 TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-2-diff
 run_pass "$TEST_KEY" svn diff
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+if $SVN_VERSION_IS_16; then
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 
 Property changes on: .
 ___________________________________________________________________
@@ -390,6 +648,26 @@ Index: added_file
  INCLUDE 'hello_constants.INc'
 +call_extra_feature()
 __OUT__
+else
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+Index: added_file
+===================================================================
+--- added_file	(revision 13)
++++ added_file	(working copy)
+@@ -1 +1,2 @@
+ INCLUDE 'hello_constants.INc'
++call_extra_feature()
+Index: .
+===================================================================
+--- .	(revision 13)
++++ .	(working copy)
+
+Property changes on: .
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/dev/Share/merge1:r12-13
+__OUT__
+fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm commit of fcm merge branch-into-trunk (2)
@@ -397,6 +675,7 @@ TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-2-commit
 run_pass "$TEST_KEY" fcm commit <<__IN__
 y
 __IN__
+sed -i "/^Updating '.':$/d" $TEST_DIR/"$TEST_KEY.out"
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] sed -i 1i\foo: starting commit message editor...
 Change summary:
@@ -461,22 +740,38 @@ __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm merge of trunk-into-branch (2)
-echo "# trunk modification" >> $MOD_FILE
+echo "# trunk modification" >>$MOD_FILE
 svn commit -q -m "Made trunk change - a simple edit of $MOD_FILE"
 svn update -q
-svn switch $ROOT_URL/branches/dev/Share/merge1
+svn switch -q $ROOT_URL/branches/dev/Share/merge1
 TEST_KEY=$TEST_KEY_BASE-trunk-into-branch-2
 echo "# added another line for simple repeat testing" >>$BRANCH_MOD_FILE
 svn commit -q -m "Made branch change for merge repeat test"
 svn update -q
 run_pass "$TEST_KEY" fcm merge --non-interactive trunk
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+if $SVN_VERSION_IS_16; then
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Eligible merge(s) from /trunk@16: 15 14
 --------------------------------------------------------------------------------
 Merge: /trunk@15
  c.f.: /branches/dev/Share/merge1@13
 Merge succeeded.
 __OUT__
+else
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+Eligible merge(s) from /trunk@16: 15 14
+--------------------------------------------------------------------------------
+Merge: /trunk@15
+ c.f.: /branches/dev/Share/merge1@13
+Merge succeeded.
+--------------------------------------------------------------------------actual
+--- Merging differences between repository URLs into '.':
+U    added_file
+--- Recording mergeinfo for merge between repository URLs into '.':
+ U   .
+--------------------------------------------------------------------------actual
+__OUT__
+fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests svn status result of fcm merge trunk-into-branch (2)
@@ -491,7 +786,8 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 # Tests svn diff result of fcm merge trunk-into-branch (2)
 TEST_KEY=$TEST_KEY_BASE-trunk-into-branch-2-diff
 run_pass "$TEST_KEY" svn diff
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+if $SVN_VERSION_IS_16; then
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 
 Property changes on: .
 ___________________________________________________________________
@@ -508,6 +804,27 @@ Index: added_file
  call_extra_feature()
 +# trunk modification
 __OUT__
+else
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+Index: added_file
+===================================================================
+--- added_file	(revision 16)
++++ added_file	(working copy)
+@@ -1,2 +1,3 @@
+ INCLUDE 'hello_constants.INc'
+ call_extra_feature()
++# trunk modification
+Index: .
+===================================================================
+--- .	(revision 16)
++++ .	(working copy)
+
+Property changes on: .
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /trunk:r10-15
+__OUT__
+fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm commit of fcm merge trunk-into-branch (2)
@@ -515,6 +832,7 @@ TEST_KEY=$TEST_KEY_BASE-trunk-into-branch-2-commit
 run_pass "$TEST_KEY" fcm commit <<__IN__
 y
 __IN__
+sed -i "/^Updating '.':$/d" $TEST_DIR/"$TEST_KEY.out"
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] sed -i 1i\foo: starting commit message editor...
 Change summary:
@@ -595,16 +913,33 @@ svn delete -q $BRANCH_MOD_FILE
 svn copy -q $MOD_FILE $MOD_FILE.add
 svn commit -q -m "Made branch change - deleted $BRANCH_MOD_FILE, copied $MOD_FILE"
 svn update -q
-svn switch $ROOT_URL/trunk
+svn switch -q $ROOT_URL/trunk
 TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-3
 run_pass "$TEST_KEY" fcm merge --non-interactive branches/dev/Share/merge1
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+if $SVN_VERSION_IS_16; then
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Eligible merge(s) from /branches/dev/Share/merge1@18: 18 17
 --------------------------------------------------------------------------------
 Merge: /branches/dev/Share/merge1@18
  c.f.: /trunk@15
 Merge succeeded.
 __OUT__
+else
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+Eligible merge(s) from /branches/dev/Share/merge1@18: 18 17
+--------------------------------------------------------------------------------
+Merge: /branches/dev/Share/merge1@18
+ c.f.: /trunk@15
+Merge succeeded.
+--------------------------------------------------------------------------actual
+--- Merging differences between repository URLs into '.':
+D    added_directory/hello_constants_dummy.inc
+A    added_file.add
+--- Recording mergeinfo for merge between repository URLs into '.':
+ U   .
+--------------------------------------------------------------------------actual
+__OUT__
+fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests svn status result of fcm merge branch-into-trunk (3)
@@ -620,7 +955,8 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 # Tests svn diff result of fcm merge branch-into-trunk (3)
 TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-3-diff
 run_pass "$TEST_KEY" svn diff
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+if $SVN_VERSION_IS_16; then
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 
 Property changes on: .
 ___________________________________________________________________
@@ -635,6 +971,26 @@ Index: added_directory/hello_constants_dummy.inc
 -INCLUDE 'hello_constants.INc'
 -# added this line for simple repeat testing
 __OUT__
+else
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+Index: added_directory/hello_constants_dummy.inc
+===================================================================
+--- added_directory/hello_constants_dummy.inc	(revision 18)
++++ added_directory/hello_constants_dummy.inc	(working copy)
+@@ -1,2 +0,0 @@
+-INCLUDE 'hello_constants.INc'
+-# added this line for simple repeat testing
+Index: .
+===================================================================
+--- .	(revision 18)
++++ .	(working copy)
+
+Property changes on: .
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/dev/Share/merge1:r14-18
+__OUT__
+fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm commit of fcm merge branch-into-trunk (3)
@@ -642,6 +998,7 @@ TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-3-commit
 run_pass "$TEST_KEY" fcm commit <<__IN__
 y
 __IN__
+sed -i "/^Updating '.':$/d" $TEST_DIR/"$TEST_KEY.out"
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] sed -i 1i\foo: starting commit message editor...
 Change summary:
@@ -774,7 +1131,7 @@ TEST_KEY=$TEST_KEY_BASE-branch-into-branch-1
 cd $TEST_DIR
 rm -rf $TEST_DIR/wc
 mkdir $TEST_DIR/wc
-svn checkout $ROOT_URL/branches/dev/Share/merge2 $TEST_DIR/wc
+svn checkout -q $ROOT_URL/branches/dev/Share/merge2 $TEST_DIR/wc
 cd $TEST_DIR/wc
 BRANCH_2_MOD_FILE=$(find . -type f | sed "/\.svn/d" | sort | head -3| tail -1)
 echo "Second branch change" >>$BRANCH_2_MOD_FILE
@@ -784,7 +1141,8 @@ run_pass "$TEST_KEY" fcm merge $ROOT_URL/branches/dev/Share/merge1 <<__IN__
 13
 y
 __IN__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+if $SVN_VERSION_IS_16; then
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Eligible merge(s) from /branches/dev/Share/merge1@20: 18 17 16 13 11 10 5
 Enter a revision (or just press <return> for "18"): --------------------------------------------------------------------------------
 Merge: /branches/dev/Share/merge1@13
@@ -808,12 +1166,57 @@ U    lib/python/info/poems.py
 Would you like to go ahead with the merge?
 Enter "y" or "n" (or just press <return> for "n"): Merge succeeded.
 __OUT__
+else
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+Eligible merge(s) from /branches/dev/Share/merge1@20: 18 17 16 13 11 10 5
+Enter a revision (or just press <return> for "18"): --------------------------------------------------------------------------------
+Merge: /branches/dev/Share/merge1@13
+ c.f.: /trunk@1
+-------------------------------------------------------------------------dry-run
+--- Merging r4 through r13 into '.':
+U    subroutine/hello_sub_dummy.h
+A    added_file
+A    added_directory
+A    added_directory/hello_constants_dummy.inc
+A    added_directory/hello_constants.inc
+A    added_directory/hello_constants.f90
+A    module/tree_conflict_file
+U    module/hello_constants_dummy.inc
+U    module/hello_constants.inc
+U    module/hello_constants.f90
+U    lib/python/info/__init__.py
+U    lib/python/info/poems.py
+ U   .
+-------------------------------------------------------------------------dry-run
+Would you like to go ahead with the merge?
+Enter "y" or "n" (or just press <return> for "n"): Merge succeeded.
+--------------------------------------------------------------------------actual
+--- Merging r4 through r13 into '.':
+U    subroutine/hello_sub_dummy.h
+A    added_file
+A    added_directory
+A    added_directory/hello_constants_dummy.inc
+A    added_directory/hello_constants.inc
+A    added_directory/hello_constants.f90
+A    module/tree_conflict_file
+U    module/hello_constants_dummy.inc
+U    module/hello_constants.inc
+U    module/hello_constants.f90
+U    lib/python/info/__init__.py
+U    lib/python/info/poems.py
+ U   .
+--- Recording mergeinfo for merge of r4 through r13 into '.':
+ G   .
+--------------------------------------------------------------------------actual
+__OUT__
+fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests svn status result of fcm merge branch-into-branch (1)
 TEST_KEY=$TEST_KEY_BASE-branch-into-branch-1-status
 run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+if $SVN_VERSION_IS_16; then
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 M       subroutine/hello_sub_dummy.h
 A  +    added_file
@@ -828,12 +1231,27 @@ A  +    added_directory/hello_constants.f90
 M       lib/python/info/__init__.py
 M       lib/python/info/poems.py
 __OUT__
+else
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+ M      .
+A  +    added_directory
+A  +    added_file
+M       lib/python/info/__init__.py
+M       lib/python/info/poems.py
+M       module/hello_constants.f90
+M       module/hello_constants.inc
+M       module/hello_constants_dummy.inc
+A  +    module/tree_conflict_file
+M       subroutine/hello_sub_dummy.h
+__OUT__
+fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests svn diff result of fcm merge branch-into-branch (1)
 TEST_KEY=$TEST_KEY_BASE-branch-into-branch-1-diff
 run_pass "$TEST_KEY" svn diff
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+if $SVN_VERSION_IS_16; then
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 
 Property changes on: .
 ___________________________________________________________________
@@ -921,6 +1339,99 @@ Index: lib/python/info/poems.py
 -print "\n",  __doc__
 +prINt "\n",  __doc__
 __OUT__
+else
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+Index: lib/python/info/__init__.py
+===================================================================
+--- lib/python/info/__init__.py	(revision 20)
++++ lib/python/info/__init__.py	(working copy)
+@@ -0,0 +1,2 @@
++trunk change
++another trunk change
+Index: lib/python/info/poems.py
+===================================================================
+--- lib/python/info/poems.py	(revision 20)
++++ lib/python/info/poems.py	(working copy)
+@@ -1,24 +1,23 @@
+-#!/usr/bin/env python
+-# -*- coding: utf-8 -*-
+ """The Python, by Hilaire Belloc
+ 
+ A Python I should not advise,--
+-It needs a doctor for its eyes,
++It needs a doctor FOR its eyes,
+ And has the measles yearly.
+-However, if you feel inclined
+-To get one (to improve your mind,
++However, if you feel INclINed
++To get one (
++to improve your mINd,
+ And not from fashion merely),
+ Allow no music near its cage;
+-And when it flies into a rage
++And when it flies INto a rage
+ Chastise it, most severely.
+-I had an aunt in Yucatan
++I had an aunt IN Yucatan
+ Who bought a Python from a man
+-And kept it for a pet.
++And kept it FOR a pet.
+ She died, because she never knew
+ These simple little rules and few;--
+-The Snake is living yet.
++The Snake is livINg yet.
+ """
+ 
+ import this
+ 
+-print "\n",  __doc__
++prINt "\n",  __doc__
+Index: module/hello_constants.f90
+===================================================================
+--- module/hello_constants.f90	(revision 20)
++++ module/hello_constants.f90	(working copy)
+@@ -1,6 +1,6 @@
+ MODULE Hello_Constants
+ 
+-INCLUDE 'hello_constants_dummy.inc'
++INCLUDE 'hello_constants_dummy.INc'
+ 
+ END MODULE Hello_Constants
+ Second branch change
+Index: module/hello_constants.inc
+===================================================================
+--- module/hello_constants.inc	(revision 20)
++++ module/hello_constants.inc	(working copy)
+@@ -1 +1,2 @@
+-CHARACTER (LEN=80), PARAMETER :: hello_string = 'Hello Earth!'
++CHARACTER (
++LEN=80), PARAMETER :: hello_strINg = 'Hello Earth!!'
+Index: module/hello_constants_dummy.inc
+===================================================================
+--- module/hello_constants_dummy.inc	(revision 20)
++++ module/hello_constants_dummy.inc	(working copy)
+@@ -1 +1 @@
+-INCLUDE 'hello_constants.inc'
++INCLUDE 'hello_constants.INc'
+Index: subroutine/hello_sub_dummy.h
+===================================================================
+--- subroutine/hello_sub_dummy.h	(revision 20)
++++ subroutine/hello_sub_dummy.h	(working copy)
+@@ -1 +1,2 @@
+ #include "hello_sub.h"
++Modified a line
+Index: .
+===================================================================
+--- .	(revision 20)
++++ .	(working copy)
+
+Property changes on: .
+___________________________________________________________________
+Added: svn:mergeinfo
+   Merged /trunk:r2-9
+   Merged /branches/dev/Share/merge1:r4-13
+__OUT__
+fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm commit of fcm merge branch-into-branch (1)
@@ -928,7 +1439,8 @@ TEST_KEY=$TEST_KEY_BASE-branch-into-branch-1-commit
 run_pass "$TEST_KEY" fcm commit <<__IN__
 y
 __IN__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+if $SVN_VERSION_IS_16; then
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] sed -i 1i\foo: starting commit message editor...
 Change summary:
 --------------------------------------------------------------------------------
@@ -978,6 +1490,53 @@ Transmitting file data ......
 Committed revision 21.
 At revision 21.
 __OUT__
+else
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+[info] sed -i 1i\foo: starting commit message editor...
+Change summary:
+--------------------------------------------------------------------------------
+[Root   : $REPOS_URL]
+[Project: ${TEST_PROJECT:-}]
+[Branch : branches/dev/Share/merge2]
+[Sub-dir: ]
+
+ M      .
+A  +    added_directory
+A  +    added_file
+M       lib/python/info/__init__.py
+M       lib/python/info/poems.py
+M       module/hello_constants.f90
+M       module/hello_constants.inc
+M       module/hello_constants_dummy.inc
+A  +    module/tree_conflict_file
+M       subroutine/hello_sub_dummy.h
+--------------------------------------------------------------------------------
+Commit message is as follows:
+--------------------------------------------------------------------------------
+foo
+Merged into /branches/dev/Share/merge2: /branches/dev/Share/merge1@13 cf. /trunk@1
+--------------------------------------------------------------------------------
+
+*** WARNING: YOU ARE COMMITTING TO A Share BRANCH.
+*** Please ensure that you have the owner's permission.
+
+Would you like to commit this change?
+Enter "y" or "n" (or just press <return> for "n"): Sending        .
+Adding         added_directory
+Adding         added_file
+Sending        lib/python/info/__init__.py
+Sending        lib/python/info/poems.py
+Sending        module/hello_constants.f90
+Sending        module/hello_constants.inc
+Sending        module/hello_constants_dummy.inc
+Adding         module/tree_conflict_file
+Sending        subroutine/hello_sub_dummy.h
+Transmitting file data ......
+Committed revision 21.
+Updating '.':
+At revision 21.
+__OUT__
+fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm log of fcm merge branch-into-branch (1)

@@ -48,7 +48,7 @@ svn add -q new_file
 svn commit -q -m "Added duplicated-name copy of conflict file"
 svn update -q
 svn switch -q $ROOT_URL/branches/dev/Share/ctrl
-fcm merge --non-interactive $ROOT_URL/branches/dev/Share/add_add
+fcm merge --non-interactive $ROOT_URL/branches/dev/Share/add_add >/dev/null
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 n
 __IN__
@@ -75,7 +75,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 # Tests fcm conflicts: add, add, discard local (info)
 TEST_KEY=$TEST_KEY_BASE-discard-info
 run_pass "$TEST_KEY" svn info new_file
-sed -i "/Date:\|Updated:\|UUID:/d" $TEST_DIR/$TEST_KEY.out
+sed -i "/Date:\|Updated:\|UUID:\|Checksum\|Relative URL:\|Working Copy Root Path:/d" $TEST_DIR/"$TEST_KEY.out"
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Path: new_file
 Name: new_file
@@ -86,7 +86,6 @@ Node Kind: file
 Schedule: normal
 Last Changed Author: $LOGNAME
 Last Changed Rev: 6
-Checksum: 1e03a88ca73f388081168bc228c4de7d
 
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
@@ -134,7 +133,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 # Tests fcm conflicts: add, add, keep local (info)
 TEST_KEY=$TEST_KEY_BASE-keep-info
 run_pass "$TEST_KEY" svn info new_file
-sed -i "/Date:\|Updated:\|UUID:/d" "$TEST_DIR/$TEST_KEY.out"
+sed -i "/Date:\|Updated:\|UUID:\|Checksum\|Relative URL:\|Working Copy Root Path:/d" $TEST_DIR/"$TEST_KEY.out"
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Path: new_file
 Name: new_file
@@ -145,7 +144,6 @@ Node Kind: file
 Schedule: normal
 Last Changed Author: $LOGNAME
 Last Changed Rev: 6
-Checksum: 1e03a88ca73f388081168bc228c4de7d
 
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null

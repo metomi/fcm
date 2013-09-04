@@ -37,35 +37,52 @@ cd $TEST_DIR/wc
 # Tests the setup for fcm status testing
 svn switch -q $ROOT_URL/trunk
 touch added_file
-touch module/tree_conflict_file
-svn add module/tree_conflict_file
-rm subroutine/hello_sub.h
-svn delete lib/python/info/poems.py
-svn delete module/hello_constants.inc
+svn add -q added_file
+svn commit -q -m "trunk modifications"
+svn update -q
 TEST_KEY=$TEST_KEY_BASE-setup
 run_pass "$TEST_KEY" fcm merge --non-interactive branches/dev/Share/merge1
+rm subroutine/hello_sub.h
+svn delete -q --force lib/python/info/poems.py
 #-------------------------------------------------------------------------------
 # Tests fcm status result of fcm merge (1)
 TEST_KEY=$TEST_KEY_BASE-status
 run_pass "$TEST_KEY" fcm status --config-dir=$TEST_DIR/.subversion
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+if $SVN_VERSION_IS_16; then
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 ?       unversioned_file
-?       added_file
 !       subroutine/hello_sub.h
 M       subroutine/hello_sub_dummy.h
-A     C module/tree_conflict_file
+      C added_file
       >   local add, incoming add upon merge
+A  +    module/tree_conflict_file
 M       module/hello_constants_dummy.inc
-D     C module/hello_constants.inc
-      >   local missing, incoming edit upon merge
+M       module/hello_constants.inc
 M       module/hello_constants.f90
 A  +    added_directory
 A  +    added_directory/hello_constants_dummy.inc
 A  +    added_directory/hello_constants.inc
 A  +    added_directory/hello_constants.f90
-D     C lib/python/info/poems.py
-      >   local missing, incoming edit upon merge
+D       lib/python/info/poems.py
 __OUT__
+else
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+ M      .
+A  +    added_directory
+      C added_file
+      >   local file obstruction, incoming file add upon merge
+D       lib/python/info/poems.py
+M       module/hello_constants.f90
+M       module/hello_constants.inc
+M       module/hello_constants_dummy.inc
+A  +    module/tree_conflict_file
+!       subroutine/hello_sub.h
+M       subroutine/hello_sub_dummy.h
+?       unversioned_file
+Summary of conflicts:
+  Tree conflicts: 1
+__OUT__
+fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------

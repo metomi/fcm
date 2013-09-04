@@ -46,11 +46,7 @@ TEST_KEY=$TEST_KEY_BASE-delete-branch-exists
 run_fail "$TEST_KEY" svn info \
                $ROOT_URL/branches/dev/Share/branch_test
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" </dev/null
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" <<__ERR__
-$ROOT_URL/branches/dev/Share/branch_test:  (Not a valid URL)
-
-svn: A problem occurred; see other errors for details
-__ERR__
+file_test "$TEST_KEY.err" "$TEST_KEY.err" -s
 teardown
 #-------------------------------------------------------------------------------
 init_repos ${TEST_PROJECT:-}
@@ -75,10 +71,6 @@ TEST_KEY=$TEST_KEY_BASE-brm-branch-exists
 run_fail "$TEST_KEY" svn info \
                $ROOT_URL/branches/dev/Share/branch_test
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" </dev/null
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" <<__ERR__
-$ROOT_URL/branches/dev/Share/branch_test:  (Not a valid URL)
-
-svn: A problem occurred; see other errors for details
-__ERR__
+file_test "$TEST_KEY.err" "$TEST_KEY.err" -s
 teardown
 #-------------------------------------------------------------------------------
