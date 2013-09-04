@@ -50,6 +50,7 @@ for FILE in $FILE_LIST; do
         tac $FILE > $TMPFILE && mv $TMPFILE $FILE
     fi
 done
+rm -f $TMPFILE
 svn commit -q -m "make trunk diff"
 svn switch -q $ROOT_URL/branches/dev/Share/branch_test
 #-------------------------------------------------------------------------------

@@ -77,6 +77,7 @@ $ROOT_URL/branches/dev/$LOGNAME/my_branch_test@9
 $ROOT_URL/branches/dev/drfooeybar/donuts@9
 __OUT__
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <$TMPFILE
+rm -f $TMPFILE
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm branch-list --user

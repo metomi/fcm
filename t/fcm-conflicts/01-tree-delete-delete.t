@@ -98,4 +98,5 @@ file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+teardown
 #-------------------------------------------------------------------------------
