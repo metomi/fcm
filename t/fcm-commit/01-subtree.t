@@ -46,12 +46,14 @@ svn delete --force -q $FILE_DIR
 #-------------------------------------------------------------------------------
 # Tests fcm commit
 TEST_KEY=$TEST_KEY_BASE
-export SVN_EDITOR="sed -i 1i\foo" 
+export SVN_EDITOR="sed -i 1i\foo"
+cd program
 run_pass "$TEST_KEY" fcm commit --svn-non-interactive <<__IN__
 y
 __IN__
 if $SVN_VERSION_IS_16; then
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+$TEST_DIR/wc: working directory changed to top of working copy.
 [info] sed -i 1i\foo: starting commit message editor...
 Change summary:
 --------------------------------------------------------------------------------
@@ -93,6 +95,7 @@ At revision 6.
 __OUT__
 else
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+$TEST_DIR/wc: working directory changed to top of working copy.
 [info] sed -i 1i\foo: starting commit message editor...
 Change summary:
 --------------------------------------------------------------------------------

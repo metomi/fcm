@@ -36,10 +36,12 @@ cd $TEST_DIR/wc
 #-------------------------------------------------------------------------------
 # Tests fcm merge of trunk-into-branch (1)
 svn switch -q $ROOT_URL/branches/dev/Share/merge1
-TEST_KEY=$TEST_KEY_BASE-trunk-into-branch-1
+TEST_KEY=$TEST_KEY_BASE-trunk-into-branch-1-non-root
+cd module
 run_pass "$TEST_KEY" fcm merge --non-interactive trunk
 if $SVN_VERSION_IS_16; then
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+$TEST_DIR/wc: working directory changed to top of working copy.
 Eligible merge(s) from /trunk@9: 9 8
 --------------------------------------------------------------------------------
 Merge: /trunk@9
@@ -48,6 +50,7 @@ Merge succeeded.
 __OUT__
 else
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+$TEST_DIR/wc: working directory changed to top of working copy.
 Eligible merge(s) from /trunk@9: 9 8
 --------------------------------------------------------------------------------
 Merge: /trunk@9
@@ -62,6 +65,7 @@ U    lib/python/info/__init__.py
 __OUT__
 fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+cd ..
 #-------------------------------------------------------------------------------
 # Tests svn status result of fcm merge (1)
 TEST_KEY=$TEST_KEY_BASE-trunk-into-branch-1-status

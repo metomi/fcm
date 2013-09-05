@@ -167,7 +167,14 @@ sub touch_file {
 sub is_wc {
   my $path = shift() || cwd();
   my $path_of_dir = -f $path ? dirname($path) : $path;
-  -e File::Spec->catfile($path_of_dir, qw{.svn entries});
+  if (-e File::Spec->catfile($path_of_dir, qw{.svn entries})) {
+      return 1;
+  }
+  my $inforc = &run_command (
+    [qw/svn info/, $path_of_dir],
+    METHOD => 'qx', DEVNULL => 1, ERROR => 'ignore'
+  );
+  return $inforc != 0;
 }
 
 # ------------------------------------------------------------------------------
