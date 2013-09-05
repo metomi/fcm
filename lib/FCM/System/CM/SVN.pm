@@ -445,15 +445,17 @@ sub _get_wc_root {
     $path = rel2abs($path);
     my $return;
     if (-e catfile($path, qw{.svn entries})) {
-        while (-e catfile($path, qw{.svn entries}) &&
-               $path ne dirname($path)) {
+        while (   -e catfile($path, qw{.svn entries})
+               && $path ne dirname($path)
+        ) {
             $return = $path;
             $path = dirname($path);
         }
     }
     else {
-        while (! -e catfile($path, qw{.svn entries}) &&
-               $path ne dirname($path)) {
+        while (   !-e catfile($path, qw{.svn entries})
+               && $path ne dirname($path)
+        ) {
             $path = dirname($path);
             $return = $path;
         }
