@@ -17,6 +17,10 @@
 # You should have received a copy of the GNU General Public License
 # along with FCM. If not, see <http://www.gnu.org/licenses/>.
 # ------------------------------------------------------------------------------
+# Optional enviroment variables:
+#   TEST_PROJECT (tests using given project name)
+#   TEST_REMOTE_HOST (tests using svn+ssh repositories located on given host)
+# ------------------------------------------------------------------------------
 
 . $(dirname $0)/../lib/bash/test_header
 
@@ -65,18 +69,58 @@ function file_xxdiff() {
 }
 
 function init_repos() {
-    if [[ $# -eq 0 ]]; then
-        PROJECT=
+    if [[ -n ${TEST_REMOTE_HOST:-} ]]; then
+        TEST_REMOTE_DIR=$(ssh $TEST_REMOTE_HOST "mktemp -d")
+        ssh $TEST_REMOTE_HOST "svnadmin create --fs-type fsfs $TEST_REMOTE_DIR"
+        REPOS_URL="svn+ssh://${TEST_REMOTE_HOST}$TEST_REMOTE_DIR"
     else
-        PROJECT=$1
+        svnadmin create --fs-type fsfs $TEST_DIR/test_repos
+        REPOS_URL="file://$TEST_DIR/test_repos"
     fi
-    svnadmin create --fs-type fsfs $TEST_DIR/test_repos
-    TEST_REPOS_URL="file://$TEST_DIR/test_repos"
+    ROOT_URL=$REPOS_URL
+    PROJECT=
+    if [[ -n ${TEST_PROJECT:-} ]]; then
+        ROOT_URL=$REPOS_URL/$TEST_PROJECT
+        PROJECT=$TEST_PROJECT"/"
+    fi
     svn import -q $TEST_SOURCE_DIR/../etc/repo_files \
-        $TEST_REPOS_URL/$PROJECT/trunk -m "initial trunk import"
-    svn mkdir -q $TEST_REPOS_URL/$PROJECT/tags -m "make tags"
-    svn mkdir -q --parents $TEST_REPOS_URL/$PROJECT/branches/dev/Share -m " "
-    rm -rf $TEST_DIR/.repo_import_files
+        $REPOS_URL/$PROJECT/trunk -m "initial trunk import"
+    svn mkdir -q $REPOS_URL/$PROJECT/tags -m "make tags"
+    svn mkdir -q --parents $REPOS_URL/$PROJECT/branches/dev/Share -m " "
+}
+
+function init_repos_layout_roses() {
+    if [[ -n ${TEST_REMOTE_HOST:-} ]]; then
+        TEST_REMOTE_DIR=$(ssh $TEST_REMOTE_HOST "mktemp -d")
+        ssh $TEST_REMOTE_HOST "svnadmin create --fs-type fsfs $TEST_REMOTE_DIR"
+        REPOS_URL="svn+ssh://${TEST_REMOTE_HOST}$TEST_REMOTE_DIR"
+    else
+        svnadmin create --fs-type fsfs $TEST_DIR/test_repos
+        REPOS_URL="file://$TEST_DIR/test_repos"
+    fi
+    svn mkdir -q --parents $REPOS_URL/a/a/0/0/0/trunk
+    svn import -q $TEST_SOURCE_DIR/../etc/repo_files \
+        $REPOS_URL/a/a/0/0/0/trunk -m "initial trunk import"
+    TMPFILE=$(mktemp)
+    cat >$TMPFILE <<__LAYOUT__
+depth-project = 5
+depth-branch = 1
+depth-tag = 1
+dir-trunk = trunk
+dir-branch =
+dir-tag =
+level-owner-branch =
+level-owner-tag =
+template-branch =
+template-tag =
+__LAYOUT__
+    TMPDIR=$(mktemp -d)
+    svn checkout -q $REPOS_URL $TMPDIR
+    svn propset -q --file=$TMPFILE fcm:layout $TMPDIR
+    svn commit -q -m " " $TMPDIR
+    rm -f $TMPFILE
+    rm -rf $TMPDIR
+    ROOT_URL=$REPOS_URL
 }
 
 function init_branch() {
@@ -178,4 +222,11 @@ function teardown() {
     rm -rf $TEST_DIR/wc
     rm -rf $TEST_DIR/run
     rm -rf $TEST_DIR/.subversion
+    if [[ -n ${TEST_REMOTE_HOST:-} ]]; then
+        ssh $TEST_REMOTE_HOST "rm -rf $TEST_REMOTE_DIR"
+    fi
 }
+
+REPOS_URL=
+ROOT_URL=
+PROJECT=
