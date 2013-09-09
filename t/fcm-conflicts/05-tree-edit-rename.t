@@ -24,12 +24,7 @@
 tests 24
 #-------------------------------------------------------------------------------
 setup
-init_repos ${TEST_PROJECT:-}
-REPOS_URL="file://"$(cd $TEST_DIR/test_repos && pwd)
-ROOT_URL=$REPOS_URL
-if [[ -n ${TEST_PROJECT:-} ]]; then
-    ROOT_URL=$REPOS_URL/$TEST_PROJECT
-fi
+init_repos
 init_branch ctrl $REPOS_URL
 init_branch_wc ed_ren $REPOS_URL
 export SVN_EDITOR="sed -i 1i\foo"
@@ -126,7 +121,7 @@ cd $TEST_DIR/wc
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: edit, rename, keep local
 TEST_KEY=$TEST_KEY_BASE-keep
-fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ed_ren
+fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ed_ren >/dev/null
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 y
 __IN__

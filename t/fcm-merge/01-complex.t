@@ -24,12 +24,7 @@
 tests 90
 #-------------------------------------------------------------------------------
 setup
-init_repos ${TEST_PROJECT:-}
-REPOS_URL="file://"$(cd $TEST_DIR/test_repos && pwd)
-ROOT_URL=$REPOS_URL
-if [[ -n ${TEST_PROJECT:-} ]]; then
-    ROOT_URL=$REPOS_URL/$TEST_PROJECT
-fi
+init_repos
 init_merge_branches merge1 merge2 $REPOS_URL
 export SVN_EDITOR="sed -i 1i\foo"
 cd $TEST_DIR/wc
@@ -42,19 +37,19 @@ run_pass "$TEST_KEY" fcm merge --non-interactive trunk
 if $SVN_VERSION_IS_16; then
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 $TEST_DIR/wc: working directory changed to top of working copy.
-Eligible merge(s) from /trunk@9: 9 8
+Eligible merge(s) from /${PROJECT}trunk@9: 9 8
 --------------------------------------------------------------------------------
-Merge: /trunk@9
- c.f.: /trunk@1
+Merge: /${PROJECT}trunk@9
+ c.f.: /${PROJECT}trunk@1
 Merge succeeded.
 __OUT__
 else
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 $TEST_DIR/wc: working directory changed to top of working copy.
-Eligible merge(s) from /trunk@9: 9 8
+Eligible merge(s) from /${PROJECT}trunk@9: 9 8
 --------------------------------------------------------------------------------
-Merge: /trunk@9
- c.f.: /trunk@1
+Merge: /${PROJECT}trunk@9
+ c.f.: /${PROJECT}trunk@1
 Merge succeeded.
 --------------------------------------------------------------------------actual
 --- Merging r2 through r9 into '.':
@@ -87,7 +82,7 @@ if $SVN_VERSION_IS_16; then
 Property changes on: .
 ___________________________________________________________________
 Added: svn:mergeinfo
-   Merged /trunk:r2-9
+   Merged /${PROJECT}trunk:r2-9
 
 Index: lib/python/info/__init__.py
 ===================================================================
@@ -114,7 +109,7 @@ Index: .
 Property changes on: .
 ___________________________________________________________________
 Added: svn:mergeinfo
-   Merged /trunk:r2-9
+   Merged /${PROJECT}trunk:r2-9
 __OUT__
 fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
@@ -140,7 +135,7 @@ M       lib/python/info/__init__.py
 Commit message is as follows:
 --------------------------------------------------------------------------------
 foo
-Merged into /branches/dev/Share/merge1: /trunk@9 cf. /trunk@1
+Merged into /${PROJECT}branches/dev/Share/merge1: /${PROJECT}trunk@9 cf. /${PROJECT}trunk@1
 --------------------------------------------------------------------------------
 
 *** WARNING: YOU ARE COMMITTING TO A Share BRANCH.
@@ -169,7 +164,7 @@ M       lib/python/info/__init__.py
 Commit message is as follows:
 --------------------------------------------------------------------------------
 foo
-Merged into /branches/dev/Share/merge1: /trunk@9 cf. /trunk@1
+Merged into /${PROJECT}branches/dev/Share/merge1: /${PROJECT}trunk@9 cf. /${PROJECT}trunk@1
 --------------------------------------------------------------------------------
 
 *** WARNING: YOU ARE COMMITTING TO A Share BRANCH.
@@ -195,7 +190,7 @@ file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 r10 | $LOGNAME | date | 3 lines
 
 foo
-Merged into /branches/dev/Share/merge1: /trunk@9 cf. /trunk@1
+Merged into /${PROJECT}branches/dev/Share/merge1: /${PROJECT}trunk@9 cf. /${PROJECT}trunk@1
 
 ------------------------------------------------------------------------
 r5 | $LOGNAME | date | 1 line
@@ -204,7 +199,7 @@ Made changes for future merge of this branch
 ------------------------------------------------------------------------
 r4 | $LOGNAME | date | 1 line
 
-Made a branch Created /branches/dev/Share/merge1 from /trunk@1.
+Made a branch Created /${PROJECT}branches/dev/Share/merge1 from /trunk@1.
 ------------------------------------------------------------------------
 r1 | $LOGNAME | date | 1 line
 
@@ -227,18 +222,18 @@ cd $TEST_DIR/wc
 run_pass "$TEST_KEY" fcm merge --non-interactive branches/dev/Share/merge1
 if $SVN_VERSION_IS_16; then
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-Eligible merge(s) from /branches/dev/Share/merge1@11: 11 10
+Eligible merge(s) from /${PROJECT}branches/dev/Share/merge1@11: 11 10
 --------------------------------------------------------------------------------
-Merge: /branches/dev/Share/merge1@11
- c.f.: /trunk@9
+Merge: /${PROJECT}branches/dev/Share/merge1@11
+ c.f.: /${PROJECT}trunk@9
 Merge succeeded.
 __OUT__
 else
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-Eligible merge(s) from /branches/dev/Share/merge1@11: 11 10
+Eligible merge(s) from /${PROJECT}branches/dev/Share/merge1@11: 11 10
 --------------------------------------------------------------------------------
-Merge: /branches/dev/Share/merge1@11
- c.f.: /trunk@9
+Merge: /${PROJECT}branches/dev/Share/merge1@11
+ c.f.: /${PROJECT}trunk@9
 Merge succeeded.
 --------------------------------------------------------------------------actual
 --- Merging differences between repository URLs into '.':
@@ -302,7 +297,7 @@ if $SVN_VERSION_IS_16; then
 Property changes on: .
 ___________________________________________________________________
 Added: svn:mergeinfo
-   Merged /branches/dev/Share/merge1:r2-11
+   Merged /${PROJECT}branches/dev/Share/merge1:r2-11
 
 Index: subroutine/hello_sub_dummy.h
 ===================================================================
@@ -457,7 +452,7 @@ Index: .
 Property changes on: .
 ___________________________________________________________________
 Added: svn:mergeinfo
-   Merged /branches/dev/Share/merge1:r4-11
+   Merged /${PROJECT}branches/dev/Share/merge1:r4-11
 __OUT__
 fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
@@ -493,7 +488,7 @@ M       lib/python/info/poems.py
 Commit message is as follows:
 --------------------------------------------------------------------------------
 foo
-Merged into /trunk: /branches/dev/Share/merge1@11 cf. /trunk@9
+Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@11 cf. /${PROJECT}trunk@9
 --------------------------------------------------------------------------------
 
 *** WARNING: YOU ARE COMMITTING TO THE TRUNK.
@@ -539,7 +534,7 @@ M       subroutine/hello_sub_dummy.h
 Commit message is as follows:
 --------------------------------------------------------------------------------
 foo
-Merged into /trunk: /branches/dev/Share/merge1@11 cf. /trunk@9
+Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@11 cf. /${PROJECT}trunk@9
 --------------------------------------------------------------------------------
 
 *** WARNING: YOU ARE COMMITTING TO THE TRUNK.
@@ -572,7 +567,7 @@ file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 r12 | $LOGNAME | date | 3 lines
 
 foo
-Merged into /trunk: /branches/dev/Share/merge1@11 cf. /trunk@9
+Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@11 cf. /${PROJECT}trunk@9
 
 ------------------------------------------------------------------------
 r9 | $LOGNAME | date | 1 line
@@ -601,18 +596,18 @@ TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-2
 run_pass "$TEST_KEY" fcm merge --non-interactive branches/dev/Share/merge1
 if $SVN_VERSION_IS_16; then
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-Eligible merge(s) from /branches/dev/Share/merge1@13: 13
+Eligible merge(s) from /${PROJECT}branches/dev/Share/merge1@13: 13
 --------------------------------------------------------------------------------
-Merge: /branches/dev/Share/merge1@13
- c.f.: /branches/dev/Share/merge1@11
+Merge: /${PROJECT}branches/dev/Share/merge1@13
+ c.f.: /${PROJECT}branches/dev/Share/merge1@11
 Merge succeeded.
 __OUT__
 else
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-Eligible merge(s) from /branches/dev/Share/merge1@13: 13
+Eligible merge(s) from /${PROJECT}branches/dev/Share/merge1@13: 13
 --------------------------------------------------------------------------------
-Merge: /branches/dev/Share/merge1@13
- c.f.: /branches/dev/Share/merge1@11
+Merge: /${PROJECT}branches/dev/Share/merge1@13
+ c.f.: /${PROJECT}branches/dev/Share/merge1@11
 Merge succeeded.
 --------------------------------------------------------------------------actual
 --- Merging r12 through r13 into '.':
@@ -642,7 +637,7 @@ if $SVN_VERSION_IS_16; then
 Property changes on: .
 ___________________________________________________________________
 Modified: svn:mergeinfo
-   Merged /branches/dev/Share/merge1:r12-13
+   Merged /${PROJECT}branches/dev/Share/merge1:r12-13
 
 Index: added_file
 ===================================================================
@@ -669,7 +664,7 @@ Index: .
 Property changes on: .
 ___________________________________________________________________
 Modified: svn:mergeinfo
-   Merged /branches/dev/Share/merge1:r12-13
+   Merged /${PROJECT}branches/dev/Share/merge1:r12-13
 __OUT__
 fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
@@ -695,7 +690,7 @@ M       added_file
 Commit message is as follows:
 --------------------------------------------------------------------------------
 foo
-Merged into /trunk: /branches/dev/Share/merge1@13 cf. /branches/dev/Share/merge1@11
+Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@13 cf. /${PROJECT}branches/dev/Share/merge1@11
 --------------------------------------------------------------------------------
 
 *** WARNING: YOU ARE COMMITTING TO THE TRUNK.
@@ -719,13 +714,13 @@ file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 r14 | $LOGNAME | date | 3 lines
 
 foo
-Merged into /trunk: /branches/dev/Share/merge1@13 cf. /branches/dev/Share/merge1@11
+Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@13 cf. /${PROJECT}branches/dev/Share/merge1@11
 
 ------------------------------------------------------------------------
 r12 | $LOGNAME | date | 3 lines
 
 foo
-Merged into /trunk: /branches/dev/Share/merge1@11 cf. /trunk@9
+Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@11 cf. /${PROJECT}trunk@9
 
 ------------------------------------------------------------------------
 r9 | $LOGNAME | date | 1 line
@@ -755,18 +750,18 @@ svn update -q
 run_pass "$TEST_KEY" fcm merge --non-interactive trunk
 if $SVN_VERSION_IS_16; then
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-Eligible merge(s) from /trunk@16: 15 14
+Eligible merge(s) from /${PROJECT}trunk@16: 15 14
 --------------------------------------------------------------------------------
-Merge: /trunk@15
- c.f.: /branches/dev/Share/merge1@13
+Merge: /${PROJECT}trunk@15
+ c.f.: /${PROJECT}branches/dev/Share/merge1@13
 Merge succeeded.
 __OUT__
 else
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-Eligible merge(s) from /trunk@16: 15 14
+Eligible merge(s) from /${PROJECT}trunk@16: 15 14
 --------------------------------------------------------------------------------
-Merge: /trunk@15
- c.f.: /branches/dev/Share/merge1@13
+Merge: /${PROJECT}trunk@15
+ c.f.: /${PROJECT}branches/dev/Share/merge1@13
 Merge succeeded.
 --------------------------------------------------------------------------actual
 --- Merging differences between repository URLs into '.':
@@ -796,8 +791,8 @@ if $SVN_VERSION_IS_16; then
 Property changes on: .
 ___________________________________________________________________
 Modified: svn:mergeinfo
-   Merged /trunk:r10-15
-   Merged /branches/dev/Share/merge1:r2-3
+   Merged /${PROJECT}trunk:r10-15
+   Merged /${PROJECT}branches/dev/Share/merge1:r2-3
 
 Index: added_file
 ===================================================================
@@ -826,7 +821,7 @@ Index: .
 Property changes on: .
 ___________________________________________________________________
 Modified: svn:mergeinfo
-   Merged /trunk:r10-15
+   Merged /${PROJECT}trunk:r10-15
 __OUT__
 fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
@@ -852,7 +847,7 @@ M       added_file
 Commit message is as follows:
 --------------------------------------------------------------------------------
 foo
-Merged into /branches/dev/Share/merge1: /trunk@15 cf. /branches/dev/Share/merge1@13
+Merged into /${PROJECT}branches/dev/Share/merge1: /${PROJECT}trunk@15 cf. /${PROJECT}branches/dev/Share/merge1@13
 --------------------------------------------------------------------------------
 
 *** WARNING: YOU ARE COMMITTING TO A Share BRANCH.
@@ -876,7 +871,7 @@ file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 r17 | $LOGNAME | date | 3 lines
 
 foo
-Merged into /branches/dev/Share/merge1: /trunk@15 cf. /branches/dev/Share/merge1@13
+Merged into /${PROJECT}branches/dev/Share/merge1: /${PROJECT}trunk@15 cf. /${PROJECT}branches/dev/Share/merge1@13
 
 ------------------------------------------------------------------------
 r16 | $LOGNAME | date | 1 line
@@ -894,7 +889,7 @@ edit on branch for merge repeat test
 r10 | $LOGNAME | date | 3 lines
 
 foo
-Merged into /branches/dev/Share/merge1: /trunk@9 cf. /trunk@1
+Merged into /${PROJECT}branches/dev/Share/merge1: /${PROJECT}trunk@9 cf. /${PROJECT}trunk@1
 
 ------------------------------------------------------------------------
 r5 | $LOGNAME | date | 1 line
@@ -903,7 +898,7 @@ Made changes for future merge of this branch
 ------------------------------------------------------------------------
 r4 | $LOGNAME | date | 1 line
 
-Made a branch Created /branches/dev/Share/merge1 from /trunk@1.
+Made a branch Created /${PROJECT}branches/dev/Share/merge1 from /trunk@1.
 ------------------------------------------------------------------------
 r1 | $LOGNAME | date | 1 line
 
@@ -922,18 +917,18 @@ TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-3
 run_pass "$TEST_KEY" fcm merge --non-interactive branches/dev/Share/merge1
 if $SVN_VERSION_IS_16; then
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-Eligible merge(s) from /branches/dev/Share/merge1@18: 18 17
+Eligible merge(s) from /${PROJECT}branches/dev/Share/merge1@18: 18 17
 --------------------------------------------------------------------------------
-Merge: /branches/dev/Share/merge1@18
- c.f.: /trunk@15
+Merge: /${PROJECT}branches/dev/Share/merge1@18
+ c.f.: /${PROJECT}trunk@15
 Merge succeeded.
 __OUT__
 else
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-Eligible merge(s) from /branches/dev/Share/merge1@18: 18 17
+Eligible merge(s) from /${PROJECT}branches/dev/Share/merge1@18: 18 17
 --------------------------------------------------------------------------------
-Merge: /branches/dev/Share/merge1@18
- c.f.: /trunk@15
+Merge: /${PROJECT}branches/dev/Share/merge1@18
+ c.f.: /${PROJECT}trunk@15
 Merge succeeded.
 --------------------------------------------------------------------------actual
 --- Merging differences between repository URLs into '.':
@@ -965,7 +960,7 @@ if $SVN_VERSION_IS_16; then
 Property changes on: .
 ___________________________________________________________________
 Modified: svn:mergeinfo
-   Merged /branches/dev/Share/merge1:r14-18
+   Merged /${PROJECT}branches/dev/Share/merge1:r14-18
 
 Index: added_directory/hello_constants_dummy.inc
 ===================================================================
@@ -992,7 +987,7 @@ Index: .
 Property changes on: .
 ___________________________________________________________________
 Modified: svn:mergeinfo
-   Merged /branches/dev/Share/merge1:r14-18
+   Merged /${PROJECT}branches/dev/Share/merge1:r14-18
 __OUT__
 fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
@@ -1019,7 +1014,7 @@ A  +    added_file.add
 Commit message is as follows:
 --------------------------------------------------------------------------------
 foo
-Merged into /trunk: /branches/dev/Share/merge1@18 cf. /trunk@15
+Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@18 cf. /${PROJECT}trunk@15
 --------------------------------------------------------------------------------
 
 *** WARNING: YOU ARE COMMITTING TO THE TRUNK.
@@ -1044,7 +1039,7 @@ file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 r19 | $LOGNAME | date | 3 lines
 
 foo
-Merged into /trunk: /branches/dev/Share/merge1@18 cf. /trunk@15
+Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@18 cf. /${PROJECT}trunk@15
 
 ------------------------------------------------------------------------
 r18 | $LOGNAME | date | 1 line
@@ -1054,7 +1049,7 @@ Made branch change - deleted ./added_directory/hello_constants_dummy.inc, copied
 r17 | $LOGNAME | date | 3 lines
 
 foo
-Merged into /branches/dev/Share/merge1: /trunk@15 cf. /branches/dev/Share/merge1@13
+Merged into /${PROJECT}branches/dev/Share/merge1: /${PROJECT}trunk@15 cf. /${PROJECT}branches/dev/Share/merge1@13
 
 ------------------------------------------------------------------------
 r16 | $LOGNAME | date | 1 line
@@ -1068,7 +1063,7 @@ Made trunk change - a simple edit of ./added_file
 r14 | $LOGNAME | date | 3 lines
 
 foo
-Merged into /trunk: /branches/dev/Share/merge1@13 cf. /branches/dev/Share/merge1@11
+Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@13 cf. /${PROJECT}branches/dev/Share/merge1@11
 
 ------------------------------------------------------------------------
 r13 | $LOGNAME | date | 1 line
@@ -1078,7 +1073,7 @@ Made branch change to add extra feature
 r12 | $LOGNAME | date | 3 lines
 
 foo
-Merged into /trunk: /branches/dev/Share/merge1@11 cf. /trunk@9
+Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@11 cf. /${PROJECT}trunk@9
 
 ------------------------------------------------------------------------
 r11 | $LOGNAME | date | 1 line
@@ -1088,7 +1083,7 @@ edit on branch for merge repeat test
 r10 | $LOGNAME | date | 3 lines
 
 foo
-Merged into /branches/dev/Share/merge1: /trunk@9 cf. /trunk@1
+Merged into /${PROJECT}branches/dev/Share/merge1: /${PROJECT}trunk@9 cf. /${PROJECT}trunk@1
 
 ------------------------------------------------------------------------
 r9 | $LOGNAME | date | 1 line
@@ -1105,7 +1100,7 @@ Made changes for future merge
 ------------------------------------------------------------------------
 r6 | $LOGNAME | date | 1 line
 
-Made a branch Created /branches/dev/Share/merge2 from /trunk@1.
+Made a branch Created /${PROJECT}branches/dev/Share/merge2 from /trunk@1.
 ------------------------------------------------------------------------
 r5 | $LOGNAME | date | 1 line
 
@@ -1113,7 +1108,7 @@ Made changes for future merge of this branch
 ------------------------------------------------------------------------
 r4 | $LOGNAME | date | 1 line
 
-Made a branch Created /branches/dev/Share/merge1 from /trunk@1.
+Made a branch Created /${PROJECT}branches/dev/Share/merge1 from /trunk@1.
 ------------------------------------------------------------------------
 r3 | $LOGNAME | date | 1 line
 
@@ -1147,10 +1142,10 @@ y
 __IN__
 if $SVN_VERSION_IS_16; then
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-Eligible merge(s) from /branches/dev/Share/merge1@20: 18 17 16 13 11 10 5
+Eligible merge(s) from /${PROJECT}branches/dev/Share/merge1@20: 18 17 16 13 11 10 5
 Enter a revision (or just press <return> for "18"): --------------------------------------------------------------------------------
-Merge: /branches/dev/Share/merge1@13
- c.f.: /trunk@1
+Merge: /${PROJECT}branches/dev/Share/merge1@13
+ c.f.: /${PROJECT}trunk@1
 -------------------------------------------------------------------------dry-run
 --- Merging r2 through r13 into '.':
 U    subroutine/hello_sub_dummy.h
@@ -1172,10 +1167,10 @@ Enter "y" or "n" (or just press <return> for "n"): Merge succeeded.
 __OUT__
 else
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-Eligible merge(s) from /branches/dev/Share/merge1@20: 18 17 16 13 11 10 5
+Eligible merge(s) from /${PROJECT}branches/dev/Share/merge1@20: 18 17 16 13 11 10 5
 Enter a revision (or just press <return> for "18"): --------------------------------------------------------------------------------
-Merge: /branches/dev/Share/merge1@13
- c.f.: /trunk@1
+Merge: /${PROJECT}branches/dev/Share/merge1@13
+ c.f.: /${PROJECT}trunk@1
 -------------------------------------------------------------------------dry-run
 --- Merging r4 through r13 into '.':
 U    subroutine/hello_sub_dummy.h
@@ -1260,8 +1255,8 @@ if $SVN_VERSION_IS_16; then
 Property changes on: .
 ___________________________________________________________________
 Added: svn:mergeinfo
-   Merged /trunk:r2-9
-   Merged /branches/dev/Share/merge1:r4-13
+   Merged /${PROJECT}trunk:r2-9
+   Merged /${PROJECT}branches/dev/Share/merge1:r4-13
 
 Index: subroutine/hello_sub_dummy.h
 ===================================================================
@@ -1432,8 +1427,8 @@ Index: .
 Property changes on: .
 ___________________________________________________________________
 Added: svn:mergeinfo
-   Merged /trunk:r2-9
-   Merged /branches/dev/Share/merge1:r4-13
+   Merged /${PROJECT}trunk:r2-9
+   Merged /${PROJECT}branches/dev/Share/merge1:r4-13
 __OUT__
 fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
@@ -1470,7 +1465,7 @@ M       lib/python/info/poems.py
 Commit message is as follows:
 --------------------------------------------------------------------------------
 foo
-Merged into /branches/dev/Share/merge2: /branches/dev/Share/merge1@13 cf. /trunk@1
+Merged into /${PROJECT}branches/dev/Share/merge2: /${PROJECT}branches/dev/Share/merge1@13 cf. /${PROJECT}trunk@1
 --------------------------------------------------------------------------------
 
 *** WARNING: YOU ARE COMMITTING TO A Share BRANCH.
@@ -1518,7 +1513,7 @@ M       subroutine/hello_sub_dummy.h
 Commit message is as follows:
 --------------------------------------------------------------------------------
 foo
-Merged into /branches/dev/Share/merge2: /branches/dev/Share/merge1@13 cf. /trunk@1
+Merged into /${PROJECT}branches/dev/Share/merge2: /${PROJECT}branches/dev/Share/merge1@13 cf. /${PROJECT}trunk@1
 --------------------------------------------------------------------------------
 
 *** WARNING: YOU ARE COMMITTING TO A Share BRANCH.
@@ -1552,7 +1547,7 @@ file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 r21 | $LOGNAME | date | 3 lines
 
 foo
-Merged into /branches/dev/Share/merge2: /branches/dev/Share/merge1@13 cf. /trunk@1
+Merged into /${PROJECT}branches/dev/Share/merge2: /${PROJECT}branches/dev/Share/merge1@13 cf. /${PROJECT}trunk@1
 
 ------------------------------------------------------------------------
 r20 | $LOGNAME | date | 1 line
@@ -1562,7 +1557,7 @@ Made branch change - added to ./module/hello_constants.f90
 r19 | $LOGNAME | date | 3 lines
 
 foo
-Merged into /trunk: /branches/dev/Share/merge1@18 cf. /trunk@15
+Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@18 cf. /${PROJECT}trunk@15
 
 ------------------------------------------------------------------------
 r18 | $LOGNAME | date | 1 line
@@ -1572,7 +1567,7 @@ Made branch change - deleted ./added_directory/hello_constants_dummy.inc, copied
 r17 | $LOGNAME | date | 3 lines
 
 foo
-Merged into /branches/dev/Share/merge1: /trunk@15 cf. /branches/dev/Share/merge1@13
+Merged into /${PROJECT}branches/dev/Share/merge1: /${PROJECT}trunk@15 cf. /${PROJECT}branches/dev/Share/merge1@13
 
 ------------------------------------------------------------------------
 r16 | $LOGNAME | date | 1 line
@@ -1586,7 +1581,7 @@ Made trunk change - a simple edit of ./added_file
 r14 | $LOGNAME | date | 3 lines
 
 foo
-Merged into /trunk: /branches/dev/Share/merge1@13 cf. /branches/dev/Share/merge1@11
+Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@13 cf. /${PROJECT}branches/dev/Share/merge1@11
 
 ------------------------------------------------------------------------
 r13 | $LOGNAME | date | 1 line
@@ -1596,7 +1591,7 @@ Made branch change to add extra feature
 r12 | $LOGNAME | date | 3 lines
 
 foo
-Merged into /trunk: /branches/dev/Share/merge1@11 cf. /trunk@9
+Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@11 cf. /${PROJECT}trunk@9
 
 ------------------------------------------------------------------------
 r11 | $LOGNAME | date | 1 line
@@ -1606,7 +1601,7 @@ edit on branch for merge repeat test
 r10 | $LOGNAME | date | 3 lines
 
 foo
-Merged into /branches/dev/Share/merge1: /trunk@9 cf. /trunk@1
+Merged into /${PROJECT}branches/dev/Share/merge1: /${PROJECT}trunk@9 cf. /${PROJECT}trunk@1
 
 ------------------------------------------------------------------------
 r9 | $LOGNAME | date | 1 line
@@ -1623,7 +1618,7 @@ Made changes for future merge
 ------------------------------------------------------------------------
 r6 | $LOGNAME | date | 1 line
 
-Made a branch Created /branches/dev/Share/merge2 from /trunk@1.
+Made a branch Created /${PROJECT}branches/dev/Share/merge2 from /trunk@1.
 ------------------------------------------------------------------------
 r5 | $LOGNAME | date | 1 line
 
@@ -1631,7 +1626,7 @@ Made changes for future merge of this branch
 ------------------------------------------------------------------------
 r4 | $LOGNAME | date | 1 line
 
-Made a branch Created /branches/dev/Share/merge1 from /trunk@1.
+Made a branch Created /${PROJECT}branches/dev/Share/merge1 from /trunk@1.
 ------------------------------------------------------------------------
 r3 | $LOGNAME | date | 1 line
 

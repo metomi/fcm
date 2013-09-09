@@ -24,12 +24,7 @@
 tests 6
 #-------------------------------------------------------------------------------
 setup
-init_repos ${TEST_PROJECT:-}
-REPOS_URL="file://"$(cd $TEST_DIR/test_repos && pwd)
-ROOT_URL=$REPOS_URL
-if [[ -n ${TEST_PROJECT:-} ]]; then
-    ROOT_URL=$REPOS_URL/$TEST_PROJECT
-fi
+init_repos
 init_merge_branches merge1 merge2 $REPOS_URL
 export SVN_EDITOR="sed -i 1i\foo"
 cd $TEST_DIR/wc
@@ -147,4 +142,5 @@ update: status of "$TEST_DIR/wc":
 __OUT__
 fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+teardown
 #-------------------------------------------------------------------------------

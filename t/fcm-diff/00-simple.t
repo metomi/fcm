@@ -24,12 +24,7 @@
 tests 3
 #-------------------------------------------------------------------------------
 setup
-init_repos ${TEST_PROJECT:-}
-REPOS_URL="file://"$(cd $TEST_DIR/test_repos && pwd)
-ROOT_URL=$REPOS_URL
-if [[ -n ${TEST_PROJECT:-} ]]; then
-    ROOT_URL=$REPOS_URL/$TEST_PROJECT
-fi
+init_repos
 init_branch_wc branch_test $REPOS_URL
 cd $TEST_DIR/wc
 FILE_LIST=$(find . -type f | sed "/\.svn/d" | sort | head -5)

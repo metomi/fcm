@@ -24,12 +24,7 @@
 tests 18
 #-------------------------------------------------------------------------------
 setup
-init_repos ${TEST_PROJECT:-}
-REPOS_URL="file://"$(cd $TEST_DIR/test_repos && pwd)
-ROOT_URL=$REPOS_URL
-if [[ -n ${TEST_PROJECT:-} ]]; then
-    ROOT_URL=$REPOS_URL/$TEST_PROJECT
-fi
+init_repos
 init_merge_branches merge1 merge2 $REPOS_URL
 cd $TEST_DIR/wc
 #-------------------------------------------------------------------------------
@@ -43,10 +38,10 @@ else
     START_REV=4
 fi
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-Eligible merge(s) from /branches/dev/Share/merge1@9: 5
+Eligible merge(s) from /${PROJECT}branches/dev/Share/merge1@9: 5
 --------------------------------------------------------------------------------
-Merge: /branches/dev/Share/merge1@5
- c.f.: /trunk@1
+Merge: /${PROJECT}branches/dev/Share/merge1@5
+ c.f.: /${PROJECT}trunk@1
 -------------------------------------------------------------------------dry-run
 --- Merging r$START_REV through r5 into '.':
 U    subroutine/hello_sub_dummy.h
@@ -85,18 +80,18 @@ export SVN_EDITOR="sed -i 1i\foo"
 run_pass "$TEST_KEY" fcm merge --non-interactive $ROOT_URL/branches/dev/Share/merge1
 if $SVN_VERSION_IS_16; then
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-Eligible merge(s) from /branches/dev/Share/merge1@9: 5
+Eligible merge(s) from /${PROJECT}branches/dev/Share/merge1@9: 5
 --------------------------------------------------------------------------------
-Merge: /branches/dev/Share/merge1@5
- c.f.: /trunk@1
+Merge: /${PROJECT}branches/dev/Share/merge1@5
+ c.f.: /${PROJECT}trunk@1
 Merge succeeded.
 __OUT__
 else
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-Eligible merge(s) from /branches/dev/Share/merge1@9: 5
+Eligible merge(s) from /${PROJECT}branches/dev/Share/merge1@9: 5
 --------------------------------------------------------------------------------
-Merge: /branches/dev/Share/merge1@5
- c.f.: /trunk@1
+Merge: /${PROJECT}branches/dev/Share/merge1@5
+ c.f.: /${PROJECT}trunk@1
 Merge succeeded.
 --------------------------------------------------------------------------actual
 --- Merging r$START_REV through r5 into '.':
@@ -163,7 +158,7 @@ if $SVN_VERSION_IS_16; then
 Property changes on: .
 ___________________________________________________________________
 Added: svn:mergeinfo
-   Merged /branches/dev/Share/merge1:r4-5
+   Merged /${PROJECT}branches/dev/Share/merge1:r4-5
 
 Index: subroutine/hello_sub_dummy.h
 ===================================================================
@@ -318,7 +313,7 @@ Index: .
 Property changes on: .
 ___________________________________________________________________
 Added: svn:mergeinfo
-   Merged /branches/dev/Share/merge1:r4-5
+   Merged /${PROJECT}branches/dev/Share/merge1:r4-5
 __OUT__
 fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
