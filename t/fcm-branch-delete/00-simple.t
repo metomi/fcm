@@ -24,12 +24,7 @@
 tests 12
 #-------------------------------------------------------------------------------
 setup
-init_repos ${TEST_PROJECT:-}
-REPOS_URL="file://"$(cd $TEST_DIR/test_repos && pwd)
-ROOT_URL=$REPOS_URL
-if [[ -n ${TEST_PROJECT:-} ]]; then
-    ROOT_URL=$REPOS_URL/$TEST_PROJECT
-fi
+init_repos
 init_branch branch_test $REPOS_URL
 init_branch_wc my_branch_test $REPOS_URL
 cd $TEST_DIR/wc
@@ -49,14 +44,8 @@ file_cmp "$TEST_KEY.out" "$TEST_KEY.out" </dev/null
 file_test "$TEST_KEY.err" "$TEST_KEY.err" -s
 teardown
 #-------------------------------------------------------------------------------
-init_repos ${TEST_PROJECT:-}
-REPOS_URL="file://"$(cd $TEST_DIR/test_repos && pwd)
-ROOT_URL=$REPOS_URL
-if [[ -n ${TEST_PROJECT:-} ]]; then
-    ROOT_URL=$REPOS_URL/$TEST_PROJECT
-fi
+init_repos
 init_branch_wc branch_test $REPOS_URL
-REPOS_URL="file://"$(cd $TEST_DIR/test_repos && pwd)
 cd $TEST_DIR/wc
 #-------------------------------------------------------------------------------
 # Tests fcm brm

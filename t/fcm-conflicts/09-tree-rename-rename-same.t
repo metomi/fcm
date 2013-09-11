@@ -25,12 +25,7 @@
 tests 33
 #-------------------------------------------------------------------------------
 setup
-init_repos ${TEST_PROJECT:-}
-REPOS_URL="file://"$(cd $TEST_DIR/test_repos && pwd)
-ROOT_URL=$REPOS_URL
-if [[ -n ${TEST_PROJECT:-} ]]; then
-    ROOT_URL=$REPOS_URL/$TEST_PROJECT
-fi
+init_repos
 init_branch ctrl $REPOS_URL
 init_branch_wc ren_ren $REPOS_URL
 # Set a special (null) fcm-graphic-merge diff editor.
@@ -89,7 +84,7 @@ cd $TEST_DIR/wc
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: rename, rename, diff rename, discard local, keep local
 TEST_KEY=$TEST_KEY_BASE-discard-keep
-fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ren_ren
+fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ren_ren >/dev/null
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 n
 y
@@ -132,7 +127,7 @@ cd $TEST_DIR/wc
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: rename, rename, diff rename, keep local, discard local
 TEST_KEY=$TEST_KEY_BASE-keep-discard
-fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ren_ren
+fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ren_ren >/dev/null
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 y
 n
@@ -182,7 +177,7 @@ cd $TEST_DIR/wc
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: rename, rename, diff rename, keep local, keep local
 TEST_KEY=$TEST_KEY_BASE-keep-keep
-fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ren_ren
+fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ren_ren >/dev/null
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 y
 y

@@ -24,12 +24,7 @@
 tests 12
 #-------------------------------------------------------------------------------
 setup
-init_repos ${TEST_PROJECT:-}
-REPOS_URL="file://"$(cd $TEST_DIR/test_repos && pwd)
-ROOT_URL=$REPOS_URL
-if [[ -n ${TEST_PROJECT:-} ]]; then
-    ROOT_URL=$REPOS_URL/$TEST_PROJECT
-fi
+init_repos
 init_branch_wc branch_test $REPOS_URL
 cd $TEST_DIR/wc
 #-------------------------------------------------------------------------------
@@ -46,7 +41,7 @@ A    $ROOT_URL/branches/dev/Share/my_branch_test
 --------------------------------------------------------------------------------
 Commit message is as follows:
 --------------------------------------------------------------------------------
-Created /branches/dev/Share/my_branch_test from /trunk@1.
+Created /${PROJECT}branches/dev/Share/my_branch_test from /${PROJECT}trunk@1.
 --------------------------------------------------------------------------------
 
 Committed revision 5.
@@ -64,12 +59,7 @@ __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 teardown
 #-------------------------------------------------------------------------------
-init_repos ${TEST_PROJECT:-}
-REPOS_URL="file://"$(cd $TEST_DIR/test_repos && pwd)
-ROOT_URL=$REPOS_URL
-if [[ -n ${TEST_PROJECT:-} ]]; then
-    ROOT_URL=$REPOS_URL/$TEST_PROJECT
-fi
+init_repos
 init_branch_wc branch_test $REPOS_URL
 cd $TEST_DIR/wc
 #-------------------------------------------------------------------------------
@@ -86,7 +76,7 @@ A    $ROOT_URL/branches/dev/Share/my_branch_test
 --------------------------------------------------------------------------------
 Commit message is as follows:
 --------------------------------------------------------------------------------
-Created /branches/dev/Share/my_branch_test from /branches/dev/Share/branch_test@4.
+Created /${PROJECT}branches/dev/Share/my_branch_test from /${PROJECT}branches/dev/Share/branch_test@4.
 --------------------------------------------------------------------------------
 
 Committed revision 5.

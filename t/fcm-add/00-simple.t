@@ -27,12 +27,7 @@ fi
 tests 24
 #-------------------------------------------------------------------------------
 setup
-init_repos ${TEST_PROJECT:-}
-REPOS_URL="file://"$(cd $TEST_DIR/test_repos && pwd)
-ROOT_URL=$REPOS_URL
-if [[ -n ${TEST_PROJECT:-} ]]; then
-    ROOT_URL=$REPOS_URL/$TEST_PROJECT
-fi
+init_repos
 init_branch_wc add $REPOS_URL
 mkdir $TEST_DIR/wc/added_directory1
 svn add -q $TEST_DIR/wc/added_directory1
@@ -60,12 +55,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 cd $TEST_DIR
 teardown
 #-------------------------------------------------------------------------------
-init_repos ${TEST_PROJECT:-}
-REPOS_URL="file://"$(cd $TEST_DIR/test_repos && pwd)
-ROOT_URL=$REPOS_URL
-if [[ -n ${TEST_PROJECT:-} ]]; then
-    ROOT_URL=$REPOS_URL/$TEST_PROJECT
-fi
+init_repos
 init_branch_wc add_c $REPOS_URL
 touch $TEST_DIR/wc/unversioned_file
 mkdir $TEST_DIR/wc/unversioned_directory

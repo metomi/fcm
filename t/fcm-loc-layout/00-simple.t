@@ -23,14 +23,9 @@
 #-------------------------------------------------------------------------------
 tests 24
 #-------------------------------------------------------------------------------
-set -eu
 setup
-init_repos ${TEST_PROJECT:-}
-REPOS_URL="file://"$(cd $TEST_DIR/test_repos && pwd)
-ROOT_URL=$REPOS_URL
-if [[ -n ${TEST_PROJECT:-} ]]; then
-    ROOT_URL=$REPOS_URL/$TEST_PROJECT
-fi
+unset TEST_PROJECT
+init_repos
 init_merge_branches merge1 merge2 $REPOS_URL
 export SVN_EDITOR="sed -i 1i\foo"
 cd $TEST_DIR/wc
@@ -101,8 +96,6 @@ teardown
 #-------------------------------------------------------------------------------
 setup
 init_repos_layout_roses
-REPOS_URL="file://"$(cd $TEST_DIR/test_repos && pwd)
-ROOT_URL=$REPOS_URL
 svn checkout -q $ROOT_URL/a/a/0/0/0/trunk $TEST_DIR/wc
 cd $TEST_DIR/wc
 #-------------------------------------------------------------------------------
