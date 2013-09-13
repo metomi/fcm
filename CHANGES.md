@@ -18,6 +18,8 @@ Changes that have significant impact on user experience.
 Lots of bug fixes and enhancements, and documentation improvements.
 The following are worth mentioning:
 
+\#39, #40, #41: CM commands are now tested under Subversion 1.8.
+
 \#37: fcm make: build: fixed hanging of `ext-iface` tasks when there is an
 unbalanced quote or bracket in a relevant Fortran source file.
 
