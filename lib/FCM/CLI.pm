@@ -218,7 +218,7 @@ sub _help {
     return;
 }
 
-# "fcm gui".
+# "fcm test-battery".
 sub _test_battery {
     my ($attrib_ref, $app, $option_ref, @args) = @_;
     exec("$FindBin::Bin/fcm_test_battery", @args);
