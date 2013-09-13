@@ -68,6 +68,7 @@ our %ACTION_OF = (
     'switch'        => _opt_func(
         'relocate', sub {$S->svn(@_)}, sub {$S->cm_switch(@_)},
     ),
+    'test-battery'  => \&_test_battery,
     'update'        => _sys_func(sub {$S->cm_update(@_)}),
     # Commands passed directly to "svn"
     map {($_ => _sys_func())} qw{
@@ -215,6 +216,12 @@ sub _help {
         }
     }
     return;
+}
+
+# "fcm gui".
+sub _test_battery {
+    my ($attrib_ref, $app, $option_ref, @args) = @_;
+    exec("$FindBin::Bin/fcm_test_battery", @args);
 }
 
 # Returns a function that select the alternate handler for the application. The

@@ -1,0 +1,17 @@
+=head1 NAME
+
+fcm test-battery (self-tests)
+
+=head1 SYNOPSIS
+
+Invokes the FCM self-tests.
+
+    fcm test-battery [PROVE_ARGS]
+
+=head1 ARGUMENTS
+
+PROVE_ARGS specifies override arguments for the 'prove' command. This is run
+from within the t/ subdirectory at the top of FCM's source tree.
+If not specified, the prove command will be run as 'prove -j 9 -r -s -f'.
+
+=cut
