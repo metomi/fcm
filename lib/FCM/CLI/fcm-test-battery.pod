@@ -1,0 +1,25 @@
+=head1 NAME
+
+fcm test-battery (self-tests)
+
+=head1 SYNOPSIS
+
+Invokes the FCM self-tests.
+
+    fcm test-battery [PROVE_ARGS]
+
+=over 4
+
+=item 1. If an environment TEST_REMOTE_HOST is set, run CM tests using an
+ auto-generated Subversion server on $TEST_REMOTE_HOST.
+
+=item 2. If an environment variable TEST_PROJECT is set, run CM tests using a
+ project sub-hierarchy in the test repositories.
+
+=head1 ARGUMENTS
+
+PROVE_ARGS specifies override arguments for the 'prove' command. This is run
+from within the t/ subdirectory at the top of FCM's source tree.
+If not specified, the prove command will be run as 'prove -j 9 -r -s -f'.
+
+=cut

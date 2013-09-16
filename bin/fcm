@@ -85,6 +85,7 @@ B<fcm> provides the following applications:
     loc-layout
     make
     mkpatch
+    test-battery
 
 B<fcm> overrides the following B<svn> applications:
 
