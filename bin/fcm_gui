@@ -26,10 +26,10 @@ use lib "$FindBin::Bin/../lib";
 use Cwd qw{cwd};
 use FCM::Context::Event;
 use FCM::Util;
-use Fcm::Config;
-use Fcm::Keyword;
-use Fcm::Timer qw{timestamp_command};
-use Fcm::Util qw{get_url_of_wc get_wct is_wc};
+use FCM1::Config;
+use FCM1::Keyword;
+use FCM1::Timer qw{timestamp_command};
+use FCM1::Util qw{get_url_of_wc get_wct is_wc};
 use File::Basename qw{basename};
 use File::Spec::Functions qw{catfile rel2abs};
 use Tk;
@@ -43,10 +43,10 @@ if (@ARGV) {
   chdir $dir if -d $dir;
 }
 
-Fcm::Keyword::set_util(FCM::Util->new());
+FCM1::Keyword::set_util(FCM::Util->new());
 
 # Get configuration settings
-my $config = Fcm::Config->new ();
+my $config = FCM1::Config->new ();
 $config->get_config ();
 
 # ------------------------------------------------------------------------------
@@ -1294,7 +1294,7 @@ sub invoke_cmd {
 
         # If the command is "checkout", change directory to working copy
         if (lc ($selsubcmd) eq 'checkout' && $subcmdvar{CHECKOUT}{URL}) {
-          my $url = Fcm::Keyword::expand($subcmdvar{CHECKOUT}{URL});
+          my $url = FCM1::Keyword::expand($subcmdvar{CHECKOUT}{URL});
           my $dir = $subcmdvar{CHECKOUT}{PATH}
                   ? $subcmdvar{CHECKOUT}{PATH}
                   : basename($url);

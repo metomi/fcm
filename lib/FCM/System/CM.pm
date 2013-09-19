@@ -24,8 +24,8 @@ package FCM::System::CM;
 use base qw{FCM::Class::CODE};
 
 use Cwd qw{cwd};
-use Fcm::Cm;
-use Fcm::Interactive;
+use FCM1::Cm;
+use FCM1::Interactive;
 use FCM::Context::Event;
 use FCM::Context::Locator;
 use FCM::System::CM::CommitMessage;
@@ -40,31 +40,31 @@ use Storable qw{dclone};
 # The (keys) named actions of this class and (values) their implementations.
 our %ACTION_OF = (
     cm_branch_create     => \&_cm_branch_create,
-    cm_branch_delete     => _fcm1_func(\&Fcm::Cm::cm_branch_delete),
-    cm_branch_diff       => _fcm1_func(\&Fcm::Cm::cm_branch_diff),
-    cm_branch_info       => _fcm1_func(\&Fcm::Cm::cm_branch_info),
+    cm_branch_delete     => _fcm1_func(\&FCM1::Cm::cm_branch_delete),
+    cm_branch_diff       => _fcm1_func(\&FCM1::Cm::cm_branch_diff),
+    cm_branch_info       => _fcm1_func(\&FCM1::Cm::cm_branch_info),
     cm_branch_list       => \&_cm_branch_list,
-    cm_commit            => _fcm1_func(\&Fcm::Cm::cm_commit),
+    cm_commit            => _fcm1_func(\&FCM1::Cm::cm_commit),
     cm_checkout          => \&_cm_checkout,
     cm_check_missing     => _fcm1_func(
-        \&Fcm::Cm::cm_check_missing,
+        \&FCM1::Cm::cm_check_missing,
         _opt_mod_st_check_handler_func('WC_STATUS_PATH'),
     ),
     cm_check_unknown     => _fcm1_func(
-        \&Fcm::Cm::cm_check_unknown,
+        \&FCM1::Cm::cm_check_unknown,
         _opt_mod_st_check_handler_func('WC_STATUS_PATH'),
     ),
     cm_diff              => \&_cm_diff,
     cm_loc_layout        => \&_cm_loc_layout,
-    cm_merge             => _fcm1_func(\&Fcm::Cm::cm_merge),
-    cm_mkpatch           => _fcm1_func(\&Fcm::Cm::cm_mkpatch),
+    cm_merge             => _fcm1_func(\&FCM1::Cm::cm_merge),
+    cm_mkpatch           => _fcm1_func(\&FCM1::Cm::cm_mkpatch),
     cm_project_create    => \&_cm_project_create,
     cm_resolve_conflicts => \&_cm_resolve_conflicts,
     cm_switch            => _fcm1_func(
-        \&Fcm::Cm::cm_switch, _opt_mod_st_check_handler_func('WC_STATUS'),
+        \&FCM1::Cm::cm_switch, _opt_mod_st_check_handler_func('WC_STATUS'),
     ),
     cm_update            => _fcm1_func(
-        \&Fcm::Cm::cm_update, _opt_mod_st_check_handler_func('WC_STATUS'),
+        \&FCM1::Cm::cm_update, _opt_mod_st_check_handler_func('WC_STATUS'),
     ),
     svn                  => \&_svn,
 );
@@ -85,12 +85,12 @@ __PACKAGE__->class(
 
 sub _init {
     my ($attrib_ref) = @_;
-    if (!defined(Fcm::Keyword::get_util())) {
-        Fcm::Keyword::set_util($attrib_ref->{util});
+    if (!defined(FCM1::Keyword::get_util())) {
+        FCM1::Keyword::set_util($attrib_ref->{util});
     }
     if ($attrib_ref->{'gui'}) {
-        Fcm::Interactive::set_impl(
-            'Fcm::Interactive::InputGetter::GUI',
+        FCM1::Interactive::set_impl(
+            'FCM1::Interactive::InputGetter::GUI',
             {geometry => $attrib_ref->{gui}},
         );
     }
@@ -102,9 +102,9 @@ sub _init {
         util => $attrib_ref->{util},
     });
     $attrib_ref->{svn} = FCM::System::CM::SVN->new({util => $attrib_ref->{util}});
-    Fcm::Cm::set_util($attrib_ref->{util});
-    Fcm::Cm::set_commit_message_util($attrib_ref->{commit_message_util});
-    Fcm::Cm::set_svn_util($attrib_ref->{svn});
+    FCM1::Cm::set_util($attrib_ref->{util});
+    FCM1::Cm::set_commit_message_util($attrib_ref->{commit_message_util});
+    FCM1::Cm::set_svn_util($attrib_ref->{svn});
 }
 
 # Create a branch in a project.
@@ -506,7 +506,7 @@ sub _cm_project_create {
     $target;
 }
 
-# Returns a simple wrapper to FCM 1 Fcm::Cm functions.
+# Returns a simple wrapper to FCM 1 FCM1::Cm functions.
 sub _fcm1_func {
     my ($action_ref, $opt_mod_ref) = @_;
     $opt_mod_ref ||= sub {};
@@ -517,7 +517,7 @@ sub _fcm1_func {
         $opt_mod_ref->($option_ref);
         eval {$action_ref->($option_ref, @args)};
         if ($@) {
-            if (!Fcm::Cm::Abort->caught($@)) {
+            if (!FCM1::Cm::Abort->caught($@)) {
                 die($@);
             }
             if (!($@->get_code() eq $@->NULL || $@->get_code() eq $@->USER)) {
@@ -538,7 +538,7 @@ sub _opt_mod_st_check_handler_func {
     sub {
         my $option_ref = shift();
         if (!$option_ref->{'non-interactive'}) {
-            $option_ref->{st_check_handler} = $Fcm::Cm::CLI_HANDLER_OF{$key};
+            $option_ref->{st_check_handler} = $FCM1::Cm::CLI_HANDLER_OF{$key};
         }
     };
 }
@@ -645,7 +645,7 @@ FCM::System::CM
 =head1 DESCRIPTION
 
 The FCM code management sub-system. This is currently a thin adaptor of
-L<Fcm::Cm|Fcm::Cm>.
+L<FCM1::Cm|FCM1::Cm>.
 
 =head1 METHODS
 
@@ -693,7 +693,7 @@ Implement the C<fcm project-create> command.
 =item $system->cm_update(\%option,@args)
 
 Thin adaptors for the corresponding code management functions in
-L<Fcm::Cm|Fcm::Cm>.
+L<FCM1::Cm|FCM1::Cm>.
 
 =item $system->svn($app,\%option,@args)
 

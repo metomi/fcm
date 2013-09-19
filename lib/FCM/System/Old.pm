@@ -23,13 +23,13 @@ package FCM::System::Old;
 use base qw{FCM::Class::CODE};
 
 use Cwd qw{cwd};
-use Fcm::Build;
-use Fcm::Config;
-use Fcm::Extract;
-#use Fcm::ExtractConfigComparator;
-use Fcm::Keyword;
+use FCM1::Build;
+use FCM1::Config;
+use FCM1::Extract;
+#use FCM1::ExtractConfigComparator;
+use FCM1::Keyword;
 
-my %CLASS_OF = (build => 'Fcm::Build', extract => 'Fcm::Extract');
+my %CLASS_OF = (build => 'FCM1::Build', extract => 'FCM1::Extract');
 
 my %KEY_OF = (
     'archive'     => 'ARCHIVE',
@@ -54,23 +54,23 @@ __PACKAGE__->class(
 
 sub _init {
     my ($attrib_ref) = @_;
-    if (!defined(Fcm::Keyword::get_util())) {
-        Fcm::Keyword::set_util($attrib_ref->{util});
+    if (!defined(FCM1::Keyword::get_util())) {
+        FCM1::Keyword::set_util($attrib_ref->{util});
     }
 }
 
 sub _config_compare {
     my ($attrib_ref, $option_hash_ref, @args) = @_;
-    $attrib_ref->{util}->class_load('Fcm::CmUrl');
-    $attrib_ref->{util}->class_load('Fcm::ExtractConfigComparator');
+    $attrib_ref->{util}->class_load('FCM1::CmUrl');
+    $attrib_ref->{util}->class_load('FCM1::ExtractConfigComparator');
     if (exists($option_hash_ref->{verbosity})) {
-        Fcm::Config->instance()->verbose($option_hash_ref->{verbosity});
+        FCM1::Config->instance()->verbose($option_hash_ref->{verbosity});
     }
     my %option = %{$option_hash_ref};
     if (exists($option{'wiki-format'})) {
         $option{'wiki'} = delete($option{'wiki-format'});
     }
-    my $system = Fcm::ExtractConfigComparator->new({files => \@args, %option});
+    my $system = FCM1::ExtractConfigComparator->new({files => \@args, %option});
     $system->invoke();
 }
 
@@ -81,7 +81,7 @@ sub _run {
             = split(qr{:}msx, join(':', @{$option_hash_ref->{targets}}));
     }
     if (exists($option_hash_ref->{verbosity})) {
-        Fcm::Config->instance()->verbose($option_hash_ref->{verbosity});
+        FCM1::Config->instance()->verbose($option_hash_ref->{verbosity});
     }
     my $system = $CLASS_OF{$key}->new();
     my $path_to_cfg = @args ? $args[0] : cwd();
