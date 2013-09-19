@@ -78,14 +78,14 @@ my %ACTION_OF = (
 );
 # Helper for "_event_e", list of exception classes and their formatters.
 our @E_FORMATTERS = (
-    ['Fcm::Cm::Exception'    , \&_format_e_cm            ],
-    ['Fcm::CLI::Exception'   , sub {$_[0]->get_message()}],
+    ['FCM1::Cm::Exception'    , \&_format_e_cm            ],
+    ['FCM1::CLI::Exception'   , sub {$_[0]->get_message()}],
     ['FCM::Class::Exception' , \&_format_e_class         ],
     ['FCM::CLI::Exception'   , \&_format_e_cli           ],
     ['FCM::System::Exception', \&_format_e_sys           ],
     ['FCM::Util::Exception'  , \&_format_e_util          ],
 );
-# Error format strings for Fcm::Cm::Exception.
+# Error format strings for FCM1::Cm::Exception.
 our %E_CM_FORMAT_FOR = (
     DIFF_PROJECTS     => "%s (target) and %s (source) are not related.\n",
     INVALID_BRANCH    => "%s: not a valid URL of a standard FCM branch.\n",

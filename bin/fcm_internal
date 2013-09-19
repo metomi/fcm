@@ -21,7 +21,7 @@
 use strict;
 use warnings;
 
-use Fcm::Timer qw{timestamp_command};
+use FCM1::Timer qw{timestamp_command};
 
 # Function declarations
 sub catfile;

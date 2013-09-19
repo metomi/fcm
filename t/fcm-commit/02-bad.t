@@ -41,7 +41,7 @@ file_cmp "$TEST_KEY.out" "$TEST_KEY.out" </dev/null
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" <<__ERR__
 [ERROR] File(s) missing:
 !                5   program/hello.F90
-[FAIL] Fcm::Cm::Abort: abort
+[FAIL] FCM1::Cm::Abort: abort
 
 __ERR__
 teardown
