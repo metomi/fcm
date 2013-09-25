@@ -5,18 +5,17 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
-## Next Release (2013-Q4)
+## 2013-09 (2013-09-26)
 
 ### Highlighted Changes
 
 Changes that have significant impact on user experience.
 
--None yet-
+-None-
 
-### Other Changes
+### Noteworthy Changes
 
-Lots of bug fixes and enhancements, and documentation improvements.
-The following are worth mentioning:
+Bug fixes and minor enhancements:
 
 \#45: An attempt to allow FCM to work under a case insensitive file system.
 
