@@ -58,6 +58,7 @@ sub _main {
         $opt_of{c},
         _props_to_opts($opt_of{D}, shellwords($P->($NAME .  '.defs'))),
         _props_to_opts($opt_of{I}, @include_paths),
+        _props_to_opts($opt_of{I}, shellwords($P->($NAME .  '.include-paths'))),
         _props_to_opts($opt_of{M}, @include_paths),
         shellwords($P->($NAME . '.flags')),
         $target->get_path_of_source(),

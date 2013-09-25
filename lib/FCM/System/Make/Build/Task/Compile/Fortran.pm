@@ -29,6 +29,7 @@ our %PROP_NO_PREPROCESS_OF = (
     'fc.flag-include'  => '-I%s',
     'fc.flag-module'   => '',
     'fc.flag-output'   => '-o%s',
+    'fc.include-paths' => '',
 );
 
 our %PROP_OF = (

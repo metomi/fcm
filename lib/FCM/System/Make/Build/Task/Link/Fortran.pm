@@ -32,6 +32,8 @@ our %PROP_OF = (
     'fc.flags-ld'      => '',
     'fc.flag-lib'      => '-l%s',
     'fc.flag-lib-path' => '-L%s',
+    'fc.libs'          => '',
+    'fc.lib-paths'     => '',
 );
 
 sub new {

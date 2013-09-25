@@ -845,14 +845,18 @@ build.source = $HOME/my-source-tree
 build.prop{fc} = ifort
 # Set Fortran compiler options
 build.prop{fc.flags} = -i8 -r8 -O3
-# Set Fortran linker options
-build.prop{fc.flags-ld} = -L/path/to/my-lib -lmine
+# Add include paths to Fortran compiler
+build.prop{fc.include-paths} = /a/path/to/include /more/path/to/include
+# Set link libraries for Fortran executables
+build.prop{fc.lib-paths} = /path/to/my-lib
+build.prop{fc.libs} = mine
 # Set C compiler/linker
 build.prop{cc} = icc
 # Set C compiler options
 build.prop{cc.flags} = -O3
-# Set C linker options
-build.prop{cc.flags-ld} = -L/path/to/my-lib -lmine
+# Set link libraries for C executables
+build.prop{cc.lib-paths} = /path/to/my-lib /path/to/your-lib
+build.prop{cc.libs} = mine yours
 # Set linker, if compiler cannot be used as linker
 #build.prop{ld} = ld
 </pre>
