@@ -120,7 +120,11 @@ $(function() {
             if (d_href) {
                 href = d_href + href;
             }
-            stack[0].append($("<li/>").append(
+            var padding = "";
+            for (var i = 0; i < stack.length - 1; i++) {
+                padding += "&nbsp;&nbsp;&nbsp;&nbsp;";
+            }
+            stack[0].append($("<li/>").html(padding).append(
                 $("<a/>", {"href": href}).html($(this).text())
             ));
 
