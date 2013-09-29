@@ -72,14 +72,15 @@ $(function() {
                                 });
                             }
                             else {
-                                icon.css("opacity", 0);
+                                icon.css("opacity", 0.1);
                             }
                         },
-                        "xml"
+                        "html"
                     )
-                    .error(function() {
+                    .error(function(b) {
+                        alert(b);
                         anchor.unbind("click");
-                        icon.css("opacity", 0);
+                        icon.css("opacity", 0.1);
                     });
                 });
             }
@@ -89,7 +90,7 @@ $(function() {
                 });
             }
             else {
-                icon.css("opacity", 0);
+                icon.css("opacity", 0.1);
             }
         });
     }
@@ -121,7 +122,7 @@ $(function() {
                 href = d_href + href;
             }
             var padding = "";
-            for (var i = 0; i < stack.length - 1; i++) {
+            for (var i = 0; i < stack.length; i++) {
                 padding += "&nbsp;&nbsp;&nbsp;&nbsp;";
             }
             stack[0].append($("<li/>").html(padding).append(
@@ -144,13 +145,13 @@ $(function() {
     var NODE;
 
     // Top page table of content
-    NODE = $("#main-content");
+    NODE = $(".fcm-top-content");
     if (NODE) {
         ul_collapse_expand(NODE, IS_MAIN);
     }
 
     // Table of content
-    NODE = $("#fcm-content");
+    NODE = $(".fcm-page-content");
     if (NODE) {
         if (content_gen(NODE)) {
             ul_collapse_expand(NODE);
@@ -158,7 +159,7 @@ $(function() {
     }
 
     // Display version information
-    NODE = $("#fcm-version");
+    NODE = $(".fcm-version");
     if (NODE) {
         NODE.text(FCM.VERSION);
     }
