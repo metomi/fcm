@@ -23,13 +23,14 @@ package FCM::System::Make::Build::Task::Compile::C;
 use base qw{FCM::System::Make::Build::Task::Compile};
 
 our %PROP_OF = (
-    'cc'              => 'gcc',
-    'cc.defs'         => '',
-    'cc.flags'        => '',
-    'cc.flag-compile' => '-c',
-    'cc.flag-define'  => '-D%s',
-    'cc.flag-include' => '-I%s',
-    'cc.flag-output'  => '-o%s',
+    'cc'               => 'gcc',
+    'cc.defs'          => '',
+    'cc.flags'         => '',
+    'cc.flag-compile'  => '-c',
+    'cc.flag-define'   => '-D%s',
+    'cc.flag-include'  => '-I%s',
+    'cc.flag-output'   => '-o%s',
+    'cc.include-paths' => '',
 );
 
 sub new {
