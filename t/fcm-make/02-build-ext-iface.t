@@ -34,7 +34,6 @@ file_cmp "$TEST_KEY.interface" build/include/t1.interface expected/t1.interface
 # We can ignore this problem, as it does not add to the interface
 TEST_KEY="$TEST_KEY_BASE-t2"
 TARGETS=t2.interface run_fail "$TEST_KEY" fcm make --new
-cat "$TEST_KEY.err"
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" <<__ERR__
 [FAIL] $PWD/src/t2.f90(2): syntax error
 

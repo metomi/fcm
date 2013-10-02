@@ -32,6 +32,8 @@ our %PROP_OF = (
     'cc.flags-ld'      => '',
     'cc.flag-lib'      => '-l%s',
     'cc.flag-lib-path' => '-L%s',
+    'cc.libs'          => '',
+    'cc.lib-paths'     => '',
 );
 
 sub new {
