@@ -20,8 +20,14 @@
 # Tests for "fcm make", "build.prop{fc.include-paths}".
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
+
+function get_compiler_log() {
+    sed '/^\[info\] shell(0.*) gfortran/!d;
+         /hello\.exe/d;
+         s/^\[info\] shell(0.*) //' .fcm-make/log
+}
 #-------------------------------------------------------------------------------
-tests 8
+tests 11
 cp -r $TEST_SOURCE_DIR/$TEST_KEY_BASE/* .
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE-control"
@@ -32,6 +38,11 @@ FCM_TEST_FC_INCLUDE_PATHS="$PWD/include/world1 $PWD/include/world2" \
     run_pass "$TEST_KEY" fcm make
 $PWD/build/bin/hello.exe >"$TEST_KEY.command.out"
 file_cmp "$TEST_KEY.command.out" "$TEST_KEY.command.out" <<<'Hello Earth'
+get_compiler_log >"$TEST_KEY.gfortran.log"
+file_cmp "$TEST_KEY.gfortran.log" "$TEST_KEY.gfortran.log" <<__LOG__
+gfortran -oo/world.o -c -I./include -I$PWD/include/world1 -I$PWD/include/world2 $PWD/src/world.f90
+gfortran -oo/hello.o -c -I./include -I$PWD/include/world1 -I$PWD/include/world2 $PWD/src/hello.f90
+__LOG__
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE-incr0"
 find build -type f -exec stat -c'%Y %n' {} \; | sort >"$TEST_KEY.mtime.old"
@@ -41,11 +52,18 @@ find build -type f -exec stat -c'%Y %n' {} \; | sort >"$TEST_KEY.mtime"
 file_cmp "$TEST_KEY.mtime" "$TEST_KEY.mtime.old" "$TEST_KEY.mtime"
 $PWD/build/bin/hello.exe >"$TEST_KEY.command.out"
 file_cmp "$TEST_KEY.command.out" "$TEST_KEY.command.out" <<<'Hello Earth'
+get_compiler_log >"$TEST_KEY.gfortran.log"
+file_cmp "$TEST_KEY.gfortran.log" "$TEST_KEY.gfortran.log" </dev/null
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE-incr1"
 FCM_TEST_FC_INCLUDE_PATHS="$PWD/include/world2 $PWD/include/world1" \
     run_pass "$TEST_KEY" fcm make
 $PWD/build/bin/hello.exe >"$TEST_KEY.command.out"
 file_cmp "$TEST_KEY.command.out" "$TEST_KEY.command.out" <<<'Hello Moon'
+get_compiler_log >"$TEST_KEY.gfortran.log"
+file_cmp "$TEST_KEY.gfortran.log" "$TEST_KEY.gfortran.log" <<__LOG__
+gfortran -oo/world.o -c -I./include -I$PWD/include/world2 -I$PWD/include/world1 $PWD/src/world.f90
+gfortran -oo/hello.o -c -I./include -I$PWD/include/world2 -I$PWD/include/world1 $PWD/src/hello.f90
+__LOG__
 #-------------------------------------------------------------------------------
 exit 0
