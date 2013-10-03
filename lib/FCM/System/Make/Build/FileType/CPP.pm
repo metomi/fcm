@@ -39,7 +39,7 @@ sub new {
     bless(
         FCM::System::Make::Build::FileType->new({
             id                    => 'cpp',
-            file_ext              => '.c .cpp',
+            file_ext              => '.c .m .cc .cp .cxx .cpp .CPP .c++ .C .mm .M',
             source_analyse_dep_of => {%SOURCE_ANALYSE_DEP_OF},
             source_to_targets     => \&_source_to_targets,
             target_file_ext_of    => {},

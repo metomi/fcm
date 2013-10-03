@@ -867,64 +867,126 @@ build.prop{cc.defs,fc.defs}[gen] = LOWERCASE UNDERSCORE
 
     <dt id="make.build.prop.cc">cc</dt>
 
-    <dd>The C/C++ compiler and linker. (default=<samp>gcc</samp>)</dd>
+    <dd>The C compiler and linker. (default=<samp>gcc</samp>)</dd>
 
     <dt id="make.build.prop.cc.defs">cc.defs</dt>
 
-    <dd>The C/C++ compiler will pre-define each word in this setting as a
+    <dd>The C compiler will pre-define each word in this setting as a
     macro.</dd>
 
     <dt id="make.build.prop.cc.flags">cc.flags</dt>
 
-    <dd>The options used by the C/C++ compiler at compile time.</dd>
+    <dd>The options used by the C compiler at compile time.</dd>
 
     <dt id="make.build.prop.cc.flags-ld">cc.flags-ld</dt>
 
-    <dd>The options used by the C/C++ compiler at link time.</dd>
+    <dd>The options used by the C compiler at link time.</dd>
 
     <dt id="make.build.prop.cc.flag-compile">cc.flag-compile</dt>
 
-    <dd>The option used by the C/C++ compiler to suppress the linking stage.
+    <dd>The option used by the C compiler to suppress the linking stage.
     (default=<samp>-c</samp>)</dd>
 
     <dt id="make.build.prop.cc.flag-define">cc.flag-define</dt>
 
-    <dd>The option used by the C/C++ compiler to define a macro.
+    <dd>The option used by the C compiler to define a macro.
     (default=<samp>-D%s</samp>)</dd>
 
     <dt id="make.build.prop.cc.flag-include">cc.flag-include</dt>
 
-    <dd>The option used by the C/C++ compiler to specify an include search
+    <dd>The option used by the C compiler to specify an include search
     path. (default=<samp>-I%s</samp>)</dd>
 
     <dt id="make.build.prop.cc.flag-lib">cc.flag-lib</dt>
 
-    <dd>The option used by the C/C++ compiler at link time to specify a
+    <dd>The option used by the C compiler at link time to specify a
     library. (default=<samp>-l%s</samp>)</dd>
 
     <dt id="make.build.prop.cc.flag-lib-path">cc.flag-lib-path</dt>
 
-    <dd>The option used by the C/C++ compiler at link time to specify a library
+    <dd>The option used by the C compiler at link time to specify a library
     search path. (default=<samp>-L%s</samp>)</dd>
 
     <dt id="make.build.prop.cc.flag-output">cc.flag-output</dt>
 
-    <dd>The option used by the C/C++ compiler to specify the output file name.
+    <dd>The option used by the C compiler to specify the output file name.
     (default=<samp>-o%s</samp>)</dd>
 
     <dt id="make.build.prop.cc.include-paths">cc.include-paths</dt>
 
-    <dd>The C/C++ compiler will add each directory in this setting as an include
+    <dd>The C compiler will add each directory in this setting as an include
     search path.</dd>
 
     <dt id="make.build.prop.cc.libs">cc.libs</dt>
 
-    <dd>The C/C++ linker will add each item in this setting as a link
+    <dd>The C linker will add each item in this setting as a link
     library.</dd>
 
     <dt id="make.build.prop.cc.lib-paths">cc.lib-paths</dt>
 
-    <dd>The C/C++ linker will add each directory in this setting as a library
+    <dd>The C linker will add each directory in this setting as a library
+    search path.</dd>
+
+    <dt id="make.build.prop.cxx">cxx</dt>
+
+    <dd>The C++ compiler and linker. (default=<samp>g++</samp>)</dd>
+
+    <dt id="make.build.prop.cxx.defs">cxx.defs</dt>
+
+    <dd>The C++ compiler will pre-define each word in this setting as a
+    macro.</dd>
+
+    <dt id="make.build.prop.cxx.flags">cxx.flags</dt>
+
+    <dd>The options used by the C++ compiler at compile time.</dd>
+
+    <dt id="make.build.prop.cxx.flags-ld">cxx.flags-ld</dt>
+
+    <dd>The options used by the C++ compiler at link time.</dd>
+
+    <dt id="make.build.prop.cxx.flag-compile">cxx.flag-compile</dt>
+
+    <dd>The option used by the C++ compiler to suppress the linking stage.
+    (default=<samp>-c</samp>)</dd>
+
+    <dt id="make.build.prop.cxx.flag-define">cxx.flag-define</dt>
+
+    <dd>The option used by the C++ compiler to define a macro.
+    (default=<samp>-D%s</samp>)</dd>
+
+    <dt id="make.build.prop.cxx.flag-include">cxx.flag-include</dt>
+
+    <dd>The option used by the C++ compiler to specify an include search
+    path. (default=<samp>-I%s</samp>)</dd>
+
+    <dt id="make.build.prop.cxx.flag-lib">cxx.flag-lib</dt>
+
+    <dd>The option used by the C++ compiler at link time to specify a
+    library. (default=<samp>-l%s</samp>)</dd>
+
+    <dt id="make.build.prop.cxx.flag-lib-path">cxx.flag-lib-path</dt>
+
+    <dd>The option used by the C++ compiler at link time to specify a library
+    search path. (default=<samp>-L%s</samp>)</dd>
+
+    <dt id="make.build.prop.cxx.flag-output">cxx.flag-output</dt>
+
+    <dd>The option used by the C++ compiler to specify the output file name.
+    (default=<samp>-o%s</samp>)</dd>
+
+    <dt id="make.build.prop.cxx.include-paths">cxx.include-paths</dt>
+
+    <dd>The C++ compiler will add each directory in this setting as an include
+    search path.</dd>
+
+    <dt id="make.build.prop.cxx.libs">cxx.libs</dt>
+
+    <dd>The C++ linker will add each item in this setting as a link
+    library.</dd>
+
+    <dt id="make.build.prop.cxx.lib-paths">cxx.lib-paths</dt>
+
+    <dd>The C++ linker will add each directory in this setting as a library
     search path.</dd>
 
     <dt id="make.build.prop.dep.bin">dep.bin</dt>
@@ -1029,8 +1091,13 @@ build.prop{cc.defs,fc.defs}[gen] = LOWERCASE UNDERSCORE
 
     <dt id="make.build.prop.file-ext.c">file-ext.c *</dt>
 
-    <dd>Specifies the extensions of a C/C++ source file. (default=<samp>.c
-    .cpp</samp>)</dd>
+    <dd>Specifies the extensions of a C source file.
+    (default=<samp>.c .i .m .mi</samp>)</dd>
+
+    <dt id="make.build.prop.file-ext.cxx">file-ext.cxx *</dt>
+
+    <dd>Specifies the extensions of a C++ source file.
+    (default=<samp>.cc .cp .cxx .cpp .CPP .c++ .C .mm .M .mii</samp>)</dd>
 
     <dt id="make.build.prop.file-ext.fortran">file-ext.fortran *</dt>
 
@@ -1177,8 +1244,8 @@ build.prop{cc.defs,fc.defs}[gen] = LOWERCASE UNDERSCORE
 
     <dt id="make.preprocess.prop.file-ext.cpp">file-ext.cpp *</dt>
 
-    <dd>Specifies the extensions of C/C++ source file. (default=<samp>.c
-    .cpp</samp>)</dd>
+    <dd>Specifies the extensions of C/C++ source file.
+    (default=<samp>.c .m .cc .cp .cxx .cpp .CPP .c++ .C .mm .M</samp>)</dd>
 
     <dt id="make.preprocess.prop.file-ext.fpp">file-ext.fpp *</dt>
 
