@@ -38,18 +38,21 @@ use Sys::Hostname qw{hostname};
 
 # The relative paths for locating files in a destination
 our %PATH_OF = (
-    'config'                => 'fcm-make.cfg',
-    'config-orig'           => 'fcm-make.cfg.orig',
-    'sys'                   => '.fcm-make',
-    'sys-cache'             => '.fcm-make/cache',
-    'sys-config-as-parsed'  => '.fcm-make/config-as-parsed.cfg',
-    'sys-config-on-success' => '.fcm-make/config-on-success.cfg',
-    'sys-ctx-uncompressed'  => '.fcm-make/ctx',
-    'sys-ctx'               => '.fcm-make/ctx.gz',
-    'sys-log'               => '.fcm-make/log',
-    'sys-lock'              => 'fcm-make.lock',
-    'sys-lock-info'         => 'fcm-make.lock/info.txt',
-    'target'                => '',
+    'config'                        => 'fcm-make.cfg',
+    'config-orig'                   => 'fcm-make.cfg.orig',
+    'sys'                           => '.fcm-make',
+    'sys-cache'                     => '.fcm-make/cache',
+    'sys-config-as-parsed'          => '.fcm-make/config-as-parsed.cfg',
+    'sys-config-as-parsed-symlink'  => 'fcm-make-as-parsed.cfg',
+    'sys-config-on-success'         => '.fcm-make/config-on-success.cfg',
+    'sys-config-on-success-symlink' => 'fcm-make-on-success.cfg',
+    'sys-ctx-uncompressed'          => '.fcm-make/ctx',
+    'sys-ctx'                       => '.fcm-make/ctx.gz',
+    'sys-log'                       => '.fcm-make/log',
+    'sys-log-symlink'               => 'fcm-make.log',
+    'sys-lock'                      => 'fcm-make.lock',
+    'sys-lock-info'                 => 'fcm-make.lock/info.txt',
+    'target'                        => '',
 );
 
 # Aliases to exception classes

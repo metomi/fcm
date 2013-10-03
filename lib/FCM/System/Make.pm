@@ -31,6 +31,7 @@ use FCM::System::Make::Mirror;
 use FCM::System::Make::Preprocess;
 use FCM::System::Make::Share::Config;
 use FCM::System::Make::Share::Dest;
+use File::Path qw{rmtree};
 use File::Spec::Functions qw{catfile};
 use File::Copy qw{copy};
 use File::Temp;
@@ -151,6 +152,10 @@ sub _dest_init {
         &&  copy($attrib_ref->{handle_log}->filename(), $log)
         &&  open(my $handle_log, '>>', $log)
     ) || return $E->throw($E->DEST_CREATE, $log, $!);
+    symlink(
+        $FCM::System::Make::Share::Dest::PATH_OF{'sys-log'},
+        $attrib_ref->{shared_util_of}{dest}->path($m_ctx, 'sys-log-symlink'),
+    );
     my $log_ctx = $attrib_ref->{util}->util_of_report()->get_ctx($m_ctx);
     $log_ctx->set_handle($handle_log);
 
@@ -161,6 +166,13 @@ sub _dest_init {
     (       close($attrib_ref->{handle_cfg})
         &&  copy($attrib_ref->{handle_cfg}->filename(), $cfg)
     ) || return $E->throw($E->DEST_CREATE, $cfg, $!);
+    _symlink(
+        $FCM::System::Make::Share::Dest::PATH_OF{'sys-config-as-parsed'},
+        $attrib_ref->{shared_util_of}{dest}->path(
+            $m_ctx,
+            'sys-config-as-parsed-symlink',
+        ),
+    );
 }
 
 # The main function of an instance of this class.
@@ -226,6 +238,13 @@ sub _main {
         $m_ctx,
         'sys-config-on-success',
     );
+    _symlink(
+        $FCM::System::Make::Share::Dest::PATH_OF{'sys-config-on-success'},
+        $attrib_ref->{shared_util_of}{dest}->path(
+            $m_ctx,
+            'sys-config-on-success-symlink',
+        ),
+    );
     _main_finally($attrib_ref, $m_ctx);
     return $m_ctx;
 }
@@ -238,6 +257,18 @@ sub _main_finally {
     $attrib_ref->{shared_util_of}{dest}->dest_done($m_ctx);
     my $log_ctx = $attrib_ref->{util}->util_of_report()->del_ctx($m_ctx);
     close($log_ctx->get_handle());
+}
+
+# Wrap "symlink".
+sub _symlink {
+    my ($source, $target) = @_;
+    if (-l $target && readlink($target) eq $source) {
+        return;
+    }
+    if (-e $target || -l $target) {
+        rmtree($target);
+    }
+    symlink($source, $target) || return $E->throw($E->DEST_CREATE, $target, $!);
 }
 
 # Wraps a piece of code with timer events.

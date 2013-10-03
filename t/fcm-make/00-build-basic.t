@@ -21,7 +21,7 @@
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
-tests 6
+tests 9
 cp -r $TEST_SOURCE_DIR/$TEST_KEY_BASE/* .
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE"
@@ -37,6 +37,9 @@ build/include/world.mod
 build/o/hello.o
 build/o/world.o
 __OUT__
+file_test "$TEST_KEY.log" fcm-make.log
+file_test "$TEST_KEY-as-parsed.cfg" fcm-make-as-parsed.cfg
+file_test "$TEST_KEY-on-success.cfg" fcm-make-on-success.cfg 
 run_pass "$TEST_KEY.exe" $PWD/build/bin/hello.exe
 file_cmp "$TEST_KEY.exe.out" "$TEST_KEY.exe.out" <<<'Hello Earth'
 #-------------------------------------------------------------------------------
