@@ -1,40 +1,45 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta name="generator" content=
-  "HTML Tidy for Linux/x86 (vers 1st December 2004), see www.w3.org" />
-
-  <title>External Distribution &amp; Collaboration for FCM Projects</title>
+  <title>FCM: External Distribution &amp; Collaboration for FCM Projects</title>
   <meta name="author" content="FCM team" />
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <link rel="stylesheet" type="text/css" href="../etc/fcm.css" />
-<script type="text/javascript" src="../etc/fcm.js">
-</script>
-<script type="text/javascript" src="../etc/fcm-version.js">
-</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="../etc/fcm-icon.png" type="image/png" />
+  <link rel="shortcut icon" href="../etc/fcm-icon.png" type="image/png" />
+  <link href="../etc/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen" />
+  <link href="../etc/fcm.css" rel="stylesheet" media="screen" />
 </head>
-
 <body>
-  <div id="body-header">
-    <a href="http://www.metoffice.gov.uk/research/collaboration/fcm/">
-    <img src="../etc/fcm.png" alt="FCM" />
-    </a>
-    <address>
-      &copy; British Crown Copyright 2006-11
-      <a href="http://www.metoffice.gov.uk">Met Office</a>.
-      See <a href="../etc/fcm-terms-of-use.html">Terms of Use</a>.<br />
-      This document is released under the <a href=
-      "http://www.nationalarchives.gov.uk/doc/open-government-licence/" rel=
-      "license">Open Government Licence</a>.<br />
-      <span id="fcm-version"></span>
-    </address>
+  <div class="navbar navbar-inverse">
+    <div class="navbar-inner">
+      <a class="brand" href=".."><span class="fcm-version">FCM</span></a>
+      <ul class="nav">
+        <li><a href="../installation/">Installation</a></li>
+
+        <li><a href="../user_guide/">User Guide</a></li>
+
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+          Misc Docs <b class="caret"></b></a>
+          <ul class="dropdown-menu">
+            <li class="active"><a href="#">Distribution &amp; Collaboration</a></li>
+
+            <li><a href="../fortran_standards/">Fortran Coding
+            Standard</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
   </div>
 
-  <h1>External Distribution &amp; Collaboration for FCM Projects</h1>
+  <div class="page-header">
+    <div class="fcm-page-content pull-right well well-small"></div>
+    <h1>FCM: Distribution &amp; Collaboration for FCM Projects</h1>
+  </div>
 
-  <div id="fcm-content"></div>
+  <div class="container">
+  <div class="row">
+  <div class="span12">
 
   <h2 id="introduction">Introduction</h2>
 
@@ -165,9 +170,11 @@
 
   <p>The recommended way of preparing changes is illustrated in Figure 1a:</p>
 
-  <p class="image"><img src="working-as-collaborator.png" alt=
-  "Figure 1a: working at the collaborator's site" /><br />
-  Figure 1a: working at the collaborator's site</p>
+  <p><strong>Figure 1a: working at the collaborator's
+  site</strong></p>
+
+  <p><img src="working-as-collaborator.png" alt=
+  "Figure 1a: working at the collaborator's site" class="img-polaroid" /></p>
 
   <p>The collaborator will create a shared package branch from the latest
   stable release on the trunk. This branch will contain all the changes that
@@ -186,9 +193,10 @@
   the local changes with those destined to be fed back. This is illustrated in
   Figure 1b:</p>
 
-  <p class="image"><img src="managing-local-changes.png" alt=
-  "Figure 1b: managing local changes" /><br />
-  Figure 1b: managing local changes</p>
+  <p><strong>Figure 1b: managing local changes</strong></p>
+
+  <p ><img src="managing-local-changes.png" alt=
+  "Figure 1b: managing local changes" class="img-polaroid" /></p>
 
   <h3 id="feedbackfcm">Feeding Back Changes Using FCM</h3>
 
@@ -204,9 +212,9 @@
   created from the repository revision which formed the basis of the changeset.
   This is illustrated in Figure 2:</p>
 
-  <p class="image"><img src="feeding-back-patch.png" alt=
-  "Figure 2: feeding back changes" /><br />
-  Figure 2: feeding back changes</p>
+  <p><strong>Figure 2: feeding back changes</strong></p>
+  <p><img src="feeding-back-patch.png" alt=
+  "Figure 2: feeding back changes" class="img-polaroid" /></p>
 
   <p>Patches will usually be exchanged in the form of a tarball. To apply the
   patch it must first be extracted to a directory. In this directory there
@@ -236,24 +244,32 @@
     which may not be the most desirable (although the logical changesets will
     still be available to examine on the import branch). This is illustrated in
     Figure 3a:
-
-      <p class="image"><img src="merging-patch-one.png" alt=
-      "Figure 3a: merging a patch in a single changeset" /><br />
-      Figure 3a: merging a patch in a single changeset</p>
     </li>
+  </ol>
 
+  <p><strong>Figure 3a: merging a patch in a single changeset</strong></p>
+
+  <p><img src="merging-patch-one.png" alt=
+  "Figure 3a: merging a patch in a single changeset"
+  class="img-polaroid" /></p>
+
+  <ol start="2">
     <li>As multiple changesets: each changeset in the branch will be merged
     into the trunk in order. This can be quite complicated and time consuming,
     especially if you have a large number of changesets and there are a lot of
     clashes. The advantage is that each logical changeset will retain its
     logical identity, which may be more desirable in the long run, when you
     come to inspect the history. This is illustrated in Figure 3b:
-
-      <p class="image"><img src="merging-patch-multi.png" alt=
-      "Figure 3b: merging a patch in multiple changesets" /><br />
-      Figure 3b: merging a patch in multiple changesets</p>
     </li>
+  </ol>
 
+  <p><strong>Figure 3b: merging a patch in multiple changesets</strong></p>
+
+  <p><img src="merging-patch-multi.png" alt=
+  "Figure 3b: merging a patch in multiple changesets"
+  class="img-polaroid" /></p>
+
+  <ol start="3">
     <li>As a mixture of the above: you may want to combine the above two
     approaches when it makes sense to do so. For example, there may be a series
     of small changesets that can be combined logically, or there may be a
@@ -275,9 +291,12 @@
   repository. This means that the collaborator's trunk will always be mirroring
   that of the central repository. This is illustrated in Figure 4:</p>
 
-  <p class="image"><img src="mirroring-trunk.png" alt=
-  "Figure 4: mirroring the trunk at the collaborator's site" /><br />
-  Figure 4: mirroring the trunk at the collaborator's site</p>
+  <p><strong>Figure 4: mirroring the trunk at the
+  collaborator's site</strong></p>
+
+  <p><img src="mirroring-trunk.png" alt=
+  "Figure 4: mirroring the trunk at the collaborator's site"
+  class="img-polaroid"/></p>
 
   <p>In order to be certain that the patch has worked correctly, we recommend
   that a check is performed to ensure that the new stable release on the trunk
@@ -293,9 +312,12 @@
   changes from the old branch to the new branch. The old branch should be
   deleted once it is no longer required. This is illustrated in Figure 5a:</p>
 
-  <p class="image"><img src="updating-branch.png" alt=
-  "Figure 5a: updating a branch to the latest stable release" /><br />
-  Figure 5a: updating a branch to the latest stable release</p>
+  <p><strong>Figure 5a: updating a branch to the latest
+  stable release</strong></p>
+
+  <p><img src="updating-branch.png" alt=
+  "Figure 5a: updating a branch to the latest stable release"
+  class="img-polaroid"/></p>
 
   <p>Note that the merge will be easiest if the old branch was created from the
   previous stable release. If it was created from the shared package branch
@@ -303,9 +325,12 @@
   FCM merge command would choose the wrong base for comparison). This is
   illustrated in Figure 5b:</p>
 
-  <p class="image"><img src="updating-shared-branch.png" alt=
-  "Figure 5b: updating a branch of the shared package branch" /><br />
-  Figure 5b: updating a branch of the shared package branch</p>
+  <p><strong>Figure 5b: updating a branch of the shared package
+  branch</strong></p>
+
+  <p><img src="updating-shared-branch.png" alt=
+  "Figure 5b: updating a branch of the shared package branch"
+  class="img-polaroid"/></p>
 
   <h3 id="other">Other Scenarios</h3>
 
@@ -440,5 +465,28 @@ patch -p0 &lt; my_patchfile
     <li><acronym title="intellectual property rights">IPR</acronym>, copyright
     and license issues should be agreed by all collaborators.</li>
   </ul>
+
+  </div>
+  </div>
+  </div>
+
+  <hr/>
+  <div class="container-fluid text-center">
+    <div class="row-fluid"><div class="span12">
+    <address><small>
+      &copy; British Crown Copyright 2006-13
+      <a href="http://www.metoffice.gov.uk">Met Office</a>.
+      See <a href="../etc/fcm-terms-of-use.html">Terms of Use</a>.<br />
+      This document is released under the British <a href=
+      "http://www.nationalarchives.gov.uk/doc/open-government-licence/" rel=
+      "license">Open Government Licence</a>.<br />
+    </small></address>
+    </div></div>
+  </div>
+
+  <script type="text/javascript" src="../etc/jquery.min.js"></script>
+  <script type="text/javascript" src="../etc/bootstrap/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="../etc/fcm.js"></script>
+  <script type="text/javascript" src="../etc/fcm-version.js"></script>
 </body>
 </html>

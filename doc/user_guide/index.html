@@ -1,505 +1,77 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta name="generator" content=
-  "HTML Tidy for Linux/x86 (vers 1st December 2004), see www.w3.org" />
-
-  <title>FCM User Guide</title>
+  <title>FCM: User Guide</title>
   <meta name="author" content="FCM team" />
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <link rel="stylesheet" type="text/css" href="../etc/fcm.css" />
-<script type="text/javascript" src="../etc/fcm.js">
-</script>
-<script type="text/javascript" src="../etc/fcm-version.js">
-</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="../etc/fcm-icon.png" type="image/png" />
+  <link rel="shortcut icon" href="../etc/fcm-icon.png" type="image/png" />
+  <link href="../etc/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen" />
+  <link href="../etc/fcm.css" rel="stylesheet" media="screen" />
 </head>
-
 <body>
-  <div id="body-header">
-    <a href="http://www.metoffice.gov.uk/research/collaboration/fcm/">
-    <img src="../etc/fcm.png" alt="FCM" />
-    </a>
-    <address>
-      &copy; British Crown Copyright 2006-12
-      <a href="http://www.metoffice.gov.uk">Met Office</a>.
-      See <a href="../etc/fcm-terms-of-use.html">Terms of Use</a>.<br />
-      This document is released under the <a href=
-      "http://www.nationalarchives.gov.uk/doc/open-government-licence/" rel=
-      "license">Open Government Licence</a>.<br />
-      <span id="fcm-version"></span>
-    </address>
+  <div class="navbar navbar-inverse">
+    <div class="navbar-inner">
+      <a class="brand" href=".."><span class="fcm-version">FCM</span></a>
+      <ul class="nav">
+        <li><a href="../installation/">Installation</a></li>
+
+        <li class="active"><a href=".">User Guide</a></li>
+
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+          Misc Docs <b class="caret"></b></a>
+          <ul class="dropdown-menu">
+            <li><a href="../collaboration/">Distribution &amp; Collaboration for
+            FCM Projects</a></li>
+
+            <li><a href="../fortran_standards/">Fortran Coding Standard</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
   </div>
 
-  <h1>FCM User Guide</h1>
+  <div class="page-header">
+    <h1>FCM: User Guide</h1>
+  </div>
+
+  <div class="container">
+  <div class="row">
+  <div class="span12">
 
   <h2>Contents</h2>
 
-  <ol>
+  <ul class="fcm-top-content unstyled">
     <li><a href="introduction.html">Introduction</a></li>
 
     <li><a href="overview.html">System Overview</a></li>
 
-    <li>
-      <a href="getting_started.html">Getting Started</a>
+    <li><a href="getting_started.html">Getting Started</a></li>
 
-      <ul>
-        <li><a href="getting_started.html#setup">How to set yourself up to run
-        FCM</a></li>
+    <li><a href="code_management.html">Code Management System</a></li>
 
-        <li><a href="getting_started.html#tutorial">Tutorial</a></li>
-      </ul>
-    </li>
+    <li><a href="working_practices.html">Code Management Working
+    Practices</a></li>
 
-    <li>
-      <a href="code_management.html">Code Management System</a>
+    <li><a href="make.html">FCM Make</a></li>
 
-      <ul>
-        <li>
-          <a href="code_management.html#svn">Using Subversion</a>
+    <li><a href="system_admin.html">System Administration</a></li>
 
-          <ul>
-            <li><a href="code_management.html#svn_concepts">Basic
-            Concepts</a></li>
-
-            <li>
-              <a href="code_management.html#svn_basic">Basic Command Line
-              Usage</a>
-
-              <ul>
-                <li><a href="code_management.html#svn_basic_keywords">URL &amp;
-                Revision Keywords</a></li>
-
-                <li><a href="code_management.html#svn_basic_diff">Examining
-                Changes</a></li>
-
-                <li><a href=
-                "code_management.html#svn_basic_conflicts">Resolving
-                Conflicts</a></li>
-
-                <li><a href="code_management.html#svn_basic_check">Adding and
-                Removing Files</a></li>
-
-                <li><a href="code_management.html#svn_basic_commit">Committing
-                Changes</a></li>
-              </ul>
-            </li>
-
-            <li>
-              <a href="code_management.html#svn_branching">Branching &amp;
-              Merging</a>
-
-              <ul>
-                <li><a href=
-                "code_management.html#svn_branching_create">Creating
-                Branches</a></li>
-
-                <li><a href="code_management.html#svn_branching_list">Listing
-                Branches Created by You or Other Users</a></li>
-
-                <li><a href="code_management.html#svn_branching_info">Getting
-                Information About Branches</a></li>
-
-                <li><a href=
-                "code_management.html#svn_branching_switch">Switching your
-                working copy to point to another branch</a></li>
-
-                <li><a href=
-                "code_management.html#svn_branching_delete">Deleting
-                Branches</a></li>
-
-                <li><a href=
-                "code_management.html#svn_branching_merge">Merging</a></li>
-              </ul>
-            </li>
-
-            <li>
-              <a href="code_management.html#svn_gui">Using the GUI</a>
-
-              <ul>
-                <li><a href="code_management.html#svn_gui_start">Starting the
-                GUI</a></li>
-
-                <li><a href="code_management.html#svn_gui_commands">GUI
-                Commands</a></li>
-              </ul>
-            </li>
-
-            <li><a href="code_management.html#svn_problems">Known Problems with
-            Subversion</a></li>
-          </ul>
-        </li>
-
-        <li>
-          <a href="code_management.html#trac">Using Trac</a>
-
-          <ul>
-            <li><a href="code_management.html#trac_login">Logging In</a></li>
-
-            <li><a href="code_management.html#trac_wiki">Using the Wiki
-            Pages</a></li>
-
-            <li><a href="code_management.html#trac_browser">Using the
-            Repository Browser</a></li>
-
-            <li><a href="code_management.html#trac_tickets">Using the Issue
-            Tracker</a></li>
-
-            <li><a href="code_management.html#trac_roadmap">Using the
-            Roadmap</a></li>
-
-            <li><a href="code_management.html#trac_timeline">Using the
-            Timeline</a></li>
-          </ul>
-        </li>
-      </ul>
-    </li>
-
-    <li>
-      <a href="working_practices.html">Code Management Working Practices</a>
-
-      <ul>
-        <li><a href="working_practices.html#changes">Making Changes</a></li>
-
-        <li><a href="working_practices.html#wc">Working Copies</a></li>
-
-        <li>
-          <a href="working_practices.html#branching">Branching &amp;
-          Merging</a>
-
-          <ul>
-            <li><a href="working_practices.html#branching_when">When to
-            Branch</a></li>
-
-            <li><a href="working_practices.html#branching_where">Where to
-            Branch From</a></li>
-
-            <li><a href="working_practices.html#branching_update">Merging From
-            the Trunk</a></li>
-
-            <li><a href="working_practices.html#branching_commit">Merging Back
-            to the Trunk</a></li>
-
-            <li><a href="working_practices.html#branching_delete">When to
-            Delete Branches</a></li>
-          </ul>
-        </li>
-
-        <li>
-          <a href="working_practices.html#binary">Working with Binary Files</a>
-
-          <ul>
-            <li><a href="working_practices.html#binary_conflicts">Resolving
-            Conflicts in Binary Files</a></li>
-
-            <li><a href="working_practices.html#binary_locking">Using
-            Locking</a></li>
-          </ul>
-        </li>
-
-        <li><a href="working_practices.html#messages">Commit Log
-        Messages</a></li>
-
-        <li>
-          <a href="working_practices.html#tickets">Trac Tickets</a>
-
-          <ul>
-            <li><a href="working_practices.html#tickets_create">Creating
-            Tickets</a></li>
-
-            <li><a href="working_practices.html#tickets_use">Using
-            Tickets</a></li>
-          </ul>
-        </li>
-
-        <li><a href="working_practices.html#packages">Creating
-        Packages</a></li>
-
-        <li><a href="working_practices.html#releases">Preparing System
-        Releases</a></li>
-
-        <li><a href="working_practices.html#rapid">Rapid vs Staged Development
-        Practices</a></li>
-      </ul>
-    </li>
-
-    <li>
-      <a href="make.html">FCM Make</a>
-
-      <ul>
-        <li><a href="make.html#introduction">Introduction</a></li>
-
-        <li><a href="make.html#concept">FCM Make: Concept</a></li>
-
-        <li>
-          <a href="make.html#extract">Extract</a>
-
-          <ul>
-            <li><a href="make.html#extract.basic">Extract:
-            Basic</a></li>
-
-            <li><a href="make.html#extract.path-root">Extract: Redefine
-            the Root of the Source Tree of a Project</a></li>
-
-            <li><a href="make.html#extract.path-filter">Extract: Filter
-            the Paths in the Source Tree of a Project</a></li>
-
-            <li><a href="make.html#extract.location-diff">Extract: Combining
-            Changes from Multiple Branches of a Project</a></li>
-
-            <li><a href="make.html#extract.inherit">Extract
-            Inheritance</a></li>
-
-            <li><a href="make.html#extract.diagnostic">Extract
-            Diagnostic</a></li>
-          </ul>
-        </li>
-
-        <li>
-          <a href="make.html#mirror">Mirror</a>
-
-          <ul>
-            <li><a href="make.html#mirror.basic">Mirror: Basic</a></li>
-
-            <li><a href="make.html#mirror.diagnostic">Mirror Diagnostic</a></li>
-          </ul>
-        </li>
-
-        <li>
-          <a href="make.html#build">Build</a>
-
-          <ul>
-            <li><a href="make.html#build.basic">Build: Basic</a></li>
-
-            <li><a href="make.html#build.source-locations">Build Source
-            Locations</a></li>
-
-            <li><a href="make.html#build.source-ns">Build Source
-            Name-spaces and Properties</a></li>
-
-            <li><a href="make.html#build.source-types">Build Source
-            Types</a></li>
-
-            <li><a href="make.html#build.source-analysis">Build Source
-            Analysis</a></li>
-
-            <li><a href="make.html#build.target-source">Build Targets from
-            Source Files</a></li>
-
-            <li><a href="make.html#build.target-source-fortran">Build Targets
-            from Source Files: Fortran Specifics</a></li>
-
-            <li><a href="make.html#build.target-selection">Build Targets
-            Selection and Rename</a></li>
-
-            <li><a href="make.html#build.target-file-ext">Build Targets File
-            Extensions</a></li>
-
-            <li><a href="make.html#build.target-ns">Build Targets from
-            Name-space</a></li>
-
-            <li><a href="make.html#build.target-update">Build Targets
-            Update in Incremental Mode</a></li>
-
-            <li><a href="make.html#build.inherit">Build
-            Inheritance</a></li>
-
-            <li><a href="make.html#build.diagnostic">Build
-            Diagnostic</a></li>
-          </ul>
-        </li>
-
-        <li>
-          <a href="make.html#preprocess">Preprocess</a>
-
-          <ul>
-            <li><a href="make.html#preprocess.basic">Preprocess: Basic</a></li>
-
-            <li><a href="make.html#preprocess.source-type">Preprocess
-            Source Types</a></li>
-
-            <li><a href="make.html#preprocess.source-analysis">Preprocess
-            Source Analysis</a></li>
-
-            <li><a href="make.html#preprocess.target-source">Preprocess
-            Targets from Source Files</a></li>
-          </ul>
-        </li>
-      </ul>
-    </li>
-
-    <li>
-      <a href="system_admin.html">System Administration</a>
-
-      <ul>
-        <li>
-          <a href="system_admin.html#svn">Subversion</a>
-
-          <ul>
-            <li><a href="system_admin.html#svn_layout">Repository
-            Layout</a></li>
-
-            <li><a href="system_admin.html#svn_create">Creating a
-            Repository</a></li>
-
-            <li><a href="system_admin.html#svn_access">Access Control</a></li>
-
-            <li><a href="system_admin.html#svn_hosting">Repository
-            Hosting</a></li>
-          </ul>
-        </li>
-
-        <li>
-          <a href="system_admin.html#trac">Trac</a>
-
-          <ul>
-            <li><a href="system_admin.html#trac_config">Trac
-            Configuration</a></li>
-
-            <li><a href="system_admin.html#trac_hosting">Trac Hosting</a></li>
-          </ul>
-        </li>
-
-        <li><a href="system_admin.html#fcm-keywords">FCM Keywords</a></li>
-
-        <li><a href="system_admin.html#make-cfg">FCM Make Configuration</a></li>
-
-        <li><a href="system_admin.html#alternate_versions">Maintaining
-        Alternate Versions of Namelists and Data Files</a></li>
-
-        <li><a href="system_admin.html#work-practice">Defining Working
-        Practices and Policies</a></li>
-      </ul>
-    </li>
-
-    <li>
-      <a href="command_ref.html">FCM Command Reference</a>
-
-      <ul>
-        <li><a href="command_ref.html#introduction">Introduction</a></li>
-
-        <li><a href="command_ref.html#env">Environment Variables</a></li>
-
-        <li><a href="command_ref.html#fcm-add">fcm add</a></li>
-
-        <li><a href="command_ref.html#fcm-branch">fcm branch</a></li>
-
-        <li><a href="command_ref.html#fcm-branch-create">fcm
-        branch-create</a></li>
-
-        <li><a href="command_ref.html#fcm-branch-delete">fcm
-        branch-delete</a></li>
-
-        <li><a href="command_ref.html#fcm-branch-diff">fcm branch-diff</a></li>
-
-        <li><a href="command_ref.html#fcm-branch-info">fcm branch-info</a></li>
-
-        <li><a href="command_ref.html#fcm-branch-list">fcm branch-list</a></li>
-
-        <li><a href="command_ref.html#fcm-browse">fcm browse</a></li>
-
-        <li><a href="command_ref.html#fcm-build">fcm build</a></li>
-
-        <li><a href="command_ref.html#fcm-cfg-print">fcm cfg-print</a></li>
-
-        <li><a href="command_ref.html#fcm-cmp-ext-cfg">fcm cmp-ext-cfg</a></li>
-
-        <li><a href="command_ref.html#fcm-commit">fcm commit</a></li>
-
-        <li><a href="command_ref.html#fcm-conflicts">fcm conflicts</a></li>
-
-        <li><a href="command_ref.html#fcm-delete">fcm delete</a></li>
-
-        <li><a href="command_ref.html#fcm-diff">fcm diff</a></li>
-
-        <li><a href="command_ref.html#fcm-export-items">fcm
-        export-items</a></li>
-
-        <li><a href="command_ref.html#fcm-extract">fcm extract</a></li>
-
-        <li><a href="command_ref.html#fcm-gui">fcm gui</a></li>
-
-        <li><a href="command_ref.html#fcm-keyword-print">fcm
-        keyword-print</a></li>
-
-        <li><a href="command_ref.html#fcm-loc-layout">fcm loc-layout</a></li>
-
-        <li><a href="command_ref.html#fcm-make">fcm make</a></li>
-
-        <li><a href="command_ref.html#fcm-merge">fcm merge</a></li>
-
-        <li><a href="command_ref.html#fcm-mkpatch">fcm mkpatch</a></li>
-
-        <li><a href="command_ref.html#fcm-project-create">fcm
-        project-create</a></li>
-
-        <li><a href="command_ref.html#fcm-switch">fcm switch</a></li>
-
-        <li><a href="command_ref.html#fcm-update">fcm update</a></li>
-
-        <li><a href="command_ref.html#svn">Other Subversion Commands</a></li>
-      </ul>
-    </li>
+    <li><a href="command_ref.html">FCM Command Reference</a></li>
 
     <li><a href="api.html">A Brief Introduction to the FCM Perl API</a></li>
-  </ol>
+  </ul>
 
   <p>Annex:</p>
 
-  <ul>
+  <ul class="fcm-top-content unstyled">
     <li><a href="annex_quick_ref.html">Quick reference</a></li>
 
     <li><a href="annex_quick_ref_tree_conflicts.html">Quick reference: Tree
     Conflict Resolution</a></li>
 
-    <li>
-      <a href="annex_cfg.html">FCM Configuration File</a>
-
-      <ul>
-        <li>
-          <a href="annex_cfg.html#syntax">Syntax</a>
-
-          <ul>
-            <li><a href="annex_cfg.html#syntax.comment">Syntax:
-            comment</a></li>
-
-            <li><a href="annex_cfg.html#syntax.declaration">Syntax:
-            declaration</a></li>
-
-            <li><a href="annex_cfg.html#syntax.variable">Syntax:
-            variable</a></li>
-
-            <li><a href="annex_cfg.html#syntax.include">Syntax:
-            include</a></li>
-          </ul>
-        </li>
-
-        <li><a href="annex_cfg.html#keyword">FCM Keyword
-        Configuration</a></li>
-
-        <li><a href="annex_cfg.html#external">FCM External
-        Configuration</a></li>
-
-        <li>
-          <a href="annex_cfg.html#make">FCM Make Configuration</a>
-
-          <ul>
-            <li><a href="annex_cfg.html#make.extract">FCM Make
-            Configuration: Extract</a></li>
-
-            <li><a href="annex_cfg.html#make.mirror">FCM Make
-            Configuration: Mirror</a></li>
-
-            <li><a href="annex_cfg.html#make.build">FCM Make
-            Configuration: Build</a></li>
-
-            <li><a href="annex_cfg.html#make.preprocess">FCM Make
-            Configuration: Preprocess</a></li>
-          </ul>
-        </li>
-      </ul>
-    </li>
+    <li><a href="annex_cfg.html">FCM Configuration File</a></li>
 
     <li><a href="annex_fcm_cfg.html">Declarations in FCM 1 central/user
     configuration file</a></li>
@@ -514,5 +86,28 @@
     <li><a href="annex_bld_cfg.html">Declarations in FCM 1 build
     configuration file</a></li>
   </ul>
+
+  </div>
+  </div>
+  </div>
+
+  <hr/>
+  <div class="container-fluid text-center">
+    <div class="row-fluid"><div class="span12">
+    <address><small>
+      &copy; British Crown Copyright 2006-13
+      <a href="http://www.metoffice.gov.uk">Met Office</a>.
+      See <a href="../etc/fcm-terms-of-use.html">Terms of Use</a>.<br />
+      This document is released under the British <a href=
+      "http://www.nationalarchives.gov.uk/doc/open-government-licence/" rel=
+      "license">Open Government Licence</a>.<br />
+    </small></address>
+    </div></div>
+  </div>
+
+  <script type="text/javascript" src="../etc/jquery.min.js"></script>
+  <script type="text/javascript" src="../etc/bootstrap/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="../etc/fcm.js"></script>
+  <script type="text/javascript" src="../etc/fcm-version.js"></script>
 </body>
 </html>
