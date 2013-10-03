@@ -33,10 +33,18 @@ See <http://metomi.github.io/fcm/doc/etc/fcm-terms-of-use.html>.
 
 See <http://metomi.github.io/fcm/doc/installation/>.
 
-## Acknowledgement
+## Code Contributors
 
-Code contributors:
 * Jim Bolton (Met Office, UK)
 * Ben Fitzpatrick (Met Office, UK)
 * Dave Matthews (Met Office, UK)
 * Matt Shin (Met Office, UK)
+
+## Acknowledgement for non-FCM Work
+
+Licences for non-FCM works included in this distribution can be
+found in the licences/ directory.
+
+doc/etc/bootstrap/:
+* Unmodified external software library copyright 2013 Twitter Inc
+  released under the Apache 2.0 license. See <http://getbootstrap.com/>.

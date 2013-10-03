@@ -1,52 +1,104 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta name="generator" content=
-  "HTML Tidy for Linux/x86 (vers 1st December 2004), see www.w3.org" />
-
   <title>FCM Documentation</title>
   <meta name="author" content="FCM team" />
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <link rel="stylesheet" type="text/css" href="etc/fcm.css" />
-<script type="text/javascript" src="etc/fcm.js">
-</script>
-<script type="text/javascript" src="etc/fcm-version.js">
-</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="etc/fcm-icon.png" type="image/png" />
+  <link rel="shortcut icon" href="etc/fcm-icon.png" type="image/png" />
+  <link href="etc/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen" />
 </head>
-
 <body>
-  <div id="body-header">
-    <a href="http://www.metoffice.gov.uk/research/collaboration/fcm/">
-    <img src="etc/fcm.png" alt="FCM" />
-    </a>
-    <address>
-      &copy; British Crown Copyright 2006-12
-      <a href="http://www.metoffice.gov.uk">Met Office</a>.
-      See <a href="etc/fcm-terms-of-use.html">Terms of Use</a>.<br />
-      This document is released under the <a href=
-      "http://www.nationalarchives.gov.uk/doc/open-government-licence/" rel=
-      "license">Open Government Licence</a>.<br />
-      <span id="fcm-version"></span>
-    </address>
+  <div class="navbar navbar-inverse">
+    <div class="navbar-inner">
+      <a class="active brand" href="#"><span class="fcm-version">FCM</span></a>
+      <ul class="nav">
+        <li><a href="installation/">Installation</a></li>
+
+        <li><a href="user_guide/">User Guide</a></li>
+
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+          Misc Docs <b class="caret"></b></a>
+          <ul class="dropdown-menu">
+            <li><a href="collaboration/">Distribution &amp; Collaboration for
+            FCM Projects</a></li>
+
+            <li><a href="fortran_standards/">Fortran Coding Standard</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="container">
+  <div class="row">
+  <div class="span12">
+  <div class="hero-unit">
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span12">
+          <h1>FCM</h1>
+        </div>
+      </div>
+    
+      <div class="row-fluid">
+        <div class="span6 well">
+          <h2>Build</h2>
+
+          <p>A powerful build system for modern Fortran software
+          applications.</p>
+        </div>
+
+        <div class="span6 well">
+          <h2>Version Control</h2>
+
+          <p>Wrappers to the Subversion version control system,
+          usage conventions and processes for scientific software
+          development.</p>
+        </div>
+      </div>
+
+      <div class="row-fluid text-center">
+        <div class="span4">
+          <p><a class="btn btn-primary btn-block" href=
+          "https://github.com/metomi/fcm/releases/">
+          <i class="icon-download icon-white"></i>
+          Get FCM from Github</a></p>
+        </div>
+        <div class="span4">
+          <p><a class="btn btn-primary btn-block" href="installation/">
+          <i class="icon-wrench icon-white"></i>
+          Read the FCM Installation Guide</a></p>
+        </div>
+        <div class="span4">
+          <p><a class="btn btn-primary btn-block" href="user_guide/">
+          <i class="icon-user icon-white"></i>
+          Read the FCM User Guide</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+  </div>
   </div>
 
-  <h1>FCM Documentation</h1>
+  <hr/>
+  <div class="container-fluid text-center">
+    <div class="row-fluid"><div class="span12">
+    <address><small>
+      &copy; British Crown Copyright 2006-13
+      <a href="http://www.metoffice.gov.uk">Met Office</a>.
+      See <a href="etc/fcm-terms-of-use.html">Terms of Use</a>.<br />
+      This document is released under the British <a href=
+      "http://www.nationalarchives.gov.uk/doc/open-government-licence/" rel=
+      "license">Open Government Licence</a>.<br />
+    </small></address>
+    </div></div>
+  </div>
 
-  <h2>Contents</h2>
-
-  <ul>
-    <li><a href="release_notes/">Release Notes</a></li>
-
-    <li><a href="installation/">Installation</a></li>
-
-    <li><a href="user_guide/">User Guide</a></li>
-
-    <li><a href="collaboration/">External Distribution &amp; Collaboration for
-    FCM Projects</a></li>
-
-    <li><a href="fortran_standards/">Fortran coding standard for FCM</a></li>
-  </ul>
+  <script type="text/javascript" src="etc/jquery.min.js"></script>
+  <script type="text/javascript" src="etc/bootstrap/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="etc/fcm.js"></script>
+  <script type="text/javascript" src="etc/fcm-version.js"></script>
 </body>
 </html>
