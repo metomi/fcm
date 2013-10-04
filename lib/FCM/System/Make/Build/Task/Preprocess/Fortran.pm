@@ -23,11 +23,12 @@ package FCM::System::Make::Build::Task::Preprocess::Fortran;
 use base qw{FCM::System::Make::Build::Task::Preprocess};
 
 our %PROP_OF = (
-    'fpp'              => 'cpp',
-    'fpp.defs'         => '',
-    'fpp.flags'        => '-P -traditional',
-    'fpp.flag-define'  => '-D%s',
-    'fpp.flag-include' => '-I%s',
+    'fpp'               => 'cpp',
+    'fpp.defs'          => '',
+    'fpp.flags'         => '-P -traditional',
+    'fpp.flag-define'   => '-D%s',
+    'fpp.flag-include'  => '-I%s',
+    'fpp.include-paths' => '',
 );
 
 sub new {

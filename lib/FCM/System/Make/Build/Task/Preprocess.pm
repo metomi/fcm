@@ -53,6 +53,7 @@ sub _main {
         shellwords($P->($NAME . '.flags')),
         _props_to_opts($opt_of{D}, shellwords($P->($NAME .  '.defs'))),
         _props_to_opts($opt_of{I}, @include_paths),
+        _props_to_opts($opt_of{I}, shellwords($P->($NAME .  '.include-paths'))),
         $target->get_path_of_source(),
     );
     my %value_of = %{$attrib_ref->{util}->shell_simple(\@command)};
