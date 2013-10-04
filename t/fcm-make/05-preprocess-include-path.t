@@ -50,7 +50,6 @@ file_cmp "$TEST_KEY.cpp.log" "$TEST_KEY.cpp.log" </dev/null
 ##-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE-incr1"
 FCM_TEST_FPP_INCLUDE_PATHS="$PWD/include/world2" run_pass "$TEST_KEY" fcm make
-$PWD/build/bin/hello.exe >"$TEST_KEY.command.out"
 file_grep "$TEST_KEY.world.F90" "world1 = 'Moon'" $PWD/preprocess/src/world.F90
 get_cpp_log >"$TEST_KEY.cpp.log"
 file_cmp "$TEST_KEY.cpp.log" "$TEST_KEY.cpp.log" <<__LOG__
