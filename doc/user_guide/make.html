@@ -1229,6 +1229,8 @@ build.prop{no-dep.include}[food] = *
       <a href=
       "annex_cfg.html#make.build.prop.cc.flag-include">cc.flag-include</a>,
       <a href=
+      "annex_cfg.html#make.build.prop.cc.include-paths">cc.include-paths</a>,
+      <a href=
       "annex_cfg.html#make.build.prop.cc.flag-output">cc.flag-output</a></p>
 
       <p><dfn>dependencies</dfn>: include and o (object).</p>
@@ -1253,14 +1255,17 @@ build.prop{no-dep.include}[food] = *
       <p><dfn>category and destination</dfn>: <a href=
       "#build.category.bin">bin</a> and bin/name.exe</p>
 
-      <p><dfn>properties</dfn>: <a href=
-      "annex_cfg.html#make.build.prop.ar">ar</a>, <a href=
-      "annex_cfg.html#make.build.prop.ar.flags">ar.flags</a>, <a href=
-      "annex_cfg.html#make.build.prop.file-ext.a">file-ext.a</a>, <a href=
-      "annex_cfg.html#make.build.prop.cc">cc</a>, <a href=
-      "annex_cfg.html#make.build.prop.cc.flags-ld">cc.flags-ld</a>, <a href=
-      "annex_cfg.html#make.build.prop.cc.flag-lib">cc.flag-lib</a>, <a href=
+      <p><dfn>properties</dfn>:
+      <a href="annex_cfg.html#make.build.prop.ar">ar</a>,
+      <a href="annex_cfg.html#make.build.prop.ar.flags">ar.flags</a>,
+      <a href="annex_cfg.html#make.build.prop.file-ext.a">file-ext.a</a>,
+      <a href="annex_cfg.html#make.build.prop.cc">cc</a>,
+      <a href="annex_cfg.html#make.build.prop.cc.flags-ld">cc.flags-ld</a>,
+      <a href="annex_cfg.html#make.build.prop.cc.flag-lib">cc.flag-lib</a>,
+      <a href=
       "annex_cfg.html#make.build.prop.cc.flag-lib-path">cc.flag-lib-path</a>,
+      <a href="annex_cfg.html#make.build.prop.cc.libs">cc.libs</a>,
+      <a href="annex_cfg.html#make.build.prop.cc.lib-paths">cc.lib-paths</a>,
       <a href=
       "annex_cfg.html#make.build.prop.cc.flag-output">cc.flag-output</a></p>
 
@@ -1313,6 +1318,8 @@ build.prop{no-dep.include}[food] = *
       "annex_cfg.html#make.build.prop.fc.flag-define">fc.flag-define</a>,
       <a href=
       "annex_cfg.html#make.build.prop.fc.flag-include">fc.flag-include</a>,
+      <a href=
+      "annex_cfg.html#make.build.prop.fc.include-paths">fc.include-paths</a>,
       <a href=
       "annex_cfg.html#make.build.prop.fc.flag-module">fc.flag-module</a>,
       <a href=
@@ -1387,13 +1394,16 @@ build.prop{no-dep.include}[food] = *
       <p><dfn>category and destination</dfn>: <a href=
       "#build.category.bin">bin</a> and bin/name.exe</p>
 
-      <p><dfn>properties</dfn>: <a href=
-      "annex_cfg.html#make.build.prop.ar">ar</a>, <a href=
-      "annex_cfg.html#make.build.prop.ar.flags">ar.flags</a>, <a href=
-      "annex_cfg.html#make.build.prop.fc">fc</a>, <a href=
-      "annex_cfg.html#make.build.prop.fc.flags-ld">fc.flags-ld</a>, <a href=
-      "annex_cfg.html#make.build.prop.fc.flag-lib">fc.flag-lib</a>, <a href=
+      <p><dfn>properties</dfn>:
+      <a href="annex_cfg.html#make.build.prop.ar">ar</a>,
+      <a href="annex_cfg.html#make.build.prop.ar.flags">ar.flags</a>,
+      <a href="annex_cfg.html#make.build.prop.fc">fc</a>,
+      <a href="annex_cfg.html#make.build.prop.fc.flags-ld">fc.flags-ld</a>,
+      <a href="annex_cfg.html#make.build.prop.fc.flag-lib">fc.flag-lib</a>,
+      <a href=
       "annex_cfg.html#make.build.prop.fc.flag-lib-path">fc.flag-lib-path</a>,
+      <a href="annex_cfg.html#make.build.prop.fc.libs">fc.libs</a>,
+      <a href="annex_cfg.html#make.build.prop.fc.lib-paths">fc.lib-paths</a>,
       <a href=
       "annex_cfg.html#make.build.prop.fc.flag-output">fc.flag-output</a></p>
 
@@ -2069,8 +2079,9 @@ preprocess.target{ns} =
       "annex_cfg.html#make.preprocess.prop.cpp.defs">cpp.defs</a>, <a href=
       "annex_cfg.html#make.preprocess.prop.cpp.flag-define">cpp.flag-define</a>,
       <a href=
-      "annex_cfg.html#make.preprocess.prop.cpp.flag-include">cpp.flag-include</a></p>
-
+      "annex_cfg.html#make.preprocess.prop.cpp.flag-include">cpp.flag-include</a>,
+      <a href=
+      "annex_cfg.html#make.preprocess.prop.cpp.include-paths">cpp.include-paths</a></p>
       <p><dfn>dependencies</dfn>: include.</p>
 
       <p><dfn>update if</dfn>: source file or any of the required properties
@@ -2095,7 +2106,9 @@ preprocess.target{ns} =
       "annex_cfg.html#make.preprocess.prop.fpp.defs">fpp.defs</a>, <a href=
       "annex_cfg.html#make.preprocess.prop.fpp.flag-define">fpp.flag-define</a>,
       <a href=
-      "annex_cfg.html#make.preprocess.prop.fpp.flag-include">fpp.flag-include</a></p>
+      "annex_cfg.html#make.preprocess.prop.fpp.flag-include">fpp.flag-include</a>,
+      <a href=
+      "annex_cfg.html#make.preprocess.prop.fpp.include-paths">fpp.include-paths</a></p>
 
       <p><dfn>dependencies</dfn>: include.</p>
 
