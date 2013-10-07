@@ -359,7 +359,7 @@ extract/foo/baz/...
   (<samp>trunk@3739</samp>), the source tree looks like this:</p>
   <pre>
 doc/...
-src/egg/boiled.py
+src/egg/boiled.y
 src/egg/microwave.x
 src/egg/omelette.c
 src/egg/poached.f90
@@ -373,7 +373,7 @@ src/...
   <code>svn status</code>) in his branch at
   <samp>branches/dev/jamie/r3739_t381@3984</samp>:</p>
   <pre>
-D      src/egg/boiled.py
+D      src/egg/boiled.y
 A      src/egg/fried.pl
 M      src/egg/omelette.c
 </pre>
@@ -388,7 +388,7 @@ M      src/egg/poached.f90
   <p>Rick has made the following changes in his working copy at
   <samp>~rick/food</samp>, but has yet to commit his changes back:</p>
   <pre>
-M      src/egg/boiled.py
+M      src/egg/boiled.y
 A      src/egg/scrambled.bash
 </pre>
 
@@ -427,7 +427,7 @@ extract/src/...
   <p>Note:</p>
 
   <ul>
-    <li>There is no <samp>extract/src/egg/boiled.py</samp> file in the extract
+    <li>There is no <samp>extract/src/egg/boiled.y</samp> file in the extract
     tree because it is deleted by Jamie's branch. Even though this file is
     modified in Rick's working copy, the extract will ignore this and assume
     that the deletion takes precedence.</li>
@@ -502,7 +502,7 @@ extract/src/egg/scrambled.bash
   that the original extract at <samp>/home/food/latest/</samp> will be left
   untouched, and the new extract will contain only the changes introduced by
   the diff locations. Note that, although
-  <samp>extract/src/egg/boiled.py</samp> remains in the original extract, it
+  <samp>extract/src/egg/boiled.y</samp> remains in the original extract, it
   will not be used in any subsequent build step.</p>
 
   <dl>
@@ -840,8 +840,8 @@ build/o/...
   <p>Sub-directories are only created as necessary, so you may not find all of
   the above in your destination tree.</p>
 
-  <p>To use a different compiler and/or compiler options for Fortran/C, you use
-  the <a href="annex_cfg.html#make.build.prop">build.prop</a> declaration to
+  <p>To use a different compiler and/or compiler options for Fortran/C/C++, you
+  use the <a href="annex_cfg.html#make.build.prop">build.prop</a> declaration to
   redefine the build properties. E.g.:</p>
   <pre>
 steps = build
@@ -861,6 +861,8 @@ build.prop{fc.libs} = mine
 build.prop{cc} = icc
 # Set C compiler options
 build.prop{cc.flags} = -O3
+# Set C++ compiler options
+build.prop{cxx.flags} = -O2
 # Set link libraries for C executables
 build.prop{cc.lib-paths} = /path/to/my-lib /path/to/your-lib
 build.prop{cc.libs} = mine yours
@@ -919,19 +921,19 @@ build.ns-incl = foo bar/baz    # but include items from these name-spaces
   have a source tree in <samp>$HOME/food</samp>:</p>
   <pre>
 $HOME/food/egg.c
-$HOME/food/ham.py
+$HOME/food/ham.f90
 </pre>
 
   <p>If you specify the source tree with <samp>build.source =
   $HOME/food</samp>, then <samp>$HOME/food/egg.c</samp> will be given the
-  name-space <samp>egg.c</samp> and <samp>$HOME/food/ham.py</samp> will be
-  given the name-space <samp>ham.py</samp>.</p>
+  name-space <samp>egg.c</samp> and <samp>$HOME/food/ham.f90</samp> will be
+  given the name-space <samp>ham.f90</samp>.</p>
 
   <p>On the other hand, if you specify the source tree with
   <samp>build.source[food] = $HOME</samp>, then
   <samp>$HOME/food/egg.c</samp> will be given the name-space
-  <samp>food/egg.c</samp> and <samp>$HOME/food/ham.py</samp> will be given the
-  name-space <samp>food/ham.py</samp>.</p>
+  <samp>food/egg.c</samp> and <samp>$HOME/food/ham.f90</samp> will be given the
+  name-space <samp>food/ham.f90</samp>.</p>
 
   <p>The name-space is organised in a simple hierarchy. For instance, the
   <samp>foo/bar/egg</samp> name-space belongs to <samp>foo/bar</samp>, which
@@ -964,10 +966,15 @@ build.prop{fc.flags}[food/bacon.f90] = -O0 -g -C
   <p>The following types are associated with file extensions:</p>
 
   <dl>
-    <dt><a href="annex_cfg.html#make.build.prop.file-ext.c">c</a> (C/C++ source
+    <dt><a href="annex_cfg.html#make.build.prop.file-ext.c">c</a> (C source
     file)</dt>
 
-    <dd>.c .cpp</dd>
+    <dd>.c .i .m .mi</dd>
+
+    <dt><a href="annex_cfg.html#make.build.prop.file-ext.cxx">cxx</a> (C++
+    source file)</dt>
+
+    <dd>.cc .cp .cxx .cpp .CPP .c++ .C .mm .M .mii</dd>
 
     <dt><a href="annex_cfg.html#make.build.prop.file-ext.fortran">fortran</a>
     (Fortran source file)</dt>
@@ -1015,7 +1022,7 @@ build.prop{file-pat.script} = (?msx-i:\w+Scr_\w+)
   what the system looks for in each type of file:</p>
 
   <dl>
-    <dt>c</dt>
+    <dt>c and cxx</dt>
 
     <dd>
       <p><dfn>main program</dfn>: e.g. <samp>int main()</samp>.</p>
@@ -1065,7 +1072,7 @@ build.prop{file-pat.script} = (?msx-i:\w+Scr_\w+)
   <p>Note: The following features are for legacy support.</p>
 
   <dl id="build.source-analysis.legacy">
-    <dt><code>DEPENDS ON: x</code> directives in C/Fortran source files</dt>
+    <dt><code>DEPENDS ON: x</code> directives in C/C++/Fortran source files</dt>
 
     <dd>The <code>DEPENDS ON: x</code> directive can be used to identify
     dependencies on other compiled objects. However, it is much better to
@@ -1083,7 +1090,7 @@ build.prop{file-pat.script} = (?msx-i:\w+Scr_\w+)
 
     <dt><samp>*.h</samp> files as Fortran include files</dt>
 
-    <dd><samp>*.h</samp> files are normally identified as C header files.
+    <dd><samp>*.h</samp> files are normally identified as C/C++ header files.
     However, they are also being used by some old Fortran programs as include
     files. Therefore, when the system analyses a <samp>*.h</samp> file, it has
     to detect the Fortran include syntax, i.e. <samp>include 'file-name'</samp>
@@ -1191,7 +1198,7 @@ build.prop{no-dep.include}[food] = *
   explanation of what this means.)</p>
 
   <dl>
-    <dt>c -&gt; name</dt>
+    <dt>c/cxx -&gt; name</dt>
 
     <dd>
       <p><dfn>description</dfn>: source file as an include file.</p>
@@ -1208,7 +1215,7 @@ build.prop{no-dep.include}[food] = *
       <p><dfn>pass on</dfn>: include, o and o.special.</p>
     </dd>
 
-    <dt>c -&gt; name.o</dt>
+    <dt>c/cxx -&gt; name.o</dt>
 
     <dd>
       <p><dfn>description</dfn>: object file. The file is named by mapping the
@@ -1244,7 +1251,7 @@ build.prop{no-dep.include}[food] = *
       <p><dfn>pass on</dfn>: o and o.special.</p>
     </dd>
 
-    <dt>c (with main function) -&gt; name.exe</dt>
+    <dt>c/cxx (with main function) -&gt; name.exe</dt>
 
     <dd>
       <p><dfn>description</dfn>: binary executable. The file is named after the
@@ -1475,8 +1482,8 @@ build.prop{no-dep.include}[food] = *
 
     <dt id="build.task.compile">compile</dt>
 
-    <dd>Creates an object file by invoking the C/Fortran compiler on the source
-    file.</dd>
+    <dd>Creates an object file by invoking the C/C++/Fortran compiler on the
+    source file.</dd>
 
     <dt id="build.task.compile-plus">compile+</dt>
 
@@ -1501,9 +1508,9 @@ build.prop{no-dep.include}[food] = *
     <dt id="build.task.link">link</dt>
 
     <dd>Creates an executable by invoking the archiver to load all required
-    objects into an archive, and then the C/Fortran compiler on the object file
-    previously compiled using a source file containing a main program, with the
-    temporary archive.</dd>
+    objects into an archive, and then the C/C++/Fortran compiler on the object
+    file previously compiled using a source file containing a main program, with
+    the temporary archive.</dd>
   </dl>
 
   <h3 id="build.target-source-fortran">Build Targets from Source Files: Fortran
@@ -1563,7 +1570,7 @@ build.prop{no-dep.include}[food] = *
   tasks and keys. The logic is demonstrated by the following example:</p>
   <pre>
 # Selects targets matching these keys
-build.target = egg.bin ham.py bacon.sh
+build.target = egg.bin ham.o bacon.sh
 # OR (
 #     those doing these tasks
 build.target{task} = install link
@@ -2016,7 +2023,7 @@ preprocess.prop{cpp.defs} = LOWER=lower UNDER LINUX
     <dt><a href="annex_cfg.html#make.preprocess.prop.file-ext.cpp">cpp</a>
     (C/C++ source file)</dt>
 
-    <dd>.c .cpp</dd>
+    <dd>.c .m .cc .cp .cxx .cpp .CPP .c++ .C .mm .M</dd>
 
     <dt><a href="annex_cfg.html#make.preprocess.prop.file-ext.fpp">fpp</a>
     (Fortran source file requiring preprocessing)</dt>
@@ -2064,7 +2071,7 @@ preprocess.target{ns} =
   <p>Here is a list of what targets are available for each type of file:</p>
 
   <dl>
-    <dt>c -&gt; name-space</dt>
+    <dt>cpp -&gt; name-space</dt>
 
     <dd>
       <p><dfn>description</dfn>: the preprocessed version of the original
@@ -2091,7 +2098,7 @@ preprocess.target{ns} =
       are modified, or if any include dependencies are updated.</p>
     </dd>
 
-    <dt>fortran -&gt; name-space</dt>
+    <dt>fpp -&gt; name-space</dt>
 
     <dd>
       <p><dfn>description</dfn>: the preprocessed version of the original

@@ -27,7 +27,6 @@ use FCM::Context::Make::Build; # for FCM::Context::Make::Build::Target
 use FCM::System::Make::Build::Task::Compile::C;
 use FCM::System::Make::Build::Task::Install;
 use FCM::System::Make::Build::Task::Link::C;
-use FCM::System::Make::Build::FileType;
 use File::Basename qw{basename};
 
 # RE: file (base) name
@@ -52,7 +51,7 @@ sub new {
     bless(
         FCM::System::Make::Build::FileType->new({
             id                       => 'c',
-            file_ext                 => '.c .cpp',
+            file_ext                 => '.c .i .m .mi',
             source_analyse_always    => 1,
             source_analyse_dep_of    => {%SOURCE_ANALYSE_DEP_OF},
             source_analyse_more      => \&_source_analyse_more,
