@@ -152,7 +152,7 @@ sub _dest_init {
         &&  copy($attrib_ref->{handle_log}->filename(), $log)
         &&  open(my $handle_log, '>>', $log)
     ) || return $E->throw($E->DEST_CREATE, $log, $!);
-    symlink(
+    _symlink(
         $FCM::System::Make::Share::Dest::PATH_OF{'sys-log'},
         $attrib_ref->{shared_util_of}{dest}->path($m_ctx, 'sys-log-symlink'),
     );
