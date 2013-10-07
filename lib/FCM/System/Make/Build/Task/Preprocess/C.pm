@@ -23,11 +23,12 @@ package FCM::System::Make::Build::Task::Preprocess::C;
 use base qw{FCM::System::Make::Build::Task::Preprocess};
 
 our %PROP_OF = (
-    'cpp'              => 'cpp',
-    'cpp.defs'         => '',
-    'cpp.flags'        => '',
-    'cpp.flag-define'  => '-D%s',
-    'cpp.flag-include' => '-I%s',
+    'cpp'               => 'cpp',
+    'cpp.defs'          => '',
+    'cpp.flags'         => '',
+    'cpp.flag-define'   => '-D%s',
+    'cpp.flag-include'  => '-I%s',
+    'cpp.include-paths' => '',
 );
 
 sub new {
