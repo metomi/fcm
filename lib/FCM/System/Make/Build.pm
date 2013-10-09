@@ -29,6 +29,7 @@ use FCM::Context::Make::Build;
 use FCM::Context::Task;
 use FCM::System::Exception;
 use FCM::System::Make::Build::FileType::C;
+use FCM::System::Make::Build::FileType::CXX;
 use FCM::System::Make::Build::FileType::Data;
 use FCM::System::Make::Build::FileType::Fortran;
 use FCM::System::Make::Build::FileType::H;
@@ -50,6 +51,7 @@ my $STATE = 'FCM::System::Make::Build::State';
 # Classes for working with typed source files
 our @FILE_TYPE_UTILS = (
     'FCM::System::Make::Build::FileType::C',
+    'FCM::System::Make::Build::FileType::CXX',
     'FCM::System::Make::Build::FileType::Data',
     'FCM::System::Make::Build::FileType::Fortran',
     'FCM::System::Make::Build::FileType::H',
