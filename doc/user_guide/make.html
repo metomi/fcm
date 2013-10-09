@@ -227,10 +227,11 @@ extract/var/...
   links or hidden files (e.g. file names beginning with a <samp>.</samp>),
   because the extract system ignores them.</p>
 
-  <dl>
-    <dt>Note - project name-space and location</dt>
+  <div class="well">
+    <p><strong><i class="icon-pencil"></i> Note - project name-space and
+    location</strong></p>
 
-    <dd>Whoever installed FCM at your site would have defined the name-spaces
+    <p>Whoever installed FCM at your site would have defined the name-spaces
     and the locations of the common projects at your site using the keyword
     configuration file at <samp>$FCM/etc/fcm-keyword.cfg</samp> (where
     <samp>$FCM/bin</samp> is the path at which FCM is installed).
@@ -244,11 +245,13 @@ extract/var/...
     "annex_cfg.html#make.extract.location.primary">extract.location{primary}</a></code>
     declaration. E.g. to define the location of the <samp>foo</samp> project,
     you can do: <samp>extract.location{primary}[foo] =
-    svn://server/repos/foo</samp>.</dd>
+    svn://server/repos/foo</samp>.</p>
+  </div>
 
-    <dt>Note - incremental mode</dt>
+  <div class="well">
+    <p><strong><i class="icon-pencil"></i> Note - incremental mode</strong></p>
 
-    <dd>Suppose you have already invoked <code>fcm make</code> using the above
+    <p>Suppose you have already invoked <code>fcm make</code> using the above
     configuration file. At a later time, you have made some changes to some of
     the files in the source trees. Re-running <code>fcm make</code> on the same
     configuration will trigger the incremental mode. In the incremental mode,
@@ -258,8 +261,40 @@ extract/var/...
     attempt a content comparison. The system updates the destination only if
     the content and/or file access permission of the source differs from that
     of the destination. To avoid the incremental mode and start afresh, invoke
-    <code>fcm make</code> with the <code>--new</code> option.</dd>
+    <code>fcm make</code> with the <code>--new</code> option.</p>
+  </div>
+
+  <h3 id="extract.location-types">Extract: Location Types</h3>
+
+  <p>The extract system currently supports the following location types:</p>
+
+  <dl class="dl-horizontal">
+    <dt>fs</dt>
+
+    <dd>A readable location in the local file system. E.g.
+    <code>~/my-project</code>, <code>/home/lily/my-project</code>, etc.</dd>
+
+    <dt>ssh</dt>
+
+    <dd>A readable location in the file system of a remote host accessible via
+    <code>ssh</code> and <code>rsync</code>, specified in the form
+    <var>[USER@]HOST:PATH</var>. The <code>ssh</code> access must be
+    without a password and that the standard Unix/Linux commands
+    <code>find</code> and <code>md5sum</code> must be available on the remote
+    host via <code>ssh</code>. E.g. <code>mylinuxbox:my-project</code>,
+    <code>holly@hpc:/data/holly/my-project</code>.</dd>
+
+    <dt>svn</dt>
+
+    <dd>A Subversion location, which may be a working copy or a valid Subversion
+    URL. Supported URL schemes are: <code>file</code>, <code>http</code>,
+    <code>https</code>, <code>svn</code> and <code>svn+ssh</code>. E.g.
+    <code>svn://mysvnhost/my-project/trunk@40778</code>,
+    <code>~/my-project@32734</code>.</dd>
   </dl>
+
+  <p>See also <a href=
+  "annex_cfg.html#make.extract.location">extract.location</a>.</p>
 
   <h3 id="extract.path-root">Extract: Redefine the Root of the Source Tree of a
   Project</h3>
@@ -1069,33 +1104,36 @@ build.prop{file-pat.script} = (?msx-i:\w+Scr_\w+)
     </dd>
   </dl>
 
-  <p>Note: The following features are for legacy support.</p>
+  <div class="well">
+    <p><strong><i class="icon-pencil"></i> Note: The following features are for
+    legacy support.</strong></p>
 
-  <dl id="build.source-analysis.legacy">
-    <dt><code>DEPENDS ON: x</code> directives in C/C++/Fortran source files</dt>
+    <dl id="build.source-analysis.legacy">
+      <dt><code>DEPENDS ON: x</code> directives in C/Fortran source files</dt>
 
-    <dd>The <code>DEPENDS ON: x</code> directive can be used to identify
-    dependencies on other compiled objects. However, it is much better to
-    specify this kind of dependency information in the configuration for the
-    build where necessary. In any case, in modern Fortran code almost all
-    dependencies should be identified automatically via the use of modules
-    and/or interface files.</dd>
+      <dd>The <code>DEPENDS ON: x</code> directive can be used to identify
+      dependencies on other compiled objects. However, it is much better to
+      specify this kind of dependency information in the configuration for the
+      build where necessary. In any case, in modern Fortran code almost all
+      dependencies should be identified automatically via the use of modules
+      and/or interface files.</dd>
 
-    <dt><code>calls: x</code> directives in scripts</dt>
+      <dt><code>calls: x</code> directives in scripts</dt>
 
-    <dd>The <code>calls: x</code> directive can be used to identify a
-    dependency on another executable. However, it is much better to specify
-    this kind of dependency information in the configuration for the build, and
-    leave the source code to concentrate on the run time logic.</dd>
+      <dd>The <code>calls: x</code> directive can be used to identify a
+      dependency on another executable. However, it is much better to specify
+      this kind of dependency information in the configuration for the build, and
+      leave the source code to concentrate on the run time logic.</dd>
 
-    <dt><samp>*.h</samp> files as Fortran include files</dt>
+      <dt><samp>*.h</samp> files as Fortran include files</dt>
 
-    <dd><samp>*.h</samp> files are normally identified as C/C++ header files.
-    However, they are also being used by some old Fortran programs as include
-    files. Therefore, when the system analyses a <samp>*.h</samp> file, it has
-    to detect the Fortran include syntax, i.e. <samp>include 'file-name'</samp>
-    as well as the regular C preprocessor include syntax.</dd>
-  </dl>
+      <dd><samp>*.h</samp> files are normally identified as C header files.
+      However, they are also being used by some old Fortran programs as include
+      files. Therefore, when the system analyses a <samp>*.h</samp> file, it has
+      to detect the Fortran include syntax, i.e. <samp>include 'file-name'</samp>
+      as well as the regular C preprocessor include syntax.</dd>
+    </dl>
+  </div>
 
   <p>There are some situations when it is not possible for the system to
   identify a dependency. E.g. a Fortran source file may depend on external

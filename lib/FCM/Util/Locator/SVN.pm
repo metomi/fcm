@@ -95,7 +95,8 @@ sub _as_invariant {
 # Returns true if $value looks like a legitimate SVN target.
 sub _can_work_with {
     my ($attrib_ref, $value) = @_;
-    if ($attrib_ref->{util}->uri_match($value)) {
+    my ($scheme) = $attrib_ref->{util}->uri_match($value);
+    if ($scheme && grep {$_ eq $scheme} qw{svn file svn+ssh http https}) {
         return $value;
     }
     my ($target, $revision) = _parse($attrib_ref, $value);
@@ -144,7 +145,7 @@ sub _dir {
     _parse_simple($attrib_ref, $target, $revision);
 }
 
-# Searches directory tree of $value.
+# Export $value to $dest.
 sub _export {
     my ($attrib_ref, $value, $dest) = @_;
     _run_svn_simple($attrib_ref, 'export', [$value, $dest], {quiet => undef});
@@ -332,7 +333,10 @@ sub _tidy {
 # Returns trunk@HEAD for a URL.
 sub _trunk_at_head {
     my ($attrib_ref, $target) = @_;
-    $attrib_ref->{util}->uri_match($target) ? 'trunk@HEAD' : undef;
+    if (!$attrib_ref->{util}->uri_match($target)) {
+        return;
+    }
+    _cat($attrib_ref, $target, 'trunk@HEAD');
 }
 
 # ------------------------------------------------------------------------------
@@ -419,9 +423,9 @@ Returns a file handle for reading the content in $value, if possible.
 
 Returns the value of a property $name of $value.
 
-=item $util->trunk_at_head()
+=item $util->trunk_at_head($value)
 
-Returns "trunk@HEAD'.
+Returns "$value/trunk@HEAD' if $value is a URI or undef otherwise.
 
 =back
 
