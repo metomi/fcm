@@ -49,17 +49,10 @@ our %CONFIG_PARSER_OF = (
 our %PROP_OF = (
     'config-file.steps' => [q{}],
     'no-config-file'    => [q{}],
-    'ssh'               => [q{ssh}],
-    'ssh.flags'         => [q{-n -oBatchMode=yes}],
-    'ssh.mkdir'         => [q{mkdir}],
-    'ssh.mkdir.flags'   => [q{-p}],
-    'ssh.pwd'           => [q{pwd}],
-    'ssh.pwd.flags'     => [q{}],
-    'rsync'             => [q{rsync}],
-    'rsync.flags'       => [q{-a --exclude='.*' --delete-excluded}
-                            . q{ --timeout=900}
-                            . q{ --rsh='ssh -oBatchMode=yes'}],
 );
+
+# Properties from FCM::Util
+our @UTIL_PROP_KEYS = qw{ssh ssh.flags rsync rsync.flags};
 
 # Creates the class.
 __PACKAGE__->class(
@@ -68,7 +61,8 @@ __PACKAGE__->class(
         shared_util_of   => '%',
         util             => '&',
     },
-    {   action_of => {
+    {   init => \&_init,
+        action_of => {
             config_parse              => \&_config_parse,
             config_parse_inherit_hook => \&_config_parse_inherit_hook,
             config_unparse            => \&_config_unparse,
@@ -78,6 +72,15 @@ __PACKAGE__->class(
         },
     },
 );
+
+# Initialises the helpers of the class.
+sub _init {
+    my ($attrib_ref) = @_;
+    for my $util_prop_key (@UTIL_PROP_KEYS) {
+        my $prop = $attrib_ref->{util}->external_cfg_get($util_prop_key);
+        $attrib_ref->{prop_of}{$util_prop_key} = [$prop];
+    }
+}
 
 # Reads the mirror.target declaration from a config entry.
 sub _config_parse_target {
@@ -250,18 +253,12 @@ sub _mirror_mkdir {
             my @ssh
                 = (_shell_cmd_list($attrib_ref, 'ssh', $ctx), $authority);
             if (!file_name_is_absolute($path)) {
-                my $value_hash_ref = _shell(
-                    $attrib_ref,
-                    [@ssh, _shell_cmd_list($attrib_ref, 'ssh.pwd', $ctx)],
-                );
+                my $value_hash_ref = _shell($attrib_ref, [@ssh, 'pwd']);
                 my $path_root = $value_hash_ref->{'o'};
                 chomp($path_root);
                 $ctx->set_target_path(rel2abs($path, $path_root));
             }
-            _shell(
-                $attrib_ref,
-                [@ssh, _shell_cmd_list($attrib_ref, 'ssh.mkdir', $ctx), $path],
-            );
+            _shell($attrib_ref, [@ssh, 'mkdir', '-p', $path]);
         }
         else {
             if (!file_name_is_absolute($path)) {

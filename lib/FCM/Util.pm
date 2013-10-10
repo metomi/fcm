@@ -109,8 +109,15 @@ our %CFG_BASENAME_OF = (
 # Values of external commands
 our %EXTERNAL_VALUE_OF = (
     'browser'       => 'firefox',
+    'diff3'         => 'diff3',
+    'diff3.flags'   => '-E -m',
     'graphic-diff'  => 'xxdiff',
     'graphic-merge' => 'xxdiff',
+    'ssh'           => 'ssh',
+    'ssh.flags'     => '-n -oBatchMode=yes',
+    'rsync'         => 'rsync',
+    'rsync.flags'   => '-a --exclude=.* --delete-excluded --timeout=900'
+                       . ' --rsh="ssh -oBatchMode=yes"',
 );
 # The name-space separator
 our $NS_SEP = '/';
