@@ -322,6 +322,30 @@ browser = konqueror
 </pre>
     </dd>
 
+    <dt id="external.diff3">diff3</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: The shell command used by the extract system of
+      FCM Make to perform a 3-way merge. (default=<samp>diff3</samp>)</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+diff3 = diff3
+</pre>
+    </dd>
+
+    <dt id="external.diff3.flags">diff3.flags</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: The options used by the 3-way merge shell
+      command. (default=<samp>-E -m</samp>)</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+diff3.flags = -E -m
+</pre>
+    </dd>
+
     <dt id="external.graphic-diff">graphic-diff</dt>
 
     <dd>
@@ -343,6 +367,56 @@ graphic-diff = tkdiff
       <p><dfn>example</dfn>:</p>
       <pre>
 graphic-merge = xxdiff
+</pre>
+    </dd>
+
+    <dt id="external.ssh">ssh</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: The secure remote shell command to execute
+      commands on a remote host.  (default=<samp>ssh</samp>)</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+ssh = ssh
+</pre>
+    </dd>
+
+    <dt id="external.ssh.flags">ssh.flags</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: The options used by the secure shell command to
+      execute commands on a remote host. (default=<samp>-n
+      -oBatchMode=yes</samp>)</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+ssh.flags = -n -oBatchMode=yes
+</pre>
+    </dd>
+
+    <dt id="external.rsync">rsync</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: The <code>rsync</code> command.
+      (default=<samp>rsync</samp>)</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+rsync = rsync
+</pre>
+    </dd>
+
+    <dt id="external.rsync.flags">rsync.flags</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: The options used by the <code>rsync</code>
+      command. (default=<samp>-a --exclude=.* --delete-excluded --timeout=900
+      --rsh=ssh\ -oBatchMode=yes</samp>)</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+rsync.flags = -a --exclude=.* --delete-excluded --timeout=900 --rsh=ssh\ -oBatchMode=yes
 </pre>
     </dd>
   </dl>
@@ -524,10 +598,13 @@ extract.ns = gen ops um var ver
       project, the system will try to use <samp>trunk@HEAD</samp>.</p>
 
       <p><dfn>modifier</dfn>: <var>type</var>: Specifies the type of the
-      locations. The system currently supports <samp>svn</samp> for a
-      Subversion location and <samp>fs</samp> for a file system location.
-      (default=<samp>svn</samp> if the location if recognised as a URL,
-      otherwise <samp>fs</samp>)</p>
+      locations. The system currently supports <samp>svn</samp> for a Subversion
+      location, <samp>ssh</samp> for a file system on a remote host accessible
+      via SSH and RSYNC, and <samp>fs</samp> for a file system location.
+      (default=<samp>svn</samp> if the location is recognised as a Subversion
+      URL, <samp>ssh</samp> if the location has the form
+      <var>[USER@]HOST:PATH</var> and <var>HOST</var> is a valid remote host,
+      <samp>fs</samp> otherwise)</p>
 
       <p><dfn>namespace</dfn>: A space-delimited list of project IDs.</p>
 
@@ -634,10 +711,13 @@ extract.path-root[gen] = src/code
       <p><dfn>description</dfn>: Sets or modifies a property.</p>
 
       <p><dfn>modifier</dfn>: <var>diff3</var>: The shell command to perform a
-      3-way merge. (default=<samp>diff3</samp>)</p>
+      3-way merge. If not specified, use the <a href="#external.diff3">diff3</a>
+      setting of the FCM external configuration.</p>
 
       <p><dfn>modifier</dfn>: <var>diff3.flags</var>: The options used by the
-      3-way merge shell command. (default=<samp>-E -m</samp>)</p>
+      3-way merge shell command. If not specified, use the <a href=
+      "#external.diff3.flags">diff3.flags</a> setting of the FCM external
+      configuration.</p>
 
       <p><dfn>value</dfn>: The value of the property.</p>
 
@@ -706,43 +786,27 @@ mirror.prop{rsync} = cnysr
 
     <dt id="make.mirror.prop.ssh">ssh</dt>
 
-    <dd>The secure remote shell command to execute commands on a remote
-    machine. (default=<samp>ssh</samp>)</dd>
+    <dd>The secure remote shell command to execute commands on a remote machine.
+    If not specified, use the <a href= "#external.ssh">ssh</a> setting of the
+    FCM external configuration.</dd>
 
     <dt id="make.mirror.prop.ssh.flags">ssh.flags</dt>
 
     <dd>The flags used by the remote shell command to execute commands on a
-    remote machine. (default=<samp>-n -oBatchMode=yes</samp>)</dd>
-
-    <dt id="make.mirror.prop.mkdir">ssh.mkdir</dt>
-
-    <dd>The <code>mkdir</code> shell command to run on the remote machine.
-    (default=<samp>mkdir</samp>)</dd>
-
-    <dt id="make.mirror.prop.mkdir.flags">ssh.mkdir.flags</dt>
-
-    <dd>The flags used by the <code>mkdir</code> shell command on the remote
-    machine. (default=<samp>-p</samp>)</dd>
-
-    <dt id="make.mirror.prop.pwd">ssh.pwd</dt>
-
-    <dd>The <code>pwd</code> shell command to run on the remote machine.
-    (default=<samp>pwd</samp>)</dd>
-
-    <dt id="make.mirror.prop.pwd.flags">ssh.pwd.flags</dt>
-
-    <dd>The flags used by the <code>pwd</code> shell command on the remote
-    machine.</dd>
+    remote machine. If not specified, use the <a href=
+    "#external.ssh.flags">ssh.flags</a> setting of the FCM external
+    configuration.</dd>
 
     <dt id="make.mirror.prop.rsync">rsync</dt>
 
-    <dd>The <code>rsync</code> command. (default=<samp>rsync</samp>)</dd>
+    <dd>The <code>rsync</code> command. If not specified, use the <a href=
+    "#external.rsync">rsync</a> setting of the FCM external configuration.</dd>
 
     <dt id="make.mirror.prop.rsync.flags">rsync.flags</dt>
 
-    <dd>The options used by the <code>rsync</code> command. (default=<samp>-a
-    --exclude='.*' --delete-excluded --timeout=900 --rsh='ssh
-    -oBatchMode=yes'</samp>)</dd>
+    <dd>The options used by the <code>rsync</code> command. If not specified,
+    use the <a href= "#external.rsync.flags">rsync.flags</a> setting of the FCM
+    external configuration.</dd>
   </dl>
 
   <h3 id="make.build">FCM Make Configuration: Build</h3>

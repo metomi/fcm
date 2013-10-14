@@ -38,7 +38,6 @@ use File::Spec::Functions qw{catfile tmpdir};
 use File::Temp;
 use List::Util qw{first};
 use Storable qw{dclone};
-use Text::ParseWords qw{shellwords};
 
 # Aliases
 our $UTIL;
@@ -59,20 +58,18 @@ our %CONFIG_PARSER_OF = (
     ),
 );
 
-# Default properties
-our %PROP_OF = (
-    'diff3'       => ['diff3'],
-    'diff3.flags' => ['-E -m'],
-);
+# Properties from FCM::Util
+our @UTIL_PROP_KEYS = qw{diff3 diff3.flags};
 
 # Creates the class.
 __PACKAGE__->class(
     {   config_parser_of => {isa => '%', default => {%CONFIG_PARSER_OF}},
-        prop_of          => {isa => '%', default => {%PROP_OF}},
+        prop_of          => '%',
         shared_util_of   => '%',
         util             => '&',
     },
-    {   action_of => {
+    {   init => \&_init,
+        action_of => {
             config_parse              => \&_config_parse,
             config_parse_inherit_hook => \&_config_parse_inherit_hook,
             config_unparse            => \&_config_unparse,
@@ -82,6 +79,15 @@ __PACKAGE__->class(
         },
     },
 );
+
+# Initialises the helpers of the class.
+sub _init {
+    my ($attrib_ref) = @_;
+    for my $util_prop_key (@UTIL_PROP_KEYS) {
+        my $prop = $attrib_ref->{util}->external_cfg_get($util_prop_key);
+        $attrib_ref->{prop_of}{$util_prop_key} = [$prop];
+    }
+}
 
 # Reads the extract.location declaration from a config entry.
 sub _config_parse_location {
@@ -431,10 +437,10 @@ sub _elaborate_ctx_of_project {
             if (!defined($project->get_locator())) {
                 return $E->throw($E->EXTRACT_LOC_BASE, $p_ns);
             }
-            my $path = $UTIL->loc_trunk_at_head($project->get_locator());
+            my $head_locator = $UTIL->loc_trunk_at_head($project->get_locator());
             my $locator
-                = $path ? $UTIL->loc_cat($project->get_locator(), $path)
-                :         dclone($project->get_locator())
+                = $head_locator ? $head_locator
+                :                 dclone($project->get_locator())
                 ;
             $project->get_trees()->[0] = $ctx->CTX_TREE->new(
                 {key => 0, locator => $locator, ns => $p_ns},

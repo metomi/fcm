@@ -76,13 +76,13 @@ sub _find {
             if ($ns eq q{.}) {
                 $ns = q{};
             }
-            my $last_modified_time = (-l $path ? lstat($path) : stat($path))[9];
+            my $last_mod_time = (-l $path ? lstat($path) : stat($path))[9];
             $callback->(
                 $path,
-                {   is_dir             => scalar(-d $path),
-                    last_modified_rev  => undef,
-                    last_modified_time => $last_modified_time,
-                    ns                 => $ns,
+                {   is_dir        => scalar(-d $path),
+                    last_mod_rev  => undef,
+                    last_mod_time => $last_mod_time,
+                    ns            => $ns,
                 },
             );
         },

@@ -27,6 +27,7 @@ use FCM::Context::Keyword;
 use FCM::Context::Locator;
 use FCM::Util::Exception;
 use FCM::Util::Locator::FS;
+use FCM::Util::Locator::SSH;
 use FCM::Util::Locator::SVN;
 
 # URI prefix for FCM scheme
@@ -96,10 +97,11 @@ my %PATTERN_OF = (
 # The name of the property where revision keywords are set in primary locations
 our $REV_PROP_NAME = 'fcm:revision';
 # The known types
-our @TYPES = qw{svn fs};
+our @TYPES = qw{svn ssh fs};
 # The classes for the known types
 our %TYPE_UTIL_CLASS_OF = (
     fs  => 'FCM::Util::Locator::FS',
+    ssh => 'FCM::Util::Locator::SSH',
     svn => 'FCM::Util::Locator::SVN',
 );
 
@@ -536,7 +538,15 @@ sub _transform_rev_keyword {
 # Returns a string to represent the relative path to the latest main tree.
 sub _trunk_at_head {
     my ($attrib_ref, $locator) = @_;
-    _util_of_type($attrib_ref, $locator)->trunk_at_head($locator->get_value());
+    my $orig_value = $locator->get_value();
+    my $util_of_type = _util_of_type($attrib_ref, $locator);
+    my $head_value = $util_of_type->trunk_at_head($orig_value);
+    if (!$head_value || $head_value eq $orig_value) {
+        return;
+    }
+    return FCM::Context::Locator->new($head_value, {
+        type => $locator->get_type(),
+    });
 }
 
 # Determines the type of the $locator.
@@ -698,9 +708,9 @@ not relevant for the $locator_value.
 
 =item $util_of_type->trunk_at_head($locator_value)
 
-If relevant, should return a string that represents the recommended relative
-path to the latest version of the main tree of a project of this type. E.g. for
-"svn", this should be "trunk@HEAD".
+If relevant, should append a string to $locator_value that represents the
+recommended relative path to the latest version of the main tree of a project of
+this type. E.g. for "svn", this should be "$locator_value/trunk@HEAD".
 
 =back
 
