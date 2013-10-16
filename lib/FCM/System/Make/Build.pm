@@ -897,7 +897,7 @@ sub _targets_from_sources {
                 }
                 else {
                     # This will be reported later as missing dependency
-                    push(@{$target->get_deps()}, [$ns, $cat]);
+                    push(@{$target->get_deps()}, [$ns, $cat, 'ns-dep']);
                 }
             }
         }
@@ -1069,7 +1069,15 @@ sub _targets_select {
         my $target = $target_of{$key};
         DEP:
         for (grep {$_->[0] ne $key} @{$target->get_deps()}) {
-            my ($dep_key, $dep_type) = @{$_};
+            my ($dep_key, $dep_type, $dep_remark) = @{$_};
+            # Duplicated targets
+            if (exists($targets_of{$dep_key})) {
+                $dup_in{$dep_key} = {
+                    'keys' => [@up_keys, $key, $dep_key],
+                    'values' => [map {$_->get_ns()} @{$targets_of{$dep_key}}],
+                };
+                next DEP;
+            }
             # Missing dependency
             if (!exists($target_of{$dep_key})) {
                 if (!exists($missing_deps_in{$key})) {
@@ -1079,7 +1087,8 @@ sub _targets_select {
                     };
                 }
                 push(
-                    @{$missing_deps_in{$key}{'values'}}, [$dep_key, $dep_type],
+                    @{$missing_deps_in{$key}{'values'}},
+                    [$dep_key, $dep_type, $dep_remark],
                 );
                 next DEP;
             }

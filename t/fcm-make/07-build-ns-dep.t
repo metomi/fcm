@@ -1,0 +1,56 @@
+#!/bin/bash
+#-------------------------------------------------------------------------------
+# (C) British Crown Copyright 2006-2013 Met Office.
+#
+# This file is part of FCM, tools for managing and building source code.
+#
+# FCM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FCM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FCM. If not, see <http://www.gnu.org/licenses/>.
+#-------------------------------------------------------------------------------
+# Tests for "fcm make", "build.prop{ns-dep.o}".
+#-------------------------------------------------------------------------------
+. $(dirname $0)/test_header
+#-------------------------------------------------------------------------------
+tests 6
+set -e
+cp -r $TEST_SOURCE_DIR/$TEST_KEY_BASE/* .
+set +e
+#-------------------------------------------------------------------------------
+TEST_KEY="$TEST_KEY_BASE-bad-1"
+run_fail "$TEST_KEY" fcm make
+tail -2 .fcm-make/log >"$TEST_KEY.log"
+file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<'__LOG__'
+[FAIL] foo: bad or missing dependency (type=ns-dep.o)
+[FAIL]     required by: hello.exe
+__LOG__
+#-------------------------------------------------------------------------------
+TEST_KEY="$TEST_KEY_BASE-bad-2"
+mkdir src/foo # An empty directory
+run_fail "$TEST_KEY" fcm make
+tail -2 .fcm-make/log >"$TEST_KEY.log"
+file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<'__LOG__'
+[FAIL] foo: bad or missing dependency (type=ns-dep.o)
+[FAIL]     required by: hello.exe
+__LOG__
+#-------------------------------------------------------------------------------
+TEST_KEY="$TEST_KEY_BASE"
+FCM_TEST_NS_DEP_O=lib run_pass "$TEST_KEY" fcm make
+sed '/^\[info\] target /!d' .fcm-make/log >"$TEST_KEY.log"
+file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<'__LOG__'
+[info] target hello.exe
+[info] target  - greet.o
+[info] target  - world.o
+[info] target  - hello.o
+__LOG__
+#-------------------------------------------------------------------------------
+exit 0

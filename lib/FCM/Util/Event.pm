@@ -196,7 +196,7 @@ our %S = (
     e_sys_build_target_bad       => '%s: don\'t know how to build specified'
                                     . ' target',
     e_sys_build_target_cyclic    => '%s: target depends on itself',
-    e_sys_build_target_dep       => '%s: missing dependency (type=%s)',
+    e_sys_build_target_dep       => '%s: bad or missing dependency (type=%s)',
     e_sys_build_target_dup       => '%s: same target from [%s]',
     e_sys_build_target_stack     => '    required by: %s',
     e_sys_cache_load             => '%s: cannot retrieve cache',
@@ -462,7 +462,14 @@ sub _format_e_sys_build_target_dep {
     while (my ($key, $hash_ref) = each(%{$e->get_ctx()})) {
         my ($head, @stack) = reverse(@{$hash_ref->{'keys'}});
         for (@{$hash_ref->{'values'}}) { # [$dep_key, $dep_type]
-            push(@messages, sprintf($S{e_sys_build_target_dep}, @{$_}));
+            my ($dep_name, $dep_type, $dep_remark) = @{$_};
+            if ($dep_remark) {
+                $dep_type = $dep_remark . '.' . $dep_type;
+            }
+            push(
+                @messages,
+                sprintf($S{e_sys_build_target_dep}, $dep_name, $dep_type),
+            );
         }
         push(@messages, map {sprintf($S{e_sys_build_target_stack}, $_)} @stack);
     }
