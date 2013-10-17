@@ -1018,7 +1018,10 @@ sub _targets_select {
                     my @dep_up_deps = @{$state_of{$_up_key}->get_deps()};
                     # If parent of $_up_key_last does not depend on
                     # $_up_key_last, chain is broken, and we are OK.
-                    if (!grep {$_->[0]->get_key() eq $_up_key_last} @dep_up_deps) {
+                    if (!grep {
+                                $_->[0]->get_key() eq $_up_key_last
+                            &&  $_->[1] eq $type
+                    } @dep_up_deps) {
                         last DEP_UP_KEY;
                     }
                     if ($key eq $_up_key) {
