@@ -94,7 +94,7 @@ fcm2_delete_ppinc_file
 fcm2_delete_ppinc_file_inherit
 fcm2_delete_ppinc_file_inherit_force
 fcm2_dep_o
-#fcm2_dep_o_all
+fcm2_dep_o_all
 fcm2_dep_o_invalid
 fcm2_duplicate_target
 fcm2_exclude_dependency
