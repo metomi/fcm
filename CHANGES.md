@@ -29,6 +29,9 @@ declared on the root name-space.
 \#58: fcm make: build: improve diagnostics for duplicated targets and bad values
 in `build.prop{ns-dep.o}` declarations.
 
+\#55: fcm make: extract: can now extract from a location that is accessible via
+`ssh` and `rsync`.
+
 \#53: fcm make: `.fcm-make/log` can now be accessed as `fcm-make.log`.
 
 \#51: FCM documentation: style updated using Bootstrap.
