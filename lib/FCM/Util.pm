@@ -92,6 +92,7 @@ our %ACTION_OF = (
     uri_match            => \&_uri_match,
     util_of_event        => _util_impl_func('event'),
     util_of_report       => _util_impl_func('reporter'),
+    version              => \&_version,
 );
 # The default paths to the configuration files.
 our @FCM1_KEYWORD_FILES = (
@@ -462,6 +463,27 @@ sub _util_of_func {
             $attrib_ref->{util_of}{locator}->($method, @_);
         };
     }
+}
+
+# Returns the FCM version string.
+sub _version {
+    my ($attrib_ref) = @_;
+    # Try "git describe"
+    my $value_hash_ref = $ACTION_OF{shell_simple}->(
+        $attrib_ref,
+        ['git', "--git-dir=$FindBin::Bin/../.git", 'describe'],
+    );
+    if ($value_hash_ref->{o} && !$value_hash_ref->{rc}) {
+        chomp($value_hash_ref->{o});
+        return "FCM " . $value_hash_ref->{o};
+    }
+    # Read fcm-version.js file
+    my $path = catfile($FindBin::Bin, qw{ .. doc etc fcm-version.js});
+    open(my($handle), '<', $path) || die("$path: $!");
+    my $content = do {local($/); readline($handle)};
+    close($handle);
+    my ($version) = $content =~ qr{\AFCM\.VERSION="(.*)";}msx;
+    return $version;
 }
 
 # ------------------------------------------------------------------------------
@@ -945,6 +967,10 @@ to handle the $u->report() method.
 
 Returns and/or sets the L<FCM::Util::Reporter|FCM::Util::Reporter> object that
 is used to handle the $u->report() method.
+
+=item $u->version()
+
+Returns the FCM version string.
 
 =back
 

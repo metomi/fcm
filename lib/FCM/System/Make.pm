@@ -35,6 +35,7 @@ use File::Path qw{rmtree};
 use File::Spec::Functions qw{catfile};
 use File::Copy qw{copy};
 use File::Temp;
+use POSIX qw{strftime};
 use Sys::Hostname qw{hostname};
 
 # Actions of the named common steps
@@ -147,7 +148,10 @@ sub _dest_init {
     $attrib_ref->{shared_util_of}{dest}->dest_init($m_ctx);
 
     # Move temporary log file to destination
+    my $now = strftime("%Y%m%dT%H%M%S", gmtime());
     my $log = $attrib_ref->{shared_util_of}{dest}->path($m_ctx, 'sys-log');
+    my $log_actual = sprintf("%s-%s", $log, $now);
+    _symlink($log_actual, $log);
     (       close($attrib_ref->{handle_log})
         &&  copy($attrib_ref->{handle_log}->filename(), $log)
         &&  open(my $handle_log, '>>', $log)
@@ -194,6 +198,10 @@ sub _main {
                     type      => undef,
                     verbosity => $attrib_ref->{util}->util_of_report()->HIGH,
                 },
+            );
+            $attrib_ref->{util}->event(
+                FCM::Context::Event->FCM_VERSION,
+                $attrib_ref->{util}->version(),
             );
             for my $step (@INIT_STEPS) {
                 $T->(sub {$ACTION_OF{$step}->(\%attrib, $m_ctx)}, $step);

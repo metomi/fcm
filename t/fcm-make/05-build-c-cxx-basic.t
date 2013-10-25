@@ -31,7 +31,8 @@ cp -r $TEST_SOURCE_DIR/$TEST_KEY_BASE/* .
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE"
 run_pass "$TEST_KEY" fcm make
-find .fcm-make build -type f | sort >"$TEST_KEY.find"
+find .fcm-make build -type f | sed 's/^\(\.fcm-make\/log\).*$/\1/' \
+    | sort >"$TEST_KEY.find"
 file_cmp "$TEST_KEY.find" "$TEST_KEY.find" <<'__OUT__'
 .fcm-make/config-as-parsed.cfg
 .fcm-make/config-on-success.cfg

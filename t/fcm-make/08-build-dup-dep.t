@@ -28,7 +28,6 @@ set +e
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE-bad"
 run_fail "$TEST_KEY" fcm make
-cat .fcm-make/log
 tail -2 .fcm-make/log >"$TEST_KEY.log"
 file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<'__LOG__'
 [FAIL] world.o: same target from [lib/earth.f90, lib/moon.f90]

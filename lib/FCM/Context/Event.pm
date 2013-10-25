@@ -43,6 +43,7 @@ use constant {
     E                             => 'E',
     EXPORT_ITEM_CREATE            => 'EXPORT_ITEM_CREATE',
     EXPORT_ITEM_DELETE            => 'EXPORT_ITEM_DELETE',
+    FCM_VERSION                   => 'FCM_VERSION',
     KEYWORD_ENTRY                 => 'KEYWORD_ENTRY',
     OUT                           => 'OUT',
     MAKE_BUILD_SHELL_OUT          => 'MAKE_BUILD_SHELL_OUT',
@@ -203,16 +204,15 @@ This event is raised when the export-items system deletes a link to an item.
 The 1st argument is the namespace of the item, the 2nd argument is the revision
 of the item and the 3rd argument is the name of the link.
 
+=item FCM::Context::Event->FCM_VERSION
+
+This event is raised to notify the FCM version.
+
 =item FCM::Context::Event->KEYWORD_ENTRY
 
 This event is raised to notify a keyword entry. The 1st argument is the keyword
 entry as a blessed reference of FCM::Context::Keyword::Entry as described in
 L<FCM::Context::Keyword|FCM::Context::Keyword>.
-
-=item FCM::Context::Event->OUT
-
-This event is raised to notify (shell command) output. The 1st argument should
-be the STDOUT, and the 2nd argument should be the STDERR.
 
 =item FCM::Context::Event->MAKE_BUILD_SHELL_OUT
 
@@ -332,6 +332,11 @@ of targets with the corresponding status.
 This event is raised as the make/mirror system updates a target destination. The
 1st argument of this event should be the target URI. The remaining arguments
 should be the source paths.
+
+=item FCM::Context::Event->OUT
+
+This event is raised to notify (shell command) output. The 1st argument should
+be the STDOUT, and the 2nd argument should be the STDERR.
 
 =item FCM::Context::Event->SHELL
 
