@@ -29,7 +29,7 @@ use FCM::Context::Locator;
 use FCM::System::Exception;
 use File::Basename qw{dirname};
 use File::Spec::Functions qw{catfile rel2abs};
-use HTTP::Date qw{str2time};
+use Time::Piece;
 use XML::Parser;
 
 my $E = 'FCM::System::Exception';
@@ -426,7 +426,9 @@ sub _get_log_handle_text {
 # Helper for "_get_log", handle text node in a "date" element.
 sub _get_log_handle_text_date {
     my ($entries_ref, $text) = @_;
-    $entries_ref->[-1]->{'date'} = str2time($text);
+    my $head = Time::Piece->strptime(substr($text, 0, -8), '%Y-%m-%dT%H:%M:%S');
+    my $tail = substr($text, -8, -1);
+    $entries_ref->[-1]->{'date'} = $head->epoch() + $tail;
 }
 
 # Helper for "_get_log", handle text node in a "path" element.
