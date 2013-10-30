@@ -483,7 +483,7 @@ sub _version {
     my $content = do {local($/); readline($handle)};
     close($handle);
     my ($version) = $content =~ qr{\AFCM\.VERSION="(.*)";}msx;
-    return $version;
+    return "FCM " . $version;
 }
 
 # ------------------------------------------------------------------------------
