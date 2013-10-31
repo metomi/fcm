@@ -45,13 +45,12 @@ use constant {PROP_DEFAULT => 0, PROP_NS_OK => 1};
 
 # Aliases
 my $E = 'FCM::System::Exception';
-my %L = ('prop' => 'prop');
 
 # Parses a configuration entry into the context.
 sub _config_parse {
     my ($attrib_ref, $ctx, $entry, $label) = @_;
     my %config_parser_of = (
-        $L{'prop'} => \&_config_parse_prop,
+        'prop' => \&_config_parse_prop,
         %{$attrib_ref->{config_parser_of}},
     );
     if (!$label || !exists($config_parser_of{$label})) {
@@ -120,7 +119,7 @@ sub _config_unparse_join {
 # Entries of the prop settings.
 sub _config_unparse_prop {
     my ($attrib_ref, $ctx) = @_;
-    my $label = join(q{.}, $ctx->get_id(), $L{'prop'});
+    my $label = join(q{.}, $ctx->get_id(), 'prop');
     my %prop_of = %{$ctx->get_prop_of()};
     map {
         my $key = $_;
@@ -143,13 +142,13 @@ sub _config_unparse_prop {
 # Parses a configuration entry into the subsystem property.
 sub _init_config_parse_prop {
     my ($attrib_ref, $entry, $label) = @_;
-    if ($label ne $L{'prop'}) {
+    if ($label ne 'prop') {
         return;
     }
     if (@{$entry->get_ns_list()}) {
         return $E->throw($E->CONFIG_NS, $entry);
     }
-    my @keys = keys(%{$entry->get_modifier_of()});
+    my @keys = grep {$_ ne 'class'} keys(%{$entry->get_modifier_of()});
     if (grep {!exists($attrib_ref->{prop_of}{$_})} @keys) {
         return $E->throw($E->CONFIG_MODIFIER, $entry);
     }

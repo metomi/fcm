@@ -57,19 +57,32 @@ sub _parse {
         }
         else {
             my ($id, $label) = split(qr{\.}msx, $entry->get_label(), 2);
-            my $ctx = $m_ctx->get_ctx_of($id);
-            if (!defined($ctx) && exists($attrib_ref->{subsystem_of}{$id})) {
-                $ctx = $attrib_ref->{subsystem_of}{$id}->ctx($id, $id);
-                $m_ctx->get_ctx_of()->{$id} = $ctx;
+            if (    $label eq 'prop'
+                &&  exists($entry->get_modifier_of()->{'class'})
+                &&  exists($attrib_ref->{subsystem_of}{$id})
+            ) {
+                my $subsystem = $attrib_ref->{subsystem_of}{$id};
+                if (!$subsystem->init_config_parse_prop($entry, $label)) {
+                    push(@unknown_entries, $entry);
+                }
             }
-            my $rc;
-            if (defined($ctx)) {
-                my $id_of_class = $ctx->get_id_of_class();
-                my $subsystem = $attrib_ref->{subsystem_of}{$id_of_class};
-                $rc = $subsystem->config_parse($ctx, $entry, $label);
-            }
-            if (!$rc) {
-                push(@unknown_entries, $entry);
+            else {
+                my $ctx = $m_ctx->get_ctx_of($id);
+                if (    !defined($ctx)
+                    &&  exists($attrib_ref->{subsystem_of}{$id})
+                ) {
+                    $ctx = $attrib_ref->{subsystem_of}{$id}->ctx($id, $id);
+                    $m_ctx->get_ctx_of()->{$id} = $ctx;
+                }
+                my $rc;
+                if (defined($ctx)) {
+                    my $id_of_class = $ctx->get_id_of_class();
+                    my $subsystem = $attrib_ref->{subsystem_of}{$id_of_class};
+                    $rc = $subsystem->config_parse($ctx, $entry, $label);
+                }
+                if (!$rc) {
+                    push(@unknown_entries, $entry);
+                }
             }
         }
     }

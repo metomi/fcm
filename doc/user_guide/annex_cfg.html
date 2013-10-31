@@ -463,18 +463,22 @@ build.prop{fc.flags}[foo/bar] = -O1
     <li>Unless stated otherwise, declarations are inherited.</li>
 
     <li>The default values of the property settings of each step class (e.g.
-    <code>build.prop{fc}</code>) can be modified in a site/user FCM make
-    configuration file:
+    <code>build.prop{fc}</code>) can be modified in:
 
       <ol>
-        <li><samp>$FCM/etc/fcm/make.cfg</samp> where <var>$FCM/bin/</var> is
-        the where <code>fcm</code> is invoked.</li>
+        <li>The site configuration file <samp>$FCM/etc/fcm/make.cfg</samp>
+        where <var>$FCM/bin/</var> is the where <code>fcm</code> is
+        invoked.</li>
 
-        <li><samp>$HOME/.metomi/fcm/make.cfg</samp>.</li>
+        <li>The user configuration file
+        <samp>$HOME/.metomi/fcm/make.cfg</samp>.</li>
+
+        <li><samp>*.prop{class,*}</samp> declarations in the FCM make
+        configuration file of the current session.</li>
       </ol>
 
-      <p>The syntax in a site/user FCM make configuration file is identical to
-      a normal FCM make configuration file except that:</p>
+      <p>The syntax is identical to a normal FCM make configuration file
+      declaration except that:</p>
 
       <ul>
         <li>Only <samp>*.prop{*}</samp> declarations are accepted.</li>
