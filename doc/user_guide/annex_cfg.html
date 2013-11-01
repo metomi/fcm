@@ -900,10 +900,11 @@ build.target-rename = hello.exe:hello
       <p><dfn>modifier</dfn>: The name of one (or more) property. See
       below.</p>
 
-      <p><dfn>namespace</dfn>: Optional. A list of space-delimited namespaces
-      to which this setting applies. If not specified, the setting applies to
-      the global/root namespace. N.B. Not all build properties accept a
-      namespace. See below for detail.</p>
+      <p><dfn>namespace</dfn>: Optional. A list of space-delimited namespaces to
+      which this setting applies. The namespace can be target names, if
+      applicable, or the hierarchical namespaces of source files. If not
+      specified, the setting applies to the global/root namespace. N.B. Not all
+      build properties accept a namespace. See below for detail.</p>
 
       <p><dfn>value</dfn>: The value of the property.</p>
 
@@ -915,6 +916,7 @@ build.prop{fc.flags}[foo/bar] = -C -g -W
 build.prop{fc.flags}[egg ham bacon] = -C -W
 build.prop{fc.flag-define} = -D%s
 build.prop{cc.defs,fc.defs}[gen] = LOWERCASE UNDERSCORE
+build.prop{fc.libs}[myprog.exe] = netcdf grib
 </pre>
     </dd>
   </dl>

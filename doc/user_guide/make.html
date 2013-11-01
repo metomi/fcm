@@ -1551,6 +1551,22 @@ build.prop{no-dep.include}[food] = *
     the temporary archive.</dd>
   </dl>
 
+  <h3 id="build.target-prop">Build Targets and Properties</h3>
+
+  <p>If you need to specify a property a specific target, you can either use
+  their source file namespace or the target key. E.g. If the
+  <samp>sausage.o</samp> taregt is generated from the source file in the
+  <samp>src/food/sausage.f90</samp> namespace, you can specify its Fortran
+  compiler flags <code><a href=
+  "annex_cfg.html#make.build.prop.fc.flags">build.prop{fc.flags}</a></code> by
+  doing either:</p>
+
+  <pre>
+build.prop{fc.flags}[sausage.o] = -O4
+# would be the same as:
+build.prop{fc.flags}[src/food/sausage.f90] = -O4
+</pre>
+
   <h3 id="build.target-source-fortran">Build Targets from Source Files: Fortran
   Specifics</h3>
 
