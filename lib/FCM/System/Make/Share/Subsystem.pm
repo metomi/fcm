@@ -25,11 +25,12 @@ use base qw{Exporter};
 
 our @EXPORT = qw{
     _config_parse
+    _config_parse_class_prop
     _config_parse_prop
     _config_parse_inherit_hook_prop
+    _config_unparse_class_prop
     _config_unparse_join
     _config_unparse_prop
-    _init_config_parse_prop
     _prop
     _prop0
     _props
@@ -57,6 +58,25 @@ sub _config_parse {
         return;
     }
     $config_parser_of{$label}->($attrib_ref, $ctx, $entry);
+    1;
+}
+
+# Parses a configuration entry into the subsystem property.
+sub _config_parse_class_prop {
+    my ($attrib_ref, $entry, $label) = @_;
+    if ($label ne 'prop') {
+        return;
+    }
+    if (@{$entry->get_ns_list()}) {
+        return $E->throw($E->CONFIG_NS, $entry);
+    }
+    my @keys = grep {$_ ne 'class'} keys(%{$entry->get_modifier_of()});
+    if (grep {!exists($attrib_ref->{prop_of}{$_})} @keys) {
+        return $E->throw($E->CONFIG_MODIFIER, $entry);
+    }
+    for my $key (@keys) {
+        $attrib_ref->{prop_of}{$key}[PROP_DEFAULT] = $entry->get_value();
+    }
     1;
 }
 
@@ -116,6 +136,19 @@ sub _config_unparse_join {
     );
 }
 
+# Entries of the class prop settings.
+sub _config_unparse_class_prop {
+    my ($attrib_ref, $id) = @_;
+    map {
+        my $key = $_;
+        FCM::Context::ConfigEntry->new({
+            label       => join(q{.}, $id, 'prop'),
+            modifier_of => {'class' => 1, $key => 1},
+            value       => $attrib_ref->{prop_of}{$key}[PROP_DEFAULT],
+        });
+    } sort keys(%{$attrib_ref->{prop_of}});
+}
+
 # Entries of the prop settings.
 sub _config_unparse_prop {
     my ($attrib_ref, $ctx) = @_;
@@ -137,25 +170,6 @@ sub _config_unparse_prop {
             });
         } sort(keys(%{$setting->get_ctx_of()}));
     } sort(keys(%prop_of));
-}
-
-# Parses a configuration entry into the subsystem property.
-sub _init_config_parse_prop {
-    my ($attrib_ref, $entry, $label) = @_;
-    if ($label ne 'prop') {
-        return;
-    }
-    if (@{$entry->get_ns_list()}) {
-        return $E->throw($E->CONFIG_NS, $entry);
-    }
-    my @keys = grep {$_ ne 'class'} keys(%{$entry->get_modifier_of()});
-    if (grep {!exists($attrib_ref->{prop_of}{$_})} @keys) {
-        return $E->throw($E->CONFIG_MODIFIER, $entry);
-    }
-    for my $key (@keys) {
-        $attrib_ref->{prop_of}{$key}[PROP_DEFAULT] = $entry->get_value();
-    }
-    1;
 }
 
 # Returns the value of a named property (for a given $ns).
@@ -240,6 +254,12 @@ Reads a configuration $entry into the $ctx context. The $label is the label of
 the $entry, but with the prefix (which should be the same as $ctx->get_id() plus
 a dot) removed.
 
+=item _config_parse_class_prop(\%attrib,$entry,$label)
+
+Reads a configuration $entry into the subsystem default property
+$attrib{prop_of}. The $label is the label of the $entry, but with the prefix
+(the subsystem ID plus a dot) removed.
+
 =item _config_parse_prop(\%attrib,$ctx,$entry)
 
 Reads a property configuration $entry into the $ctx context. This method may
@@ -258,15 +278,14 @@ inherited subsystem context. Inherits property settings from $i_ctx into $ctx.
 
 Joins the @list into a string that can be parsed again by shellwords.
 
+=item _config_unparse_class_prop(\%attrib,$id)
+
+Turns the default properties in the current subsystem into a list configuration
+entries. $id is the ID of the current subsystem.
+
 =item _config_unparse_prop(\%attrib,$ctx)
 
 Turns the properties in $ctx into a list configuration entries.
-
-=item _init_config_parse_prop(\%attrib,$entry,$label)
-
-Reads a configuration $entry into the subsystem default property
-$attrib{prop_of}. The $label is the label of the $entry, but with the prefix
-(the subsystem ID plus a dot) removed.
 
 =item _prop(\%attrib,$id,$ctx,$ns)
 

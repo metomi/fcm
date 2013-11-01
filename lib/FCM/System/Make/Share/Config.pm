@@ -62,7 +62,7 @@ sub _parse {
                 &&  exists($attrib_ref->{subsystem_of}{$id})
             ) {
                 my $subsystem = $attrib_ref->{subsystem_of}{$id};
-                if (!$subsystem->init_config_parse_prop($entry, $label)) {
+                if (!$subsystem->config_parse_class_prop($entry, $label)) {
                     push(@unknown_entries, $entry);
                 }
             }
@@ -196,6 +196,12 @@ sub _unparse {
                 [\&_unparse_use     , 'use'  ],
                 [sub {$m_ctx->get_dest()}, 'dest' ],
             ),
+        ),
+        (   map {   my $id = $_;
+                    my $subsystem = $attrib_ref->{subsystem_of}->{$id};
+                    $subsystem->config_unparse_class_prop($id);
+            }
+            sort keys(%{$attrib_ref->{subsystem_of}})
         ),
         (   map {   my $ctx = $_;
                     my $id_of_class = $ctx->get_id_of_class();

@@ -105,7 +105,7 @@ sub _init {
             my ($id, $label) = split(qr{\.}msx, $entry->get_label(), 2);
             if (exists($attrib_ref->{subsystem_of}{$id})) {
                 my $subsystem = $attrib_ref->{subsystem_of}{$id};
-                if (!$subsystem->init_config_parse_prop($entry, $label)) {
+                if (!$subsystem->config_parse_class_prop($entry, $label)) {
                     push(@unknown_entries, $entry);
                 }
             }
@@ -413,7 +413,7 @@ represent the settings of the $ctx.
 Returns a new context for the subsystem. The $id_of_class is the ID of the
 subsystem class. The $id is the step ID of the context.
 
-=item $subsystem->init_config_parse_prop($entry,$label)
+=item $subsystem->config_parse_class_prop($entry,$label)
 
 Reads a configuration $entry into the subsystem default property. The $label is
 the label of the $entry, but with the prefix (the subsystem ID plus a dot)
