@@ -173,6 +173,10 @@ sub _parse_use {
 # Turns the context back into a config.
 sub _unparse {
     my ($attrib_ref, $m_ctx) = @_;
+    my %subsystem_of = map {
+        my $id = $m_ctx->get_ctx_of()->{$_}->get_id_of_class();
+        ($id, $attrib_ref->{subsystem_of}->{$id});
+    } @{$m_ctx->get_steps()};
     map {$_->as_string()} (
         (   map {   FCM::Context::ConfigEntry->new({
                         label   => 'step.class',
@@ -198,17 +202,14 @@ sub _unparse {
             ),
         ),
         (   map {   my $id = $_;
-                    my $subsystem = $attrib_ref->{subsystem_of}->{$id};
-                    $subsystem->config_unparse_class_prop($id);
+                    $subsystem_of{$id}->config_unparse_class_prop($id);
             }
-            sort keys(%{$attrib_ref->{subsystem_of}})
+            sort keys(%subsystem_of)
         ),
-        (   map {   my $ctx = $_;
+        (   map {   my $ctx = $m_ctx->get_ctx_of()->{$_};
                     my $id_of_class = $ctx->get_id_of_class();
-                    my $subsystem = $attrib_ref->{subsystem_of}{$id_of_class};
-                    $subsystem ? $subsystem->config_unparse($ctx) : ();
+                    $subsystem_of{$id_of_class}->config_unparse($ctx);
                 }
-            map {$m_ctx->get_ctx_of()->{$_}}
             @{$m_ctx->get_steps()}
         ),
     );
