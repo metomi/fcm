@@ -64,10 +64,11 @@ __PACKAGE__->class(
     {   init => \&_init,
         action_of => {
             config_parse              => \&_config_parse,
+            config_parse_class_prop   => \&_config_parse_class_prop,
             config_parse_inherit_hook => \&_config_parse_inherit_hook,
             config_unparse            => \&_config_unparse,
+            config_unparse_class_prop => \&_config_unparse_class_prop,
             ctx                       => \&_ctx,
-            init_config_parse_prop    => \&_init_config_parse_prop,
             main                      => \&_main,
         },
     },

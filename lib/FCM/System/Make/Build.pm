@@ -92,10 +92,11 @@ __PACKAGE__->class(
     {   init => \&_init,
         action_of => {
             config_parse              => \&_config_parse,
+            config_parse_class_prop   => \&_config_parse_class_prop,
             config_parse_inherit_hook => \&_config_parse_inherit_hook,
             config_unparse            => \&_config_unparse,
+            config_unparse_class_prop => \&_config_unparse_class_prop,
             ctx                       => \&_ctx,
-            init_config_parse_prop    => \&_init_config_parse_prop,
             main                      => \&_main,
         },
     },
@@ -912,20 +913,30 @@ sub _targets_props_assign {
         = _prev_hash_item_getter($m_ctx, $ctx, sub {$_[0]->get_target_of()});
     my %NO_INHERIT_CATEGORY_IN
         = map {$_ => 1} _props($attrib_ref, 'no-inherit-target-category', $ctx);
+    my %CTX_PROP_OF = %{$ctx->get_prop_of()};
     for my $target (@{$targets_ref}) {
         # Properties
         my $FILE_TYPE_UTIL
             = $attrib_ref->{file_type_util_of}->{$target->get_type()};
         my $task = $FILE_TYPE_UTIL->task_of()->{$target->get_task()};
+        my $key = $target->get_key();
         if ($task->can('prop_of')) {
             my %prop_of = %{$task->prop_of($target)};
             while (my $name = each(%prop_of)) {
-                $target->get_prop_of()->{$name}
-                    = _prop($attrib_ref, $name, $ctx, $target->get_ns());
+                if (    exists($CTX_PROP_OF{$name})
+                    &&  exists($CTX_PROP_OF{$name}->get_ctx_of()->{$key})
+                ) {
+                    $target->get_prop_of()->{$name}
+                        = $CTX_PROP_OF{$name}->get_ctx_of()->{$key}->get_value();
+                }
+                else {
+                    $target->get_prop_of()->{$name}
+                        = _prop($attrib_ref, $name, $ctx, $target->get_ns());
+                }
             }
         }
         # Path, checksum and previous properties
-        my $p_target = $P_TARGET_GETTER->($target->get_key());
+        my $p_target = $P_TARGET_GETTER->($key);
         if (defined($p_target)) {
             $target->set_checksum($p_target->get_checksum());
             if ($p_target->is_ok()) {
@@ -1193,7 +1204,10 @@ sub _targets_select {
     my @invalid_prop_ns_list;
     while (my ($name, $prop) = each(%{$ctx->get_prop_of()})) {
         while (my ($ns, $prop_ctx) = each(%{$prop->get_ctx_of()})) {
-            if (!$prop_ctx->get_inherited() && !exists($has_ns_in{$ns})) {
+            if (    !$prop_ctx->get_inherited()
+                &&  !exists($target_of{$ns})
+                &&  !exists($has_ns_in{$ns})
+            ) {
                 push(
                     @invalid_prop_ns_list,
                     [$ctx->get_id(), $name, $ns, $prop_ctx->get_value()],

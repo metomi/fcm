@@ -25,6 +25,7 @@ N_TESTS=6
 tests $N_TESTS
 #-------------------------------------------------------------------------------
 # Get a remote host for testing
+T_HOST=
 for FILE in $HOME/.metomi/fcm/t.cfg $FCM_HOME/etc/fcm/t.cfg; do
     if [[ ! -f $FILE || ! -r $FILE ]]; then
         continue

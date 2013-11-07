@@ -57,19 +57,32 @@ sub _parse {
         }
         else {
             my ($id, $label) = split(qr{\.}msx, $entry->get_label(), 2);
-            my $ctx = $m_ctx->get_ctx_of($id);
-            if (!defined($ctx) && exists($attrib_ref->{subsystem_of}{$id})) {
-                $ctx = $attrib_ref->{subsystem_of}{$id}->ctx($id, $id);
-                $m_ctx->get_ctx_of()->{$id} = $ctx;
+            if (    $label eq 'prop'
+                &&  exists($entry->get_modifier_of()->{'class'})
+                &&  exists($attrib_ref->{subsystem_of}{$id})
+            ) {
+                my $subsystem = $attrib_ref->{subsystem_of}{$id};
+                if (!$subsystem->config_parse_class_prop($entry, $label)) {
+                    push(@unknown_entries, $entry);
+                }
             }
-            my $rc;
-            if (defined($ctx)) {
-                my $id_of_class = $ctx->get_id_of_class();
-                my $subsystem = $attrib_ref->{subsystem_of}{$id_of_class};
-                $rc = $subsystem->config_parse($ctx, $entry, $label);
-            }
-            if (!$rc) {
-                push(@unknown_entries, $entry);
+            else {
+                my $ctx = $m_ctx->get_ctx_of($id);
+                if (    !defined($ctx)
+                    &&  exists($attrib_ref->{subsystem_of}{$id})
+                ) {
+                    $ctx = $attrib_ref->{subsystem_of}{$id}->ctx($id, $id);
+                    $m_ctx->get_ctx_of()->{$id} = $ctx;
+                }
+                my $rc;
+                if (defined($ctx)) {
+                    my $id_of_class = $ctx->get_id_of_class();
+                    my $subsystem = $attrib_ref->{subsystem_of}{$id_of_class};
+                    $rc = $subsystem->config_parse($ctx, $entry, $label);
+                }
+                if (!$rc) {
+                    push(@unknown_entries, $entry);
+                }
             }
         }
     }
@@ -160,6 +173,10 @@ sub _parse_use {
 # Turns the context back into a config.
 sub _unparse {
     my ($attrib_ref, $m_ctx) = @_;
+    my %subsystem_of = map {
+        my $id = $m_ctx->get_ctx_of()->{$_}->get_id_of_class();
+        ($id, $attrib_ref->{subsystem_of}->{$id});
+    } @{$m_ctx->get_steps()};
     map {$_->as_string()} (
         (   map {   FCM::Context::ConfigEntry->new({
                         label   => 'step.class',
@@ -184,12 +201,15 @@ sub _unparse {
                 [sub {$m_ctx->get_dest()}, 'dest' ],
             ),
         ),
-        (   map {   my $ctx = $_;
+        (   map {   my $id = $_;
+                    $subsystem_of{$id}->config_unparse_class_prop($id);
+            }
+            sort keys(%subsystem_of)
+        ),
+        (   map {   my $ctx = $m_ctx->get_ctx_of()->{$_};
                     my $id_of_class = $ctx->get_id_of_class();
-                    my $subsystem = $attrib_ref->{subsystem_of}{$id_of_class};
-                    $subsystem ? $subsystem->config_unparse($ctx) : ();
+                    $subsystem_of{$id_of_class}->config_unparse($ctx);
                 }
-            map {$m_ctx->get_ctx_of()->{$_}}
             @{$m_ctx->get_steps()}
         ),
     );
