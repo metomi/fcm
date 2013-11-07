@@ -224,8 +224,10 @@ our %PREF_NAME_OF = (
     'usage'    => $HELP_APP,
     'www'      => 'browse',
     '?'        => $HELP_APP,
+    '-V'       => 'version',
     '--help'   => $HELP_APP,
     '--usage'  => $HELP_APP,
+    '--version'=> 'version',
 );
 
 # Creates the class.

@@ -26,8 +26,8 @@ use base qw{FCM::Class::CODE};
 use Data::Dumper qw{Dumper};
 use FCM::Context::Event;
 use File::Basename qw{basename};
-use HTTP::Date qw{time2isoz};
 use List::Util qw{first};
+use POSIX qw{strftime};
 use Scalar::Util qw{blessed};
 
 my $CTX = 'FCM::Context::Event';
@@ -52,8 +52,8 @@ my %ACTION_OF = (
     $CTX->E                             => \&_event_e,
     $CTX->EXPORT_ITEM_CREATE            => _func('export_item_create'),
     $CTX->EXPORT_ITEM_DELETE            => _func('export_item_delete'),
+    $CTX->FCM_VERSION                   => _func('fcm_version'),
     $CTX->KEYWORD_ENTRY                 => \&_event_keyword_entry,
-    $CTX->OUT                           => \&_event_out,
     $CTX->MAKE_BUILD_SHELL_OUT          => \&_event_make_build_shell_out,
     $CTX->MAKE_BUILD_SOURCE_ANALYSE     => \&_event_make_build_source_analyse,
     $CTX->MAKE_BUILD_SOURCE_SUMMARY     => _func('make_build_source_summary'),
@@ -72,6 +72,7 @@ my %ACTION_OF = (
     $CTX->MAKE_EXTRACT_TARGET           => \&_event_make_extract_target,
     $CTX->MAKE_EXTRACT_TARGET_SUMMARY   => \&_event_make_extract_target_summary,
     $CTX->MAKE_MIRROR                   => \&_event_make_mirror,
+    $CTX->OUT                           => \&_event_out,
     $CTX->SHELL                         => \&_event_shell,
     $CTX->TASK_WORKERS                  => \&_event_task_workers,
     $CTX->TIMER                         => \&_event_timer,
@@ -284,6 +285,7 @@ our %S = (
     event                        => '%s: event raised',
     export_item_create           => 'A %s@%s -> %s',
     export_item_delete           => 'D %s@%s -> %s',
+    fcm_version                  => '%s',
     keyword_loc                  => 'location[%s] = %s',
     keyword_loc_primary          => 'location{primary}[%s] = %s',
     keyword_rev                  => 'revision[%s:%s] = %s',
@@ -892,10 +894,15 @@ sub _event_shell {
 # Notification when a timer starts/ends.
 sub _event_timer {
     my ($name, $start, $elapsed, $failed) = @_;
-    my $message
-        = defined($elapsed) ? sprintf($S{timer_done}, $name, $elapsed)
-        :                     sprintf($S{timer_init}, $name, time2isoz($start))
-        ;
+    my $message;
+    if (defined($elapsed)) {
+        $message = sprintf($S{timer_done}, $name, $elapsed);
+    }
+    else {
+        my $format = '%Y-%m-%dT%H:%M:%SZ';
+        $message = sprintf(
+            $S{timer_init}, $name, strftime($format, gmtime($start)));
+    }
     my $prefix
         = $failed           ? $R->PREFIX_FAIL
         : defined($elapsed) ? $R->PREFIX_DONE

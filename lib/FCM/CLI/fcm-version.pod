@@ -1,0 +1,11 @@
+=head1 NAME
+
+fcm version (--version, -V)
+
+=head1 SYNOPSIS
+
+Print FCM version.
+
+    fcm version
+
+=cut

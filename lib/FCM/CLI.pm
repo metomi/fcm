@@ -70,6 +70,7 @@ our %ACTION_OF = (
     ),
     'test-battery'  => \&_test_battery,
     'update'        => _sys_func(sub {$S->cm_update(@_)}),
+    'version'       => _sys_func(sub {$S->version(@_)}),
     # Commands passed directly to "svn"
     map {($_ => _sys_func())} qw{
         blame
@@ -192,12 +193,7 @@ sub _help {
             ;
         if ($pod eq $0) {
             # Read fcm-version.js file
-            my $path = catfile($FindBin::Bin, qw{ .. doc etc fcm-version.js});
-            open(my($handle), '<', $path) || die("$path: $!");
-            my $content = do {local($/); readline($handle)};
-            close($handle);
-            my ($version) = $content =~ qr{\AFCM\.VERSION="(.*)";}msx;
-            chomp($content);
+            my $version = $attrib_ref->{system}->util()->version();
             my $bin = rel2abs($0);
             $EVENT->(FCM::Context::Event->OUT, "$version ($bin)\n");
         }

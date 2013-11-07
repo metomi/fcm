@@ -161,6 +161,6 @@ $(function() {
     // Display version information
     NODE = $(".fcm-version");
     if (NODE) {
-        NODE.text(FCM.VERSION);
+        NODE.text("FCM " + FCM.VERSION);
     }
 });

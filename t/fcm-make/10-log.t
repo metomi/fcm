@@ -21,41 +21,33 @@
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
-tests 12
+tests 7
 cp -r $TEST_SOURCE_DIR/$TEST_KEY_BASE/* .
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE"
 run_pass "$TEST_KEY" fcm make
-find .fcm-make build -type f | sed 's/^\(\.fcm-make\/log\).*$/\1/' \
-    | sort >"$TEST_KEY.find"
-file_cmp "$TEST_KEY.find" "$TEST_KEY.find" <<'__OUT__'
-.fcm-make/config-as-parsed.cfg
-.fcm-make/config-on-success.cfg
-.fcm-make/ctx.gz
-.fcm-make/log
-build/bin/hello.exe
-build/include/world.mod
-build/o/hello.o
-build/o/world.o
-__OUT__
-file_test "$TEST_KEY.log" fcm-make.log
-readlink fcm-make.log >"$TEST_KEY.log.out"
-file_cmp "$TEST_KEY.log.out" "$TEST_KEY.log.out" <<<'.fcm-make/log'
-file_test "$TEST_KEY-as-parsed.cfg" fcm-make-as-parsed.cfg
-readlink fcm-make-as-parsed.cfg >"$TEST_KEY-as-parsed.cfg.out"
-file_cmp "$TEST_KEY-as-parsed.cfg.out" "$TEST_KEY-as-parsed.cfg.out" \
-    <<<'.fcm-make/config-as-parsed.cfg'
-file_test "$TEST_KEY-on-success.cfg" fcm-make-on-success.cfg 
-readlink fcm-make-on-success.cfg >"$TEST_KEY-on-success.cfg.out"
-file_cmp "$TEST_KEY-on-success.cfg.out" "$TEST_KEY-on-success.cfg.out" \
-    <<<'.fcm-make/config-on-success.cfg'
-run_pass "$TEST_KEY.exe" $PWD/build/bin/hello.exe
-file_cmp "$TEST_KEY.exe.out" "$TEST_KEY.exe.out" <<<'Hello Earth'
+if [[ -d $FCM_HOME/.git ]]; then
+    VERSION="FCM $(git --git-dir=$FCM_HOME/.git describe)"
+else
+    VERSION=$(sed '/FCM\.VERSION/!d; s/^.*="\(.*\)";$/\1/' \
+        $FCM_HOME/doc/etc/fcm-version.js)
+fi
+file_grep "$TEST_KEY.log.version" "\\[info\\] $VERSION" .fcm-make/log
+file_grep "$TEST_KEY.log.mode" '\[info\] mode=new' .fcm-make/log
+if [[ $(ls .fcm-make/log-* | wc -l) == 1 ]]; then
+    pass "$TEST_KEY-n-logs"
+else
+    fail "$TEST_KEY-n-logs"
+fi
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE-incr"
-find build -type f -exec stat -c'%Y %n' {} \; | sort >"$TEST_KEY.mtime.old"
+sleep 1
 run_pass "$TEST_KEY" fcm make
-find build -type f -exec stat -c'%Y %n' {} \; | sort >"$TEST_KEY.mtime"
-file_cmp "$TEST_KEY.mtime" "$TEST_KEY.mtime.old" "$TEST_KEY.mtime"
+file_grep "$TEST_KEY.log.mode" '\[info\] mode=incremental' .fcm-make/log
+if [[ $(ls .fcm-make/log-* | wc -l) == 2 ]]; then
+    pass "$TEST_KEY-n-logs"
+else
+    fail "$TEST_KEY-n-logs"
+fi
 #-------------------------------------------------------------------------------
 exit 0

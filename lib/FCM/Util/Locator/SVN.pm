@@ -24,8 +24,8 @@ package FCM::Util::Locator::SVN;
 use base qw{FCM::Class::CODE};
 
 use File::Temp;
-use HTTP::Date qw{str2time};
 use POSIX qw{setlocale LC_ALL};
+use Time::Piece;
 
 our %ACTION_OF = (
     as_invariant      => \&_as_invariant,
@@ -65,7 +65,7 @@ my %INFO_OF = (
 my %INFO_KIND_OF = (directory => 'dir', file => 'file');
 
 my %INFO_MOD_OF = (
-    last_changed_date => sub {str2time((split(qr{\s+\(}msx, $_[0], 2))[0])},
+    last_changed_date => \&_svn_info_last_changed_date,
     kind => sub {exists($INFO_KIND_OF{$_[0]}) ? $INFO_KIND_OF{$_[0]} : $_[0]},
 );
 
@@ -307,6 +307,15 @@ sub _svn_info {
             $callback_ref->(\%hash);
         }
     }
+}
+
+# Parse last changed date from "svn info".
+sub _svn_info_last_changed_date {
+    my $text = (split(qr{\s+\(}msx, $_[0], 2))[0];
+    my $head = Time::Piece->strptime(substr($text, 0, -6), '%Y-%m-%d %H:%M:%S');
+    my $tail = substr($text, -5);
+    my ($tz_sign, $tz_h, $tz_m) = $tail =~ qr{([\-\+])(\d\d)(\d\d)}msx;
+    $head->epoch() - int($tz_sign . 1) * ($tz_h * 3600 + $tz_m * 60);
 }
 
 # Returns a tidied version of a Subversion URL.

@@ -58,6 +58,7 @@ our %ACTION_OF = (
     make                 => _func('make', sub {$S->main(@_)}),
     svn                  => _func('cm'  , sub {$S->svn(@_)}),
     util                 => sub {$_[0]->{util}},
+    version              => _func('misc', sub {$S->version(@_)}),
 );
 # The (keys) named system and their implementation classes.
 our %SYSTEM_CLASS_OF = (
