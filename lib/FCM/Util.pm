@@ -478,7 +478,7 @@ sub _version {
         return "FCM " . $value_hash_ref->{o};
     }
     # Read fcm-version.js file
-    my $path = catfile($FindBin::Bin, qw{ .. doc etc fcm-version.js});
+    my $path = catfile($FindBin::Bin, qw{.. doc etc fcm-version.js});
     open(my($handle), '<', $path) || die("$path: $!");
     my $content = do {local($/); readline($handle)};
     close($handle);
