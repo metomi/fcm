@@ -280,12 +280,12 @@ Joins the @list into a string that can be parsed again by shellwords.
 
 =item _config_unparse_class_prop(\%attrib,$id)
 
-Turns the default properties in the current subsystem into a list configuration
-entries. $id is the ID of the current subsystem.
+Turns the default properties in the current subsystem into a list of
+configuration entries. $id is the ID of the current subsystem.
 
 =item _config_unparse_prop(\%attrib,$ctx)
 
-Turns the properties in $ctx into a list configuration entries.
+Turns the properties in $ctx into a list of configuration entries.
 
 =item _prop(\%attrib,$id,$ctx,$ns)
 
