@@ -309,7 +309,7 @@ sub _keyword_find {
     return;
 }
 
-# Searches FCM keywords.
+# Emit an FCM::Context::Event->OUT event to print FCM's version.
 sub _version {
     my ($attrib_ref, $option_ref, @args) = @_;
     my $UTIL = $attrib_ref->{util};
