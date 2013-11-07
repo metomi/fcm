@@ -27,12 +27,8 @@ PATH=$PWD/bin:$PATH
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE"
 run_pass "$TEST_KEY" fcm make
-find .fcm-make build -type f | sort >"$TEST_KEY.find"
+find build -type f | sort >"$TEST_KEY.find"
 file_cmp "$TEST_KEY.find" "$TEST_KEY.find" <<'__OUT__'
-.fcm-make/config-as-parsed.cfg
-.fcm-make/config-on-success.cfg
-.fcm-make/ctx.gz
-.fcm-make/log
 build/bin/hello.exe
 build/include/world.mod
 build/o/hello.o
