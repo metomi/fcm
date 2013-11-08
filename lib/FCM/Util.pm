@@ -469,10 +469,18 @@ sub _util_of_func {
 sub _version {
     my ($attrib_ref) = @_;
     # Try "git describe"
-    my $value_hash_ref = $ACTION_OF{shell_simple}->(
-        $attrib_ref,
-        ['git', "--git-dir=$FindBin::Bin/../.git", 'describe'],
-    );
+    my $value_hash_ref = eval {
+        $ACTION_OF{shell_simple}->(
+            $attrib_ref,
+            ['git', "--git-dir=$FindBin::Bin/../.git", 'describe'],
+        );
+    };
+    if (my $e = $@) {
+        if (!$E->caught($e)) {
+            die($e);
+        }
+        $@ = undef;
+    }
     if ($value_hash_ref->{o} && !$value_hash_ref->{rc}) {
         chomp($value_hash_ref->{o});
         return "FCM " . $value_hash_ref->{o};
