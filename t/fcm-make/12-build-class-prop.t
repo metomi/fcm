@@ -27,12 +27,8 @@ PATH=$PWD/bin:$PATH
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE"
 run_pass "$TEST_KEY" fcm make
-find .fcm-make build* -type f | sort >"$TEST_KEY.find"
+find build* -type f | sort >"$TEST_KEY.find"
 file_cmp "$TEST_KEY.find" "$TEST_KEY.find" <<'__FIND__'
-.fcm-make/config-as-parsed.cfg
-.fcm-make/config-on-success.cfg
-.fcm-make/ctx.gz
-.fcm-make/log
 build/bin/hello.bin
 build/o/hello.o
 build_house/bin/hello_house
@@ -42,8 +38,8 @@ build_office/o/hello_office.o
 build_road/bin/hello_road
 build_road/o/hello_road.o
 __FIND__
-sed '/^\[info\] shell(0.*)/!d; s/^\[info\] shell(0.*) //' .fcm-make/log \
-    >"$TEST_KEY.log"
+sed '/^\[info\] shell(0.*) \(my-fc\|gfortran\)/!d; s/^\[info\] shell(0.*) //' \
+    .fcm-make/log >"$TEST_KEY.log"
 file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<__LOG__
 my-fc -oo/hello.o -c -I./include $PWD/src/hello.f90
 my-fc -obin/hello.bin o/hello.o
