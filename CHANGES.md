@@ -5,6 +5,32 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## Next Release (2013-Q4)
+
+### Highlighted Changes
+
+-none yet-
+
+### Noteworthy Changes
+
+Bug fixes and minor enhancements:
+
+\#65: fcm make: support declaration of class default properties using the
+syntax e.g. `build.prop{class,fc}=my-fc`.
+
+\#65: fcm make: build: support target name as name-space for target properties,
+e.g. `build.prop{fc}[myprog.exe]=my-fc`. N.B. Dependency properties are
+regarded as source properties, and so are not supported by this change.
+
+\#63: fcm make: log file improvements. Print FCM version in beginning of log
+file.
+
+\#63: fcm --version: new command to print FCM version.
+
+\#63: FCM is no longer dependent on the `HTTP::Date` Perl module.
+
+--------------------------------------------------------------------------------
+
 ## 2013-10 (2013-10-30)
 
 ### Highlighted Changes
