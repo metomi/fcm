@@ -1,6 +1,7 @@
 # FCM
 
-FCM is a set of tools for managing and building source code.
+FCM: a modern Fortran build system,
+and wrappers to Subversion for scientific software development
 
 See <http://metomi.github.io/fcm/>.
 
