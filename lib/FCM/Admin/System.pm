@@ -225,25 +225,6 @@ sub add_trac_environment {
 sub backup_svn_repository {
     my ($option_hash_ref, $project) = @_;
     my $RUNNER = sub {FCM::Admin::Runner->instance()->run(@_)};
-    if (!exists($option_hash_ref->{'no-verify-integrity'})) {
-        my $VERIFIED_REVISION_REGEX = qr{\A\*\s+Verified\s+revision\s+\d+\.}xms;
-        $RUNNER->(
-            "verifying integrity of SVN repository of $project",
-            sub {
-                my $pipe = IO::Pipe->new();
-                $pipe->reader(sprintf(
-                    qq{svnadmin verify %s 2>&1}, $project->get_svn_live_path(),
-                ));
-                while (my $line = $pipe->getline()) {
-                    if ($line !~ $VERIFIED_REVISION_REGEX) { # don't print
-                        print($line);
-                    }
-                }
-                return $pipe->close();
-                # Note: "verify" is not yet possible via SVN::Repos
-            },
-        );
-    }
     if (!exists($option_hash_ref->{'no-pack'})) {
         $RUNNER->(
             sprintf("packing %s", $project->get_svn_live_path()),
@@ -262,6 +243,25 @@ sub backup_svn_repository {
         )},
         # Note: "hotcopy" is not yet possible via SVN::Repos
     );
+    if (!exists($option_hash_ref->{'no-verify-integrity'})) {
+        my $VERIFIED_REVISION_REGEX = qr{\A\*\s+Verified\s+revision\s+\d+\.}xms;
+        $RUNNER->(
+            "verifying integrity of SVN repository of $project",
+            sub {
+                my $pipe = IO::Pipe->new();
+                $pipe->reader(sprintf(
+                    qq{svnadmin verify %s 2>&1}, $work_path,
+                ));
+                while (my $line = $pipe->getline()) {
+                    if ($line !~ $VERIFIED_REVISION_REGEX) { # don't print
+                        print($line);
+                    }
+                }
+                return $pipe->close();
+                # Note: "verify" is not yet possible via SVN::Repos
+            },
+        );
+    }
     _create_backup_archive(
         $work_path,
         FCM::Admin::Config->instance()->get_svn_backup_dir(),
@@ -279,7 +279,7 @@ sub backup_svn_repository {
                     $dump_path,
                     sub {
                         my ($base_name, $path) = @_;
-                        my ($rev) = $base_name =~ qr{\A(\d+)\.gz\z}xms;
+                        my $rev = basename($base_name, '.gz');
                         if (!$rev || $rev > $youngest) {
                             return;
                         }
@@ -301,22 +301,6 @@ sub backup_svn_repository {
 sub backup_trac_environment {
     my ($option_hash_ref, $project) = @_;
     my $trac_live_path = $project->get_trac_live_path();
-    if (!exists($option_hash_ref->{'no-verify-integrity'})) {
-        my $db_path = $project->get_trac_live_db_path();
-        FCM::Admin::Runner->instance()->run(
-            "checking $db_path for integrity",
-            sub {
-                my $db_handle
-                    = DBI->connect(qq{dbi:SQLite:dbname=$db_path}, q{}, q{});
-                if (!$db_handle) {
-                    return;
-                }
-                my $rc = defined($db_handle->do(q{pragma integrity_check;}));
-                $db_handle->disconnect();
-                return $rc;
-            },
-        );
-    }
     # Make sure the project INI file is owned by the correct group
     #my $project_trac_ini_file = $project->get_trac_live_ini_path();
     #my $gid = FCM::Admin::Config->instance()->get_trac_gid();
@@ -341,6 +325,23 @@ sub backup_trac_environment {
             );
         },
     );
+    if (!exists($option_hash_ref->{'no-verify-integrity'})) {
+        my $db_path = File::Spec->catfile($work_path, qw{db trac.db});
+        my $db_name = File::Spec->catfile($project->get_name(), qw{db trac.db});
+        FCM::Admin::Runner->instance()->run(
+            "checking $db_name for integrity",
+            sub {
+                my $db_handle
+                    = DBI->connect(qq{dbi:SQLite:dbname=$db_path}, q{}, q{});
+                if (!$db_handle) {
+                    return;
+                }
+                my $rc = defined($db_handle->do(q{pragma integrity_check;}));
+                $db_handle->disconnect();
+                return $rc;
+            },
+        );
+    }
     _create_backup_archive(
         $work_path,
         FCM::Admin::Config->instance()->get_trac_backup_dir(),
@@ -759,7 +760,7 @@ sub recover_svn_repository {
             $project->get_svn_dump_path(),
             sub {
                 my ($base_name, $path) = @_;
-                my ($rev) = $base_name =~ qr{\A(\d+)\.gz\z}xms;
+                my $rev = basename($base_name, '.gz');
                 if (!$rev || $rev <= $youngest) {
                     return;
                 }
@@ -771,7 +772,7 @@ sub recover_svn_repository {
         @rev_dump_paths
             = map {$_->[0]}
               sort {$a->[1] <=> $b->[1]}
-              map {[$_, basename($_)]}
+              map {[$_, basename($_, '.gz')]}
               @rev_dump_paths;
         for my $rev_dump_path (@rev_dump_paths) {
             FCM::Admin::Runner->instance()->run(
