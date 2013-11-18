@@ -280,7 +280,7 @@ sub backup_svn_repository {
                     sub {
                         my ($base_name, $path) = @_;
                         my $rev = basename($base_name, '.gz');
-                        if (!$rev || $rev > $youngest) {
+                        if ($rev > $youngest) {
                             return;
                         }
                         push(@rev_dump_paths, $path);
@@ -761,7 +761,7 @@ sub recover_svn_repository {
             sub {
                 my ($base_name, $path) = @_;
                 my $rev = basename($base_name, '.gz');
-                if (!$rev || $rev <= $youngest) {
+                if ($rev <= $youngest) {
                     return;
                 }
                 push(@rev_dump_paths, $path);
