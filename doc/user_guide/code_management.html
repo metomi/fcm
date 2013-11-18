@@ -44,7 +44,7 @@
   <h2 id="svn">Using Subversion</h2>
 
   <p>One of the key strengths of Subversion is its documentation. <a href=
-  "http://svnbook.red-bean.com/en/1.6/">Version Control with Subversion</a>
+  "http://svnbook.red-bean.com/en/1.8/">Version Control with Subversion</a>
   (which we'll just refer to as the <cite>Subversion book</cite> from now on)
   is an excellent book which explains in detail how to use Subversion and also
   provides a good introduction to all the basic concepts of version control.
@@ -61,20 +61,20 @@
   <p>In order to use FCM you need to have a basic understanding of version
   control. If you're not already familiar with Subversion or CVS then please
   read the chapter <a href=
-  "http://svnbook.red-bean.com/en/1.6/svn.basic.html">Fundamental Concepts</a>
+  "http://svnbook.red-bean.com/en/1.8/svn.basic.html">Fundamental Concepts</a>
   from the <cite>Subversion book</cite>. In particular, make sure that you
   understand:</p>
 
   <ul>
     <li>The <q title=
-    "http://svnbook.red-bean.com/en/1.6/svn.basic.version-control-basics.html#svn.basic.vsn-models.copy-merge">
+    "http://svnbook.red-bean.com/en/1.8/svn.basic.version-control-basics.html#svn.basic.vsn-models.copy-merge">
     Copy-Modify-Merge</q> approach to file sharing.</li>
 
     <li>Global Revision Numbers.</li>
   </ul>
 
   <p>Note that this chapter states that <q title=
-  "http://svnbook.red-bean.com/en/1.6/svn.basic.in-action.html#svn.basic.in-action.wc">
+  "http://svnbook.red-bean.com/en/1.8/svn.basic.in-action.html#svn.basic.in-action.wc">
   working copies do not always correspond to any single revision in the
   repository</q>. However, the FCM working practices do not encourage this and
   the wrapper scripts provided by FCM should ensure that your working copy (a
@@ -87,7 +87,7 @@
   development model. However, there are some important differences which may
   confuse those more familiar with CVS. Fortunately, the appendix in the
   <cite>Subversion book</cite> <a href=
-  "http://svnbook.red-bean.com/en/1.6/svn.forcvs.html">Subversion for CVS
+  "http://svnbook.red-bean.com/en/1.8/svn.forcvs.html">Subversion for CVS
   Users</a> is specifically written for those moving from CVS to Subversion and
   you should read this if you are a CVS user.</p>
 
@@ -96,7 +96,7 @@
   <p>Before we discuss the FCM system you need to have a good understanding of
   how to perform most of the normal day-to-day tasks using Subversion.
   Therefore, unless you are already familiar with Subversion, please read the
-  chapter <a href="http://svnbook.red-bean.com/en/1.6/svn.tour.html">Basic
+  chapter <a href="http://svnbook.red-bean.com/en/1.8/svn.tour.html">Basic
   Usage</a> from the <cite>Subversion book</cite>.</p>
 
   <p>So, now you have an understanding of how to do basic tasks using
@@ -163,7 +163,7 @@ fcm ls fcm:um_tg  # OR: fcm ls fcm:um-tg
     <li>If the repository needs to be moved then only the keyword definitions
     need to be updated (although any working copies you have will still need to
     be <em>relocated</em> by issuing a <a href=
-    "http://svnbook.red-bean.com/en/1.6/svn.ref.svn.c.switch.html"><code>fcm
+    "http://svnbook.red-bean.com/en/1.8/svn.ref.svn.c.switch.html"><code>fcm
     switch --relocate</code></a> command).</li>
   </ul>
 
@@ -599,7 +599,7 @@ At revision 170.
 
   <p>Branching is a fundamental concept common to most version control systems.
   For a good introduction please read the chapter <a href=
-  "http://svnbook.red-bean.com/en/1.6/svn.branchmerge.html">Branching and
+  "http://svnbook.red-bean.com/en/1.8/svn.branchmerge.html">Branching and
   Merging</a> from the <cite>Subversion book</cite>. Even if you are already
   familiar with branching using other version control systems you should still
   read this chapter to see how branching is implemented in Subversion.</p>
@@ -615,7 +615,7 @@ At revision 170.
     <li>That when you make a branch you are taking a copy of the entire project
     file tree. Fortunately, the design of the Subversion repository means that
     these copies are <q title=
-    "http://svnbook.red-bean.com/en/1.6/svn.branchmerge.using.html#svn.branchmerge.using.create">
+    "http://svnbook.red-bean.com/en/1.8/svn.branchmerge.using.html#svn.branchmerge.using.create">
     cheap</q> - they are quick to create and take very little space.</li>
 
     <li>That Subversion has only implemented merge tracking recently,

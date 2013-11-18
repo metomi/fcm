@@ -86,6 +86,7 @@ our %ACTION_OF = (
         mergeinfo
         mkdir
         move
+        patch
         propdel
         propedit
         propget
@@ -96,6 +97,7 @@ our %ACTION_OF = (
         revert
         status
         unlock
+        upgrade
     },
 );
 # List of overridden subcommands that need to display "svn help"
