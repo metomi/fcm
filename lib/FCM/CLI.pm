@@ -92,6 +92,7 @@ our %ACTION_OF = (
         propget
         proplist
         propset
+        relocate
         resolve
         resolved
         revert
