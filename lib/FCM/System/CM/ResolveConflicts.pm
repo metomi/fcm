@@ -29,7 +29,7 @@ use FCM::Context::Event;
 use FCM::System::Exception;
 use File::Basename qw{basename dirname};
 use File::Copy qw{copy};
-use File::Spec::Functions qw{catfile};
+use File::Spec::Functions qw{abs2rel catfile rel2abs};
 use File::Temp;
 
 # LxIy stands for local x, incoming y in the tree conflict description.
@@ -149,7 +149,11 @@ sub _cm_resolve_text_conflict {
     # Get conflicts markers files
     my %info = %{$attrib_ref->{svn}->get_info($path)->[0]};
     my @keys = map {"conflict:$_-file"} qw{prev-wc prev-base cur-base};
-    my ($mine, $older, $yours) = map {catfile(dirname($path), $_)} @info{@keys};
+    # Subversion 1.6: conflict filenames are relative paths.
+    # Subversion 1.8: conflict filenames are absolute paths.
+    my ($mine, $older, $yours) = map {
+        rel2abs($_, rel2abs(dirname($path)))
+    } @info{@keys};
 
     # If $path is newer (by more than a second), it may contain saved changes.
     if (    -f $path && (stat($path))[9] > (stat($mine))[9] + 1
