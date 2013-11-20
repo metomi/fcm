@@ -1271,9 +1271,8 @@ sub cm_mkpatch {
     open FILE, '>', $out or die $out, ': cannot open (', $!, ')';
 
     # Script header
-    my $shell = FCM1::Config->instance()->setting(qw/TOOL SHELL/);
     print FILE <<EOF;
-#!$shell
+#!/usr/bin/env bash
 # ------------------------------------------------------------------------------
 # NAME
 #   apply-patch
@@ -1355,7 +1354,7 @@ EOF
 
     # Script header
     print FILE <<EOF;
-#!/bin/bash
+#!/usr/bin/env bash
 # ------------------------------------------------------------------------------
 # NAME
 #   fcm-import-patch
