@@ -5,7 +5,7 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
-## Next Release (2013-Q4)
+## 2013-11 (2013-11-??)
 
 ### Highlighted Changes
 
@@ -18,7 +18,13 @@ regarded as source properties, and so are not supported by this change.
 
 ### Noteworthy Changes
 
-Bug fixes and minor enhancements:
+\#73: fcm mkpatch: use `/usr/bin/env bash` in generated scripts.
+
+\#72: fcm conflicts: fix incompatibility with SVN 1.8.
+
+\#70: fcm CLI: support new SVN 1.8 commands.
+
+\#68: sbin/fcm-backup-*: hotcopy before verifying the hotcopy.
 
 \#63: fcm make: log file improvements. Print FCM version in beginning of log
 file.
