@@ -5,7 +5,7 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
-## 2013-11 (2013-11-??)
+## 2013-11 (2013-11-22)
 
 ### Highlighted Changes
 
@@ -24,7 +24,7 @@ regarded as source properties, and so are not supported by this change.
 
 \#70: fcm CLI: support new SVN 1.8 commands.
 
-\#68: sbin/fcm-backup-*: hotcopy before verifying the hotcopy.
+\#68: sbin/fcm-backup-\*: hotcopy before verifying the hotcopy.
 
 \#63: fcm make: log file improvements. Print FCM version in beginning of log
 file.
