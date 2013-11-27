@@ -301,7 +301,7 @@ browser.rev-tmpl = @{1} # default
 
   <ol>
     <li><samp>$FCM/etc/fcm/external.cfg</samp> where <var>$FCM/bin/</var> is
-    the where <code>fcm</code> is invoked.</li>
+    the path at which <code>fcm</code> is installed.</li>
 
     <li><samp>$HOME/.metomi/fcm/external.cfg</samp>.</li>
   </ol>
@@ -467,8 +467,8 @@ build.prop{fc.flags}[foo/bar] = -O1
 
       <ol>
         <li>The site configuration file <samp>$FCM/etc/fcm/make.cfg</samp>
-        where <var>$FCM/bin/</var> is the where <code>fcm</code> is
-        invoked.</li>
+        where <var>$FCM/bin/</var> is the path at which <code>fcm</code> is
+        installed.</li>
 
         <li>The user configuration file
         <samp>$HOME/.metomi/fcm/make.cfg</samp>.</li>
@@ -901,8 +901,9 @@ build.target-rename = hello.exe:hello
       below.</p>
 
       <p><dfn>namespace</dfn>: Optional. A list of space-delimited namespaces to
-      which this setting applies. The namespace can be target names, if
-      applicable, or the hierarchical namespaces of source files. If not
+      which this setting applies. The namespaces can be target names, when used
+      with target properties (dependency properties are regarded as source
+      properties), or the hierarchical namespaces of source files. If not
       specified, the setting applies to the global/root namespace. N.B. Not all
       build properties accept a namespace. See below for detail.</p>
 
