@@ -48,7 +48,7 @@ sub new {
     bless(
         FCM::System::Make::Build::FileType->new({
             id                    => 'script',
-            file_she              => q{#!},
+            file_she              => q{}, # Value not used, for file type match
             file_ext              => q{},
             source_analyse_dep_of => {%SOURCE_ANALYSE_DEP_OF},
             source_to_targets     => \&_source_to_targets,

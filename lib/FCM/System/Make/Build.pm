@@ -456,7 +456,7 @@ sub _sources_type {
             my $line = $UTIL->file_head($path);
             if ($line) {
                 while (my ($pattern, $type) = each(%INPUT_FILE_SHE_TO_TYPE_MAP)) {
-                    if (index($line, $pattern) == 0) {
+                    if (index($line, '#!') == 0) { # OK to hard code this
                         keys(%INPUT_FILE_SHE_TO_TYPE_MAP); # reset iterator
                         return $type;
                     }
