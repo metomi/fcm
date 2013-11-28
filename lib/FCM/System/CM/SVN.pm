@@ -426,7 +426,8 @@ sub _get_log_handle_text {
 # Helper for "_get_log", handle text node in a "date" element.
 sub _get_log_handle_text_date {
     my ($entries_ref, $text) = @_;
-    chomp($text); # "svn log --xml" may return a date with trailing spaces!
+    # "svn log --xml" may return a date with trailing spaces!
+    $text =~ s{\s+\z}{}gmsx;
     my $head = Time::Piece->strptime(substr($text, 0, -8), '%Y-%m-%dT%H:%M:%S');
     my $tail = substr($text, -8, -1);
     $entries_ref->[-1]->{'date'} = $head->epoch() + $tail;
