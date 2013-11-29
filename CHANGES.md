@@ -5,6 +5,21 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## 2013-12 (TBC)
+
+### Highlighted Changes
+
+-none-
+
+### Noteworthy Changes
+
+\#77: fcm make: mirror and build: fix etc files install. This was broken by #65
+which causes etc files to be installed to `bin/`.
+
+\#74: Handle date in `svn log --xml`, which may have trailing spaces and lines.
+
+--------------------------------------------------------------------------------
+
 ## 2013-11 (2013-11-22)
 
 ### Highlighted Changes
