@@ -5,7 +5,7 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
-## 2013-12 (TBC)
+## 2013-12 (2013-12-02)
 
 ### Highlighted Changes
 
