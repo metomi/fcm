@@ -106,9 +106,13 @@ sub _find {
         die($value_hash_ref);
     }
     my $found;
+    LINE:
     for my $line (grep {$_} split("\n", $value_hash_ref->{o})) {
         $found ||= 1;
         my ($md5sum, $name) = split(q{ }, $line, 2);
+        if ($name =~ qr{/\.[^/]+}msx) { # Ignore Unix hidden files
+            next LINE;
+        }
         my $ns = substr($name, length($path) + 1);
         $callback->(
             $auth . ':' . $name,

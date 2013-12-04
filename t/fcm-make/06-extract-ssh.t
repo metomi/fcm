@@ -41,10 +41,11 @@ if [[ -z $T_HOST ]]; then
 fi
 #-------------------------------------------------------------------------------
 # Create a source tree on the remote host
-mkdir -p hello/{greet,hello,hi}
+mkdir -p hello/{greet,hello,hi,.secret}
 for NAME in mercury venus earth mars; do
     echo "Greet $NAME" >hello/greet/greet_${NAME}.txt
     echo "Hello $NAME" >hello/hello/hello_${NAME}.txt
+    echo "[Alien-speak] $NAME" >hello/.secret/hello_${NAME}.txt
     echo "Hi $NAME" >hello/hi/hi_${NAME}.txt
 done
 T_HOST_WORK_DIR=$(ssh -oBatchMode=yes $T_HOST mktemp -d)
