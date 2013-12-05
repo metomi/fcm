@@ -93,9 +93,6 @@ sub _init {
 # Reads the extract.location declaration from a config entry.
 sub _config_parse_location {
     my ($attrib_ref, $ctx, $entry) = @_;
-    if (!$entry->get_value()) {
-        return $E->throw($E->CONFIG_VALUE, $entry);
-    }
     if (!@{$entry->get_ns_list()}) {
         return $E->throw($E->CONFIG_NS, $entry);
     }
@@ -125,8 +122,13 @@ sub _config_parse_location_base {
             $ctx->get_project_of()->{$ns} = $ctx->CTX_PROJECT->new({ns => $ns});
         }
         my $project = $ctx->get_project_of()->{$ns};
-        my $locator = FCM::Context::Locator->new($entry->get_value(), \%option);
         if ($project->get_inherited()) {
+            if (!$entry->get_value()) {
+                return $E->throw($E->CONFIG_VALUE, $entry);
+            }
+            my $locator = FCM::Context::Locator->new(
+                $entry->get_value(), \%option,
+            );
             if ($project->get_locator()) {
                 $attrib_ref->{util}->loc_rel2abs(
                     $locator,
@@ -140,11 +142,21 @@ sub _config_parse_location_base {
             }
         }
         else {
-            if (!exists($project->get_trees()->[0])) {
+            if (    !exists($project->get_trees()->[0])
+                ||  !defined($project->get_trees()->[0])
+            ) {
                 $project->get_trees()->[0]
                     = $ctx->CTX_TREE->new({key => 0, ns => $ns});
             }
-            $project->get_trees()->[0]->set_locator($locator);
+            if ($entry->get_value()) {
+                my $locator = FCM::Context::Locator->new(
+                    $entry->get_value(), \%option,
+                );
+                $project->get_trees()->[0]->set_locator($locator);
+            }
+            else {
+                $project->get_trees()->[0] = undef;
+            }
         }
     }
 }
@@ -202,10 +214,13 @@ sub _config_parse_location_primary {
                 return $E->throw($E->CONFIG_CONFLICT, $entry);
             }
         }
-        else {
+        elsif ($entry->get_value()) {
             $project->set_locator(
                 FCM::Context::Locator->new($entry->get_value(), \%option),
             );
+        }
+        else {
+            $project->set_locator(undef);
         }
     }
 }
