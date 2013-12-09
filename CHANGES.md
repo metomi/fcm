@@ -5,6 +5,20 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## Next Release (2014-Q1?)
+
+### Highlighted Changes
+
+-none-
+
+### Noteworthy Changes
+
+\#80: fcm make: extract: support `extract.location` declarations reset.
+
+\#79: fcm make: extract: SSH location: ignore dot files.
+
+--------------------------------------------------------------------------------
+
 ## 2013-12 (2013-12-02)
 
 ### Highlighted Changes
