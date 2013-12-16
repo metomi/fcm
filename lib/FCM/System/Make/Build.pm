@@ -1031,7 +1031,6 @@ sub _targets_select {
                 DEP_UP_KEY:
                 while (my $_up_unit = pop(@_up_units)) {
                     my ($_up_key, $_up_type) = @{$_up_unit};
-                    my $_up_state = $state_of{$_up_key};
                     my @dep_up_deps = @{$state_of{$_up_key}->get_deps()};
                     # If parent of $_up_unit_last does not depend on
                     # $_up_unit_last, chain is broken, and we are OK.
