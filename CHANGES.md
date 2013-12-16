@@ -13,6 +13,8 @@ for a full listing of issues for each release.
 
 ### Noteworthy Changes
 
+\#81: fcm make: build: build: fix cyclic dependency logic.
+
 \#80: fcm make: extract: support `extract.location` declarations reset.
 
 \#79: fcm make: extract: SSH location: ignore dot files.
