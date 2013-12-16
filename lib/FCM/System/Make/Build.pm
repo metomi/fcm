@@ -1004,14 +1004,16 @@ sub _targets_select {
     # Walks the target dependency tree to build a state dependency tree.
     # Checks for missing dependencies.
     # Checks for duplicated target.
-    my @items = map {[undef, $_]} @target_keys;
+    my @items = map {[[$_, undef]]} @target_keys;
     my %state_of;
     my %dup_in;
     my %cyc_in;
     my %missing_deps_in;
     ITEM:
     while (my $item = pop(@items)) {
-        my ($type, $key, @up_keys) = @{$item};
+        my ($unit, @up_units) = @{$item};
+        my ($key, $type) = @{$unit};
+        my @up_keys = map {$_->[0]} @up_units;
         if (   exists($cyc_in{$key})
             || exists($dup_in{$key})
             || exists($missing_deps_in{$key})
@@ -1021,27 +1023,32 @@ sub _targets_select {
         if (exists($state_of{$key})) {
             # Already visited this ITEM
             # Detect cyclic dependency
-            if (grep {$_ eq $key} @up_keys) {
-                my @_up_keys = @up_keys;
-                my $_up_key_last = pop(@_up_keys);
+            if (    !$state_of{$key}->get_cyclic_ok()
+                &&  grep {$_->[0] eq $key} @up_units
+            ) {
+                my @_up_units = (@up_units, $unit);
+                my $_up_unit_last = pop(@_up_units);
                 DEP_UP_KEY:
-                while (my $_up_key = pop(@_up_keys)) {
+                while (my $_up_unit = pop(@_up_units)) {
+                    my ($_up_key, $_up_type) = @{$_up_unit};
                     my @dep_up_deps = @{$state_of{$_up_key}->get_deps()};
-                    # If parent of $_up_key_last does not depend on
-                    # $_up_key_last, chain is broken, and we are OK.
-                    if (!grep {
-                                $_->[0]->get_key() eq $_up_key_last
-                            &&  $_->[1] eq $type
-                    } @dep_up_deps) {
+                    # If parent of $_up_unit_last does not depend on
+                    # $_up_unit_last, chain is broken, and we are OK.
+                    my ($_up_key_last, $_up_type_last) = @{$_up_unit_last};
+                    if (!grep {     $_->[0]->get_key() eq $_up_key_last
+                                ||  $_->[1] eq $_up_type_last
+                        } @dep_up_deps
+                    ) {
                         last DEP_UP_KEY;
                     }
-                    if ($key eq $_up_key) {
+                    if ($type && $key eq $_up_key && $type eq $_up_type) {
                         $cyc_in{$key} = {'keys' => [@up_keys, $key]};
                         next ITEM;
                     }
-                    $_up_key_last = $_up_key;
+                    $_up_unit_last = $_up_unit;
                 }
             }
+            $state_of{$key}->set_cyclic_ok(1);
             # Float current target up dependency chain
             my $is_directly_related = 1;
             UP_KEY:
@@ -1107,7 +1114,7 @@ sub _targets_select {
                 next DEP;
             }
             # OK
-            push(@items, [$dep_type, $dep_key, @up_keys, $key]);
+            push(@items, [[$dep_key, $dep_type], @up_units, [$key, $type]]);
         }
         # Float current target up dependency chain
         my $is_directly_related = 1;
@@ -1123,7 +1130,7 @@ sub _targets_select {
         # Adds triggers
         for my $trigger_key (@{$target->get_triggers()}) {
             if (!exists($state_of{$trigger_key})) {
-                unshift(@items, [undef, $trigger_key]);
+                unshift(@items, [[$trigger_key, undef]]);
             }
         }
     }
@@ -1421,6 +1428,7 @@ use constant {
 };
 
 __PACKAGE__->class({
+    cyclic_ok   => '$',
     deps        => '@',
     floatables  => '%',
     id          => '$',
