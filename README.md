@@ -7,7 +7,7 @@ See <http://metomi.github.io/fcm/>.
 
 ## Copyright
 
-(C) British Crown Copyright 2006-2013 Met Office.
+(C) British Crown Copyright 2006-14 Met Office.
 
 ## Terms of Use
 
