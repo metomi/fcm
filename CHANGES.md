@@ -13,7 +13,7 @@ for a full listing of issues for each release.
 
 ### Noteworthy Changes
 
-\#81: fcm make: build: build: fix cyclic dependency logic.
+\#81: fcm make: build: fix cyclic dependency logic.
 
 \#80: fcm make: extract: support `extract.location` declarations reset.
 
