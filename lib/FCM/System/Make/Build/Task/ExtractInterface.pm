@@ -37,9 +37,9 @@ my $RE_ATTR = qr{
 my $RE_FILE = qr{[\w\-+.]+}imsx;
 my $RE_NAME = qr{[A-Za-z]\w*}imsx;
 my $RE_SPEC = qr{
-    character|complex|double\s*precision|integer|logical|real|type
+    character|class|complex|double\s*complex|double\s*precision|integer|logical|procedure|real|type
 }imsx;
-my $RE_UNIT_BASE = qr{block\s*data|module|program}imsx;
+my $RE_UNIT_BASE = qr{block\s*data|module|program|submodule}imsx;
 my $RE_UNIT_CALL = qr{function|subroutine}imsx;
 my $RE_UNIT      = qr{$RE_UNIT_BASE|$RE_UNIT_CALL}msx;
 my %RE           = (
@@ -54,7 +54,7 @@ my %RE           = (
     QUOTE       => qr{\A[^'"]*(['"])}msx,
     TYPE_ATTR   => qr{\A\s*($RE_ATTR)\b}msx,
     TYPE_SPEC   => qr{\A\s*($RE_SPEC)\b}msx,
-    UNIT_ATTR   => qr{\A\s*(?:(?:elemental|recursive|pure)\s+)+(.*)\z}imsx,
+    UNIT_ATTR   => qr{\A\s*(?:(?:(?:impure\s+)?elemental|recursive|pure)\s+)+(.*)\z}imsx,
     UNIT_BASE   => qr{\A\s*($RE_UNIT_BASE)\s+($RE_NAME)\s*\z}imsx,
     UNIT_CALL   => qr{\A\s*($RE_UNIT_CALL)\s+($RE_NAME)\b}imsx,
     UNIT_END  => qr{\A\s*(end)(?:\s+($RE_NAME)(?:\s+($RE_NAME))?)?\s*\z}imsx,
@@ -64,7 +64,10 @@ my %RE           = (
 # Keywords in type declaration statements
 my %TYPE_DECL_KEYWORD_SET = map { ($_, 1) } qw{
     allocatable
+    asynchronous
+    contiguous
     dimension
+    external
     in
     inout
     intent
@@ -76,6 +79,8 @@ my %TYPE_DECL_KEYWORD_SET = map { ($_, 1) } qw{
     pointer
     save
     target
+    value
+    volatile
 };
 
 __PACKAGE__->class({util => '&'}, {action_of => {main => \&_main}});
@@ -216,7 +221,7 @@ sub _extract_statement_quote {
     }
 }
 
-# Study statements and put attributes into array $statements
+# Read a statement and put attributes into $statement
 sub _process {
     my ($statement, $context, $state) = @_;
     my $name;
@@ -254,9 +259,12 @@ sub _process {
     }
 
     # Interface/Contains
-    ($name) = $statement->{value} =~ qr{\A\s*(contains|interface)\b}imsx;
-    if ($name) {
-        $state->{'in_' . lc($name)} = 1;
+    if ($statement->{value} =~ qr{\A\s*contains\b}imsx) {
+        $state->{'in_contains'} = 1;
+        return;
+    }
+    if ($statement->{value} =~ qr{\A\s*(?:abstract\s+)?interface\b}imsx) {
+        $state->{'in_interface'} = 1;
         return;
     }
 
@@ -366,7 +374,7 @@ STATEMENT:
         }
         if ($statement->{type} eq 'use') {
             my ($head, $tail)
-                = split(qr{\s*:\s*}msx, lc($statement->{value}), 2);
+                = split(qr{,\s*only\s*:\s*}msx, lc($statement->{value}), 2);
             if ($tail) {
                 my @imports = map { [split(qr{\s*=>\s*}msx, $_, 2)] }
                     split(qr{\s*,\s*}msx, $tail);
@@ -385,7 +393,7 @@ STATEMENT:
                     push(
                         @interface_statements,
                         {   lines => [
-                                sprintf("%s:&\n", $head),
+                                sprintf("%s, only:&\n", $head),
                                 (map { sprintf(" & %s\n", $_) } @token_lines),
                             ]
                         },
