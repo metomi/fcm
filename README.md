@@ -3,13 +3,13 @@
 FCM: a modern Fortran build system,
 and wrappers to Subversion for scientific software development
 
-See <http://metomi.github.io/fcm/>.
+[Installation](http://metomi.github.io/fcm/doc/installation/) |
+[User Guide](http://metomi.github.io/fcm/doc/user_guide/) |
+[How to Contribute](CONTRIBUTING.md)
 
-## Copyright
+## Copyright and Terms of Use
 
 (C) British Crown Copyright 2006-14 Met Office.
-
-## Terms of Use
 
 FCM is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -30,22 +30,6 @@ Licence. See doc/etc/fcm-terms-of-use.html and
 
 See <http://metomi.github.io/fcm/doc/etc/fcm-terms-of-use.html>.
 
-## Installation
+## Acknowledgement for Non-FCM Work
 
-See <http://metomi.github.io/fcm/doc/installation/>.
-
-## Code Contributors
-
-* Jim Bolton (Met Office, UK)
-* Ben Fitzpatrick (Met Office, UK)
-* Dave Matthews (Met Office, UK)
-* Matt Shin (Met Office, UK)
-
-## Acknowledgement for non-FCM Work
-
-Licences for non-FCM works included in this distribution can be
-found in the licences/ directory.
-
-doc/etc/bootstrap/:
-* Unmodified external software library copyright 2013 Twitter Inc
-  released under the Apache 2.0 license. See <http://getbootstrap.com/>.
+See [Acknowledgement for Non-FCM Work](ACKNOWLEDGEMENT.md).
