@@ -14,7 +14,7 @@ branch of [metomi/fcm](https://github.com/metomi/fcm). New contributors
 should add their details to the [Code Contributors](#code-contributors)
 section of this file as part of their first request. The developer who
 reviews each pull request is responsible for checking that the
-contributors name is listed in this file before merging the pull request
+contributor's name is listed in this file before merging the pull request
 into *master*.
 
 ## Code Contributors
