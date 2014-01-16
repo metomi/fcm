@@ -28,6 +28,9 @@ below:
 * Dave Matthews (Met Office, UK)
 * Matt Shin (Met Office, UK)
 
+(All contributors are identifiable with email addresses in the version
+control logs or otherwise.)
+
 ## Contributor Licence Agreement and Certificate of Origin
 
 By making a contribution to this project, I certify that:
