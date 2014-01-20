@@ -76,7 +76,7 @@
     <dd>
       <p><dfn>used by:</dfn> the code management commands.</p>
 
-      <p><dfn>versions known to work:</dfn> RHEL-6.1: 2.36.</p>
+      <p><dfn>versions known to work:</dfn> RHEL-6.3: 2.36.</p>
     </dd>
 
     <dt>Perl module <a href=
@@ -85,7 +85,7 @@
     <dd>
       <p><dfn>used by:</dfn> <code>fcm gui</code>.</p>
 
-      <p><dfn>versions known to work:</dfn> RHEL-6.1: 804.028.</p>
+      <p><dfn>versions known to work:</dfn> RHEL-6.3: 804.028.</p>
     </dd>
 
     <dt><a href="http://subversion.apache.org/">Subversion</a></dt>
@@ -94,7 +94,8 @@
       <p><dfn>used by:</dfn> the code management commands, the extract system
       of <code>fcm make</code>, the deprecated <code>fcm extract</code>.</p>
 
-      <p><dfn>versions known to work:</dfn> RHEL-6.1: 1.6.17.</p>
+      <p><dfn>versions known to work:</dfn> AIX-7.1: 1.6.18, RHEL-6.3: 1.6.17,
+      RHEL-6.3: 1.8.5.</p>
 
       <p><dfn>remark:</dfn> you can use the extract system to mirror code to a
       remote platform for building. Therefore it is only necessary to have
@@ -118,7 +119,7 @@
       <p><dfn>used by:</dfn> <code>fcm branch-diff --graphical</code>,
       <code>fcm conflicts</code>, <code>fcm diff --graphical</code>.</p>
 
-      <p><dfn>versions known to work:</dfn> RHEL-6.1: 3.2.</p>
+      <p><dfn>versions known to work:</dfn> RHEL-6.3: 3.2.</p>
 
       <p><dfn>remark:</dfn> The <code>fcm branch-diff --graphical</code> and
       <code>fcm diff --graphical</code> commands use xxdiff by default but can
@@ -132,7 +133,7 @@
       <p><dfn>used by:</dfn> the extract system of <code>fcm make</code>, the
       deprecated <code>fcm extract</code>.</p>
 
-      <p><dfn>versions known to work:</dfn> RHEL-6.1: 2.8.1.</p>
+      <p><dfn>versions known to work:</dfn> RHEL-6.3: 2.8.1.</p>
 
       <p><dfn>remark:</dfn>: used to merge changes to source files modified by
       2+ diff source trees (compared with the base).</p>
@@ -144,7 +145,7 @@
       <p><dfn>used by:</dfn> the mirror system of <code>fcm make</code>, the
       deprecated <code>fcm extract</code>.</p>
 
-      <p><dfn>versions known to work:</dfn> AIX-7.1: 3.0.9, RHEL-6.1: 3.0.6.</p>
+      <p><dfn>versions known to work:</dfn> AIX-7.1: 3.0.9, RHEL-6.3: 3.0.6.</p>
 
       <p><dfn>remark:</dfn> used to mirror source file to another
       <var>USER@HOST</var>.</p>
@@ -166,10 +167,16 @@
   <h2 id="distro">Content in the Distribution</h2>
 
   <dl class="well">
-    <dt>README<br />
+    <dt>ACKNOWLEDGEMENT.md<br />
+    CONTRIBUTING.md<br />
+    README.md<br />
     COPYING</dt>
 
-    <dd>Licensing information.</dd>
+    <dd>Terms of use and project information.</dd>
+
+    <dt>CHANGES.md</dt>
+
+    <dd>Contains highlight and noteworthy changes since release 2-3-1.</dd>
 
     <dt>bin/</dt>
 
@@ -177,14 +184,7 @@
 
     <dt>doc/</dt>
 
-    <dd>System documentation.</dd>
-
-    <dt>doc/collaboration/</dt>
-
-    <dd>Contains the <a href="../collaboration/index.html">External
-    Distribution &amp; Collaboration for FCM Projects</a> document which
-    discusses how projects configured under FCM can be distributed
-    externally.</dd>
+    <dd>FCM documentation.</dd>
 
     <dt>doc/installation/</dt>
 
@@ -192,9 +192,7 @@
 
     <dt>doc/release_notes/</dt>
 
-    <dd>Contains these release notes. It also contains the release notes for
-    all previous versions which may be useful if you have skipped any
-    versions.</dd>
+    <dd>Contains release notes prior to and including release 2-3-1.</dd>
 
     <dt>doc/fortran_standards/</dt>
 
@@ -298,7 +296,7 @@
 
     <dt>t/</dt>
 
-    <dd>Contains unit test for FCM.</dd>
+    <dd>Contains functional test for FCM.</dd>
 
     <dt>test/</dt>
 

@@ -5,7 +5,7 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
-## Next Release (2014-Q1?)
+## 2014-01 (2014-01-20)
 
 ### Highlighted Changes
 
