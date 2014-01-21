@@ -27,8 +27,26 @@ cp -r $TEST_SOURCE_DIR/$TEST_KEY_BASE/* .
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE"
 run_pass "$TEST_KEY" fcm make
-sed '/\[info\] target /!d' .fcm-make/log >"$TEST_KEY.log"
+sed '/^\[info\] \(source->target\|target\) /!d' .fcm-make/log >"$TEST_KEY.log"
 file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<'__LOG__'
+[info] source->target / -> (archive) lib/ libo.a
+[info] source->target lib -> (archive) lib/ lib/libo.a
+[info] source->target lib/earth.f90 -> (install) include/ earth.f90
+[info] source->target lib/earth.f90 -> (ext-iface) include/ earth.interface
+[info] source->target lib/earth.f90 -> (compile) o/ world.o
+[info] source->target lib/greet.f90 -> (install) include/ greet.f90
+[info] source->target lib/greet.f90 -> (ext-iface) include/ greet.interface
+[info] source->target lib/greet.f90 -> (compile) o/ greet.o
+[info] source->target lib/greet_fmt_mod.f90 -> (install) include/ greet_fmt_mod.f90
+[info] source->target lib/greet_fmt_mod.f90 -> (compile+) include/ greet_fmt_mod.mod
+[info] source->target lib/greet_fmt_mod.f90 -> (compile) o/ greet_fmt_mod.o
+[info] source->target main -> (archive) lib/ main/libo.a
+[info] source->target main/hello.f90 -> (link) bin/ hello.exe
+[info] source->target main/hello.f90 -> (install) include/ hello.f90
+[info] source->target main/hello.f90 -> (compile) o/ hello.o
+[info] source->target main/hi.f90 -> (link) bin/ hi.exe
+[info] source->target main/hi.f90 -> (install) include/ hi.f90
+[info] source->target main/hi.f90 -> (compile) o/ hi.o
 [info] target hi.exe
 [info] target  - greet.o
 [info] target  -  - greet_fmt_mod.mod

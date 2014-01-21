@@ -1985,6 +1985,20 @@ egg/fried.h
 </pre>
         </li>
 
+        <li>A list of the available targets from the sources. Each row contains
+        the source namespace, the target task, the target category and the key
+        of the target. E.g.:
+          <pre>
+[info] source-&gt;target / -&gt; (archive) lib/ libo.a
+[info] source-&gt;target hello.f90 -&gt; (link) bin/ hello.exe
+[info] source-&gt;target hello.f90 -&gt; (install) include/ hello.f90
+[info] source-&gt;target hello.f90 -&gt; (compile) o/ hello.o
+[info] source-&gt;target world.f90 -&gt; (install) include/ world.f90
+[info] source-&gt;target world.f90 -&gt; (compile+) include/ world.mod
+[info] source-&gt;target world.f90 -&gt; (compile) o/ world.o
+</pre>
+        </li>
+
         <li>A list of the required targets for this build. Each row contains
         the task, the category and the key of the target. E.g.:
           <pre>

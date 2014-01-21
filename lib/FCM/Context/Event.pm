@@ -49,6 +49,7 @@ use constant {
     MAKE_BUILD_SHELL_OUT          => 'MAKE_BUILD_SHELL_OUT',
     MAKE_BUILD_SOURCE_ANALYSE     => 'MAKE_BUILD_SOURCE_ANALYSE',
     MAKE_BUILD_SOURCE_SUMMARY     => 'MAKE_BUILD_SOURCE_SUMMARY',
+    MAKE_BUILD_TARGET_FROM_NS     => 'MAKE_BUILD_TARGET_FROM_NS',
     MAKE_BUILD_TARGET_MISSING_DEP => 'MAKE_BUILD_TARGET_MISSING_DEP',
     MAKE_BUILD_TARGET_SELECT      => 'MAKE_BUILD_TARGET_SELECT',
     MAKE_BUILD_TARGET_SELECT_TIMER=> 'MAKE_BUILD_TARGET_SELECT_TIMER',
@@ -233,6 +234,12 @@ files. The 1st argument should be the total number of files. The 2nd argument
 should be the number analysed. The 3rd argument should be the elapsed time. The
 4th argument should be the total time, which may differ from the elapsed time if
 the analysis is run on more than 1 process.
+
+=item FCM::Context::Event->MAKE_BUILD_TARGET_FROM_NS
+
+This event is raised when the make/build system has generated a build target
+from a source or a source name-space. The arguments are: source/target
+namespace, target task, target category, and the target key.
 
 =item FCM::Context::Event->MAKE_BUILD_TARGET_MISSING_DEP
 

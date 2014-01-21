@@ -57,6 +57,7 @@ my %ACTION_OF = (
     $CTX->MAKE_BUILD_SHELL_OUT          => \&_event_make_build_shell_out,
     $CTX->MAKE_BUILD_SOURCE_ANALYSE     => \&_event_make_build_source_analyse,
     $CTX->MAKE_BUILD_SOURCE_SUMMARY     => _func('make_build_source_summary'),
+    $CTX->MAKE_BUILD_TARGET_FROM_NS     => \&_event_make_build_target_from_ns,
     $CTX->MAKE_BUILD_TARGET_SELECT      => \&_event_make_build_target_select,
     $CTX->MAKE_BUILD_TARGET_SELECT_TIMER=> _func('make_build_target_select_t'),
     $CTX->MAKE_BUILD_TARGET_MISSING_DEP => \&_event_make_build_target_missing_dep,
@@ -295,6 +296,7 @@ our %S = (
     make_build_source_analyse_1  => '             -> (%9s) %s',
     make_build_source_summary    => 'sources: total=%d, analysed=%d,'
                                     . ' elapsed-time=%.1fs, total-time=%.1fs',
+    make_build_target_from_ns    => 'source->target %s -> (%s) %s/ %s',
     make_build_target_select     => 'required-target: %-9s %-7s %s',
     make_build_target_select_t   => 'target-tree-analysis: elapsed-time=%.1fs',
     make_build_target_stack      => 'target %s%s%s',
@@ -931,6 +933,14 @@ sub _event_make_build_target_missing_dep {
     $R->report(
         {level => $R->WARN, type => $R->TYPE_ERR},
         sprintf($S{make_build_target_missing_dep}, @_),
+    );
+}
+
+# Notification when make-build generates a target from source.
+sub _event_make_build_target_from_ns {
+    $R->report(
+        {level => $R->HIGH},
+        sprintf($S{make_build_target_from_ns}, @_),
     );
 }
 

@@ -27,8 +27,18 @@ cp -r $TEST_SOURCE_DIR/$TEST_KEY_BASE/* .
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE"
 run_pass "$TEST_KEY" fcm make
-sed '/\[info\] target /!d' .fcm-make/log >"$TEST_KEY.log"
+sed '/^\[info\] \(source->target\|target\) /!d' .fcm-make/log >"$TEST_KEY.log"
 file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<'__LOG__'
+[info] source->target / -> (archive) lib/ libo.a
+[info] source->target hello.f90 -> (link) bin/ hello.exe
+[info] source->target hello.f90 -> (install) include/ hello.f90
+[info] source->target hello.f90 -> (compile) o/ hello.o
+[info] source->target hello_mod.f90 -> (install) include/ hello_mod.f90
+[info] source->target hello_mod.f90 -> (compile+) include/ hello_mod.mod
+[info] source->target hello_mod.f90 -> (compile) o/ hello_mod.o
+[info] source->target hello_sub.f90 -> (install) include/ hello_sub.f90
+[info] source->target hello_sub.f90 -> (ext-iface) include/ hello_sub.interface
+[info] source->target hello_sub.f90 -> (compile) o/ hello_sub.o
 [info] target hello.exe
 [info] target  - hello_sub.o
 [info] target  -  - hello_mod.mod
