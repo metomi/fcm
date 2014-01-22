@@ -43,7 +43,8 @@ our @INTRINSIC_MODULES = qw{
 my $RE_FILE = qr{[\w\-+.]+}imsx;
 my $RE_NAME = qr{[A-Za-z]\w*}imsx;
 my $RE_SPEC = qr{
-    character|class|complex|double\s*complex|double\s*precision|integer|logical|procedure|real|type
+    character|class|complex|double\s*complex|double\s*precision|integer|
+    logical|procedure|real|type
 }imsx;
 my $RE_UNIT_BASE = qr{block\s*data|module|program|submodule}imsx;
 my $RE_UNIT_CALL = qr{subroutine|function}imsx;
