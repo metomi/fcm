@@ -149,6 +149,7 @@ function file_grep() {
 }
 
 FCM_HOME=${FCM_HOME:-$(cd $(dirname $BASH_SOURCE)/../../.. && pwd)}
+export FCM_HOME
 PATH=$FCM_HOME/bin:$PATH
 SVN_VERSION_IS_16=false
 SVN_VERSION=$(svn --version)

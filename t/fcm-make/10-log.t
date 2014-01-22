@@ -31,6 +31,7 @@ if [[ -d $FCM_HOME/.git ]]; then
 else
     VERSION=$(sed '/FCM\.VERSION/!d; s/^.*="\(.*\)";$/\1/' \
         $FCM_HOME/doc/etc/fcm-version.js)
+    VERSION="FCM $VERSION"
 fi
 file_grep "$TEST_KEY.log.version" "\\[info\\] $VERSION" .fcm-make/log
 file_grep "$TEST_KEY.log.mode" '\[info\] mode=new' .fcm-make/log
