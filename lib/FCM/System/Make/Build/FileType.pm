@@ -83,17 +83,21 @@ sub _source_analyse {
 LINE:
     while (my $line = readline($handle)) {
         chomp($line);
+        TYPE:
         for my $type (@dep_types) {
-            my ($item)
+            my ($item, $can_analyse_more)
                 = $attrib_ref->{source_analyse_dep_of}{$type}->($line);
             if ($item) {
                 $dep_of{$type}{$item} = 1;
-                next LINE;
+                if ($can_analyse_more) {
+                    last TYPE;
+                }
+                else {
+                    next LINE;
+                }
             }
         }
-        if ($attrib_ref->{source_analyse_more}->($line, \%info_of, \%state)) {
-            next LINE;
-        }
+        $attrib_ref->{source_analyse_more}->($line, \%info_of, \%state);
     }
     return (\%dep_of, \%info_of);
 }

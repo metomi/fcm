@@ -35,22 +35,25 @@ use Text::Balanced qw{extract_bracketed extract_delimited};
 our $FILE_EXT = '.F .F90 .F95 .FOR .FTN .f .f90 .f95 .for .ftn .inc';
 
 # List of Fortran intrinsic modules
-our @INTRINSIC_MODULES
-    = qw{iso_c_binding ieee_exceptions ieee_arithmetic ieee_features};
+our @INTRINSIC_MODULES = qw{
+    iso_c_binding iso_fortran_env ieee_exceptions ieee_arithmetic ieee_features
+};
 
 # Regular expressions
 my $RE_FILE = qr{[\w\-+.]+}imsx;
 my $RE_NAME = qr{[A-Za-z]\w*}imsx;
 my $RE_SPEC = qr{
-    character|complex|double\s*precision|integer|logical|real|type
+    character|class|complex|double\s*complex|double\s*precision|integer|
+    logical|procedure|real|type
 }imsx;
-my $RE_UNIT_BASE = qr{block\s*data|module|program}imsx;
+my $RE_UNIT_BASE = qr{block\s*data|module|program|submodule}imsx;
 my $RE_UNIT_CALL = qr{subroutine|function}imsx;
 my %RE           = (
     DEP_O     => qr{\A\s*!\s*depends\s*on\s*:\s*($RE_FILE)}imsx,
     DEP_USE   => qr{\A\s*use\s+($RE_NAME)}imsx,
+    DEP_SUBM  => qr{\A\s*submodule\s+\(($RE_NAME)\)\s}imsx,
     INCLUDE   => qr{\#?\s*include\s*}imsx,
-    UNIT_ATTR => qr{\A\s*(?:(?:elemental|recursive|pure)\s+)+(.*)\z}imsx,
+    UNIT_ATTR => qr{\A\s*(?:(?:(?:impure\s+)?elemental|recursive|pure)\s+)+(.*)\z}imsx,
     UNIT_BASE => qr{\A\s*($RE_UNIT_BASE)\s+($RE_NAME)\s*\z}imsx,
     UNIT_CALL => qr{\A\s*($RE_UNIT_CALL)\s+($RE_NAME)\b}imsx,
     UNIT_END  => qr{\A\s*(end)(?:\s+($RE_NAME)(?:\s+($RE_NAME))?)?\s*\z}imsx,
@@ -132,9 +135,12 @@ sub _source_analyse_more {
     }
 
     # Interface/Contains
-    my ($name) = $line =~ qr{\A\s*(contains|interface)\b}imsx;
-    if ($name) {
-        $state->{'in_' . lc($name)} = 1;
+    if ($line =~ qr{\A\s*contains\b}imsx) {
+        $state->{'in_contains'} = 1;
+        return 1;
+    }
+    if ($line =~ qr{\A\s*(?:abstract\s+)?interface\b}imsx) {
+        $state->{'in_interface'} = 1;
         return 1;
     }
 
@@ -168,11 +174,16 @@ sub _source_analyse_dep_include {
 
 # Reads information: extract a module dependency.
 sub _source_analyse_dep_module {
-    my ($extracted) = lc($_[0]) =~ $RE{DEP_USE};
+    my ($extracted, $can_analyse_more);
+    ($extracted) = lc($_[0]) =~ $RE{DEP_USE};
+    if (!$extracted) {
+        ($extracted) = lc($_[0]) =~ $RE{DEP_SUBM};
+        $can_analyse_more = 1;
+    }
     if (!$extracted || grep {$_ eq $extracted} @INTRINSIC_MODULES) {
         return;
     }
-    $extracted;
+    ($extracted, $can_analyse_more);
 }
 
 # Parse a statement for program unit header. Returns a list containing the type,
