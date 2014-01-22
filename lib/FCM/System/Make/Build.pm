@@ -860,6 +860,19 @@ sub _targets_from_sources {
             );
         }
     }
+    for my $target (
+        sort {
+            $a->get_ns() cmp $b->get_ns() || $a->get_key() cmp $b->get_key();
+        } @{$targets_ref}
+    ) {
+        $EVENT->(
+            FCM::Context::Event->MAKE_BUILD_TARGET_FROM_NS,
+            ($target->get_ns() ? $target->get_ns() : '/'),
+            $target->get_task(),
+            $target->get_category(),
+            $target->get_key(),
+        );
+    }
     # Target categories and name-spaces.
     for my $target (@{$targets_ref}) {
         my $cat = $target->get_category();

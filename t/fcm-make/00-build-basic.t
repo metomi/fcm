@@ -21,7 +21,7 @@
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
-tests 12
+tests 13
 cp -r $TEST_SOURCE_DIR/$TEST_KEY_BASE/* .
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE"
@@ -39,8 +39,24 @@ build/o/hello.o
 build/o/world.o
 __OUT__
 file_test "$TEST_KEY.log" fcm-make.log
-readlink fcm-make.log >"$TEST_KEY.log.out"
-file_cmp "$TEST_KEY.log.out" "$TEST_KEY.log.out" <<<'.fcm-make/log'
+readlink fcm-make.log >"$TEST_KEY.log.readlink"
+file_cmp "$TEST_KEY.log.readlink" "$TEST_KEY.log.readlink" <<<'.fcm-make/log'
+sed '/^\[info\] \(source->target\|target\|required-target\) /!d' \
+    .fcm-make/log >"$TEST_KEY.log.sed"
+file_cmp "$TEST_KEY.log.sed" "$TEST_KEY.log.sed" <<'__LOG__'
+[info] source->target / -> (archive) lib/ libo.a
+[info] source->target hello.f90 -> (link) bin/ hello.exe
+[info] source->target hello.f90 -> (install) include/ hello.f90
+[info] source->target hello.f90 -> (compile) o/ hello.o
+[info] source->target world.f90 -> (install) include/ world.f90
+[info] source->target world.f90 -> (compile+) include/ world.mod
+[info] source->target world.f90 -> (compile) o/ world.o
+[info] target hello.exe
+[info] target  - hello.o
+[info] target  -  - world.mod
+[info] target  -  -  - world.o
+[info] target  - world.o
+__LOG__
 file_test "$TEST_KEY-as-parsed.cfg" fcm-make-as-parsed.cfg
 readlink fcm-make-as-parsed.cfg >"$TEST_KEY-as-parsed.cfg.out"
 file_cmp "$TEST_KEY-as-parsed.cfg.out" "$TEST_KEY-as-parsed.cfg.out" \

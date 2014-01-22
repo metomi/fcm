@@ -37,8 +37,20 @@ __LOG__
 TEST_KEY="$TEST_KEY_BASE"
 rm src/lib/moon.f90
 run_pass "$TEST_KEY" fcm make
-sed '/^\[info\] target /!d' .fcm-make/log >"$TEST_KEY.log"
+sed '/^\[info\] \(source->target\|target\) /!d' .fcm-make/log >"$TEST_KEY.log"
 file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<'__LOG__'
+[info] source->target / -> (archive) lib/ libo.a
+[info] source->target lib -> (archive) lib/ lib/libo.a
+[info] source->target lib/earth.f90 -> (install) include/ earth.f90
+[info] source->target lib/earth.f90 -> (ext-iface) include/ earth.interface
+[info] source->target lib/earth.f90 -> (compile) o/ world.o
+[info] source->target lib/greet.f90 -> (install) include/ greet.f90
+[info] source->target lib/greet.f90 -> (ext-iface) include/ greet.interface
+[info] source->target lib/greet.f90 -> (compile) o/ greet.o
+[info] source->target main -> (archive) lib/ main/libo.a
+[info] source->target main/hello.f90 -> (link) bin/ hello.exe
+[info] source->target main/hello.f90 -> (install) include/ hello.f90
+[info] source->target main/hello.f90 -> (compile) o/ hello.o
 [info] target hello.exe
 [info] target  - greet.o
 [info] target  - world.o
