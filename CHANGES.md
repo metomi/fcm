@@ -5,6 +5,28 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## Next Release (2014-Q1?)
+
+### Highlighted Changes
+
+-none-
+
+### Noteworthy Changes
+
+\#87: fcm make: build: print sources to targets diagnostics on `-vv` mode and
+in the log.
+
+\#83: fcm make: build: an initial attempt to support some Fortran 2K features.
+* Recognise `iso_fortran_env` as an intrinsic module.
+* Recognise `use, intrinsic ::` statements.
+* Recognise `class`, `double complex` and `procedure` as types.
+* Recognise new type declaration attributes.
+* Recognise `abstract interface` blocks.
+* Recognise `impure elemental` as a valid function or subroutine attribute.
+* Recognise `submodule` blocks.
+
+--------------------------------------------------------------------------------
+
 ## 2014-01 (2014-01-20)
 
 ### Highlighted Changes
