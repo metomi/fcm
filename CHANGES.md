@@ -5,10 +5,9 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
-## Next Release (2014-Q1?)
+## 2014-02 (2014-02-03)
 
 ### Highlighted Changes
-
 
 \#83: fcm make: build: an initial attempt to support some Fortran 2K features.
 * Recognise `iso_fortran_env` as an intrinsic module.
