@@ -21,7 +21,7 @@
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
-tests 9
+tests 12
 #-------------------------------------------------------------------------------
 setup
 init_repos
@@ -32,9 +32,7 @@ cd $TEST_DIR/wc
 # Tests fcm switch trunk
 svn switch -q $ROOT_URL/branches/dev/Share/merge1
 TEST_KEY=$TEST_KEY_BASE-trunk
-run_pass "$TEST_KEY" fcm switch trunk <<__IN__
-y
-__IN__
+run_pass "$TEST_KEY" fcm switch trunk <<<'y'
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 switch: status of "$TEST_DIR/wc":
 ?       unversioned_file
@@ -55,9 +53,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 # Tests fcm switch merge1 branch
 rm unversioned_file
 TEST_KEY=$TEST_KEY_BASE-branch-1
-run_pass "$TEST_KEY" fcm switch branches/dev/Share/merge1 <<__IN__
-y
-__IN__
+run_pass "$TEST_KEY" fcm switch branches/dev/Share/merge1 <<<'y'
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 U    subroutine/hello_sub_dummy.h
 A    added_file
@@ -92,5 +88,18 @@ A    renamed_added_file
 Updated to revision 9.
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
-teardown
 #-------------------------------------------------------------------------------
+# Tests fcm switch trunk, without .svn/entries
+TEST_KEY=$TEST_KEY_BASE-trunk-2
+rm .svn/entries
+run_pass "$TEST_KEY" fcm switch trunk <<<'y'
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
+D    renamed_added_file
+ U   subroutine/hello_sub.h
+U    lib/python/info/__init__.py
+Updated to revision 9.
+__OUT__
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+#-------------------------------------------------------------------------------
+teardown
+exit
