@@ -91,15 +91,19 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm switch trunk, without .svn/entries
 TEST_KEY=$TEST_KEY_BASE-trunk-2
-rm -f .svn/entries
-run_pass "$TEST_KEY" fcm switch trunk <<<'y'
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
+if $SVN_VERSION_IS_16; then
+    skip 3 "$TEST_KEY won't work under Subversion 1.6"
+else
+    rm -f .svn/entries
+    run_pass "$TEST_KEY" fcm switch trunk <<<'y'
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
 D    renamed_added_file
  U   subroutine/hello_sub.h
 U    lib/python/info/__init__.py
 Updated to revision 9.
 __OUT__
-file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+    file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+fi
 #-------------------------------------------------------------------------------
 teardown
 exit
