@@ -443,6 +443,13 @@ sub _get_log_handle_text_path {
 sub _get_wc_root {
     my ($attrib_ref, $path) = @_;
     $path ||= cwd();
+    my ($entries_ref) = _get_info($attrib_ref, $path);
+    if (    defined($entries_ref)
+        &&  @{$entries_ref}
+        &&  exists($entries_ref->[0]->{'wc-info:wcroot-abspath'})
+    ) {
+        return $entries_ref->[0]->{'wc-info:wcroot-abspath'};
+    }
     if (-f $path) {
         $path = dirname($path);
     }
