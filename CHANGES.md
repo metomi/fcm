@@ -9,12 +9,6 @@ for a full listing of issues for each release.
 
 ### Highlighted Changes
 
--none-
-
-### Noteworthy Changes
-
-\#87: fcm make: build: print sources to targets diagnostics on `-vv` mode and
-in the log.
 
 \#83: fcm make: build: an initial attempt to support some Fortran 2K features.
 * Recognise `iso_fortran_env` as an intrinsic module.
@@ -24,6 +18,17 @@ in the log.
 * Recognise `abstract interface` blocks.
 * Recognise `impure elemental` as a valid function or subroutine attribute.
 * Recognise `submodule` blocks.
+
+### Noteworthy Changes
+
+\#89: fcm merge, fcm switch, etc: Subversion 1.8 `svn upgrade` command may
+not write a `.svn/entries` file at the working copy root. Several FCM wrappers
+were failing because they were unable to determine the working copy root. This
+is fixed by using the new entry available in Subversion 1.8 `svn info` to
+determine the working copy root.
+
+\#87: fcm make: build: print sources to targets diagnostics on `-vv` mode and
+in the log.
 
 --------------------------------------------------------------------------------
 
