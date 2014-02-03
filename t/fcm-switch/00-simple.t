@@ -91,7 +91,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm switch trunk, without .svn/entries
 TEST_KEY=$TEST_KEY_BASE-trunk-2
-rm .svn/entries
+rm -f .svn/entries
 run_pass "$TEST_KEY" fcm switch trunk <<<'y'
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
 D    renamed_added_file
