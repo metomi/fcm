@@ -150,6 +150,17 @@ sub _dest_init {
     }
     $m_ctx->set_dest_lock($lock);
     # Cleans items created by previous make, if necessary
+    for my $path (
+        _path($attrib_ref, $m_ctx, 'sys-config-as-parsed-symlink'),
+        _path($attrib_ref, $m_ctx, 'sys-config-on-success-symlink'),
+        _path($attrib_ref, $m_ctx, 'sys-config-on-success'),
+        _path($attrib_ref, $m_ctx, 'sys-log-symlink'),
+    ) {
+        eval {rmtree($path)};
+        if (my $e = $@) {
+            return $E->throw($E->DEST_CLEAN, $path, $e);
+        }
+    }
     if ($OPTION_OF{new}) {
         my @steps = @{$m_ctx->get_steps()};
         for my $path (
