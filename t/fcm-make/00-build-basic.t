@@ -21,7 +21,7 @@
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
-tests 13
+tests 18
 cp -r $TEST_SOURCE_DIR/$TEST_KEY_BASE/* .
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE"
@@ -39,6 +39,8 @@ build/o/hello.o
 build/o/world.o
 __OUT__
 file_test "$TEST_KEY.log" fcm-make.log
+file_test "$TEST_KEY.fcm-make-as-parsed.cfg" fcm-make-as-parsed.cfg
+file_test "$TEST_KEY.fcm-make-on-success.cfg" fcm-make-on-success.cfg
 readlink fcm-make.log >"$TEST_KEY.log.readlink"
 file_cmp "$TEST_KEY.log.readlink" "$TEST_KEY.log.readlink" <<<'.fcm-make/log'
 sed '/^\[info\] \(source->target\|target\|required-target\) /!d' \
@@ -73,5 +75,11 @@ find build -type f -exec stat -c'%Y %n' {} \; | sort >"$TEST_KEY.mtime.old"
 run_pass "$TEST_KEY" fcm make
 find build -type f -exec stat -c'%Y %n' {} \; | sort >"$TEST_KEY.mtime"
 file_cmp "$TEST_KEY.mtime" "$TEST_KEY.mtime.old" "$TEST_KEY.mtime"
+#-------------------------------------------------------------------------------
+TEST_KEY="$TEST_KEY_BASE-incr-fail"
+echo 'build.target=foo' >>fcm-make.cfg
+run_fail "$TEST_KEY" fcm make
+run_fail "$TEST_KEY.config-on-success" test -e .fcm-make/config-on-success
+run_fail "$TEST_KEY.fcm-make-on-success.cfg" test -e fcm-make-on-success.cfg
 #-------------------------------------------------------------------------------
 exit 0
