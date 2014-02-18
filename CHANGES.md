@@ -5,6 +5,22 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## Next Release (2014-Q1?)
+
+### Highlighted Changes
+
+-none-
+
+### Noteworthy Changes
+
+\#93: fcm make: fix `use=` properties override. This change allows `use=`
+declarations to be placed anywhere in an `fcm-make.cfg` without interfering
+other `*.prop` declarations.
+
+\#91: fcm make: remove config-on-success on failure.
+
+--------------------------------------------------------------------------------
+
 ## 2014-02 (2014-02-03)
 
 ### Highlighted Changes
