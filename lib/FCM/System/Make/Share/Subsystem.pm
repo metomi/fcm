@@ -120,10 +120,15 @@ sub _config_parse_inherit_hook_prop {
         if (!defined($ctx->get_prop_of($key))) {
             $ctx->get_prop_of()->{$key} = dclone($i_prop);
         }
+        my %prop_ctx_of = %{$ctx->get_prop_of($key)->get_ctx_of()};
         while (my ($ns, $i_prop_ctx) = each(%{$i_prop->get_ctx_of()})) {
-            my $prop_ctx = dclone($i_prop_ctx);
-            $prop_ctx->set_inherited(1);
-            $ctx->get_prop_of($key)->get_ctx_of()->{$ns} = $prop_ctx;
+            if (    !exists($prop_ctx_of{$ns})
+                ||  $prop_ctx_of{$ns}->get_inherited()
+            ) {
+                my $prop_ctx = dclone($i_prop_ctx);
+                $prop_ctx->set_inherited(1);
+                $ctx->get_prop_of($key)->get_ctx_of()->{$ns} = $prop_ctx;
+            }
         }
     }
 }
