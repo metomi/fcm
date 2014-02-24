@@ -56,7 +56,7 @@
 
   <p>The FCM make system can be invoked using the command line interface:</p>
   <pre>
-fcm make [OPTIONS]
+fcm make [OPTIONS] [DECLARAION ...]
 </pre>
 
   <p>The FCM make system relies on a configuration file to tell it what to do.
@@ -66,6 +66,10 @@ fcm make [OPTIONS]
   an alternate path to the FCM make configuration file. For full details of the
   other command line options please see <a href="command_ref.html#fcm-make">FCM
   Command Reference &gt; fcm make</a>.</p>
+
+  <p>You can override the settings in the configuration file using command line
+  arguments. Each command line argument is considered a declaration line to
+  append to the configuration file.</p>
 
   <p>The FCM make configuration file is expected to be an FCM configuration
   file. (See <a href="annex_cfg.html">Annex: FCM Configuration File</a>.) A

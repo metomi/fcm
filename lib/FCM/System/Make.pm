@@ -122,24 +122,14 @@ sub _init {
 
 # Sets up the destination.
 sub _config_parse {
-    my ($attrib_ref, $m_ctx) = @_;
-    my $path = $m_ctx->get_option_of('config-file');
-    if (!defined($path)) {
-        my $dir = $m_ctx->get_option_of('directory');
-        $path = $attrib_ref->{shared_util_of}{dest}->path($dir, 'config');
-    }
-    my $locator = FCM::Context::Locator->new($path);
-    my $config_reader_ref = $attrib_ref->{util}->config_reader(
-        $locator, {event_level => $attrib_ref->{util}->util_of_report()->LOW},
-    );
-    my $entry_iter_ref = sub {
-        my $entry = $config_reader_ref->();
-        if (defined($entry)) {
-            print({$attrib_ref->{handle_cfg}} $entry->as_string(), "\n");
-        }
-        $entry;
+    my ($attrib_ref, $m_ctx, @args) = @_;
+    my $entry_callback_ref = sub {
+        my ($entry) = @_;
+        print({$attrib_ref->{handle_cfg}} $entry->as_string(), "\n");
     };
-    $attrib_ref->{shared_util_of}{config}->parse($m_ctx, $entry_iter_ref);
+    $attrib_ref->{shared_util_of}{config}->parse(
+        $entry_callback_ref, $m_ctx, @args,
+    );
 }
 
 # Sets up the destination.
@@ -181,7 +171,7 @@ sub _dest_init {
 
 # The main function of an instance of this class.
 sub _main {
-    my ($attrib_ref, $option_hash_ref) = @_;
+    my ($attrib_ref, $option_hash_ref, @args) = @_;
     # Starts the system
     my $m_ctx = FCM::Context::Make->new({option_of => $option_hash_ref});
     my $T = sub {_timer_wrap($attrib_ref, @_)};
@@ -204,7 +194,7 @@ sub _main {
                 $attrib_ref->{util}->version(),
             );
             for my $step (@INIT_STEPS) {
-                $T->(sub {$ACTION_OF{$step}->(\%attrib, $m_ctx)}, $step);
+                $T->(sub {$ACTION_OF{$step}->(\%attrib, $m_ctx, @args)}, $step);
             }
             for my $step (@{$m_ctx->get_steps()}) {
                 my $ctx = $m_ctx->get_ctx_of($step);
