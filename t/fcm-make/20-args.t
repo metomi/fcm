@@ -21,7 +21,7 @@
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
-tests 4
+tests 6
 set -e
 cp -r $TEST_SOURCE_DIR/$TEST_KEY_BASE/* .
 set +e
@@ -35,6 +35,13 @@ __LOG__
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE-greet"
 run_pass "$TEST_KEY" fcm make 'build.target=greet.exe'
+grep '^\[info\] required-target:' .fcm-make/log >$TEST_KEY.log
+file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<'__LOG__'
+[info] required-target: link      bin     greet.exe
+__LOG__
+#-------------------------------------------------------------------------------
+TEST_KEY="$TEST_KEY_BASE-new-greet"
+run_pass "$TEST_KEY" fcm make --new 'build.target=greet.exe'
 grep '^\[info\] required-target:' .fcm-make/log >$TEST_KEY.log
 file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<'__LOG__'
 [info] required-target: link      bin     greet.exe
