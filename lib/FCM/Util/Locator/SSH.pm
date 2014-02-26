@@ -99,8 +99,7 @@ sub _find {
     my $value_hash_ref = $attrib_ref->{util}->shell_simple([
         _shell_cmd_list($attrib_ref, 'ssh'),
         $auth,
-        'find', $path,
-        '-type', 'f', '-exec', 'md5sum', '{}', '\;',
+        "find $path -type f -not -path '*/.*' -exec stat -c'%Y %n' {} ';'",
     ]);
     if ($value_hash_ref->{rc}) {
         die($value_hash_ref);
@@ -109,16 +108,13 @@ sub _find {
     LINE:
     for my $line (grep {$_} split("\n", $value_hash_ref->{o})) {
         $found ||= 1;
-        my ($md5sum, $name) = split(q{ }, $line, 2);
-        if ($name =~ qr{/\.[^/]+}msx) { # Ignore Unix hidden files
-            next LINE;
-        }
+        my ($mtime, $name) = split(q{ }, $line, 2);
         my $ns = substr($name, length($path) + 1);
         $callback->(
             $auth . ':' . $name,
             {   is_dir        => undef,
-                last_mod_rev  => $md5sum,
-                last_mod_time => undef,
+                last_mod_rev  => undef,
+                last_mod_time => $mtime,
                 ns            => $ns,
             },
         );

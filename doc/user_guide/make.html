@@ -279,9 +279,10 @@ extract/var/...
     <dd>A readable location in the file system of a remote host accessible via
     <code>ssh</code> and <code>rsync</code>, specified in the form
     <var>[USER@]HOST:PATH</var>. The <code>ssh</code> access must be
-    without a password and that the standard Unix/Linux commands
-    <code>find</code> and <code>md5sum</code> must be available on the remote
-    host via <code>ssh</code>. E.g. <code>mylinuxbox:my-project</code>,
+    without a password, and you must be able to run the <a href=
+    "http://www.gnu.org/software/coreutils/">GNU coreutils</a> version of the
+    <code>find</code> and <code>stat</code> on the remote host. E.g.
+    <code>mylinuxbox:my-project</code>,
     <code>holly@hpc:/data/holly/my-project</code>.</dd>
 
     <dt>svn</dt>
