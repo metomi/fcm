@@ -6,7 +6,12 @@ fcm make
 
 Invokes the FCM make system. See the user guide for detail.
 
-    fcm make [OPTIONS]
+    fcm make [OPTIONS] [DECLARATION ...]
+
+=head1 ARGUMENTS
+
+Each argument is considered to be a declaration line to append to the
+configuration file.
 
 =head1 OPTIONS
 

@@ -148,7 +148,7 @@ function file_grep() {
     fail $TEST_KEY
 }
 
-FCM_HOME=${FCM_HOME:-$(cd $(dirname $BASH_SOURCE)/../../.. && pwd)}
+FCM_HOME=${FCM_HOME:-$(cd $(dirname $(readlink -f $BASH_SOURCE))/../../.. && pwd)}
 export FCM_HOME
 PATH=$FCM_HOME/bin:$PATH
 SVN_VERSION_IS_16=false

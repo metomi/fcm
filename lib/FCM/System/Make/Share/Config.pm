@@ -26,6 +26,7 @@ use base qw{FCM::Class::CODE};
 use FCM::Context::ConfigEntry;
 use FCM::Context::Locator;
 use FCM::System::Exception;
+use File::Temp;
 use Scalar::Util qw{blessed};
 
 # Alias to class name
@@ -47,9 +48,50 @@ __PACKAGE__->class(
 # Get configuration file entries from an iterator, and use the entries to
 # populate the context of the current make.
 sub _parse {
-    my ($attrib_ref, $m_ctx, $entry_iter_ref) = @_;
+    my ($attrib_ref, $entry_callback_ref, $m_ctx, @args) = @_;
+    my $path = $m_ctx->get_option_of('config-file');
+    if (!defined($path)) {
+        my $dir = $m_ctx->get_option_of('directory');
+        $path = $attrib_ref->{shared_util_of}{dest}->path($dir, 'config');
+    }
+    my $locator = FCM::Context::Locator->new($path);
+    my $config_reader_ref = $attrib_ref->{util}->config_reader(
+        $locator, {event_level => $attrib_ref->{util}->util_of_report()->LOW},
+    );
+    my ($args_config_handle, $args_config_reader_ref);
+    if (@args) {
+        $args_config_handle = File::Temp->new();
+        for my $arg (@args) {
+            print($args_config_handle "$arg\n");
+        }
+        $args_config_handle->seek(0, 0);
+        my $locator = FCM::Context::Locator->new($args_config_handle->filename());
+        $args_config_reader_ref = $attrib_ref->{util}->config_reader(
+            FCM::Context::Locator->new($args_config_handle->filename()),
+            {event_level => $attrib_ref->{util}->util_of_report()->LOW},
+        );
+    }
+    my $entry_iter_ref = sub {
+        my $entry;
+        if (defined($config_reader_ref)) {
+            $entry = $config_reader_ref->();
+            if (!defined($entry)) {
+                $config_reader_ref = undef;
+            }
+        }
+        if (!defined($entry) && defined($args_config_reader_ref)) {
+            $entry = $args_config_reader_ref->();
+            if (!defined($entry)) {
+                $args_config_reader_ref = undef;
+            }
+        }
+        $entry;
+    };
     my @unknown_entries;
     while (defined(my $entry = $entry_iter_ref->())) {
+        if (defined($entry_callback_ref)) {
+            $entry_callback_ref->($entry);
+        }
         if (exists($CONFIG_PARSER_OF{$entry->get_label()})) {
             $CONFIG_PARSER_OF{$entry->get_label()}->(
                 $attrib_ref, $m_ctx, $entry,
