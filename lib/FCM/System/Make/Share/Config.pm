@@ -206,9 +206,9 @@ sub _parse_use {
                 }
             }
         }
-        $m_ctx->set_steps([@{$i_m_ctx->get_steps()}]);
-        # FIXME: should only inherit context in steps?
-        # FIXME: handle the situation where the inherited make has been moved.
+        if (!@{$m_ctx->get_steps()}) {
+            $m_ctx->set_steps([@{$i_m_ctx->get_steps()}]);
+        }
     }
 }
 
@@ -238,8 +238,8 @@ sub _unparse {
                         : ()
                     ;
                 }
-            (   [\&_unparse_steps   , 'steps'],
-                [\&_unparse_use     , 'use'  ],
+            (   [\&_unparse_use     , 'use'  ],
+                [\&_unparse_steps   , 'steps'],
                 [sub {$m_ctx->get_dest()}, 'dest' ],
             ),
         ),
