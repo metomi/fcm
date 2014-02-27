@@ -13,6 +13,13 @@ for a full listing of issues for each release.
 
 ### Noteworthy Changes
 
+\#98: fcm make: extract: fix ssh location efficiency.
+
+\#96: fcm make: arguments as extra configurations. This change allows the
+`fcm make` command to accept command line arguments. Each argument will be
+appended in order as a new line in the current `fcm-make.cfg`. This allows
+users to override the configuration on the command line.
+
 \#93: fcm make: fix `use=` properties override. This change allows `use=`
 declarations to be placed anywhere in an `fcm-make.cfg` without interfering
 other `*.prop` declarations.
