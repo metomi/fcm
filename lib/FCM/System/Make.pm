@@ -220,6 +220,12 @@ sub _main {
                     die($e);
                 }
                 $ctx->set_status($m_ctx->ST_OK);
+                my $prev_m_ctx = $m_ctx->get_prev_ctx();
+                if (    defined($prev_m_ctx)
+                    &&  exists($prev_m_ctx->get_ctx_of()->{$step})
+                ) {
+                    delete($prev_m_ctx->get_ctx_of()->{$step});
+                }
             }
         },
     )};
