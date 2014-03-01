@@ -196,6 +196,14 @@ sub _main {
             for my $step (@INIT_STEPS) {
                 $T->(sub {$ACTION_OF{$step}->(\%attrib, $m_ctx, @args)}, $step);
             }
+            my $prev_m_ctx = $m_ctx->get_prev_ctx();
+            if (defined($prev_m_ctx)) {
+                for my $step (keys(%{$prev_m_ctx->get_ctx_of()})) {
+                    if (!grep {$_ eq $step} @{$m_ctx->get_steps()}) {
+                        delete($prev_m_ctx->get_ctx_of()->{$step});
+                    }
+                }
+            }
             for my $step (@{$m_ctx->get_steps()}) {
                 my $ctx = $m_ctx->get_ctx_of($step);
                 if (!defined($ctx)) {
@@ -220,7 +228,6 @@ sub _main {
                     die($e);
                 }
                 $ctx->set_status($m_ctx->ST_OK);
-                my $prev_m_ctx = $m_ctx->get_prev_ctx();
                 if (    defined($prev_m_ctx)
                     &&  exists($prev_m_ctx->get_ctx_of()->{$step})
                 ) {
