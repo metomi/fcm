@@ -34,8 +34,11 @@ use FCM::System::CM::ResolveConflicts qw{_cm_resolve_conflicts};
 use FCM::System::CM::SVN;
 use FCM::System::Exception;
 use FCM::Util::Exception;
+use File::Spec::Functions qw{catfile};
 use List::Util qw{first};
 use Storable qw{dclone};
+
+our $SUBVERSION_SERVERS_CONF = catfile((getpwuid($<))[7], qw{.subversion/servers});
 
 # The (keys) named actions of this class and (values) their implementations.
 our %ACTION_OF = (
@@ -162,7 +165,9 @@ sub _cm_branch_create {
     my @names;
     if ($layout_config{'template-branch'}) {
         my $template = $layout_config{'template-branch'};
-        if (index($template, '{category}') >= 0 || index($template, '{owner}') >= 0) {
+        if (    index($template, '{category}') >= 0
+            ||  index($template, '{owner}') >= 0
+        ) {
             $option_ref->{type} ||= 'dev::user';
             $option_ref->{type} = lc($option_ref->{type});
             $option_ref->{type}
@@ -189,13 +194,9 @@ sub _cm_branch_create {
             }
             if (index($template, '{owner}') >= 0) {
                 my $index = index($template, '{owner}');
-                my $owner;
-                if (exists($set{user})) {
-                    $owner = scalar(getpwuid($<));
-                }
-                else {
-                    $owner = first {exists($set{lc($_)})} qw{Share Config Rel};
-                }
+                my $owner = exists($set{user})
+                    ? _get_username($attrib_ref, $root)
+                    : first {exists($set{lc($_)})} qw{Share Config Rel};
                 substr($template, $index, length('{owner}'), $owner);
             }
         }
@@ -340,7 +341,8 @@ sub _cm_branch_list {
                 ];
             }
             elsif (!%patterns_at) {
-                $patterns_at{$level} = ['^' . scalar(getpwuid($<)) . '$'];
+                my $owner = _get_username($attrib_ref, $root);
+                $patterns_at{$level} = ['^' . $owner . '$'];
             }
         }
         my $url0 = $url_project;
@@ -530,6 +532,72 @@ sub _fcm1_func {
         }
         return;
     };
+}
+
+# Return the username of the host of a given target URL.
+sub _get_username {
+    my ($attrib_ref, $target) = @_;
+    my ($scheme, $sps) = $attrib_ref->{util}->uri_match($target);
+    my ($host) = $sps =~ qr{\A//([^/]+)(?:/|\z)}msx;
+    # Note: can use Config::IniFiles, but best to avoid another dependency.
+    # Note: not very efficient logic here, but should not yet matter.
+    my $subversion_servers_conf = exists($ENV{'FCM_SUBVERSION_SERVERS_CONF'})
+        ? $ENV{'FCM_SUBVERSION_SERVERS_CONF'} : $SUBVERSION_SERVERS_CONF;
+    my $handle
+        = $attrib_ref->{'util'}->file_load_handle($subversion_servers_conf);
+    my $is_in_section;
+    my $group;
+    LINE:
+    while (my $line = readline($handle)) {
+        chomp($line);
+        if ($line =~ qr{\A\s*(?:[#;]|\z)}msx) {
+            next LINE;
+        }
+        if ($line =~ qr{\A\s*\[\s*groups\s*\]\s*\z}msx) {
+            $is_in_section = 1;
+        }
+        elsif ($line =~ qr{\A\s*\[}msx) {
+            $is_in_section = 0;
+        }
+        elsif ($is_in_section) {
+            my ($lhs, $rhs) = $line =~ qr{\A\s*(\S+)\s*=\s*(\S+)\s*\z}msx;
+            if ($rhs) {
+                $rhs =~ s{[.]}{\\.}gmsx;
+                $rhs =~ s{[*]}{.*}gmsx;
+                $rhs =~ s{[?]}{.?}gmsx;
+                if ($host =~ qr{\A$rhs\z}msx) {
+                    $group = $lhs;
+                    last LINE;
+                }
+            }
+        }
+    }
+    my $username = scalar(getpwuid($<)); # current user ID
+    if ($group) {
+        seek($handle, 0, 0);
+        LINE:
+        while (my $line = readline($handle)) {
+            chomp($line);
+            if ($line =~ qr{\A\s*(?:[#;]|\z)}msx) {
+                next LINE;
+            }
+            if ($line =~ qr{\A\s*\[\s*$group\s*\]\s*\z}msx) {
+                $is_in_section = 1;
+            }
+            elsif ($line =~ qr{\A\s*\[}msx) {
+                $is_in_section = 0;
+            }
+            elsif ($is_in_section) {
+                my ($rhs) = $line =~ qr{\A\s*username\s*=\s*(\S+)\s*\z}msx;
+                if ($rhs) {
+                    $username = $rhs;
+                    last LINE;
+                }
+            }
+        }
+    }
+    close($handle);
+    return $username;
 }
 
 # Generate an option modifier to st_check_handler.
