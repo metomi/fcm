@@ -5,24 +5,31 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
-## Next Release (2014-Q1?)
+## 2014-03 (2014-03-03)
 
 ### Highlighted Changes
-
--none-
-
-### Noteworthy Changes
-
-\#98: fcm make: extract: fix ssh location efficiency.
 
 \#96: fcm make: arguments as extra configurations. This change allows the
 `fcm make` command to accept command line arguments. Each argument will be
 appended in order as a new line in the current `fcm-make.cfg`. This allows
 users to override the configuration on the command line.
 
+### Noteworthy Changes
+
+\#101: fcm make: do not inherit `steps` if it is already set in the current
+configuration. This allows `steps=` to be declared before `use=`.
+
+\#100: fcm make: reduce memory usage in incremental mode. Invoking `fcm make`
+with many steps was causing Perl to exit with SIGSEGV previously.
+
+\#98: fcm make: extract: fix ssh location efficiency.
+
 \#93: fcm make: fix `use=` properties override. This change allows `use=`
 declarations to be placed anywhere in an `fcm-make.cfg` without interfering
 other `*.prop` declarations.
+
+\#92: fcm branch-create/list: support alternate username using information in
+users' `~/.subversion/servers` file.
 
 \#91: fcm make: remove config-on-success on failure.
 
