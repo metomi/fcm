@@ -65,7 +65,7 @@ sub instance {
         $INSTANCE = bless({%DEFAULT_R, %DEFAULT_RW}, $class);
         # Load $FCM_HOME/etc/fcm/admin.cfg and $HOME/.metomi/fcm/admin.cfg
         my $UTIL = FCM::Util->new();
-        my @paths = map {catfile($_, 'admin.cfg')} ($UTIL->cfg_paths());
+        my @paths = map {catfile($_, 'admin.cfg')} ($UTIL->conf_paths());
         for my $path (grep {-f $_ && -r _} @paths) {
             my $config_reader
                 = $UTIL->config_reader(FCM::Context::Locator->new($path));

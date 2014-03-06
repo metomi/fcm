@@ -489,7 +489,7 @@ sub _load_layout_config {
         for my $path (
             grep {-f $_ && -r _}
                 map {catfile($_, $attrib_ref->{layout_cfg_base})}
-                    $attrib_ref->{util}->cfg_paths()
+                    $attrib_ref->{util}->conf_paths()
         ) {
             my $config_reader_ref = $attrib_ref->{util}->config_reader(
                 FCM::Context::Locator->new($path),

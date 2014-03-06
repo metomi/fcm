@@ -75,6 +75,18 @@
   command.</p>
 
   <dl>
+    <dt id="env.FCM_CONF_PATH">FCM_CONF_PATH='/path/to/conf1
+    /path/to/conf2'</dt>
+
+    <dd>This variable is mainly used to test FCM. If specified, override the
+    paths for site and user configuration files.  The value should be a space
+    delimited list of paths where FCM site and user configuration files can be
+    found. The value can also be set to a null string to allow FCM to run with
+    no site or user configuration.  If not defined, the default to look for site
+    and user configuration files from <code>$FCM_HOME/etc/fcm/</code> and
+    <code>~/.metomi/fcm/</code> (where <var>$FCM_HOME/bin/fcm</var> is where the
+    <code>fcm</code> command is invoked.</dd>
+
     <dt id="env.FCM_DEBUG">FCM_DEBUG=true</dt>
 
     <dd>If specified, raises the verbosity to the <dfn>debug</dfn> level. This

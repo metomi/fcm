@@ -39,13 +39,14 @@ use File::Path qw{mkpath};
 use File::Spec::Functions qw{catfile};
 use FindBin;
 use Scalar::Util qw{blessed reftype};
+use Text::ParseWords qw{shellwords};
 use Time::HiRes qw{gettimeofday tv_interval};
 
 use constant {NS_ITER_UP => 1};
 
 # The (keys) named actions of this class and (values) their implementations.
 our %ACTION_OF = (
-    cfg_paths            => sub {@{$_[0]->{cfg_paths}}},
+    conf_paths           => sub {@{$_[0]->{conf_paths}}},
     class_load           => \&_class_load,
     config_reader        => _util_of_func('config_reader', 'main'),
     external_cfg_get     => \&_external_cfg_get,
@@ -98,7 +99,7 @@ our %ACTION_OF = (
 our @FCM1_KEYWORD_FILES = (
     catfile((getpwuid($<))[7], qw{.fcm}),
 );
-our @CFG_PATHS = (
+our @CONF_PATHS = (
     catfile($FindBin::Bin, qw{.. etc fcm}),
     catfile((getpwuid($<))[7], qw{.met-um fcm}),
     catfile((getpwuid($<))[7], qw{.metomi fcm}),
@@ -150,7 +151,7 @@ my $RE_URI = qr/
 # Creates the class.
 __PACKAGE__->class(
     {   cfg_basename_of   => {isa => '%', default => {%CFG_BASENAME_OF}},
-        cfg_paths         => {isa => '@', default => [@CFG_PATHS]},
+        conf_paths        => {isa => '@', default => [@CONF_PATHS]},
         event             => '&',
         external_value_of => {isa => '%', default => {%EXTERNAL_VALUE_OF}},
         ns_sep            => {isa => '$', default => $NS_SEP},
@@ -176,7 +177,10 @@ sub _init {
 sub _cfg_init {
     my ($attrib_ref, $name, $action_ref) = @_;
     my $basename = $attrib_ref->{cfg_basename_of}{$name};
-    my @paths = @{$attrib_ref->{cfg_paths}};
+    if (exists($ENV{FCM_CONF_PATH})) {
+        $attrib_ref->{conf_paths} = [shellwords($ENV{FCM_CONF_PATH})];
+    }
+    my @paths = @{$attrib_ref->{conf_paths}};
     for my $path (grep {-f $_ && -r _} map {catfile($_, $basename)} @paths) {
         my $config_reader = $ACTION_OF{config_reader}->(
             $attrib_ref, FCM::Context::Locator->new($path),
@@ -523,10 +527,10 @@ the instance:
 
 =over 4
 
-=item cfg_paths
+=item conf_paths
 
 The search paths to the configuration files. The default is the value in
-@FCM::Util::CFG_PATHS.
+@FCM::Util::CONF_PATHS.
 
 =item cfg_basename_of
 
@@ -557,7 +561,7 @@ A HASH to map (keys) utility names to (values) their implementation instances.
 
 =back
 
-=item $u->cfg_paths()
+=item $u->conf_paths()
 
 Returns a list of the search paths to the configuration files.
 
