@@ -17,17 +17,6 @@
         <li><a href="../installation/">Installation</a></li>
 
         <li class="active"><a href=".">User Guide</a></li>
-
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-          Misc Docs <b class="caret"></b></a>
-          <ul class="dropdown-menu">
-            <li><a href="../collaboration/">Distribution &amp; Collaboration for
-            FCM Projects</a></li>
-
-            <li><a href="../fortran_standards/">Fortran Coding Standard</a></li>
-          </ul>
-        </li>
       </ul>
     </div>
   </div>
@@ -1585,12 +1574,28 @@ build.prop{fc.flags}[src/food/sausage.f90] = -O4
   i.e.:</p>
 
   <ul>
-    <li>Use functions and subroutines from a module.</li>
+    <li>Place functions and subroutines in a module, and give them the
+    <code>PUBLIC</code> attribute. Import them with the <code>USE
+    &lt;module&gt;</code> statement. We recommend adding the <code>ONLY</code>
+    clause in a <code>USE &lt;module&gt;</code> when importing symbols from a
+    module. This makes it easier to locate the source of each symbol, and avoids
+    unintentional access to other <code>PUBLIC</code> symbols within the
+    <code>MODULE</code>. If you are importing from an intrinsic module, you
+    should add the <code>INTRINSIC</code> clause to the <code>USE
+    &lt;module&gt;</code> statement to tell the build system not to look for the
+    module from your source tree.</li>
 
-    <li>Use functions and subroutines in the CONTAINS section of a program
-    unit.</li>
+    <li>Place functions and subroutines in the <code>CONTAINS</code> section of
+    a standalone program unit. There are two advantages for this approach.
+    Firstly, the sub-programs will get an automatic interface when the container
+    program unit is compiled. Secondly, it should be easier for the compiler to
+    provide optimisation when the sub-programs are internal to the caller. The
+    disadvantage of this approach is that the sub-programs are local to the
+    caller, and so they cannot be called by other program units. Therefore, this
+    approach is only suitable for small sub-programs local to a particular
+    program unit.</li>
 
-    <li>Use the build system's automatic interface file feature.</li>
+    <li>Use the build system's automatic interface file feature. See below.</li>
   </ul>
 
   <p>For each free format Fortran source file, e.g. <samp>name.f90</samp>, with
@@ -2049,6 +2054,22 @@ egg/fried.h
   preprocessing in such a way, we have to preprocess it before feeding it to
   the build system. The preprocess system can be used to do this. It is
   typically run as a step before build.</p>
+
+  <p>However, using a separate preprocess step is not the best way of working,
+  as it adds an overhead to the build process. If your code requires
+  preprocessing, you should try to design it to avoid changes in the above.</p>
+
+  <p>In practice, the only reasonable use of a preprocessor with Fortran is for
+  code selection. For example, preprocessing is useful for isolating machine
+  specific libraries or instructions, where it may be appropriate to use inline
+  alternatives for small sections of code. Another example is when multiple
+  versions of the same procedure exist in the source tree and you need to use
+  the preprocessor to select the correct version for your build.</p>
+
+  <p>Avoid using the a preprocessor for code inclusion, as you should be able
+  to do the same via the Fortran <code>INCLUDE</code> statement. You should
+  also avoid embedding preprocessor macros within the continuations of a
+  Fortran statement, as it can make your code very confusing.</p>
 
   <p>The preprocess system works using the same logic as the build system, but
   is configured primarily to preprocess C/C++ and Fortran source files. We
