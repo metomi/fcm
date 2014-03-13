@@ -5,6 +5,21 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## Next Release (2014-Q1?)
+
+### Highlighted Changes
+
+-none-
+
+### Noteworthy Changes
+
+\#105: `FCM_CONF_PATH`: new environment variable that can be used to override
+site/user configuration paths.
+
+\#103: fcm make: extract: detect diff trees that are the same as the base tree.
+
+--------------------------------------------------------------------------------
+
 ## 2014-03 (2014-03-03)
 
 ### Highlighted Changes
