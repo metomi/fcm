@@ -28,7 +28,7 @@ set +e
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE-bad"
 run_fail "$TEST_KEY" fcm make
-tail -2 .fcm-make/log >"$TEST_KEY.log"
+tail -2 .fcm-make/log >"$TEST_KEY.log" 2>/dev/null
 file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<'__LOG__'
 [FAIL] world.o: same target from [lib/earth.f90, lib/moon.f90]
 [FAIL]     required by: hello.exe

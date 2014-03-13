@@ -479,10 +479,9 @@ sub _elaborate_ctx_of_project {
                 && $path_root eq $prev_path_root
                 ;
         }
-        # Determine the new trees
+        # Tree locators as invariant
         TREE:
         for my $tree (grep {!$_->get_inherited()} @{$project->get_trees()}) {
-            my $key = $tree->get_key();
             my $tree_locator = $tree->get_locator();
             # Ensures that the tree locator is an absolute path
             if (defined($project->get_locator())) {
@@ -490,6 +489,23 @@ sub _elaborate_ctx_of_project {
             }
             # Determines invariant form of the locator of the project tree.
             $UTIL->loc_as_invariant($tree_locator);
+        }
+        # Remove diff trees that are the same as the base tree
+        my ($base_tree, @old_diff_trees) = @{$project->get_trees()};
+        my $base_value = $base_tree->get_locator()->get_value();
+        my @new_diff_trees;
+        TREE:
+        for my $tree (@old_diff_trees) {
+            if ($base_value ne $tree->get_locator()->get_value()) {
+                push(@new_diff_trees, $tree);
+                $tree->set_key(scalar(@new_diff_trees)); # reset key (index)
+            }
+        }
+        $project->set_trees([$base_tree, @new_diff_trees]);
+        # Determine the new trees
+        TREE:
+        for my $tree (grep {!$_->get_inherited()} @{$project->get_trees()}) {
+            my $tree_locator = $tree->get_locator();
             if (    $can_use_prev
                 &&  $tree_locator->get_value_level() >= $tree_locator->L_INVARIANT
             ) {

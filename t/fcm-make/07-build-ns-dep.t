@@ -28,7 +28,7 @@ set +e
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE-bad-1"
 run_fail "$TEST_KEY" fcm make
-tail -2 .fcm-make/log >"$TEST_KEY.log"
+tail -2 .fcm-make/log >"$TEST_KEY.log" 2>/dev/null
 file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<'__LOG__'
 [FAIL] foo: bad or missing dependency (type=ns-dep.o)
 [FAIL]     required by: hello.exe
@@ -37,7 +37,7 @@ __LOG__
 TEST_KEY="$TEST_KEY_BASE-bad-2"
 mkdir src/foo # An empty directory
 run_fail "$TEST_KEY" fcm make
-tail -2 .fcm-make/log >"$TEST_KEY.log"
+tail -2 .fcm-make/log >"$TEST_KEY.log" 2>/dev/null
 file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<'__LOG__'
 [FAIL] foo: bad or missing dependency (type=ns-dep.o)
 [FAIL]     required by: hello.exe
