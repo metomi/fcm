@@ -21,118 +21,95 @@
 #     fcm-rpmbuild
 #
 # SYNOPSIS
-#     fcm-rpmbuild [--no-vcs] [SOURCE] [SOURCE_SITE]
+#     fcm-rpmbuild [--no-gui] [REV]
 #     E.g.:
-#     fcm rpmbuild fcm:fcm/trunk fcm:fcm-site/trunk
+#     fcm rpmbuild 2014-03
 #
 # DESCRIPTION
 #     Build an RPM for distributing FCM.
+#     Assume that the current working directory is a local Git clone containing
+#     the FCM project.
 #
 # OPTIONS
-#     --no-vcs - do not add subversion and related dependencies to RPM.
+#     --no-gui - do not add GUI packages such as "perl-Tk" and "xxdiff".
 #
 # ARGUMENTS
-#     SOURCE - The source tree of the distribution. (default = fcm:fcm/trunk)
-#     SOURCE_SITE - The source tree with site specific settings in "etc/fcm/".
+#     REV - Revision to build. Default to HEAD.
 #-------------------------------------------------------------------------------
 
-function get_last_changed_rev() {
-    fcm info "$@" | awk -F': ' '$1 ~ /^Last Changed Rev$/ {print $2}'
+prefix_source() {
+    N=0
+    while read; do
+        echo "Source$((++N)): https://github.com/metomi/fcm/commit/$REPLY"
+    done
 }
 
 set -eu
 THIS=$(basename $0)
 
-# Sort out the rpmbuild directory structure
-if [[ -f $HOME/.rpmmacros ]]; then
-    DIR=$(awk '$1 ~ /^%_topdir$/ {print $2}' $HOME/.rpmmacros)
-    mkdir -p $DIR
-else
-    DIR=$(mktemp -d)
-    echo "%_topdir $DIR" >$HOME/.rpmmacros
-    function finally() {
-        cd
-        rm -f $HOME/.rpmmacros
-        rm -rf $DIR
-    }
-    trap finally ERR
-    trap finally EXIT
-    trap finally INT
-fi
-cd $DIR
-mkdir -p BUILD RPMS SOURCES SPECS SRPMS
-rm -rf SOURCES/fcm
+rpmdev-setuptree
 
 # Build RPM without no dependency on subversion or xxdiff?
-REQUIRES_VCS="perl-Tk perl-XML-Parser subversion xxdiff"
-if (($# > 0)) && [[ $1 == '--no-vcs' ]]; then
-    REQUIRES_VCS=
+REQUIRES_GUI='perl-Tk xxdiff'
+if (($# > 0)) && [[ $1 == '--no-gui' ]]; then
+    REQUIRES_GUI=
     shift 1
 fi
 
 # Create the source tree
-SOURCE=${1:-fcm:fcm/trunk}
-fcm export -q $SOURCE SOURCES/fcm
-REV_SOURCE="r$(get_last_changed_rev $SOURCE)"
-SOURCE_SITE=${2:-}
-REV_SOURCE_SITE=
-if [[ -n $SOURCE_SITE ]]; then
-    mkdir -p SOURCES/fcm-site/etc
-    fcm export -q $SOURCE_SITE/etc/fcm SOURCES/fcm-site/etc/fcm
-    cp -p SOURCES/fcm-site/etc/fcm/* SOURCES/fcm/etc/fcm/
-    rm -r SOURCES/fcm-site
-    REV_SOURCE_SITE="r$(get_last_changed_rev $SOURCE_SITE)"
+REV=${1:-HEAD}
+REV_NAME=$(git describe $REV)
+REV_BASE=$(git describe --abbrev=0 $REV)
+REV_BASE_DOT=$(sed 's/-/./g' <<<$REV_BASE)
+git archive --format=tar --prefix=fcm-$REV_BASE_DOT/ $REV \
+    | (cd ~/rpmbuild/SOURCES/ && tar -xf -)
+echo "FCM.VERSION=\"$REV_BASE_DOT\";" \
+    >~/rpmbuild/SOURCES/fcm-$REV_BASE_DOT/doc/etc/fcm-version.js
+rm -r ~/rpmbuild/SOURCES/fcm-$REV_BASE_DOT/{test,t}
+if [[ -z $REQUIRES_GUI ]]; then
+    rm ~/rpmbuild/SOURCES/fcm-$REV_BASE_DOT/{bin/fcm_gui,lib/FCM1/Interactive/InputGetter/GUI.pm}
 fi
-mkdir -p SOURCES/fcm/usr/local/bin
-sed -i "s/\";$/$REV_SOURCE$REV_SOURCE_SITE\";/" SOURCES/fcm/doc/etc/fcm-version.js
-cat >SOURCES/fcm/usr/local/bin/fcm <<'__FCM_WRAPPER__'
-#!/bin/bash
-FCM_HOME=${FCM_HOME:-/opt/fcm}
-PATH=$FCM_HOME/bin:$PATH exec $FCM_HOME/bin/$(basename $0) "$@"
-__FCM_WRAPPER__
 
 # Create the rpmbuild spec file
-chmod +x SOURCES/fcm/usr/local/bin/fcm
-cat >SPECS/fcm.spec <<__SPEC__
-Summary: FCM is a set of tools for managing and building source code.
+{
+    cat <<__SPEC__
 Name: fcm
-Version: $REV_SOURCE$REV_SOURCE_SITE
-Release: 1
-URL: http://www.metoffice.gov.uk/research/collaboration/fcm/
-License: GPLv3
+Version: $REV_BASE_DOT
+Release: 1%{?dist}
+Summary: A modern Fortran build system + wrappers to SVN
 Group: Development/Tools
-BuildRoot: $PWD/BUILD/%{name}-%{version}
+License: GPLv3
+URL: https://github.com/metomi/fcm/
+Source0: https://github.com/metomi/fcm/releases/
+__SPEC__
+    git log --format=%H --first-parent --reverse $REV_BASE..$REV_NAME \
+        | prefix_source
+    cat <<__SPEC__
 BuildArch: noarch
-Source: $PWD/SOURCES/fcm
-Requires: diffutils gzip make perl perl-libwww-perl $REQUIRES_VCS
+Requires: diffutils gzip make perl-core perl-Config-IniFiles perl-MailTools perl-XML-Parser subversion subversion-perl $REQUIRES_GUI
 
 %description
-http://www.metoffice.gov.uk/research/collaboration/fcm/
+FCM: A modern Fortran build system + wrappers to Subversion for scientific
+software development
 
 %prep
 
 %build
 
 %install
-rm -rf \$RPM_BUILD_ROOT
-mkdir -p \$RPM_BUILD_ROOT/opt/fcm
-mkdir -p \$RPM_BUILD_ROOT/usr/local/bin
-cd \$RPM_SOURCE_DIR
-find fcm -type d -exec install -Dd {} \$RPM_BUILD_ROOT/opt/{} \;
-find fcm -type f -exec install -D {} \$RPM_BUILD_ROOT/opt/{} \;
-install \$RPM_SOURCE_DIR/fcm/usr/local/bin/fcm \$RPM_BUILD_ROOT/usr/local/bin/
+rm -fr %{buildroot}
+mkdir -p %{buildroot}/opt/
+cp -pr %_sourcedir/fcm-$REV_BASE_DOT %{buildroot}/opt/fcm
 
 %clean 
-rm -rf \$RPM_BUILD_ROOT
+rm -fr %{buildroot}
 
 %files
-%defattr(-,root,root,-)
-/usr/local/bin/fcm
 /opt/fcm
 __SPEC__
+} >~/rpmbuild/SPECS/fcm.spec
 
-# Build the rpm
-rpmbuild -ba SPECS/fcm.spec
-
-cd $OLDPWD
-cp $DIR/RPMS/noarch/* .
+cd ~/rpmbuild/SPECS
+rpmbuild -ba fcm.spec
+rm -fr ~/rpmbuild/SOURCES/fcm-$REV_BASE_DOT
+exit
