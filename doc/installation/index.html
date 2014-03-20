@@ -6,8 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="../etc/fcm-icon.png" type="image/png" />
   <link rel="shortcut icon" href="../etc/fcm-icon.png" type="image/png" />
-  <link href="../etc/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen" />
-  <link href="../etc/fcm.css" rel="stylesheet" media="screen" />
+  <link href="../etc/bootstrap/css/bootstrap.min.css" type="text/css" rel="stylesheet" media="screen" />
+  <link href="../etc/fcm.css" type="text/css" rel="stylesheet" media="screen" />
 </head>
 <body>
   <div class="navbar navbar-inverse">
@@ -43,7 +43,7 @@
   <h2 id="requirements">System Requirements</h2>
 
   <p>FCM is intended to run on a Unix/Linux system. It is known to work on
-  RHEL-6.3 and some part of it on AIX-7.1.</p>
+  RHEL-6 and some part of it on AIX-7.</p>
 
   <p>FCM releases can be downloaded from <a href=
   "https://github.com/metomi/fcm/releases">Github</a>. Download the tar.gz file
@@ -72,12 +72,40 @@
     </dd>
 
     <dt>Perl module <a href=
-    "http://search.cpan.org/~msergeant/XML-Parser-2.36/">XML::Parser</a></dt>
+    "http://search.cpan.org/dist/Config-IniFiles/">Config::IniFiles</a></dt>
+
+    <dd>
+      <p><dfn>used by:</dfn> the admin commands.</p>
+
+      <p><dfn>versions known to work:</dfn> RHEL-6: 2.72.</p>
+    </dd>
+
+    <dt>Perl module <a href=
+    "http://search.cpan.org/dist/DBD-SQLite/">DBD::SQLite</a></dt>
+
+    <dd>
+      <p><dfn>used by:</dfn> the admin commands.</p>
+
+      <p><dfn>versions known to work:</dfn> RHEL-6: 1.29.</p>
+    </dd>
+
+    <dt>Perl module <a href=
+    "http://search.cpan.org/dist/Alien-SVN/">SVN::Client</a></dt>
+
+    <dd>
+      <p><dfn>used by:</dfn> the admin commands.</p>
+
+      <p><dfn>versions known to work:</dfn> RHEL-6: 1.8.8 (RPM from <a href=
+      "http://opensource.wandisco.com/rhel/6/svn-1.8/RPMS/x86_64/">http://opensource.wandisco.com/</a>).</p>
+    </dd>
+
+    <dt>Perl module <a href=
+    "http://search.cpan.org/dist/XML-Parser/">XML::Parser</a></dt>
 
     <dd>
       <p><dfn>used by:</dfn> the code management commands.</p>
 
-      <p><dfn>versions known to work:</dfn> RHEL-6.3: 2.36.</p>
+      <p><dfn>versions known to work:</dfn> RHEL-6: 2.36.</p>
     </dd>
 
     <dt>Perl module <a href=
@@ -86,7 +114,7 @@
     <dd>
       <p><dfn>used by:</dfn> <code>fcm gui</code>.</p>
 
-      <p><dfn>versions known to work:</dfn> RHEL-6.3: 804.028.</p>
+      <p><dfn>versions known to work:</dfn> RHEL-6: 804.028.</p>
     </dd>
 
     <dt><a href="http://subversion.apache.org/">Subversion</a></dt>
@@ -95,8 +123,8 @@
       <p><dfn>used by:</dfn> the code management commands, the extract system
       of <code>fcm make</code>, the deprecated <code>fcm extract</code>.</p>
 
-      <p><dfn>versions known to work:</dfn> AIX-7.1: 1.6.18, RHEL-6.3: 1.6.17,
-      RHEL-6.3: 1.8.5.</p>
+      <p><dfn>versions known to work:</dfn> AIX-7: 1.6.18, RHEL-6: 1.6.17,
+      RHEL-6: 1.8.8.</p>
 
       <p><dfn>remark:</dfn> you can use the extract system to mirror code to a
       remote platform for building. Therefore it is only necessary to have
@@ -120,7 +148,7 @@
       <p><dfn>used by:</dfn> <code>fcm branch-diff --graphical</code>,
       <code>fcm conflicts</code>, <code>fcm diff --graphical</code>.</p>
 
-      <p><dfn>versions known to work:</dfn> RHEL-6.3: 3.2.</p>
+      <p><dfn>versions known to work:</dfn> RHEL-6: 3.2.</p>
 
       <p><dfn>remark:</dfn> The <code>fcm branch-diff --graphical</code> and
       <code>fcm diff --graphical</code> commands use xxdiff by default but can
@@ -134,7 +162,7 @@
       <p><dfn>used by:</dfn> the extract system of <code>fcm make</code>, the
       deprecated <code>fcm extract</code>.</p>
 
-      <p><dfn>versions known to work:</dfn> RHEL-6.3: 2.8.1.</p>
+      <p><dfn>versions known to work:</dfn> RHEL-6: 2.8.1.</p>
 
       <p><dfn>remark:</dfn>: used to merge changes to source files modified by
       2+ diff source trees (compared with the base).</p>
@@ -146,7 +174,7 @@
       <p><dfn>used by:</dfn> the mirror system of <code>fcm make</code>, the
       deprecated <code>fcm extract</code>.</p>
 
-      <p><dfn>versions known to work:</dfn> AIX-7.1: 3.0.9, RHEL-6.3: 3.0.6.</p>
+      <p><dfn>versions known to work:</dfn> AIX-7: 3.0.9, RHEL-6: 3.0.6.</p>
 
       <p><dfn>remark:</dfn> used to mirror source file to another
       <var>USER@HOST</var>.</p>
@@ -157,7 +185,7 @@
     <dd>
       <p><dfn>used by:</dfn> the deprecated <code>fcm build</code>.</p>
 
-      <p><dfn>versions known to work:</dfn> AIX-7.1: 3.80, RHEL-6.1: 3.81.</p>
+      <p><dfn>versions known to work:</dfn> AIX-7: 3.80, RHEL-6: 3.81.</p>
     </dd>
   </dl>
   </div>
