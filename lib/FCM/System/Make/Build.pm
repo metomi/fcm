@@ -959,6 +959,7 @@ sub _targets_props_assign {
             else {
                 $target->set_path_of_prev($p_target->get_path_of_prev());
                 $target->set_prop_of_prev_of($p_target->get_prop_of_prev_of());
+                $target->set_status($target->ST_OOD);
             }
             if (exists($NO_INHERIT_CATEGORY_IN{$target->get_category()})) {
                 $target->set_path_of_prev($target->get_path());
