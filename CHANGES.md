@@ -13,6 +13,9 @@ for a full listing of issues for each release.
 
 ### Noteworthy Changes
 
+\#111: fcm make: build in inherit mode: fix incorrect success in repeated
+incremental mode.
+
 \#105: `FCM_CONF_PATH`: new environment variable that can be used to override
 site/user configuration paths.
 
