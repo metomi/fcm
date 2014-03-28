@@ -46,11 +46,11 @@ sub _main {
     my @include_paths
         = map {catfile(($_ eq $paths[0] ? q{.} : $_), 'include')} @paths;
     my %opt_of = (
-        c => $P->($NAME . '.flag-compile'),
-        D => $P->($NAME . '.flag-define'),
-        I => $P->($NAME . '.flag-include'),
-        M => $P->($NAME . '.flag-module'),    # FIXME
-        o => $P->($NAME . '.flag-output'),
+        c   => $P->($NAME . '.flag-compile'),
+        D   => $P->($NAME . '.flag-define'),
+        I   => $P->($NAME . '.flag-include'),
+        M   => $P->($NAME . '.flag-module'),    # FIXME
+        o   => $P->($NAME . '.flag-output'),
     );
     my @command_list = (
         shellwords($P->($NAME)),
@@ -60,6 +60,7 @@ sub _main {
         _props_to_opts($opt_of{I}, @include_paths),
         _props_to_opts($opt_of{I}, shellwords($P->($NAME .  '.include-paths'))),
         _props_to_opts($opt_of{M}, @include_paths),
+        shellwords($P->($NAME . '.flag-omp')),
         shellwords($P->($NAME . '.flags')),
         $target->get_path_of_source(),
     );

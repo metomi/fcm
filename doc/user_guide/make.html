@@ -1140,6 +1140,24 @@ build.prop{file-pat.script} = (?msx-i:\w+Scr_\w+)
     </dl>
   </div>
 
+  <div class="well">
+    <p><strong><i class="icon-pencil"></i> Note: Dependency Analysis and Fortran
+    OpenMP Sentinels.</strong></p>
+
+    <p>The build system recognises statements with Fortran OpenMP sentinels that
+    affect build dependencies. E.g.:</p>
+
+    <pre>
+!$ USE my_omp_mod, ONLY: my_omp_sub
+! ...
+!$ INCLUDE 'my_omp_logic'
+</pre>
+
+    <p>These dependencies are normally ignored. However, if a relevant
+    <code>build.prop{fc.flag-omp}</code> property is specified, the build system
+    will treat these statements as normal dependency statements.</p>
+  </div>
+
   <p>There are some situations when it is not possible for the system to
   identify a dependency. E.g. a Fortran source file may depend on external
   objects that are not detected by the automatic analysis. Therefore, the
@@ -1284,6 +1302,8 @@ build.prop{no-dep.include}[food] = *
       <a href=
       "annex_cfg.html#make.build.prop.cc.include-paths">cc.include-paths</a>,
       <a href=
+      "annex_cfg.html#make.build.prop.cc.flag-omp">cc.flag-omp</a>,
+      <a href=
       "annex_cfg.html#make.build.prop.cc.flag-output">cc.flag-output</a></p>
 
       <p><dfn>dependencies</dfn>: include and o (object).</p>
@@ -1319,6 +1339,8 @@ build.prop{no-dep.include}[food] = *
       "annex_cfg.html#make.build.prop.cc.flag-lib-path">cc.flag-lib-path</a>,
       <a href="annex_cfg.html#make.build.prop.cc.libs">cc.libs</a>,
       <a href="annex_cfg.html#make.build.prop.cc.lib-paths">cc.lib-paths</a>,
+      <a href=
+      "annex_cfg.html#make.build.prop.cc.flag-omp">cc.flag-omp</a>,
       <a href=
       "annex_cfg.html#make.build.prop.cc.flag-output">cc.flag-output</a></p>
 
@@ -1375,6 +1397,8 @@ build.prop{no-dep.include}[food] = *
       "annex_cfg.html#make.build.prop.fc.include-paths">fc.include-paths</a>,
       <a href=
       "annex_cfg.html#make.build.prop.fc.flag-module">fc.flag-module</a>,
+      <a href=
+      "annex_cfg.html#make.build.prop.fc.flag-omp">fc.flag-omp</a>,
       <a href=
       "annex_cfg.html#make.build.prop.fc.flag-output">fc.flag-output</a></p>
 
@@ -1457,6 +1481,8 @@ build.prop{no-dep.include}[food] = *
       "annex_cfg.html#make.build.prop.fc.flag-lib-path">fc.flag-lib-path</a>,
       <a href="annex_cfg.html#make.build.prop.fc.libs">fc.libs</a>,
       <a href="annex_cfg.html#make.build.prop.fc.lib-paths">fc.lib-paths</a>,
+      <a href=
+      "annex_cfg.html#make.build.prop.fc.flag-omp">fc.flag-omp</a>,
       <a href=
       "annex_cfg.html#make.build.prop.fc.flag-output">fc.flag-output</a></p>
 

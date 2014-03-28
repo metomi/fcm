@@ -39,6 +39,9 @@ our @INTRINSIC_MODULES = qw{
     iso_c_binding iso_fortran_env ieee_exceptions ieee_arithmetic ieee_features
 };
 
+# Prefix for dependency name that is only applicable under OMP
+our $OMP_PREFIX = '!$';
+
 # Regular expressions
 my $RE_FILE = qr{[\w\-+.]+}imsx;
 my $RE_NAME = qr{[A-Za-z]\w*}imsx;
@@ -51,8 +54,9 @@ my $RE_UNIT_CALL = qr{subroutine|function}imsx;
 my %RE           = (
     DEP_O     => qr{\A\s*!\s*depends\s*on\s*:\s*($RE_FILE)}imsx,
     DEP_USE   => qr{\A\s*use\s+($RE_NAME)}imsx,
-    DEP_SUBM  => qr{\A\s*submodule\s+\(($RE_NAME)\)\s}imsx,
+    DEP_SUBM  => qr{\A\s*submodule\s+\(($RE_NAME)\)}imsx,
     INCLUDE   => qr{\#?\s*include\s*}imsx,
+    OMP_SENT  => qr{\A(\s*!\$\s+)?(.*)\z}imsx,
     UNIT_ATTR => qr{\A\s*(?:(?:(?:impure\s+)?elemental|recursive|pure)\s+)+(.*)\z}imsx,
     UNIT_BASE => qr{\A\s*($RE_UNIT_BASE)\s+($RE_NAME)\s*\z}imsx,
     UNIT_CALL => qr{\A\s*($RE_UNIT_CALL)\s+($RE_NAME)\b}imsx,
@@ -96,6 +100,7 @@ sub new {
             source_analyse_more        => \&_source_analyse_more,
             source_analyse_more_init   => \&_source_analyse_more_init,
             source_to_targets          => \&_source_to_targets,
+            target_deps_filter         => \&_target_deps_filter,
             target_file_ext_of         => {%TARGET_EXT_OF},
             target_file_name_option_of => {'f90-mod' => q{}},
             task_class_of              => {%TASK_CLASS_OF},
@@ -168,20 +173,35 @@ sub _source_analyse_more_init {
 
 # Reads information: extract an include dependency.
 sub _source_analyse_dep_include {
-    my ($extracted) = extract_delimited($_[0], q{'"}, $RE{INCLUDE});
-    $extracted ? substr($extracted, 1, length($extracted) - 2) : undef;
+    my ($line) = @_;
+    my ($omp_sentinel, $extracted);
+    ($omp_sentinel, $line) = $line =~ $RE{OMP_SENT};
+    ($extracted) = extract_delimited($line, q{'"}, $RE{INCLUDE});
+    if (!$extracted) {
+        return;
+    }
+    $extracted = substr($extracted, 1, length($extracted) - 2);
+    if ($omp_sentinel) {
+        $extracted = $OMP_PREFIX . $extracted;
+    }
+    $extracted;
 }
 
 # Reads information: extract a module dependency.
 sub _source_analyse_dep_module {
-    my ($extracted, $can_analyse_more);
-    ($extracted) = lc($_[0]) =~ $RE{DEP_USE};
+    my ($line) = @_;
+    my ($omp_sentinel, $extracted, $can_analyse_more);
+    ($omp_sentinel, $line) = $line =~ $RE{OMP_SENT};
+    ($extracted) = lc($line) =~ $RE{DEP_USE};
     if (!$extracted) {
-        ($extracted) = lc($_[0]) =~ $RE{DEP_SUBM};
+        ($extracted) = lc($line) =~ $RE{DEP_SUBM};
         $can_analyse_more = 1;
     }
     if (!$extracted || grep {$_ eq $extracted} @INTRINSIC_MODULES) {
         return;
+    }
+    if ($omp_sentinel) {
+        $extracted = $OMP_PREFIX . $extracted;
     }
     ($extracted, $can_analyse_more);
 }
@@ -324,6 +344,24 @@ sub _source_to_targets {
         );
     }
     return @targets;
+}
+
+# If target's fc.flag-omp property is empty, remove !$OMP dependencies.
+# Otherwise, remove !$OMP sentinels from the dependencies.
+sub _target_deps_filter {
+    my ($attrib_ref, $target) = @_;
+    if ($target->get_prop_of()->{'fc.flag-omp'}) {
+        for my $dep_ref (@{$target->get_deps()}) {
+            if (index($dep_ref->[0], $OMP_PREFIX) == 0) {
+                substr($dep_ref->[0], 0, length($OMP_PREFIX), q{});
+            }
+        }
+    }
+    else {
+        $target->set_deps(
+            [grep {index($_->[0], $OMP_PREFIX) == -1} @{$target->get_deps()}],
+        );
+    }
 }
 
 # ------------------------------------------------------------------------------

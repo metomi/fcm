@@ -23,6 +23,8 @@ use warnings;
 package FCM::System::Make::Build::FileType;
 use base qw{FCM::Class::CODE};
 
+use Text::ParseWords qw{shellwords};
+
 # Creates the class.
 __PACKAGE__->class(
     {   id                         => '$',
@@ -34,6 +36,7 @@ __PACKAGE__->class(
         source_analyse_more        => '&',
         source_analyse_more_init   => '&',
         source_to_targets          => '&',
+        target_deps_filter         => '&',
         target_file_ext_of         => '%',
         target_file_name_option_of => '%',
         task_class_of              => '%',
@@ -57,6 +60,7 @@ __PACKAGE__->class(
             source_analyse      => \&_source_analyse,
             source_analyse_deps => sub {keys(%{$_[0]->{source_analyse_dep_of}})},
             source_to_targets   => sub {$_[0]->{source_to_targets}->(@_)},
+            target_deps_filter  => sub {$_[0]->{target_deps_filter}->(@_)},
         },
     },
 );
@@ -73,14 +77,34 @@ sub _init {
 
 # Reads information according to the $source.
 sub _source_analyse {
-    my ($attrib_ref, $handle, $dep_types_ref) = @_;
-    my @dep_types
-        = defined($dep_types_ref) ? @{$dep_types_ref}
-        :                           (_source_analyse_deps($attrib_ref))
-        ;
+    my ($attrib_ref, $source) = @_;
+    my %no_dep_of;
+    my %dep_type_of
+        = map {($_ => 1)} keys(%{$attrib_ref->{source_analyse_dep_of}});
+    while (my $type = each(%dep_type_of)) {
+        my $key = 'no-dep.' . $type;
+        if ($source->get_prop_of($key)) {
+            for my $v (shellwords($source->get_prop_of($key))) {
+                if ($v eq '*') {
+                    delete($dep_type_of{$type});
+                }
+                else {
+                    $no_dep_of{$type}{$v} = 1;
+                }
+            }
+        }
+    }
+    if (!keys(%dep_type_of) && !$attrib_ref->{source_analyse_always}) {
+        return;
+    }
+    my $path = $source->get_path();
+    my $handle = $attrib_ref->{util}->file_load_handle($path);
+
+    my @dep_types = keys(%dep_type_of)
+        ? keys(%dep_type_of) : (_source_analyse_deps($attrib_ref));
     my (%dep_of, %info_of, %state);
     $attrib_ref->{source_analyse_more_init}->(\%info_of, \%state);
-LINE:
+    LINE:
     while (my $line = readline($handle)) {
         chomp($line);
         TYPE:
@@ -99,7 +123,16 @@ LINE:
         }
         $attrib_ref->{source_analyse_more}->($line, \%info_of, \%state);
     }
-    return (\%dep_of, \%info_of);
+
+    close($handle);
+    $source->set_info_of(\%info_of);
+    while (my ($type, $hash_ref) = each(%dep_of)) {
+        while (my $item = each(%{$hash_ref})) {
+            if (!exists($no_dep_of{$type}{$item})) {
+                push(@{$source->get_deps()}, [$item, $type]);
+            }
+        }
+    }
 }
 
 1;
@@ -139,13 +172,10 @@ Returns the recommended ID of this file type.
 Returns the recommended file name extension, file name pattern and file she-bang
 line pattern of this file type.
 
-=item $instance->source_analyse($handle,\@dep_types)
+=item $instance->source_analyse($source)
 
-Reads information from $handle. If @dep_types is specified, only look for
-dependencies in the specified types. Returns a 2-element ARRAY. The first
-element is a reference to a HASH containing the (keys) dependency items and the
-(values) their types. The second element is a reference to a HASH containing the
-information relevant to the source file type.
+Analysis $source for dependencies and other information. Add or modify items in
+@{$source->get_deps()} and %{$source->get_info_of()}.
 
 =item $instance->source_analyse_deps()
 
@@ -161,6 +191,11 @@ information other than dependencies.
 Using the information in $source, creates and returns the contexts of a list of
 suitable build targets. Where appropriate, the %prop_of should contain a mapping
 of the names of the properties used by this method and their values.
+
+=item $instance->target_deps_filter($target)
+
+This may modify @{$target->get_deps()} in place based on values in
+%{$target->get_prop_of()}. This method is normally implemented by sub-classes.
 
 =item $instance->target_file_ext_of()
 

@@ -105,6 +105,7 @@ sub _main {
             ),
             _props_to_opts($opt_of{L}, shellwords($P->($NAME .  '.lib-paths'))),
             _props_to_opts($opt_of{l}, shellwords($P->($NAME .  '.libs'))),
+            shellwords($P->($NAME . '.flag-omp')),
             shellwords($P->($NAME . '.flags-ld')),
         ],
     ) {

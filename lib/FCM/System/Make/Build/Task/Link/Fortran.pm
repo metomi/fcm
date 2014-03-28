@@ -27,7 +27,7 @@ use FCM::System::Make::Build::Task::Compile::Fortran;
 our %PROP_OF = (
     %FCM::System::Make::Build::Task::Link::PROP_OF,
     (   map {$_ => $FCM::System::Make::Build::Task::Compile::Fortran::PROP_OF{$_}}
-        qw{fc fc.flag-output}
+        qw{fc fc.flag-omp fc.flag-output}
     ),
     'fc.flags-ld'      => '',
     'fc.flag-lib'      => '-l%s',

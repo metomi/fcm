@@ -28,6 +28,7 @@ our %PROP_NO_PREPROCESS_OF = (
     'fc.flag-compile'  => '-c',
     'fc.flag-include'  => '-I%s',
     'fc.flag-module'   => '',
+    'fc.flag-omp'      => '',
     'fc.flag-output'   => '-o%s',
     'fc.include-paths' => '',
 );
