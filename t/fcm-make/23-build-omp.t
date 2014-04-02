@@ -23,12 +23,8 @@
 #-------------------------------------------------------------------------------
 tests 16
 cp -r $TEST_SOURCE_DIR/$TEST_KEY_BASE/* .
-for I in $(seq 1 100); do
-    echo '6.0'
-done >"$TEST_KEY_BASE.exe.on.out"
-for I in $(seq 1 100); do
-    echo '1.0'
-done >"$TEST_KEY_BASE.exe.off.out"
+yes 6.0 | head -n 100 >"$TEST_KEY_BASE.exe.on.out"
+yes 1.0 | head -n 100 >"$TEST_KEY_BASE.exe.off.out"
 #-------------------------------------------------------------------------------
 TEST_KEY=$TEST_KEY_BASE-on # fc.flag-omp on in new mode
 run_pass "$TEST_KEY" fcm make
