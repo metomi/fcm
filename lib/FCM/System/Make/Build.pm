@@ -526,39 +526,7 @@ sub _source_analyse {
     if (!$FILE_TYPE_UTIL->can('source_analyse')) {
         return;
     }
-    my %dep_type_of = map {($_ => 1)} $FILE_TYPE_UTIL->source_analyse_deps();
-    my %no_dep_of;
-    while (my $type = each(%dep_type_of)) {
-        my $key = 'no-dep.' . $type;
-        if ($source->get_prop_of($key)) {
-            for my $v (shellwords($source->get_prop_of($key))) {
-                if ($v eq '*') {
-                    delete($dep_type_of{$type});
-                }
-                else {
-                    $no_dep_of{$type}{$v} = 1;
-                }
-            }
-        }
-    }
-    if (
-        !keys(%dep_type_of) && !$FILE_TYPE_UTIL->source_analyse_always($source)
-    ) {
-        return;
-    }
-    my $path   = $source->get_path();
-    my $handle = $UTIL->file_load_handle($path);
-    my ($dep_hash_ref, $info_hash_ref)
-        = $FILE_TYPE_UTIL->source_analyse($handle, [keys(%dep_type_of)]);
-    close($handle);
-    $source->set_info_of($info_hash_ref);
-    while (my ($type, $hash_ref) = each(%{$dep_hash_ref})) {
-        while (my $item = each(%{$hash_ref})) {
-            if (!exists($no_dep_of{$type}{$item})) {
-                push(@{$source->get_deps()}, [$item, $type]);
-            }
-        }
-    }
+    $FILE_TYPE_UTIL->source_analyse($source);
 }
 
 # Generates an iterator for each source file requiring information gathering.
@@ -946,6 +914,11 @@ sub _targets_props_assign {
                     $target->get_prop_of()->{$name}
                         = _prop($attrib_ref, $name, $ctx, $target->get_ns());
                 }
+            }
+            if (    %{$target->get_prop_of()}
+                &&  $FILE_TYPE_UTIL->can('target_deps_filter')
+            ) {
+                $FILE_TYPE_UTIL->target_deps_filter($target);
             }
         }
         # Path, checksum and previous properties

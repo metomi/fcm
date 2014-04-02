@@ -29,6 +29,7 @@ our %PROP_OF = (
     'cxx.flag-compile'  => '-c',
     'cxx.flag-define'   => '-D%s',
     'cxx.flag-include'  => '-I%s',
+    'cxx.flag-omp'      => '',
     'cxx.flag-output'   => '-o%s',
     'cxx.include-paths' => '',
 );

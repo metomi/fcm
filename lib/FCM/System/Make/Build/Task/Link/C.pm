@@ -27,7 +27,7 @@ use FCM::System::Make::Build::Task::Compile::C;
 our %PROP_OF = (
     %FCM::System::Make::Build::Task::Link::PROP_OF,
     (   map {$_ => $FCM::System::Make::Build::Task::Compile::C::PROP_OF{$_}}
-        qw{cc cc.flag-output}
+        qw{cc cc.flag-omp cc.flag-output}
     ),
     'cc.flags-ld'      => '',
     'cc.flag-lib'      => '-l%s',

@@ -967,6 +967,10 @@ build.prop{fc.libs}[myprog.exe] = netcdf grib
     <dd>The option used by the C compiler at link time to specify a library
     search path. (default=<samp>-L%s</samp>)</dd>
 
+    <dt id="make.build.prop.cc.flag-omp">cc.flag-omp</dt>
+
+    <dd>The option used by the C compiler to switch on OpenMP.</dd>
+
     <dt id="make.build.prop.cc.flag-output">cc.flag-output</dt>
 
     <dd>The option used by the C compiler to specify the output file name.
@@ -1028,6 +1032,10 @@ build.prop{fc.libs}[myprog.exe] = netcdf grib
 
     <dd>The option used by the C++ compiler at link time to specify a library
     search path. (default=<samp>-L%s</samp>)</dd>
+
+    <dt id="make.build.prop.cxx.flag-omp">cxx.flag-omp</dt>
+
+    <dd>The option used by the C++ compiler to switch on OpenMP.</dd>
 
     <dt id="make.build.prop.cxx.flag-output">cxx.flag-output</dt>
 
@@ -1118,6 +1126,13 @@ build.prop{fc.libs}[myprog.exe] = netcdf grib
 
     <dd>The option used by the Fortran compiler to specify a module search
     path.</dd>
+
+    <dt id="make.build.prop.fc.flag-omp">fc.flag-omp</dt>
+
+    <dd>The option used by the Fortran compiler to switch on OpenMP. If
+    specified, the build system will treat <code>USE</code> and
+    <code>INCLUDE</code> statements that are protected by <code>!$ </code>
+    sentinels as normal dependency statements.</dd>
 
     <dt id="make.build.prop.fc.flag-output">fc.flag-output</dt>
 
