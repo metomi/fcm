@@ -5,11 +5,14 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
-## Next Release (2014-Q1?)
+## 2014-04 (2014-04-02)
 
 ### Highlighted Changes
 
--none-
+\#114: fcm make: build: now recognises statements with Fortran OpenMP sentinels
+that affect build dependencies. These dependencies are normally ignored.
+However, if a relevant `build.prop{fc.flag-omp}` property is specified, the
+build system will treat these statements as normal dependency statements.
 
 ### Noteworthy Changes
 
