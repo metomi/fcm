@@ -36,7 +36,13 @@ our $FILE_EXT = '.F .F90 .F95 .FOR .FTN .f .f90 .f95 .for .ftn .inc';
 
 # List of Fortran intrinsic modules
 our @INTRINSIC_MODULES = qw{
-    iso_c_binding iso_fortran_env ieee_exceptions ieee_arithmetic ieee_features
+    ieee_arithmetic
+    ieee_exceptions
+    ieee_features
+    iso_c_binding
+    iso_fortran_env
+    omp_lib
+    omp_lib_kinds
 };
 
 # Prefix for dependency name that is only applicable under OMP

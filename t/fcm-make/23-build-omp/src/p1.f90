@@ -1,5 +1,6 @@
 program p1
 
+!$ use omp_lib
 !$ use m1, only: s1
 !$ use m2, only: s2
 
