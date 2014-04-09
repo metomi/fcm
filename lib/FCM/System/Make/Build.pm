@@ -915,11 +915,9 @@ sub _targets_props_assign {
                         = _prop($attrib_ref, $name, $ctx, $target->get_ns());
                 }
             }
-            if (    %{$target->get_prop_of()}
-                &&  $FILE_TYPE_UTIL->can('target_deps_filter')
-            ) {
-                $FILE_TYPE_UTIL->target_deps_filter($target);
-            }
+        }
+        if ($FILE_TYPE_UTIL->can('target_deps_filter')) {
+            $FILE_TYPE_UTIL->target_deps_filter($target);
         }
         # Path, checksum and previous properties
         my $p_target = $P_TARGET_GETTER->($key);

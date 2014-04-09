@@ -7,7 +7,7 @@ real, intent(in) :: y(:)
 integer :: i
 !$omp parallel do shared(z)
 do i = 1, n
-z(i) = y(i) * 3.0
+    z(i) = y(i) * 3.0
 end do
 !$omp end parallel do
 end subroutine s2
