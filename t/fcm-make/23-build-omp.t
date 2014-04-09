@@ -28,12 +28,12 @@ yes 1.0 | head -n 100 >"$TEST_KEY_BASE.exe.off.out"
 #-------------------------------------------------------------------------------
 TEST_KEY=$TEST_KEY_BASE-on # fc.flag-omp on in new mode
 run_pass "$TEST_KEY" fcm make
-grep ' !\$' fcm-make.log >"$TEST_KEY.log.deps.expected"
+grep ' !\$' fcm-make.log | sort >"$TEST_KEY.log.deps.expected"
 file_cmp  "$TEST_KEY.log.deps" "$TEST_KEY.log.deps.expected" <<'__LOG__'
 [info]              -> (  include) !$i1.f90
 [info]              -> (  include) !$i2.f90
-[info]              -> ( f.module) !$m2
 [info]              -> ( f.module) !$m1
+[info]              -> ( f.module) !$m2
 __LOG__
 run_pass "$TEST_KEY.exe" $PWD/build/bin/p1.exe
 file_cmp "$TEST_KEY.exe.out" "$TEST_KEY_BASE.exe.on.out" "$TEST_KEY.exe.out"
