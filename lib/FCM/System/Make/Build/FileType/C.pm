@@ -85,6 +85,7 @@ sub _source_to_targets {
     my ($ext, $root) = $attrib_ref->{util}->file_ext($key);
     my %dot = %{$prop_hash_ref};
     my @deps = @{$source->get_deps()};
+    my $key_o = lc($root) . $dot{o}; # lc for legacy
     my @targets = (
         $TARGET->new(
             {   category  => $TARGET->CT_INCLUDE,
@@ -100,7 +101,7 @@ sub _source_to_targets {
                 deps          => [@deps],
                 dep_policy_of => {'include' => $TARGET->POLICY_CAPTURE},
                 info_of       => {paths => []},
-                key           => lc($root) . $dot{o}, # lc for legacy
+                key           => $key_o,
                 task          => 'compile',
             }
         ),
@@ -112,7 +113,7 @@ sub _source_to_targets {
             @targets,
             $TARGET->new(
                 {   category   => $TARGET->CT_BIN,
-                    deps       => [[$root . $dot{o}, 'o'], @link_deps],
+                    deps       => [[$key_o, 'o'], @link_deps],
                     dep_policy_of => {
                         map {($_ => $TARGET->POLICY_CAPTURE)} qw{o o.special},
                     },
