@@ -34,8 +34,6 @@ sub main {
     my %option;
     my $result = GetOptions(
         \%option,
-        q{admin-user|u=s@},
-        q{authorised|a},
         q{help|usage|h},
         q{svn-live-dir=s},
         q{svn-project-suffix=s},
@@ -48,11 +46,6 @@ sub main {
     if (exists($option{help})) {
         pod2usage(q{-verbose} => 1);
     }
-    if (exists($option{'admin-user'})) {
-        $option{'admin-user'} = [
-            split(q{,}, join(q{,}, @{$option{'admin-user'}})),
-        ];
-    }
     option2config(\%option);
     if (@ARGV != 1) {
         my $message = sprintf(
@@ -61,11 +54,7 @@ sub main {
         pod2usage({q{-exitval} => 1, q{-message} => $message});
     }
     my ($project_name) = @ARGV;
-    add_trac_environment(
-        $project_name,
-        (exists($option{'admin-user'}) ? $option{'admin-user'} : []),
-        exists($option{'authorised'}),
-    );
+    add_trac_environment($project_name);
 }
 
 __END__
@@ -80,16 +69,6 @@ fcm-add-trac-env
 =head1 OPTIONS
 
 =over 4
-
-=item --admin-user=LIST, -uLIST
-
-Specifies one or more admin users, in a comma separated list.
-
-=item --authorised, -a
-
-Adds an "authorised" permission. Only those users granted this permission
-will have "_CREATE" and "_MODIFY" access. The default is to grant all
-authenticated users "_CREATE" and "_MODIFY" access.
 
 =item --help, -h, --usage
 

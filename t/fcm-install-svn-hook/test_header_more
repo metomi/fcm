@@ -17,5 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with FCM. If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
-set -eu
-nohup $0-background "$@" 0<&0 1>/dev/null 2>&1 &
+
+# Convert a string like "2014-05-01T09:30:45Z" to "YYYY-mm-ddTHH:MM:SSZ".
+# This allows output files to compare.
+date2datefmt() {
+    perl -p -e 's/\d+-\d\d-\d\dT\d\d:\d\d:\d\dZ/YYYY-mm-ddTHH:MM:SSZ/' "$@"
+}

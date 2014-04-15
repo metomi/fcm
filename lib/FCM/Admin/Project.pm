@@ -149,11 +149,18 @@ sub get_trac_live_path {
 # Returns the URL to the project's Trac live environment.
 sub get_trac_live_url {
     my ($self) = @_;
-    q{http://}
-    . FCM::Admin::Config->instance()->get_trac_host_id()
-    . q{/projects/}
-    . $self->get_name()
-    ;
+    my $return = FCM::Admin::Config->instance()->get_trac_live_url_tmpl();
+    for (
+        ['{host}', FCM::Admin::Config->instance()->get_trac_host_name()],
+        ['{project}', $self->get_name()],
+    ) {
+        my ($key, $value) = @{$_};
+        my $index = index($return, $key);
+        if ($index > -1) {
+            substr($return, $index, length($key), $value);
+        }
+    }
+    $return;
 }
 
 1;

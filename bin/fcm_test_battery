@@ -17,9 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with FCM. If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
-cd $(dirname $0)/../t
-if (($# == 0)); then
-    exec prove -j 9 -r -s -f
-else
-    exec prove "$@"
+cd $(dirname $0)/..
+if [[ "$PWD" != "$OLDPWD" ]]; then
+    echo "[INFO] cd $PWD"
 fi
+exec prove -j 9 -s -r "${@:-t}"

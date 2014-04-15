@@ -21,38 +21,14 @@ use strict;
 use warnings;
 
 package FCM::Admin::User;
-
+use base qw{FCM::Class::HASH};
 use overload q{""} => \&get_name;
 
-# The default values of the attributes
-my %DEFAULT = (
-    name         => undef,
-    display_name => undef,
-    email        => undef,
-);
-
-# ------------------------------------------------------------------------------
-# Returns a new instance of this class.
-sub new {
-    my ($class, $args_ref) = @_;
-    return bless({%DEFAULT, %{$args_ref}}, $class);
-}
-
-# ------------------------------------------------------------------------------
-# Getters and setters.
-for my $key (keys(%DEFAULT)) {
-    no strict qw{refs};
-    my $getter = qq{get_$key};
-    my $setter = qq{set_$key};
-    *$getter = sub {
-        my ($self) = @_;
-        return $self->{$key};
-    };
-    *$setter = sub {
-        my ($self, $value) = @_;
-        $self->{$key} = $value;
-    };
-}
+__PACKAGE__->class({
+    name         => '$',
+    display_name => '$',
+    email        => '$',
+});
 
 1;
 __END__

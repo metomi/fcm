@@ -41,7 +41,7 @@ our %ACTION_OF = (
 );
 
 # Creates the class.
-__PACKAGE__->class({}, {action_of => \%ACTION_OF});
+__PACKAGE__->class({util => '&'}, {action_of => \%ACTION_OF});
 
 # Joins @paths to the end of $value.
 sub _cat {
@@ -102,7 +102,7 @@ sub _reader {
 # Returns $value in scalar context, or ($value,undef) in list context.
 sub _parse {
     my ($attrib_ref, $value) = @_;
-    $value =~ s{\A~([^/]*)}{$1 ? (getpwnam($1))[7] : (getpwuid($<))[7]}exms;
+    $value = $attrib_ref->{util}->file_tilde_expand($value);
     $value = File::Spec->rel2abs($value);
     my ($vol, $dir_name, $base) = File::Spec->splitpath($value);
     my @dir_names;

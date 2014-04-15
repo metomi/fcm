@@ -802,7 +802,7 @@ sub cm_merge {
   # Run "svn merge" in "--dry-run" mode to see the result
   # ----------------------------------------------------------------------------
   my $dry_run_output
-    = $SVN->stdout(qw{merge --dry-run --non-interactive}, @delta);
+    = $SVN->stdout(qw{svn merge --dry-run --non-interactive}, @delta);
 
   # Abort merge if it will result in no change
   if (!$dry_run_output) {
@@ -825,7 +825,7 @@ sub cm_merge {
     return _cm_abort();
   }
   $SVN->call('cleanup');
-  my $output = $SVN->stdout(qw{merge --non-interactive}, @delta);
+  my $output = $SVN->stdout(qw{svn merge --non-interactive}, @delta);
   $CLI_MESSAGE->('MERGE_OK');
   if ($output ne $dry_run_output) {
     $CLI_MESSAGE->('MERGE_ACTUAL', $output);
@@ -983,7 +983,7 @@ sub cm_mkpatch {
       for my $path (@paths) {
         (my $file = $path) =~ s#^$url_path/*##;
         my @diff = $SVN->stdout(
-          qw{diff --no-diff-deleted --summarize -c}, $rev,
+          qw{svn diff --no-diff-deleted --summarize -c}, $rev,
           sprintf("%s/%s@%s", $url->url(), $file, $rev),
         );
         next unless $diff[-1] =~ /^[A-Z]/;
@@ -997,7 +997,9 @@ sub cm_mkpatch {
     # Create the patch using "svn diff"
     my $patch = ();
     if ($use_patch) {
-      $patch = $SVN->stdout(qw{diff --no-diff-deleted -c}, $rev, $url->url());
+      $patch = $SVN->stdout(
+          qw{svn diff --no-diff-deleted -c}, $rev, $url->url(),
+      );
       if ($patch) {
         # Don't use the patch if it may contain subversion keywords or
         # any changes to PDF files or any changes to symbolic links or
@@ -1068,7 +1070,7 @@ sub cm_mkpatch {
         # Skip property changes (if not done earlier)
         if (not $only_modified and $log{$rev}{paths}{$path}{action} eq 'M') {
           my @diff = $SVN->stdout(
-            qw{diff --no-diff-deleted --summarize -c}, $rev, $url_file,
+            qw{svn diff --no-diff-deleted --summarize -c}, $rev, $url_file,
           );
           next CHANGED unless $diff[-1] =~ /^[A-Z]/;
         }
@@ -1201,11 +1203,11 @@ sub cm_mkpatch {
         # Handle symbolic links
         if (not $is_dir and $log{$rev}{paths}{$path}{action} ne 'A') {
           my ($was_symlink) = $SVN->stdout(
-            qw{propget svn:special},
+            qw{svn propget svn:special},
             sprintf("%s/%s@%d", $url->url(), $file, ($rev - 1)),
           );
           my ($is_symlink) = $SVN->stdout(
-            qw{propget svn:special}, $url_file,
+            qw{svn propget svn:special}, $url_file,
           );
           if ($was_symlink and not $is_symlink) {
             # A symbolic link has been changed to a normal file
@@ -1228,7 +1230,7 @@ sub cm_mkpatch {
           } else {
             # Export the file if it is binary
             my @mime_type = $SVN->stdout(
-              qw{propget svn:mime-type}, $url_file,
+              qw{svn propget svn:mime-type}, $url_file,
             );
             for (@mime_type) {
               $export_required = 1 if not /^text\//;
@@ -1793,7 +1795,7 @@ sub _svn_status_get {
         }
     }
     my @options = ($show_updates ? qw{--show-updates} : ());
-    $SVN->stdout('status', @options, @targets);
+    $SVN->stdout(qw{svn status}, @options, @targets);
 }
 
 # ------------------------------------------------------------------------------

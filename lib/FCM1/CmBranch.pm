@@ -618,7 +618,9 @@ sub allow_subdir_merge_from {
     # Use "svn diff --summarize" to work out what's changed between last
     # merge/ancestor and current revision
     my $range = $branch->pegrev . ':' . $rev;
-    my @out = $SVN->stdout(qw{diff --summarize -r}, $range, $branch->url_peg());
+    my @out = $SVN->stdout(
+        qw{svn diff --summarize -r}, $range, $branch->url_peg(),
+    );
 
     # Returns false if there are changes outside of $subdir
     my $url = join ('/', $branch->url, $subdir);
@@ -680,9 +682,7 @@ sub del {
   # ----------------------------------------------------------------------------
   if (not $non_interactive) {
     my $mesg = '';
-    my $user = $self->config->user_id;
-
-    if ($user && $self->branch_owner() && $self->branch_owner() ne $user) {
+    if (!$self->layout()->is_owned_by_user()) {
       $mesg .= "\n";
 
       if (exists $FCM1::CmUrl::owner_keywords{$self->branch_owner()}) {

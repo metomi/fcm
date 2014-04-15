@@ -1,0 +1,65 @@
+#!/bin/bash
+#-------------------------------------------------------------------------------
+# (C) British Crown Copyright 2006-14 Met Office.
+#
+# This file is part of FCM, tools for managing and building source code.
+#
+# FCM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FCM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FCM. If not, see <http://www.gnu.org/licenses/>.
+#-------------------------------------------------------------------------------
+# NAME
+#     trac_hook
+#
+# SYNOPSIS
+#     . trac_hook
+#     trac_hook "$REPOS" "$REV" added|modified
+#
+# DESCRIPTION
+#   Provide a function called "trac_hook", which updates the corresponding Trac
+#   environment, for post-commit or post-revprop-change.
+#
+# ENVIRONMENT VARIABLES
+#   FCM_SVN_HOOK_TRAC_ROOT_DIR
+#     The root directories of Trac environments. Update corresponding Trac
+#     environment if specified.
+#   FCM_SVN_HOOK_REPOS_SUFFIX
+#     A suffix that should be removed from the basename of REPOS to get the
+#     name of the Trac environment. (Default is "".)
+#-------------------------------------------------------------------------------
+
+trac_hook() {
+    local REPOS=$1
+    local REV=$2
+    local TRAC_ACT=$3
+    if which trac-admin 1>/dev/null 2>&1 \
+        && [[ -n ${FCM_SVN_HOOK_TRAC_ROOT_DIR:-} ]]
+    then
+        local TRAC_NAME=$(basename "$REPOS")
+        if [[ -n ${FCM_SVN_HOOK_REPOS_SUFFIX:-} ]]; then
+            TRAC_NAME=${NAME%$FCM_SVN_HOOK_REPOS_SUFFIX}
+        fi
+        local TRAC_DIR="$FCM_SVN_HOOK_TRAC_ROOT_DIR/$TRAC_NAME"
+        if [[ -d "$TRAC_DIR" ]]; then
+            if [[ $(trac-admin --version) == trac-admin\ 0.11* ]]; then
+                # N.B. "added" was automatic on access
+                if [[ "$TRAC_ACT" == 'modified' ]]; then
+                    echo "trac-admin $TRAC_DIR resync $REV"
+                    trac-admin "$TRAC_DIR" resync "$REV" >/dev/null
+                fi
+            else
+                echo "trac-admin $TRAC_DIR changeset $TRAC_ACT $REPOS $REV"
+                trac-admin "$TRAC_DIR" changeset "$TRAC_ACT" "$REPOS" "$REV"
+            fi
+        fi
+    fi
+}

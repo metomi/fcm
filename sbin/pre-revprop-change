@@ -1,0 +1,84 @@
+#!/bin/bash
+#-------------------------------------------------------------------------------
+# (C) British Crown Copyright 2006-14 Met Office.
+#
+# This file is part of FCM, tools for managing and building source code.
+#
+# FCM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FCM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FCM. If not, see <http://www.gnu.org/licenses/>.
+#-------------------------------------------------------------------------------
+# NAME
+#   pre-revprop-change
+#
+# SYNOPSIS
+#   pre-revprop-change REPOS REV PROP_AUTHOR PROP_NAME ACTION
+#
+# ARGUMENTS
+#   REPOS - the path to the Subversion repository
+#   REV - the revision relevant for the property
+#   PROP_AUTHOR - the author of this property change
+#   PROP_NAME - the name of the property, should only be "svn:log"
+#   ACTION - the action of the property change, should only be "M"
+#
+# DESCRIPTION
+#   This script enables users to change revision properties.
+#
+#   By default, only "M svn:log" is allowed. If
+#   "$REPOS/hooks/pre-revprop-change-ok.conf" exists, the contents should be a
+#   list of allowed changes to revision properties. E.g.:
+#
+#   M svn:author
+#   M svn:log
+#
+#   An empty file disables all changes.
+#
+#   It e-mails the host user account whenever an action is blocked.
+#-------------------------------------------------------------------------------
+set -eu
+
+REPOS=$1
+REV=$2
+USER=$3
+PROPNAME=$4
+ACTION=$5
+
+export PATH=${PATH:-'/usr/local/bin:/bin:/usr/bin'}:$(dirname $0)
+THIS=$(basename "$0")
+USER=${USER:-(whoami)}
+NAME=$(basename "$REPOS")
+
+OK_CHANGES=$(echo 'M svn:log')
+OK_CHANGES_FILE="$REPOS/hooks/$THIS-ok.conf"
+if [[ -f $OK_CHANGES_FILE ]]; then
+    OK_CHANGES=$(<$OK_CHANGES_FILE)
+fi
+
+NOW=$(date -u +%FT%H:%M:%SZ)
+if ! grep -q "$ACTION  *$PROPNAME" <<<"$OK_CHANGES"; then
+    if [[ -n "$OK_CHANGES" ]]; then
+        echo -n "[$ACTION $PROPNAME] permission denied. Can only do:" >&2
+        while read; do
+            echo -n " [$REPLY]" >&2
+        done <<<"$OK_CHANGES"
+        echo >&2
+    else
+        echo "[$ACTION $PROPNAME] permission denied." >&2
+    fi
+    if [[ -n ${FCM_SVN_HOOK_ADMIN_EMAIL:-} ]]; then
+        mail -s "$NAME:$THIS" "$FCM_SVN_HOOK_ADMIN_EMAIL" <<<"[! $NOW] $@" \
+            || true
+    fi
+    echo "[! $NOW] $@"
+    exit 1
+fi
+exit

@@ -47,7 +47,7 @@ my $THIS   = basename($0);
 my $CONFIG = FCM::Admin::Config->instance();
 
 my $OUT_FILE = File::Spec->catfile(
-    $CONFIG->get_fcm_home(), qw{public_html FCM}, qq{$THIS.out},
+    (getpwuid($<))[7], qw{public_html FCM}, qq{$THIS.out},
 );
 
 main();
@@ -115,9 +115,6 @@ sub do_tasks {
         );
     }
     $RUNNER->run_continue("backing up Trac files", \&backup_trac_files);
-    $RUNNER->run_continue(
-        "distributing FCM to standard locations", \&distribute_wc,
-    );
 }
 
 # ------------------------------------------------------------------------------

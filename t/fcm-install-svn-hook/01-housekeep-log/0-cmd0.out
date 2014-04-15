@@ -1,0 +1,16 @@
+YYYY-mm-ddTHH:MM:SSZ: copy FCM_HOME/etc/svn-hooks/post-commit to PWD/svn-repos/foo/hooks/post-commit
+YYYY-mm-ddTHH:MM:SSZ: copy FCM_HOME/etc/svn-hooks/post-revprop-change to PWD/svn-repos/foo/hooks/post-revprop-change
+YYYY-mm-ddTHH:MM:SSZ: copy FCM_HOME/etc/svn-hooks/pre-commit to PWD/svn-repos/foo/hooks/pre-commit
+YYYY-mm-ddTHH:MM:SSZ: copy FCM_HOME/etc/svn-hooks/pre-revprop-change to PWD/svn-repos/foo/hooks/pre-revprop-change
+YYYY-mm-ddTHH:MM:SSZ: creating symlink: post-commit.log.TODAY -> PWD/svn-repos/foo/log/post-commit.log
+YYYY-mm-ddTHH:MM:SSZ: creating symlink: post-revprop-change.log.TODAY -> PWD/svn-repos/foo/log/post-revprop-change.log
+YYYY-mm-ddTHH:MM:SSZ: creating symlink: pre-commit.log.TODAY -> PWD/svn-repos/foo/log/pre-commit.log
+YYYY-mm-ddTHH:MM:SSZ: creating symlink: pre-revprop-change.log.TODAY -> PWD/svn-repos/foo/log/pre-revprop-change.log
+YYYY-mm-ddTHH:MM:SSZ: copy FCM_HOME/etc/svn-hooks/post-commit to PWD/svn-repos/bar/hooks/post-commit
+YYYY-mm-ddTHH:MM:SSZ: copy FCM_HOME/etc/svn-hooks/post-revprop-change to PWD/svn-repos/bar/hooks/post-revprop-change
+YYYY-mm-ddTHH:MM:SSZ: copy FCM_HOME/etc/svn-hooks/pre-commit to PWD/svn-repos/bar/hooks/pre-commit
+YYYY-mm-ddTHH:MM:SSZ: copy FCM_HOME/etc/svn-hooks/pre-revprop-change to PWD/svn-repos/bar/hooks/pre-revprop-change
+YYYY-mm-ddTHH:MM:SSZ: creating symlink: post-commit.log.TODAY -> PWD/svn-repos/bar/log/post-commit.log
+YYYY-mm-ddTHH:MM:SSZ: creating symlink: post-revprop-change.log.TODAY -> PWD/svn-repos/bar/log/post-revprop-change.log
+YYYY-mm-ddTHH:MM:SSZ: creating symlink: pre-commit.log.TODAY -> PWD/svn-repos/bar/log/pre-commit.log
+YYYY-mm-ddTHH:MM:SSZ: creating symlink: pre-revprop-change.log.TODAY -> PWD/svn-repos/bar/log/pre-revprop-change.log

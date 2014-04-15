@@ -1,0 +1,154 @@
+#!/bin/bash
+#-------------------------------------------------------------------------------
+# (C) British Crown Copyright 2006-14 Met Office.
+#
+# This file is part of FCM, tools for managing and building source code.
+#
+# FCM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FCM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FCM. If not, see <http://www.gnu.org/licenses/>.
+#-------------------------------------------------------------------------------
+# NAME
+#   post-commit-bg
+#
+# SYNOPSIS
+#   post-commit-bg REPOS REV
+#
+# ARGUMENTS
+#   REPOS - the path to the Subversion repository
+#   REV - the revision of the commit
+#   TXN - the commit transaction that becomes the revision
+#
+# DESCRIPTION
+#   This script performs the post-commit tasks of a Subversion repository in
+#   the background.
+#
+#   The script does the following:
+#   1. Creates an incremental revision dump of the current revision.
+#   2. Update corresponding Trac environment, if relevant.
+#   3. Checks the size of the revision dump. Warns if it exceeds a threshold.
+#   4. If this changeset has a change to "^/svnperms.conf", install its HEAD
+#      revision at "$REPOS/hooks/", or remove it from "$REPOS/hooks/" if it is
+#      removed from the HEAD.
+#   5. Runs "$REPOS/hooks/post-commit-bg-custom" and/or
+#      "$REPOS/hooks/post-commit-background-custom", if available.
+#   6. E-mails the host user account on error.
+#
+# ENVIRONMENT VARIABLES
+#   FCM_SVN_HOOK_COMMIT_DUMP_DIR
+#     The path to dump commit deltas. Generate a commit delta if specified.
+#   FCM_SVN_HOOK_TRAC_ROOT_DIR
+#     The root directories of Trac environments. Update corresponding Trac
+#     environment if specified.
+#   FCM_SVN_HOOK_REPOS_SUFFIX
+#     A suffix that should be removed from the basename of REPOS to get the
+#     name of the Trac environment. (Default is "".)
+#
+# FILES
+#   $REPOS/hooks/post-commit-bg-custom
+#   $REPOS/hooks/post-commit-background-custom
+#-------------------------------------------------------------------------------
+set -eu
+. "$(dirname $0)/trac_hook"
+
+REPOS=$1
+REV=$2
+TXN=$3
+
+export PATH=${PATH:-'/usr/local/bin:/bin:/usr/bin'}:$(dirname $0)
+THIS=$(basename $0)
+USER=${USER:-$(whoami)}
+LOG_REV="$REPOS/log/$THIS-$REV.log"
+
+main() {
+    local RET_CODE=0
+    local NOW=$(date -u +%FT%H:%M:%SZ)
+    local AUTHOR=$(svnlook author -r "$REV" "$REPOS")
+    echo "$NOW+ $REV by $AUTHOR"
+
+    # Dump revision delta
+    if [[ -n ${FCM_SVN_HOOK_COMMIT_DUMP_DIR:-} ]]; then
+        if [[ ! -d "$FCM_SVN_HOOK_COMMIT_DUMP_DIR" ]]; then
+            mkdir -p "$FCM_SVN_HOOK_COMMIT_DUMP_DIR" || true
+        fi
+        local NAME=$(basename "$REPOS")
+        local DUMP="$FCM_SVN_HOOK_COMMIT_DUMP_DIR/$NAME-$REV.gz"
+        echo "svnadmin dump -r$REV --incremental --deltas $REPOS | gzip 1>$DUMP"
+        svnadmin dump "-r$REV" --incremental --deltas "$REPOS" \
+            | gzip 1>"$DUMP" || RET_CODE=$?
+    fi
+
+    # Resync Trac
+    trac_hook "$REPOS" "$REV" added || RET_CODE=$?
+
+    # Check size - send warning email if threshold exceeded
+    local REV_FILE=$REPOS/db/revs/$((REV / 1000))/$REV
+    local REV_FILE_SIZE_THRESHOLD=1048576 # 1MB
+    local REV_FILE_SIZE=$(du -b -s $REV_FILE | cut -f 1)
+    if (($REV_FILE_SIZE > $REV_FILE_SIZE_THRESHOLD)); then
+        echo "REV_FILE_SIZE=$REV_FILE_SIZE # EXCEED $REV_FILE_SIZE_THRESHOLD"
+        RET_CODE=1
+    else
+        echo "REV_FILE_SIZE=$REV_FILE_SIZE # within $REV_FILE_SIZE_THRESHOLD"
+    fi
+
+    # Install svnperms.conf, if necessary
+    local CHANGED=$(svnlook changed -r "$REV" "$REPOS")
+    if grep -q '^....svnperms.conf$' <<<"$CHANGED"; then
+        # Don't specify revision, so always look at latest.
+        if svnlook filesize "$REPOS" svnperms.conf >/dev/null 2>&1; then
+            echo "svnlook cat $REPOS svnperms.conf >$REPOS/hooks/svnperms.conf"
+            svnlook cat "$REPOS" 'svnperms.conf' >"$REPOS/hooks/svnperms.conf"
+        else
+            echo "rm -f $REPOS/hooks/svnperms.conf"
+            rm -f "$REPOS/hooks/svnperms.conf"
+        fi
+    fi
+
+    # On commit to a branch, notify the branch owner if author is not him/her
+    local ADDRS=$(post-commit-bg-notify-who "$REPOS" "$REV" "$TXN")
+    if [[ -n $ADDRS ]]; then
+        SUBJECT="-s$(basename $REPOS)@$REV by $AUTHOR"
+        FROM=
+        if [[ -n ${FCM_SVN_HOOK_NOTIFICATION_FROM:-} ]]; then
+            FROM="-r${FCM_SVN_HOOK_NOTIFICATION_FROM:-}"
+        fi
+        echo -n "svn log -v -r \"$REV\" \"file://$REPOS\""
+        echo " | mail \"$FROM\" \"$SUBJECT\" \"$ADDRS\""
+        svn log -v -r "$REV" "file://$REPOS" | mail "$FROM" "$SUBJECT" "$ADDRS"
+    fi
+
+    # Custom hook
+    local CUSTOM_HOOK=
+    for CUSTOM_HOOK in \
+        "$REPOS/hooks/$THIS-custom" \
+        "$REPOS/hooks/post-commit-background-custom"
+    do
+        if [[ -x "$CUSTOM_HOOK" ]]; then
+            echo "$CUSTOM_HOOK $REPOS $REV $TXN"
+            "$CUSTOM_HOOK" "$REPOS" "$REV" "$TXN" || RET_CODE=$?
+        fi
+    done
+
+    echo "RET_CODE=$RET_CODE"
+    return $RET_CODE
+}
+
+if ! main 1>$LOG_REV 2>&1; then
+    if [[ -n ${FCM_SVN_HOOK_ADMIN_EMAIL:-} ]]; then
+        mail -s "[$THIS] $REPOS@$REV" "$FCM_SVN_HOOK_ADMIN_EMAIL" <"$LOG_REV" \
+            || true
+    fi
+fi
+cat "$LOG_REV"
+rm -f "$LOG_REV"
+exit

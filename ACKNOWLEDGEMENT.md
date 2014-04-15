@@ -7,4 +7,13 @@ Non-FCM works included in this distribution are listed below:
 
 doc/etc/bootstrap/:
 * Unmodified external software library copyright 2013 Twitter Inc
-  released under the Apache 2.0 license. See <http://getbootstrap.com/>.
+  released under the Apache 2.0 license.
+  See [Bootstrap](http://getbootstrap.com/).
+
+svn-hooks/svnperms.py:
+* Subversion repository pre-commit path-based permission checking utility,
+  written by [Gustavo Niemeyer](mailto:gustavo@niemeyer.net) and released under
+  Apache 2.0 license.
+  Original source downloaded from r1295006 at:
+  https://svn.apache.org/viewvc/subversion/trunk/tools/hook-scripts/svnperms.py
+  This version is modified to allow custom permission message per repository.

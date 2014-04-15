@@ -1,0 +1,66 @@
+#!/usr/bin/perl
+# ------------------------------------------------------------------------------
+# (C) British Crown Copyright 2006-14 Met Office.
+#
+# This file is part of FCM, tools for managing and building source code.
+#
+# FCM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FCM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FCM. If not, see <http://www.gnu.org/licenses/>.
+# ------------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+use FCM::Admin::System qw{get_users};
+use FCM::Util;
+
+my $UTIL = FCM::Util->new();
+
+if (!caller()) {
+    main(@ARGV);
+}
+
+sub main {
+    local(@ARGV) = @_;
+    if (!@ARGV) {
+        return;
+    }
+    my @names = @ARGV;
+    local($FCM::Admin::System::UTIL) = $UTIL;
+    my @emails
+        = sort grep {$_} map {$_->get_email()} values(%{get_users(@names)});
+    print(join(q{,}, @emails) . "\n");
+}
+
+1;
+__END__
+
+=head1 NAME
+
+fcm-users-to-emails
+
+=head1 SYNOPSIS
+
+    fcm-user-to-email USER ...
+
+=head1 DESCRIPTION
+
+Print email addresses (comma separated) of users in argument list.
+
+=head1 COPYRIGHT
+
+E<169> Crown copyright Met Office. All rights reserved.
+
+=cut

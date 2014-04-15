@@ -26,6 +26,7 @@ use lib "$FindBin::Bin/../lib";
 use FCM::Admin::System qw{
     filter_projects
     get_projects_from_svn_live
+    housekeep_svn_hook_logs
     install_svn_hook
 };
 use FCM::Admin::Util qw{option2config};
@@ -38,6 +39,7 @@ sub main {
     my %option;
     my $result = GetOptions(
         \%option,
+        q{clean},
         q{help|usage|h},
         q{svn-live-dir=s},
         q{svn-project-suffix=s},
@@ -51,7 +53,8 @@ sub main {
     option2config(\%option);
     my @projects = filter_projects([get_projects_from_svn_live()], \@ARGV);
     for my $project (@projects) {
-        install_svn_hook($project);
+        install_svn_hook($project, $option{clean});
+        housekeep_svn_hook_logs($project);
     }
 }
 
@@ -68,6 +71,10 @@ fcm-install-svn-hook
 =head1 OPTIONS
 
 =over 4
+
+=item --clean
+
+Removes items (except logs) that are not in the install sources.
 
 =item --help, -h, --usage
 
@@ -99,7 +106,7 @@ the live directory.
 =head1 DESCRIPTION
 
 This program install hook scripts for Subversion repositories in the live
-directory.
+directory, and install/housekeep the log files for the hook scripts.
 
 =head1 COPYRIGHT
 

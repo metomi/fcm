@@ -1,0 +1,111 @@
+#!/bin/bash
+#-------------------------------------------------------------------------------
+# (C) British Crown Copyright 2006-14 Met Office.
+#
+# This file is part of FCM, tools for managing and building source code.
+#
+# FCM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FCM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FCM. If not, see <http://www.gnu.org/licenses/>.
+#-------------------------------------------------------------------------------
+# NAME
+#   post-revprop-change-bg
+#
+# SYNOPSIS
+#   post-revprop-change-bg REPOS REV PROP_AUTHOR PROP_NAME ACTION
+#
+# ARGUMENTS
+#   REPOS - the path to the Subversion repository
+#   REV - the revision relevant for the property
+#   PROP_AUTHOR - the author of this property change
+#   PROP_NAME - the name of the property, should only be "svn:log"
+#   ACTION - the action of the property change, should only be "M"
+#
+# DESCRIPTION
+#   This script performs the post-revprop-change tasks of a Subversion
+#   repository in the background.
+#
+#   The script does the following:
+#   1. Write diff between old and new property.
+#   2. Update corresponding Trac environment, if relevant.
+#   3. E-mails the host user account on error.
+#   4. E-mails the changeset author if property author is not changeset author.
+#
+# ENVIRONMENT VARIABLES
+#   FCM_SVN_HOOK_TRAC_ROOT_DIR
+#     The root directories of Trac environments. Update corresponding Trac
+#     environment if specified.
+#   FCM_SVN_HOOK_REPOS_SUFFIX
+#     A suffix that should be removed from the basename of REPOS to get the
+#     name of the Trac environment. (Default is "".)
+#-------------------------------------------------------------------------------
+set -eu
+. "$(dirname $0)/trac_hook"
+
+REPOS=$1
+REV=$2
+PROP_AUTHOR=$3
+PROP_NAME=$4
+ACTION=$5
+
+export PATH=${PATH:-'/usr/local/bin:/bin:/usr/bin'}:$(dirname $0)
+THIS=$(basename $0)
+USER=${USER:-$(whoami)}
+LOG_TMP=$(mktemp "$REPOS/log/$THIS.log.XXXXXXXXXX")
+NAME=$(basename "$REPOS")
+
+main() {
+    local RET_CODE=0
+    local NOW=$(date -u +%FT%H:%M:%SZ)
+    echo "$NOW+ $ACTION $PROP_NAME @$REV by $PROP_AUTHOR"
+
+    # Resync Trac
+    trac_hook "$REPOS" "$REV" modified || RET_CODE=$?
+
+    # Diff old/new in log
+    local OLD_FILE=$(mktemp "$REPOS/log/$THIS.$REV.XXXXXXXXXX.old")
+    cat >"$OLD_FILE"
+    local DIFF_FILE=$(mktemp "$REPOS/log/$THIS.$REV.XXXXXXXXXX.diff")
+    {
+        echo "$NOW+ $ACTION $PROP_NAME @$REV by $PROP_AUTHOR"
+        printf '=%.0s' {1..72}
+        echo
+    } >"$DIFF_FILE"
+    svnlook pg -r "$REV" --revprop "$REPOS" "$PROP_NAME" \
+        | diff -u --label="old-value" --label="new-value" "$OLD_FILE" - \
+        | tee -a "$DIFF_FILE"
+
+    # Email to changeset author if not the same as property change author
+    REV_AUTHOR=$(svnlook author -r "$REV" "$REPOS")
+    if [[ "$REV_AUTHOR" != "$PROP_AUTHOR" ]]; then
+        SUBJECT="-s$(basename $REPOS)@$REV [$ACTION $PROP_NAME] by $PROP_AUTHOR"
+        FROM=
+        if [[ -n ${FCM_SVN_HOOK_NOTIFICATION_FROM:-} ]]; then
+            FROM="-r${FCM_SVN_HOOK_NOTIFICATION_FROM:-}"
+        fi
+        ADDRS=$(fcm-user-to-email "$REV_AUTHOR" "$PROP_AUTHOR")
+        mail "$FROM" "$SUBJECT" "$ADDRS" <"$DIFF_FILE" || true
+    fi
+    rm -f "$OLD_FILE" "$DIFF_FILE"
+
+    echo "RET_CODE=$RET_CODE"
+    return $RET_CODE
+}
+
+if ! main 1>$LOG_TMP 2>&1 && [[ -n ${FCM_SVN_HOOK_ADMIN_EMAIL:-} ]]; then
+    mail -s "[ERROR $THIS] $NAME" "$FCM_SVN_HOOK_ADMIN_EMAIL" <"$LOG_TMP" \
+        || true
+fi
+
+cat "$LOG_TMP"
+rm -f "$LOG_TMP"
+exit

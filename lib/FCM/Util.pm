@@ -57,6 +57,7 @@ our %ACTION_OF = (
     file_load_handle     => \&_file_load_handle,
     file_md5             => \&_file_md5,
     file_save            => \&_file_save,
+    file_tilde_expand    => \&_file_tilde_expand,
     hash_cmp             => \&_hash_cmp,
     loc_as_invariant     => _util_of_loc_func('as_invariant'),
     loc_as_keyword       => _util_of_loc_func('as_keyword'),
@@ -170,6 +171,9 @@ sub _init {
             _class_load($attrib_ref, $util_class);
             $attrib_ref->{util_of}{$key} = $util_class->new({util => $self});
         }
+    }
+    if (exists($ENV{FCM_CONF_PATH})) {
+        $attrib_ref->{conf_paths} = [shellwords($ENV{FCM_CONF_PATH})];
     }
 }
 
@@ -308,6 +312,13 @@ sub _file_save {
         print($handle $content) || return $E->throw($E->IO, $path, $!);
     }
     close($handle) || return $E->throw($E->IO, $path, $!);
+}
+
+# Expand leading ~ and ~USER syntax in $path and return the resulting string.
+sub _file_tilde_expand {
+    my ($attrib_ref, $path) = @_;
+    $path =~ s{\A~([^/]*)}{$1 ? (getpwnam($1))[7] : (getpwuid($<))[7]}exms;
+    return $path;
 }
 
 # Compares contents of 2 HASH references.
@@ -688,6 +699,11 @@ Returns the MD5 checksum of $path.
 =item $u->file_save($path, $content)
 
 Saves $content to a $path in the file system.
+
+=item $u->file_tilde_expand($path)
+
+Expand any leading "~" or "~USER" syntax to the HOME directory of the current
+user or the HOME directory of USER. Return the modified string.
 
 =item $u->hash_cmp(\%hash_1,\%hash_2,$keys_only)
 

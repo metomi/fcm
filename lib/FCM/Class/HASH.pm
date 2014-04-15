@@ -188,8 +188,9 @@ FCM::Class::HASH
     use base qw{FCM::Class::HASH};
     __PACKAGE__->class(
         {
-            eggs => {isa => 'ARRAY'},
-            ham  => {isa => 'HASH'},
+            eggs  => {isa => '@'},
+            ham   => {isa => '%'},
+            bacon => '$',
             # ...
         },
     );

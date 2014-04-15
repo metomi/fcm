@@ -1,0 +1,107 @@
+#!/bin/bash
+#-------------------------------------------------------------------------------
+# (C) British Crown Copyright 2006-14 Met Office.
+#
+# This file is part of FCM, tools for managing and building source code.
+#
+# FCM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FCM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FCM. If not, see <http://www.gnu.org/licenses/>.
+#-------------------------------------------------------------------------------
+# NAME
+#   pre-commit
+#
+# SYNOPSIS
+#   pre-commit REPOS TXN
+#
+# ARGUMENTS
+#   REPOS - the path to the Subversion repository
+#   TXN - the commit transaction
+#
+# DESCRIPTION
+#   This script performs pre-commit check, including:
+#   1. Path-based permission check using "svnperms.py", if
+#      "$REPOS/hooks/svnperms.conf" exists.
+#   2. Size check. Transaction should occupy less than 10MB, or the number of
+#      MB specified in "$REPOS/hooks/pre-commit-size-threshold.conf".
+#   3. Runs "$REPOS/hooks/pre-commit-custom" if it exists.
+#
+# ENVIRONMENT VARIABLES
+#   FCM_SVN_HOOK_ADMIN_EMAIL
+#     The name of the admin team. (Default is "Admin".)
+#-------------------------------------------------------------------------------
+set -eu
+
+REPOS=$1
+TXN=$2
+
+export PATH=${PATH:-'/usr/local/bin:/bin:/usr/bin'}:$(dirname $0)
+THIS=$(basename $0)
+USER=${USER:-$(whoami)}
+NAME=$(basename "$REPOS")
+LOG_TXN="$REPOS/$THIS-$TXN.log"
+
+main() {
+    local NOW=$(date -u +%FT%H:%M:%SZ)
+    local AUTHOR=$(svnlook author -t "$TXN" "$REPOS")
+    echo "$NOW+ $TXN by $AUTHOR"
+    svnlook changed -t "$TXN" "$REPOS"
+    local ADMIN_EMAIL=${FCM_SVN_HOOK_ADMIN_EMAIL:-Admin}
+
+    # Check size.
+    local MB=1048576
+    local THRESHOLD=10
+    local SIZE_THRESHOLD_FILE="$REPOS/hooks/$THIS-size-threshold.conf"
+    if [[ -f "$SIZE_THRESHOLD_FILE" && -r "$SIZE_THRESHOLD_FILE" ]]; then
+        THRESHOLD=$(<"$SIZE_THRESHOLD_FILE")
+    fi
+    local TXN_FILE="$REPOS/db/txn-protorevs/$TXN.rev"
+    local SIZE=$(du -b -s "$TXN_FILE" | cut -f 1)
+    if ((SIZE > THRESHOLD * MB)); then
+        SIZE=$(du -h -s "$TXN_FILE" | cut -f 1)
+        echo "$NAME@$TXN: changeset size ${SIZE}B exceeds ${THRESHOLD}MB." >&2
+        echo "Email $ADMIN_EMAIL if you need to bypass this restriction." >&2
+        return 1
+    fi
+
+    # Check permission.
+    local PERM_CONFIG="$REPOS/hooks/svnperms.conf"
+    if [[ -r "$PERM_CONFIG" && -s "$PERM_CONFIG" ]]; then
+        svnperms.py -r "$REPOS" -t "$TXN" -f "$PERM_CONFIG" || return $?
+    elif [[ -L "$PERM_CONFIG" ]]; then
+        echo "$NAME: permission configuration file not found." >&2
+        echo "$ADMIN_EMAIL has been notified." >&2
+        return 1
+    fi
+
+    # Verify owner of any new branches, if relevant
+    pre-commit-verify-branch-owner "$REPOS" "$TXN" || return $?
+
+    # Custom checking, if required
+    local CUSTOM_HOOK="$REPOS/hooks/$THIS-custom"
+    if [[ -x "$CUSTOM_HOOK" ]]; then
+        "$CUSTOM_HOOK" "$REPOS" "$TXN" || return $?
+    fi
+}
+
+RET_CODE=0
+if ! main 1>"$LOG_TXN" 2>&1; then
+    if [[ -n ${FCM_SVN_HOOK_ADMIN_EMAIL:-} ]]; then
+        mail -s "[$THIS] $REPOS@$TXN" "$FCM_SVN_HOOK_ADMIN_EMAIL" <"$LOG_TXN" \
+            || true
+    fi
+    cat "$LOG_TXN"
+    cat "$LOG_TXN" >&2
+    RET_CODE=1
+fi
+rm -f "$LOG_TXN"
+exit $RET_CODE
