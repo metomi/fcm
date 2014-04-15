@@ -99,7 +99,7 @@ sub _find {
     my $value_hash_ref = $attrib_ref->{util}->shell_simple([
         _shell_cmd_list($attrib_ref, 'ssh'),
         $auth,
-        "find $path -type f -not -path '*/.*' -exec stat -c'%Y %n' {} ';'",
+        "find $path -type f -not -path \"*/.*\" -printf \"%T@ %p\\\\n\"",
     ]);
     if ($value_hash_ref->{rc}) {
         die($value_hash_ref);
