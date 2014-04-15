@@ -9,12 +9,16 @@ for a full listing of issues for each release.
 
 ### Highlighted Changes
 
-\#114: fcm make: build: now recognises statements with Fortran OpenMP sentinels
-that affect build dependencies. These dependencies are normally ignored.
+\#114, #117, #118: fcm make: build: now recognises statements with Fortran
+OpenMP sentinels that affect build dependencies.
+These dependencies are normally ignored.
 However, if a relevant `build.prop{fc.flag-omp}` property is specified, the
 build system will treat these statements as normal dependency statements.
 
 ### Noteworthy Changes
+
+\#120: fcm make: build will now correctly handle C source files that has camel
+case names and `main` functions.
 
 \#111: fcm make: build in inherit mode: fix incorrect success in repeated
 incremental mode.
