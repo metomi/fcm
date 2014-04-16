@@ -26,6 +26,7 @@ below:
 * Jim Bolton (Met Office, UK)
 * Ben Fitzpatrick (Met Office, UK)
 * Dave Matthews (Met Office, UK)
+* Stephen Oxley (Met Office, UK)
 * Matt Shin (Met Office, UK)
 
 (All contributors are identifiable with email addresses in the version
