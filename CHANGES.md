@@ -17,6 +17,9 @@ build system will treat these statements as normal dependency statements.
 
 ### Noteworthy Changes
 
+\#121: fcm make: extract via SSH: improve performance by using `find -printf`
+instead of `find -exec stat`.
+
 \#120: fcm make: build will now correctly handle C source files that has camel
 case names and `main` functions.
 
