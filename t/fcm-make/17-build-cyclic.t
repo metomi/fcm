@@ -17,8 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with FCM. If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
-# Tests "fcm make", "build.prop{dep.o}" top namespace, complicated by a module.
-# See also "09-build.dep-o.t".
+# Tests "fcm make", self cyclic dependency.
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------

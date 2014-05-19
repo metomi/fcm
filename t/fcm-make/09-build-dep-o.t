@@ -48,17 +48,17 @@ file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<'__LOG__'
 [info] source->target main/hi.f90 -> (install) include/ hi.f90
 [info] source->target main/hi.f90 -> (compile) o/ hi.o
 [info] target hi.exe
+[info] target  - hi.o
+[info] target  - world.o
 [info] target  - greet.o
 [info] target  -  - greet_fmt_mod.mod
 [info] target  -  -  - greet_fmt_mod.o
-[info] target  - world.o
 [info] target  - greet_fmt_mod.o
-[info] target  - hi.o
 [info] target hello.exe
-[info] target  - greet.o (n-deps=1)
-[info] target  - world.o
-[info] target  - greet_fmt_mod.o
 [info] target  - hello.o
+[info] target  - world.o
+[info] target  - greet.o (n-deps=1)
+[info] target  - greet_fmt_mod.o
 __LOG__
 #-------------------------------------------------------------------------------
 exit 0

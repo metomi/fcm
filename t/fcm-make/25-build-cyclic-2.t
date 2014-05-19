@@ -17,8 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with FCM. If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
-# Tests "fcm make", "build.prop{dep.o}" top namespace, complicated by a module.
-# See also "09-build.dep-o.t".
+# Tests "fcm make", adjacent cyclic dependency.
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
@@ -26,25 +25,16 @@ tests 2
 cp -r $TEST_SOURCE_DIR/$TEST_KEY_BASE/* .
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE"
-run_pass "$TEST_KEY" fcm make
-sed '/^\[info\] \(source->target\|target\) /!d' .fcm-make/log >"$TEST_KEY.log"
-file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<'__LOG__'
-[info] source->target / -> (archive) lib/ libo.a
-[info] source->target hello.f90 -> (link) bin/ hello.exe
-[info] source->target hello.f90 -> (install) include/ hello.f90
-[info] source->target hello.f90 -> (compile) o/ hello.o
-[info] source->target hello_mod.f90 -> (install) include/ hello_mod.f90
-[info] source->target hello_mod.f90 -> (compile+) include/ hello_mod.mod
-[info] source->target hello_mod.f90 -> (compile) o/ hello_mod.o
-[info] source->target hello_sub.f90 -> (install) include/ hello_sub.f90
-[info] source->target hello_sub.f90 -> (ext-iface) include/ hello_sub.interface
-[info] source->target hello_sub.f90 -> (compile) o/ hello_sub.o
-[info] target hello.exe
-[info] target  - hello.o
-[info] target  - hello_sub.o
-[info] target  -  - hello_mod.mod
-[info] target  -  -  - hello_mod.o
-[info] target  - hello_mod.o
-__LOG__
+run_fail "$TEST_KEY" fcm make
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" <<'__ERR__'
+[FAIL] m1.mod: target depends on itself
+[FAIL]     required by: m2.o
+[FAIL]     required by: m2.mod
+[FAIL]     required by: m1.o
+[FAIL]     required by: m1.mod
+[FAIL]     required by: foo.o
+[FAIL]     required by: foo.exe
+
+__ERR__
 #-------------------------------------------------------------------------------
 exit 0

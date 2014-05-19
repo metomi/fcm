@@ -1100,6 +1100,8 @@ sub _targets_select {
             }
             # OK
             push(@items, [[$dep_key, $dep_type], @up_units, [$key, $type]]);
+            # add_visitor, is_directly_related=1
+            $state_of{$key}->add_visitor($target_of{$dep_key}, $dep_type, 1)
         }
         # Float current target up dependency chain
         my $is_directly_related = 1;
