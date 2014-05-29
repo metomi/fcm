@@ -642,12 +642,12 @@ for my $name (qw/central_config user_config user_id verbose/) {
     if (not defined $self->{$name}) {
       if ($name eq 'central_config') {
         # Central configuration file
-        if (-r catfile (dirname ($FindBin::Bin), 'etc', 'fcm.cfg')) {
+        if (-f catfile (dirname ($FindBin::Bin), 'etc', 'fcm.cfg')) {
           $self->{$name} = catfile (
             dirname ($FindBin::Bin), 'etc', 'fcm.cfg'
           );
 
-        } elsif (-r catfile ($FindBin::Bin, 'fcm.cfg')) {
+        } elsif (-f catfile ($FindBin::Bin, 'fcm.cfg')) {
           $self->{$name} = catfile ($FindBin::Bin, 'fcm.cfg');
         }
 
@@ -656,7 +656,7 @@ for my $name (qw/central_config user_config user_id verbose/) {
         my $home = (getpwuid ($<))[7];
         $home = $ENV{HOME} if not defined $home;
         $self->{$name} = catfile ($home, '.fcm')
-          if defined ($home) and -r catfile ($home, '.fcm');
+          if defined ($home) and -f catfile ($home, '.fcm');
 
       } elsif ($name eq 'user_id') {
         # User ID of current process
@@ -834,7 +834,7 @@ sub _read_config_file {
   my $self        = shift;
   my $config_file = $_[0];
 
-  if (!$config_file || !-f $config_file || !-r $config_file) {
+  if (!$config_file || !-f $config_file) {
     return;
   }
 

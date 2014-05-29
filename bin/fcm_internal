@@ -280,7 +280,7 @@ sub load {
         for my $dir (@objpath) {
           my $full = catfile ($dir, $file);
 
-          if (-r $full) {
+          if (-f $full) {
             $file = $full;
             last;
           }

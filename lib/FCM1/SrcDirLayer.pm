@@ -212,7 +212,7 @@ sub update_cache {
   my $dirname = dirname $self->cachedir;
   mkpath($dirname);
 
-  if (!-w $dirname) {
+  if (!-d $dirname) {
     _err('CACHE_WRITE', [$dirname]);
   }
   

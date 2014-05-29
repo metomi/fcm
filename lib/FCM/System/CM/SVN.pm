@@ -486,29 +486,26 @@ sub _load_layout_config {
     }
     else {
         %site_layout_config = %LAYOUT_CONFIG;
-        for my $path (
-            grep {-f $_ && -r _}
-                map {catfile($_, $attrib_ref->{layout_cfg_base})}
-                    $attrib_ref->{util}->conf_paths()
-        ) {
-            my $config_reader_ref = $attrib_ref->{util}->config_reader(
-                FCM::Context::Locator->new($path),
-            );
-            my @unknown_entries;
-            while (defined(my $entry = $config_reader_ref->())) {
-                if (exists($site_layout_config{$entry->get_label()})) {
-                    my $value
-                        = $entry->get_value() ? $entry->get_value() : undef;
-                    $site_layout_config{$entry->get_label()} = $value;
+        $attrib_ref->{util}->cfg_init(
+            $attrib_ref->{layout_cfg_base},
+            sub {
+                my $config_reader = shift();
+                my @unknown_entries;
+                while (defined(my $entry = $config_reader->())) {
+                    if (exists($site_layout_config{$entry->get_label()})) {
+                        my $value
+                            = $entry->get_value() ? $entry->get_value() : undef;
+                        $site_layout_config{$entry->get_label()} = $value;
+                    }
+                    else {
+                        push(@unknown_entries, $entry);
+                    }
                 }
-                else {
-                    push(@unknown_entries, $entry);
+                if (@unknown_entries) {
+                    return $E->throw($E->CONFIG_UNKNOWN, \@unknown_entries);
                 }
-            }
-            if (@unknown_entries) {
-                return $E->throw($E->CONFIG_UNKNOWN, \@unknown_entries);
-            }
-        }
+            },
+        );
         $attrib_ref->{layout_config_of}{q{}} = {%site_layout_config};
     }
     $attrib_ref->{layout_config_of}{$root} = {%site_layout_config};

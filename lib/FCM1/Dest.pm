@@ -188,7 +188,7 @@ sub DESTROY {
   my $self = shift;
 
   # Remove the lockfile if it is set
-  unlink $self->lockfile if $self->lockfile and -w $self->lockfile;
+  unlink $self->lockfile if $self->lockfile and -f $self->lockfile;
 
   return;
 }
@@ -516,8 +516,8 @@ sub create {
     }
 
     # Check whether directory exists and is writable
-    unless (-d $dir and -w $dir) {
-      w_report 'ERROR: ', $dir, ': cannot write to destination.';
+    if (!-d $dir) {
+      w_report 'ERROR: ', $dir, ': cannot create destination.';
       $rc = 0;
     }
   }
@@ -638,7 +638,6 @@ sub get_source_files {
     &find (sub {
       return if /^\./;                    # ignore system/hidden file
       return if -d $File::Find::name;     # ignore directory
-      return if not -r $File::Find::name; # ignore unreadable files
 
       my $name = join (
         '__', @{ $self->get_pkgname_of_path ($File::Find::name) },

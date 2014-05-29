@@ -613,7 +613,7 @@ sub manage_users_in_svn_passwd {
             my $USERS_SECTION = q{users};
             my $svn_passwd_ini;
             my $is_changed;
-            if (-f $svn_passwd_file && -r $svn_passwd_file) {
+            if (-f $svn_passwd_file) {
                 $svn_passwd_ini
                     = Config::IniFiles->new(q{-file} => $svn_passwd_file);
             }
@@ -665,7 +665,7 @@ sub manage_users_in_trac_passwd {
         sub {
             my %old_names;
             my %new_names = %{$user_ref};
-            if (-f $trac_passwd_file && -r $trac_passwd_file) {
+            if (-f $trac_passwd_file) {
                 read_file(
                     $trac_passwd_file,
                     sub {

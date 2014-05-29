@@ -93,31 +93,28 @@ sub _init {
             }
         }
     }
-    for my $path (
-        grep {-f $_ && -r _}
-            map {catfile($_, $attrib_ref->{cfg_base})}
-                $attrib_ref->{util}->conf_paths()
-    ) {
-        my $config_reader_ref = $attrib_ref->{util}->config_reader(
-            FCM::Context::Locator->new($path),
-        );
-        my @unknown_entries;
-        while (defined(my $entry = $config_reader_ref->())) {
-            my ($id, $label) = split(qr{\.}msx, $entry->get_label(), 2);
-            if (exists($attrib_ref->{subsystem_of}{$id})) {
-                my $subsystem = $attrib_ref->{subsystem_of}{$id};
-                if (!$subsystem->config_parse_class_prop($entry, $label)) {
+    $attrib_ref->{util}->cfg_init(
+        $attrib_ref->{cfg_base},
+        sub {
+            my $config_reader = shift();
+            my @unknown_entries;
+            while (defined(my $entry = $config_reader->())) {
+                my ($id, $label) = split(qr{\.}msx, $entry->get_label(), 2);
+                if (exists($attrib_ref->{subsystem_of}{$id})) {
+                    my $subsystem = $attrib_ref->{subsystem_of}{$id};
+                    if (!$subsystem->config_parse_class_prop($entry, $label)) {
+                        push(@unknown_entries, $entry);
+                    }
+                }
+                else {
                     push(@unknown_entries, $entry);
                 }
             }
-            else {
-                push(@unknown_entries, $entry);
+            if (@unknown_entries) {
+                return $E->throw($E->CONFIG_UNKNOWN, \@unknown_entries);
             }
-        }
-        if (@unknown_entries) {
-            return $E->throw($E->CONFIG_UNKNOWN, \@unknown_entries);
-        }
-    }
+        },
+    );
 }
 
 # Sets up the destination.

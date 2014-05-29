@@ -230,7 +230,7 @@ sub action {
     } elsif ($self->actiontype eq 'COPY') {
       # Action is COPY: copy file to destination if necessary
       # ------------------------------------------------------------------------
-      my $copy_required = ($dep_uptodate and $self->output and -r $self->output)
+      my $copy_required = ($dep_uptodate and $self->output and -f $self->output)
                           ? compare ($self->output, $self->srcfile->src)
                           : 1;
 
@@ -285,7 +285,7 @@ sub action {
       my $update_required = 1;
       my $oldfile = find_file_in_path ($base, \@path);
 
-      if ($oldfile and -r $oldfile) {
+      if ($oldfile and -f $oldfile) {
         # Read old file
         open FILE, '<', $oldfile;
         my @oldlines = readline 'FILE';

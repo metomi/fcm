@@ -762,7 +762,7 @@ sub invoke_scan_dependency {
 
   # Check whether make file is out of date
   # ----------------------------------------------------------------------------
-  my $out_of_date = not -r $self->dest->bldmakefile;
+  my $out_of_date = ! -f $self->dest->bldmakefile;
 
   if ($rc and not $out_of_date) {
     for (qw/CACHE CACHE_DEP/) {
@@ -1217,7 +1217,7 @@ sub parse_cfg_source {
     my $value = $line->value;
     $value = File::Spec->rel2abs (&expand_tilde ($value), $self->dest->srcdir);
 
-    if (not -r $value) {
+    if (! -e $value) {
       $line->error ($value . ': source does not exist or is not readable.');
       next;
     }
@@ -1253,7 +1253,7 @@ sub parse_cfg_source {
       next if $base =~ /^\./;
 
       my $file = File::Spec->catfile ($src{$key}, $base);
-      next unless -f $file and -r $file;
+      next if ! -f $file;
 
       my $name = join ('__', ($key, $base));
       $src{$name} = $file unless exists $src{$name};

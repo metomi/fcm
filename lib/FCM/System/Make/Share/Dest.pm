@@ -100,7 +100,7 @@ sub _dest_done {
     }
     my $dest = _path($attrib_ref, $m_ctx, 'sys-ctx-uncompressed');
     my $dest_parent = dirname($dest);
-    if (-d $dest_parent && -w $dest_parent) {
+    if (-d $dest_parent) {
         eval {
             my $handle = IO::File->new_tmpfile();
             nstore_fd($m_ctx, $handle) || die($!);
@@ -176,8 +176,7 @@ sub _dest_init {
     # Loads context of previous make, if possible
     my $prev_m_ctx = eval {
         my $path = _path($attrib_ref, $m_ctx, 'sys-ctx');
-        -f $path && -r _
-            ? _ctx_load($attrib_ref, $path, blessed($m_ctx)) : undef;
+        -f $path ? _ctx_load($attrib_ref, $path, blessed($m_ctx)) : undef;
     };
     if (my $e = $@) {
         if (!$E->caught($e) || $e->get_code() ne $E->CACHE_LOAD) {
