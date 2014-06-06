@@ -366,7 +366,7 @@ sub print_cfg {
   }
 
   if ($out) {
-    my $old_select = select;
+    my $out_handle = select();
 
     # Open file if necessary
     if ($file) {
@@ -377,61 +377,51 @@ sub print_cfg {
         mkpath $dirname;
       }
       croak $dirname, ': cannot write to config file directory, abort'
-        unless -d $dirname and -w $dirname;
+        unless -d $dirname;
 
       if (-f $file and not $force) {
-        if (-r $file) {
-          # Read old config file to see if content has changed
-          open IN, '<', $file or croak $file, ': cannot open (', $!, '), abort';
-          my $in_lines = '';
-          while (my $line = <IN>) {
-            $in_lines .= $line;
-          }
-          close IN or croak $file, ': cannot close (', $!, '), abort';
+        # Read old config file to see if content has changed
+        open(my $handle, '<', $file) || croak("$file: $!\n");
+        my $in_lines = '';
+        while (my $line = readline($handle)) {
+          $in_lines .= $line;
+        }
+        close($handle);
 
-          # Return if content is up-to-date
-          if ($in_lines eq $out) {
-            print 'No change in ', lc ($self->type), ' cfg: ', $file, "\n"
-              if $self->verbose > 1 and $self->type;
-            return 1;
-          }
+        # Return if content is up-to-date
+        if ($in_lines eq $out) {
+          print 'No change in ', lc ($self->type), ' cfg: ', $file, "\n"
+            if $self->verbose > 1 and $self->type;
+          return 1;
         }
 
         # If config file already exists, make sure it is writable
-        if (-w $file) {
-          if ($self->type) {
-            # Existing config file writable, rename it using its time stamp
-            my $mtime = (stat $file)[9];
-            my ($sec, $min, $hour, $mday, $mon, $year) = (gmtime $mtime)[0 .. 5];
-            my $timestamp = sprintf '%4d%2.2d%2.2d_%2.2d%2.2d%2.2d_',
-                            $year + 1900, $mon + 1, $mday, $hour, $min, $sec;
-            my $oldfile   = File::Spec->catfile (
-              $dirname, $timestamp . basename ($file)
-            );
-            rename $file, $oldfile;
-            print 'Rename existing ', lc ($self->type), ' cfg: ',
-                  $oldfile, "\n" if $self->verbose > 1;
-          }
-
-        } else {
-          # Existing config file not writable, throw an error
-          croak $file, ': config file not writable, abort';
+        if ($self->type) {
+          # Existing config file writable, rename it using its time stamp
+          my $mtime = (stat $file)[9];
+          my ($sec, $min, $hour, $mday, $mon, $year) = (gmtime $mtime)[0 .. 5];
+          my $timestamp = sprintf '%4d%2.2d%2.2d_%2.2d%2.2d%2.2d_',
+                          $year + 1900, $mon + 1, $mday, $hour, $min, $sec;
+          my $oldfile   = File::Spec->catfile (
+            $dirname, $timestamp . basename ($file)
+          );
+          rename $file, $oldfile;
+          print 'Rename existing ', lc ($self->type), ' cfg: ',
+                $oldfile, "\n" if $self->verbose > 1;
         }
       }
 
       # Open file and select file handle
-      open OUT, '>', $file
-        or croak $file, ': cannot open config file (', $!, '), abort';
-      select OUT;
+      open(my $handle, '>', $file) || croak("$file: $!\n");
+      $out_handle = $handle;
     }
 
     # Print output
-    print $out;
+    print($out_handle $out);
 
     # Close file if necessary
     if ($file) {
-      select $old_select;
-      close OUT or croak $file, ': cannot close config file (', $!, '), abort';
+      close($out_handle) || croak("$file: $!\n");
 
       if ($self->type and $self->verbose > 1) {
         print 'Generated ', lc ($self->type), ' cfg: ', $file, "\n";
@@ -506,7 +496,7 @@ sub _get_cfg_lines {
     # $self->src() is not a URI, assume that it resides in the file system
     for my $paths_ref (@paths_refs) {
       my $path = File::Spec->catfile($self->src(), @{$paths_ref});
-      if (!-d $path && -r _) { # "-f $path" returns false for "/dev/null"
+      if (-e $path && !-d $path) { # "-f $path" returns false for "/dev/null"
         open(my $handle, '<', $path)
           || croak("$path: cannot open config file, abort: $!");
         my @lines = readline($handle);

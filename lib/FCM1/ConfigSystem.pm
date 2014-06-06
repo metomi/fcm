@@ -233,7 +233,7 @@ sub compare_setting {
               ? File::Spec->catfile ($self->dest->cachedir, $cachebase)
               : $self->dest->cache;
   my @in_caches = ();
-  if (-r $cache) {
+  if (-f $cache) {
     push @in_caches, $cache;
 
   } else {
@@ -241,13 +241,13 @@ sub compare_setting {
       my $use_cache = $cachebase
                       ? File::Spec->catfile ($use->dest->cachedir, $cachebase)
                       : $use->dest->cache;
-      push @in_caches, $use_cache if -r $use_cache;
+      push @in_caches, $use_cache if -f $use_cache;
     }
   }
 
   my $old_lines = undef;
   for my $in_cache (@in_caches) {
-    next unless -r $in_cache;
+    next unless -f $in_cache;
     my $cfg = FCM1::CfgFile->new (SRC => $in_cache);
 
     if ($cfg->read_cfg) {

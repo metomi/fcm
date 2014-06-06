@@ -343,7 +343,7 @@ sub expand_all {
       my $wanted = sub {
         my $base_name = $_;
         my $path = $File::Find::name;
-        if (-f $path && -r $path && !-l $path) {
+        if (-f $path && !-l $path) {
           my $dir_path      = dirname($path);
           my $rel_dir_path  = File::Spec->abs2rel($dir_path, $root_locator);
           if ($rel_dir_path eq q{.}) {

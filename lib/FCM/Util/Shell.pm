@@ -212,7 +212,9 @@ sub _which {
     if (file_name_is_absolute($name)) {
         return $name;
     }
+    use filetest 'access';
     first {-f $_ && -x _} map {catfile($_, $name)} path();
+    no filetest 'access';
 }
 
 # ------------------------------------------------------------------------------

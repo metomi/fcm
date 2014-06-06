@@ -565,7 +565,7 @@ sub _get_username {
                 $rhs =~ s{[.]}{\\.}gmsx;
                 $rhs =~ s{[*]}{.*}gmsx;
                 $rhs =~ s{[?]}{.?}gmsx;
-                if ($host =~ qr{\A$rhs\z}msx) {
+                if ($host && $host =~ qr{\A$rhs\z}msx) {
                     $group = $lhs;
                     last LINE;
                 }

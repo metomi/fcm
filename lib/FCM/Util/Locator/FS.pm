@@ -95,9 +95,6 @@ sub _find {
 sub _reader {
     my ($attrib_ref, $value) = @_;
     $value = _parse($attrib_ref, $value);
-    if (!-f $value || !-r _) {
-        die("$!\n");
-    }
     open(my $handle, '<', $value) || die("$!\n");
     return $handle;
 }

@@ -46,7 +46,7 @@ use constant {NS_ITER_UP => 1};
 
 # The (keys) named actions of this class and (values) their implementations.
 our %ACTION_OF = (
-    conf_paths           => sub {@{$_[0]->{conf_paths}}},
+    cfg_init             => \&_cfg_init,
     class_load           => \&_class_load,
     config_reader        => _util_of_func('config_reader', 'main'),
     external_cfg_get     => \&_external_cfg_get,
@@ -175,13 +175,13 @@ sub _init {
 
 # Loads the named configuration from its configuration files.
 sub _cfg_init {
-    my ($attrib_ref, $name, $action_ref) = @_;
-    my $basename = $attrib_ref->{cfg_basename_of}{$name};
+    my ($attrib_ref, $basename, $action_ref) = @_;
     if (exists($ENV{FCM_CONF_PATH})) {
         $attrib_ref->{conf_paths} = [shellwords($ENV{FCM_CONF_PATH})];
     }
-    my @paths = @{$attrib_ref->{conf_paths}};
-    for my $path (grep {-f $_ && -r _} map {catfile($_, $basename)} @paths) {
+    for my $path (
+        grep {-f} map {catfile($_, $basename)} @{$attrib_ref->{conf_paths}}
+    ) {
         my $config_reader = $ACTION_OF{config_reader}->(
             $attrib_ref, FCM::Context::Locator->new($path),
         );
@@ -220,7 +220,7 @@ sub _event {
             $EXTERNAL_CFG_INIT = 1;
             _cfg_init(
                 $attrib_ref,
-                'external',
+                $attrib_ref->{cfg_basename_of}{external},
                 sub {
                     my $config_reader = shift();
                     while (defined(my $entry = $config_reader->())) {
@@ -275,7 +275,6 @@ sub _file_load {
 # Opens a file handle to read from a file system path.
 sub _file_load_handle {
     my ($attrib_ref, $path) = @_;
-    (-f $path && -r _) || return $E->throw($E->IO, $path, $!);
     open(my($handle), '<', $path) || return $E->throw($E->IO, $path, $!);
     $handle;
 }
@@ -447,7 +446,7 @@ sub _util_of_func {
             if (!$KEYWORD_CFG_INIT) {
                 $KEYWORD_CFG_INIT = 1;
                 my $config_upgrade = FCM::Util::ConfigUpgrade->new();
-                for my $path (grep {-f $_ && -r _} @FCM1_KEYWORD_FILES) {
+                for my $path (grep {-f} @FCM1_KEYWORD_FILES) {
                     my $config_reader = $ACTION_OF{config_reader}->(
                         $attrib_ref,
                         FCM::Context::Locator->new($path),
@@ -460,7 +459,7 @@ sub _util_of_func {
                 }
                 _cfg_init(
                     $attrib_ref,
-                    'keyword',
+                    $attrib_ref->{cfg_basename_of}{keyword},
                     sub {$ACTION_OF{loc_kw_ctx_load}->($attrib_ref, @_)},
                 );
             }
@@ -561,9 +560,10 @@ A HASH to map (keys) utility names to (values) their implementation instances.
 
 =back
 
-=item $u->conf_paths()
+=item $u->cfg_init($basename,\&action)
 
-Returns a list of the search paths to the configuration files.
+Search site/user configuration given by $basename. Invoke the callback
+&action($config_reader) for each configuration file found.
 
 =item $u->class_load($name,$test_method)
 
