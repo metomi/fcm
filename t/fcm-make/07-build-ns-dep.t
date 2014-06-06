@@ -60,9 +60,9 @@ file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<'__LOG__'
 [info] source->target main/hello.f90 -> (install) include/ hello.f90
 [info] source->target main/hello.f90 -> (compile) o/ hello.o
 [info] target hello.exe
-[info] target  - greet.o
-[info] target  - world.o
 [info] target  - hello.o
+[info] target  - world.o
+[info] target  - greet.o
 __LOG__
 #-------------------------------------------------------------------------------
 exit 0
