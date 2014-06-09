@@ -5,11 +5,31 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## Next Release (2014-06-??)
+
+### Highlighted Changes
+
+-none-
+
+### Noteworthy Changes
+
+[#125](https://github.com/metomi/fcm/pull/125):
+fcm make: build: handle adjacent cyclic dependency correctly.
+
+[#128](https://github.com/metomi/fcm/pull/128):
+Remove unnecessary `-r`, `-w` and `-x` tests to avoid ACL problems.
+Use Perl's `filetest` pragma where necessary to correctly handle ACL.
+
+--------------------------------------------------------------------------------
+
 ## 2014-04 (2014-04-23)
 
 ### Highlighted Changes
 
-\#114, #117, #118: fcm make: build: now recognises statements with Fortran
+[#114](https://github.com/metomi/fcm/pull/#114),
+[#117](https://github.com/metomi/fcm/pull/#117),
+[#118](https://github.com/metomi/fcm/pull/#118):
+fcm make: build: now recognises statements with Fortran
 OpenMP sentinels that affect build dependencies.
 These dependencies are normally ignored.
 However, if a relevant `build.prop{fc.flag-omp}` property is specified, the
@@ -17,19 +37,24 @@ build system will treat these statements as normal dependency statements.
 
 ### Noteworthy Changes
 
-\#121: fcm make: extract via SSH: improve performance by using `find -printf`
+[#121](https://github.com/metomi/fcm/pull/#121):
+fcm make: extract via SSH: improve performance by using `find -printf`
 instead of `find -exec stat`.
 
-\#120: fcm make: build will now correctly handle C source files that has camel
+[#120](https://github.com/metomi/fcm/pull/#120):
+fcm make: build will now correctly handle C source files that has camel
 case names and `main` functions.
 
-\#111: fcm make: build in inherit mode: fix incorrect success in repeated
+[#111](https://github.com/metomi/fcm/pull/#111):
+fcm make: build in inherit mode: fix incorrect success in repeated
 incremental mode.
 
-\#105: `FCM_CONF_PATH`: new environment variable that can be used to override
+[#105](https://github.com/metomi/fcm/pull/#105):
+`FCM_CONF_PATH`: new environment variable that can be used to override
 site/user configuration paths.
 
-\#103: fcm make: extract: detect diff trees that are the same as the base tree.
+[#103](https://github.com/metomi/fcm/pull/#103):
+fcm make: extract: detect diff trees that are the same as the base tree.
 
 --------------------------------------------------------------------------------
 
@@ -37,29 +62,36 @@ site/user configuration paths.
 
 ### Highlighted Changes
 
-\#96: fcm make: arguments as extra configurations. This change allows the
+[#96](https://github.com/metomi/fcm/pull/#96):
+fcm make: arguments as extra configurations. This change allows the
 `fcm make` command to accept command line arguments. Each argument will be
 appended in order as a new line in the current `fcm-make.cfg`. This allows
 users to override the configuration on the command line.
 
 ### Noteworthy Changes
 
-\#101: fcm make: do not inherit `steps` if it is already set in the current
+[#101](https://github.com/metomi/fcm/pull/#101):
+fcm make: do not inherit `steps` if it is already set in the current
 configuration. This allows `steps=` to be declared before `use=`.
 
-\#100: fcm make: reduce memory usage in incremental mode. Invoking `fcm make`
+[#100](https://github.com/metomi/fcm/pull/#100):
+fcm make: reduce memory usage in incremental mode. Invoking `fcm make`
 with many steps was causing Perl to exit with SIGSEGV previously.
 
-\#98: fcm make: extract: fix ssh location efficiency.
+[#98](https://github.com/metomi/fcm/pull/#98):
+fcm make: extract: fix ssh location efficiency.
 
-\#93: fcm make: fix `use=` properties override. This change allows `use=`
+[#93](https://github.com/metomi/fcm/pull/#93):
+fcm make: fix `use=` properties override. This change allows `use=`
 declarations to be placed anywhere in an `fcm-make.cfg` without interfering
 other `*.prop` declarations.
 
-\#92: fcm branch-create/list: support alternate username using information in
+[#92](https://github.com/metomi/fcm/pull/#92):
+fcm branch-create/list: support alternate username using information in
 users' `~/.subversion/servers` file.
 
-\#91: fcm make: remove config-on-success on failure.
+[#91](https://github.com/metomi/fcm/pull/#91):
+fcm make: remove config-on-success on failure.
 
 --------------------------------------------------------------------------------
 
@@ -67,7 +99,8 @@ users' `~/.subversion/servers` file.
 
 ### Highlighted Changes
 
-\#83: fcm make: build: an initial attempt to support some Fortran 2K features.
+[#83](https://github.com/metomi/fcm/pull/#83):
+fcm make: build: an initial attempt to support some Fortran 2K features.
 * Recognise `iso_fortran_env` as an intrinsic module.
 * Recognise `use, intrinsic ::` statements.
 * Recognise `class`, `double complex` and `procedure` as types.
@@ -78,13 +111,15 @@ users' `~/.subversion/servers` file.
 
 ### Noteworthy Changes
 
-\#89: fcm merge, fcm switch, etc: Subversion 1.8 `svn upgrade` command may
+[#89](https://github.com/metomi/fcm/pull/#89):
+fcm merge, fcm switch, etc: Subversion 1.8 `svn upgrade` command may
 not write a `.svn/entries` file at the working copy root. Several FCM wrappers
 were failing because they were unable to determine the working copy root. This
 is fixed by using the new entry available in Subversion 1.8 `svn info` to
 determine the working copy root.
 
-\#87: fcm make: build: print sources to targets diagnostics on `-vv` mode and
+[#87](https://github.com/metomi/fcm/pull/#87):
+fcm make: build: print sources to targets diagnostics on `-vv` mode and
 in the log.
 
 --------------------------------------------------------------------------------
@@ -97,11 +132,14 @@ in the log.
 
 ### Noteworthy Changes
 
-\#81: fcm make: build: fix cyclic dependency logic.
+[#81](https://github.com/metomi/fcm/pull/#81):
+fcm make: build: fix cyclic dependency logic.
 
-\#80: fcm make: extract: support `extract.location` declarations reset.
+[#80](https://github.com/metomi/fcm/pull/#80):
+fcm make: extract: support `extract.location` declarations reset.
 
-\#79: fcm make: extract: SSH location: ignore dot files.
+[#79](https://github.com/metomi/fcm/pull/#79):
+fcm make: extract: SSH location: ignore dot files.
 
 --------------------------------------------------------------------------------
 
@@ -113,10 +151,13 @@ in the log.
 
 ### Noteworthy Changes
 
-\#77: fcm make: mirror and build: fix etc files install. This was broken by #65
+[#77](https://github.com/metomi/fcm/pull/#77):
+fcm make: mirror and build: fix etc files install. This was broken by
+[#65](https://github.com/metomi/fcm/pull/#65)
 which causes etc files to be installed to `bin/`.
 
-\#74: Handle date in `svn log --xml`, which may have trailing spaces and lines.
+[#74](https://github.com/metomi/fcm/pull/#74):
+Handle date in `svn log --xml`, which may have trailing spaces and lines.
 
 --------------------------------------------------------------------------------
 
@@ -124,29 +165,38 @@ which causes etc files to be installed to `bin/`.
 
 ### Highlighted Changes
 
-\#65: fcm make: support declaration of class default properties using the
+[#65](https://github.com/metomi/fcm/pull/#65):
+fcm make: support declaration of class default properties using the
 syntax e.g. `build.prop{class,fc}=my-fc`.
 
-\#65: fcm make: build: support target name as name-space for target properties,
+[#65](https://github.com/metomi/fcm/pull/#65):
+fcm make: build: support target name as name-space for target properties,
 e.g. `build.prop{fc}[myprog.exe]=my-fc`. N.B. Dependency properties are
 regarded as source properties, and so are not supported by this change.
 
 ### Noteworthy Changes
 
-\#73: fcm mkpatch: use `/usr/bin/env bash` in generated scripts.
+[#73](https://github.com/metomi/fcm/pull/#73):
+fcm mkpatch: use `/usr/bin/env bash` in generated scripts.
 
-\#72: fcm conflicts: fix incompatibility with SVN 1.8.
+[#72](https://github.com/metomi/fcm/pull/#72):
+fcm conflicts: fix incompatibility with SVN 1.8.
 
-\#70: fcm CLI: support new SVN 1.8 commands.
+[#70](https://github.com/metomi/fcm/pull/#70):
+fcm CLI: support new SVN 1.8 commands.
 
-\#68: sbin/fcm-backup-\*: hotcopy before verifying the hotcopy.
+[#68](https://github.com/metomi/fcm/pull/#68):
+sbin/fcm-backup-\*: hotcopy before verifying the hotcopy.
 
-\#63: fcm make: log file improvements. Print FCM version in beginning of log
+[#63](https://github.com/metomi/fcm/pull/#63):
+fcm make: log file improvements. Print FCM version in beginning of log
 file.
 
-\#63: fcm --version: new command to print FCM version.
+[#63](https://github.com/metomi/fcm/pull/#63):
+fcm --version: new command to print FCM version.
 
-\#63: FCM is no longer dependent on the `HTTP::Date` Perl module.
+[#63](https://github.com/metomi/fcm/pull/#63):
+FCM is no longer dependent on the `HTTP::Date` Perl module.
 
 --------------------------------------------------------------------------------
 
@@ -156,11 +206,14 @@ file.
 
 Changes that have significant impact on user experience.
 
-\#52: fcm make: build: new properties for C++ source files, separated from
+[#52](https://github.com/metomi/fcm/pull/#52):
+fcm make: build: new properties for C++ source files, separated from
 C source files. File extension for C and C++ source files is rationalised to
 follow what is documented in the GCC manual.
 
-\#50, \#54: fcm make: build/preprocess.prop: include-paths/lib-paths/libs:
+[#50](https://github.com/metomi/fcm/pull/#50),
+[#54](https://github.com/metomi/fcm/pull/#54):
+fcm make: build/preprocess.prop: include-paths/lib-paths/libs:
 New build properties to specify a list of include paths for compile
 tasks, and library paths and libraries for link tasks.
 
@@ -168,18 +221,23 @@ tasks, and library paths and libraries for link tasks.
 
 Bug fixes and minor enhancements:
 
-\#59: fcm make: fix invalid cyclic dependency error when `build.prop{dep.o}` is
+[#59](https://github.com/metomi/fcm/pull/#59):
+fcm make: fix invalid cyclic dependency error when `build.prop{dep.o}` is
 declared on the root name-space.
 
-\#58: fcm make: build: improve diagnostics for duplicated targets and bad values
+[#58](https://github.com/metomi/fcm/pull/#58):
+fcm make: build: improve diagnostics for duplicated targets and bad values
 in `build.prop{ns-dep.o}` declarations.
 
-\#55: fcm make: extract: can now extract from a location that is accessible via
+[#55](https://github.com/metomi/fcm/pull/#55):
+fcm make: extract: can now extract from a location that is accessible via
 `ssh` and `rsync`.
 
-\#53: fcm make: `.fcm-make/log` can now be accessed as `fcm-make.log`.
+[#53](https://github.com/metomi/fcm/pull/#53):
+fcm make: `.fcm-make/log` can now be accessed as `fcm-make.log`.
 
-\#51: FCM documentation: style updated using Bootstrap.
+[#51](https://github.com/metomi/fcm/pull/#51):
+FCM documentation: style updated using Bootstrap.
 
 --------------------------------------------------------------------------------
 
@@ -195,17 +253,24 @@ Changes that have significant impact on user experience.
 
 Bug fixes and minor enhancements:
 
-\#45: An attempt to allow FCM to work under a case insensitive file system.
+[#45](https://github.com/metomi/fcm/pull/#45):
+An attempt to allow FCM to work under a case insensitive file system.
 
-\#39, #40, #41: CM commands are now tested under Subversion 1.8.
+[#39](https://github.com/metomi/fcm/pull/#39),
+[#40](https://github.com/metomi/fcm/pull/#40),
+[#41](https://github.com/metomi/fcm/pull/#41):
+CM commands are now tested under Subversion 1.8.
 
-\#37: fcm make: build: fixed hanging of `ext-iface` tasks when there is an
+[#37](https://github.com/metomi/fcm/pull/#37):
+fcm make: build: fixed hanging of `ext-iface` tasks when there is an
 unbalanced quote or bracket in a relevant Fortran source file.
 
-\#20: fcm make: build: allow separate linker command and add ability to keep
+[#20](https://github.com/metomi/fcm/pull/#20):
+fcm make: build: allow separate linker command and add ability to keep
 the intermediate library archive while linking an executable.
 
-\#19: added test suite for code management commands to the distribution.
+[#19](https://github.com/metomi/fcm/pull/#19):
+added test suite for code management commands to the distribution.
 
 r4955: fcm extract: fix failure caused by the checking of latest version of a
 deleted branch.
