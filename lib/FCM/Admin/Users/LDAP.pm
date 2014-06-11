@@ -48,11 +48,15 @@ sub _get_users_info {
     my %user_of;
     for my $entry ($res->entries()) {
         my $name = $entry->get_value($uid_attr);
-        $user_of{$name} = FCM::Admin::User->new({
-            name         => $name,
-            display_name => $entry->get_value($cn_attr),
-            email        => $entry->get_value($mail_attr),
-        });
+        my $display_name = $entry->get_value($cn_attr);
+        my $email = $entry->get_value($mail_attr);
+        if ($display_name && $email) {
+            $user_of{$name} = FCM::Admin::User->new({
+                name         => $name,
+                display_name => $display_name,
+                email        => $email,
+            });
+        }
     }
     return (wantarray() ? %user_of : \%user_of);
 }
