@@ -28,7 +28,6 @@ use FCM::Admin::Runner;
 use File::Basename qw{dirname};
 use File::Copy qw{copy};
 use File::Path qw{mkpath rmtree};
-use File::Temp qw{tempfile};
 use IO::File;
 use SVN::Client;
 

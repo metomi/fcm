@@ -269,8 +269,14 @@ sub backup_svn_repository {
             sub {!system(qw{svnadmin pack}, $project->get_svn_live_path())},
         );
     }
-    my $work_dir = tempdir(CLEANUP => 1);
-    my $work_path = catfile($work_dir, $project->get_svn_base_name());
+    my $base_name = $project->get_svn_base_name();
+    run_mkpath($CONFIG->get_svn_backup_dir());
+    my $work_dir = tempdir(
+        "$base_name.backup.XXXXXX",
+        DIR => $CONFIG->get_svn_backup_dir(),
+        CLEANUP => 1,
+    );
+    my $work_path = catfile($work_dir, $base_name);
     $RUN->(
         sprintf(
             "hotcopying %s to %s", $project->get_svn_live_path(), $work_path,
@@ -336,6 +342,7 @@ sub backup_svn_repository {
             }
         );
     }
+    run_rmtree($work_dir);
     return 1;
 }
 
@@ -344,8 +351,14 @@ sub backup_svn_repository {
 sub backup_trac_environment {
     my ($option_hash_ref, $project) = @_;
     my $trac_live_path = $project->get_trac_live_path();
-    my $work_dir = tempdir(CLEANUP => 1);
-    my $work_path = catfile($work_dir, $project->get_name());
+    my $base_name = $project->get_name();
+    run_mkpath($CONFIG->get_trac_backup_dir());
+    my $work_dir = tempdir(
+        "$base_name.backup.XXXXXX",
+        DIR => $CONFIG->get_trac_backup_dir(),
+        CLEANUP => 1,
+    );
+    my $work_path = catfile($work_dir, $base_name);
     $RUNNER->run_with_retries(
         sprintf(
             qq{hotcopying %s to %s},
@@ -383,6 +396,7 @@ sub backup_trac_environment {
         $CONFIG->get_trac_backup_dir(),
         $project->get_trac_archive_base_name(),
     );
+    run_rmtree($work_dir);
     return 1;
 }
 
