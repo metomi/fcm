@@ -89,7 +89,7 @@ our %USER_INFO_TOOL_OF = (
 );
 our $USER_INFO_TOOL;
 
-my $UTIL = $FCM::Admin::Config::UTIL;
+our $UTIL = $FCM::Admin::Config::UTIL;
 my $CONFIG = FCM::Admin::Config->instance();
 my $RUNNER = FCM::Admin::Runner->instance();
 

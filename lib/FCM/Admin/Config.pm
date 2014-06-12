@@ -67,10 +67,10 @@ __PACKAGE__->class({
     trac_ini_file       => {isa => '$', default => 'trac.ini'},
     trac_live_dir       => {isa => '$', default => '/srv/trac'},
     trac_live_url_tmpl  => {isa => '$', default => $TRAC_LIVE_URL_TMPL},
-    trac_passwd_file    => {isa => '$', default => ''},
+    trac_passwd_file    => {isa => '$', default => q{}},
 
     # User information tool settings
-    user_info_tool      => {isa => '$', default => ''},
+    user_info_tool      => {isa => '$', default => 'passwd'},
 
     # User information tool, LDAP settings
     ldappw              => {isa => '$', default => '~/.ldappw'},

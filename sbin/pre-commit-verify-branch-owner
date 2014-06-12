@@ -29,7 +29,7 @@ use FCM::Util;
 
 our @IGNORES = qw{Config Rel Share};
 
-my $UTIL = FCM::Util->new();
+my $UTIL = $FCM::Admin::System::UTIL;
 my $CM_SYS = FCM::System::CM::SVN->new({'util' => $UTIL});
 
 if (!caller()) {
@@ -65,7 +65,6 @@ sub main {
     }
 
     # Verify branch owners, if necessary
-    local($FCM::Admin::System::UTIL) = $UTIL;
     my @bad_users = verify_users(keys(%lines_of));
     for my $bad_user (@bad_users) {
         for my $line (@{$lines_of{$bad_user}}) {
