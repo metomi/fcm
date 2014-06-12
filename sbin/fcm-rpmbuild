@@ -21,7 +21,7 @@
 #     fcm-rpmbuild
 #
 # SYNOPSIS
-#     fcm-rpmbuild [--no-gui] [REV]
+#     fcm-rpmbuild [--gui] [REV]
 #     E.g.:
 #     fcm rpmbuild 2014-03
 #
@@ -31,7 +31,7 @@
 #     the FCM project.
 #
 # OPTIONS
-#     --no-gui - do not add GUI packages such as "perl-Tk" and "xxdiff".
+#     --gui - add GUI packages such as "perl-Tk" and "xxdiff".
 #
 # ARGUMENTS
 #     REV - Revision to build. Default to HEAD.
@@ -39,13 +39,14 @@
 
 set -eu
 THIS=$(basename $0)
+NAME='fcm'
 
 rpmdev-setuptree
 
 # Build RPM without no dependency on subversion or xxdiff?
-REQUIRES_GUI='perl-Tk xxdiff'
-if (($# > 0)) && [[ $1 == '--no-gui' ]]; then
-    REQUIRES_GUI=
+REQUIRES_GUI=
+if (($# > 0)) && [[ $1 == '--gui' ]]; then
+    REQUIRES_GUI='perl-Tk xxdiff'
     shift 1
 fi
 
@@ -59,10 +60,10 @@ if [[ $REV_NAME != $REV_BASE ]]; then
     RELEASE=${COMMIT_DATE}git${REV_NAME#$REV_BASE-*-g}
 fi
 REV_BASE_DOT=$(sed 's/-/./g' <<<$REV_BASE)
-git archive --format=tar --prefix=fcm-$REV_BASE_DOT/ $REV \
+git archive --format=tar --prefix=$NAME-$REV_BASE_DOT/ $REV \
     | (cd ~/rpmbuild/SOURCES/ && tar -xf -)
-SOURCE=~/rpmbuild/SOURCES/fcm-$REV_BASE_DOT
-echo "FCM.VERSION=\"$REV_NAME\";" >$SOURCE/doc/etc/fcm-version.js
+SOURCE=~/rpmbuild/SOURCES/$NAME-$REV_BASE_DOT
+echo "FCM.VERSION=\"$REV_NAME\";" >$SOURCE/doc/etc/$NAME-version.js
 rm -r $SOURCE/{test,t}
 if [[ -z $REQUIRES_GUI ]]; then
     rm $SOURCE/{bin/fcm_gui,lib/FCM1/Interactive/InputGetter/GUI.pm}
@@ -71,16 +72,16 @@ fi
 # Create the rpmbuild spec file
 {
     cat <<__SPEC__
-Name: fcm
+Name: $NAME
 Version: $REV_BASE_DOT
 Release: $RELEASE
 Summary: A modern Fortran build system + wrappers to SVN
 Group: Development/Tools
 License: GPLv3
-URL: https://github.com/metomi/fcm/
-Source0: https://github.com/metomi/fcm/releases/
+URL: https://github.com/metomi/$NAME/
+Source0: https://github.com/metomi/$NAME/releases/
 BuildArch: noarch
-Requires: diffutils gzip make perl-core perl-Config-IniFiles perl-MailTools perl-XML-Parser subversion subversion-perl $REQUIRES_GUI
+Requires: diffutils filesystem gzip make perl-core perl-Config-IniFiles perl-MailTools perl-XML-Parser subversion subversion-perl $REQUIRES_GUI
 
 %description
 FCM: A modern Fortran build system + wrappers to Subversion for scientific
@@ -93,19 +94,19 @@ software development
 %install
 rm -fr %{buildroot}
 mkdir -p %{buildroot}/opt/ %{buildroot}/usr/bin
-cp -pr %_sourcedir/fcm-$REV_BASE_DOT %{buildroot}/opt/fcm
-cp -p %_sourcedir/fcm-$REV_BASE_DOT/usr/bin/fcm %{buildroot}/usr/bin
+cp -pr %_sourcedir/$NAME-$REV_BASE_DOT %{buildroot}/opt/$NAME
+cp -p %_sourcedir/$NAME-$REV_BASE_DOT/usr/bin/fcm %{buildroot}/usr/bin
 
 %clean 
 rm -fr %{buildroot}
 
 %files
-/opt/fcm
+/opt/$NAME
 /usr/bin/fcm
 __SPEC__
-} >~/rpmbuild/SPECS/fcm.spec
+} >~/rpmbuild/SPECS/$NAME.spec
 
 cd ~/rpmbuild/SPECS
-rpmbuild -ba fcm.spec
-rm -fr ~/rpmbuild/SOURCES/fcm-$REV_BASE_DOT
+rpmbuild -ba $NAME.spec
+rm -fr ~/rpmbuild/SOURCES/$NAME-$REV_BASE_DOT
 exit
