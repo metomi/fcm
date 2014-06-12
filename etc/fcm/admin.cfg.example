@@ -10,17 +10,20 @@
 #  admin_email = $USER
 ## Notification email address (for the "From:" field in notification emails).
 #  notification_from =
-#
+
+## Location for log files
+#  log_dir = /var/log/fcm
+
 ## Location where FCM is installed
 #  fcm_home = $FCM_HOME
 ## Location where FCM site specific items are installed
 #  fcm_site_home =
-#
+
 ## Locations (space delimited) to mirror items in "mirror_keys"
 #  mirror_dests =
 ## Items (space delimited) to mirror to "mirror_dests", e.g. "fcm_site_home"
 #  mirror_keys =
-#
+
 ## Location to backup Subversion repositories
 #  svn_backup_dir = /var/svn/backups
 ## Location to create dumps for commits to Subversion repositories
@@ -32,10 +35,10 @@
 ## Location to serve Subversion repositories
 #  svn_live_dir = /srv/svn
 ## Name of svnserve password file
-#  svn_passwd_file = passwd
+#  svn_passwd_file =
 ## File name suffix that may be added to each Subversion repository
 #  svn_project_suffix =
-#
+
 ## List of admin users for all Trac environments
 #  trac_admin_users =
 ## Location to backup Trac environments
@@ -51,11 +54,11 @@
 ## Template to create a Trac environment URL (from a user's perspective)
 #  trac_live_url_tmpl = https://{host}/trac/{project}
 ## Name of Trac password file (under Apache)
-#  trac_passwd_file = trac.htpasswd
-#
+#  trac_passwd_file =
+
 ## Specify the name of the tool for obtaining user info (ldap or passwd)
 #  user_info_tool = passwd
-##
+
 ## LDAP settings, only relevant if user_info_tool = ldap
 ## File containing the password to the LDAP server, if required
 # ldappw = ~/.ldappw
@@ -67,7 +70,7 @@
 # ldap_basedn =
 ## The attributes for UID, common name and email in the LDAP directory
 # ldap_attrs = uid cn mail
-#
+
 ## PASSWD settings, only relevant if user_info_tool = passwd
 ## Domain name to suffix user IDs to create an email address
 #  passwd_email_domain =

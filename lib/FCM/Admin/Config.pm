@@ -29,6 +29,8 @@ use File::Basename qw{dirname};
 use File::Spec::Functions qw{catfile};
 use FindBin;
 
+our $UTIL = FCM::Util->new();
+
 my $TRAC_LIVE_URL_TMPL = 'https://{host}/trac/{project}';
 my $USER_ID = (getpwuid($<))[0];
 
@@ -36,6 +38,9 @@ __PACKAGE__->class({
     # Emails
     admin_email         => {isa => '$', default => $USER_ID},
     notification_from   => {isa => '$'},
+
+    # Location for log files
+    log_dir             => {isa => '$', default => '/var/log/fcm'},
 
     # FCM installation locations
     fcm_home            => {isa => '$', default => dirname($FindBin::Bin)},
@@ -62,10 +67,10 @@ __PACKAGE__->class({
     trac_ini_file       => {isa => '$', default => 'trac.ini'},
     trac_live_dir       => {isa => '$', default => '/srv/trac'},
     trac_live_url_tmpl  => {isa => '$', default => $TRAC_LIVE_URL_TMPL},
-    trac_passwd_file    => {isa => '$', default => 'trac.htpasswd'},
+    trac_passwd_file    => {isa => '$', default => ''},
 
     # User information tool settings
-    user_info_tool      => {isa => '$', default => 'passwd'},
+    user_info_tool      => {isa => '$', default => ''},
 
     # User information tool, LDAP settings
     ldappw              => {isa => '$', default => '~/.ldappw'},
@@ -87,7 +92,6 @@ sub instance {
     if (!defined($INSTANCE)) {
         $INSTANCE = $class->new();
         # Load $FCM_HOME/etc/fcm/admin.cfg and $HOME/.metomi/fcm/admin.cfg
-        my $UTIL = FCM::Util->new();
         $UTIL->cfg_init(
             'admin.cfg',
             sub {
@@ -150,6 +154,16 @@ The e-mail address of the FCM administrator.
 =item notification_from
 
 Notification email address (for the "From:" field in notification emails).
+
+=back
+
+Location for log files.
+
+=over 4
+
+=item log_dir
+
+The location for log files.
 
 =back
 

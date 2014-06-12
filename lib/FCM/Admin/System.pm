@@ -87,9 +87,9 @@ our %USER_INFO_TOOL_OF = (
     'ldap'   => 'FCM::Admin::Users::LDAP',
     'passwd' => 'FCM::Admin::Users::Passwd',
 );
-our $UTIL;
 our $USER_INFO_TOOL;
 
+my $UTIL = $FCM::Admin::Config::UTIL;
 my $CONFIG = FCM::Admin::Config->instance();
 my $RUNNER = FCM::Admin::Runner->instance();
 
@@ -547,7 +547,6 @@ sub get_projects_from_trac_live {
 sub get_users {
     my @only_users = @_;
     if (!defined($USER_INFO_TOOL)) {
-        $UTIL ||= FCM::Util->new();
         my $name = $CONFIG->get_user_info_tool();
         my $class = $UTIL->class_load($USER_INFO_TOOL_OF{$name});
         $USER_INFO_TOOL = $class->new({util => $UTIL});
@@ -704,6 +703,9 @@ sub install_svn_hook {
 # Updates the SVN password file.
 sub manage_users_in_svn_passwd {
     my ($user_ref) = @_;
+    if (!$CONFIG->get_svn_passwd_file()) {
+        return 1;
+    }
     my $svn_passwd_file = catfile(
         $CONFIG->get_svn_live_dir(),
         $CONFIG->get_svn_passwd_file(),
@@ -761,6 +763,9 @@ sub manage_users_in_svn_passwd {
 # Updates the Trac password file.
 sub manage_users_in_trac_passwd {
     my ($user_ref) = @_;
+    if (!$CONFIG->get_trac_passwd_file()) {
+        return 1;
+    }
     my $trac_passwd_file = catfile(
         $CONFIG->get_trac_live_dir(),
         $CONFIG->get_trac_passwd_file(),
@@ -962,7 +967,6 @@ sub vacuum_trac_env_db {
 sub verify_users {
     my @users = @_;
     if (!defined($USER_INFO_TOOL)) {
-        $UTIL ||= FCM::Util->new();
         my $name = $CONFIG->get_user_info_tool();
         my $class = $UTIL->class_load($USER_INFO_TOOL_OF{$name});
         $USER_INFO_TOOL = $class->new({util => $UTIL});

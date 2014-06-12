@@ -61,11 +61,11 @@ fi
 REV_BASE_DOT=$(sed 's/-/./g' <<<$REV_BASE)
 git archive --format=tar --prefix=fcm-$REV_BASE_DOT/ $REV \
     | (cd ~/rpmbuild/SOURCES/ && tar -xf -)
-echo "FCM.VERSION=\"$REV_NAME\";" \
-    >~/rpmbuild/SOURCES/fcm-$REV_BASE_DOT/doc/etc/fcm-version.js
-rm -r ~/rpmbuild/SOURCES/fcm-$REV_BASE_DOT/{test,t}
+SOURCE=~/rpmbuild/SOURCES/fcm-$REV_BASE_DOT
+echo "FCM.VERSION=\"$REV_NAME\";" >$SOURCE/doc/etc/fcm-version.js
+rm -r $SOURCE/{test,t}
 if [[ -z $REQUIRES_GUI ]]; then
-    rm ~/rpmbuild/SOURCES/fcm-$REV_BASE_DOT/{bin/fcm_gui,lib/FCM1/Interactive/InputGetter/GUI.pm}
+    rm $SOURCE/{bin/fcm_gui,lib/FCM1/Interactive/InputGetter/GUI.pm}
 fi
 
 # Create the rpmbuild spec file
@@ -92,14 +92,16 @@ software development
 
 %install
 rm -fr %{buildroot}
-mkdir -p %{buildroot}/opt/
+mkdir -p %{buildroot}/opt/ %{buildroot}/usr/bin
 cp -pr %_sourcedir/fcm-$REV_BASE_DOT %{buildroot}/opt/fcm
+cp -p %_sourcedir/fcm-$REV_BASE_DOT/usr/bin/fcm %{buildroot}/usr/bin
 
 %clean 
 rm -fr %{buildroot}
 
 %files
 /opt/fcm
+/usr/bin/fcm
 __SPEC__
 } >~/rpmbuild/SPECS/fcm.spec
 
