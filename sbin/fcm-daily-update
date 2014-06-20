@@ -61,8 +61,10 @@ sub main {
     open(my $old_err, q{>&}, \*STDERR)
         || die("$THIS: cannot duplicate STDERR ($!)\n");
     my $log_dir = $UTIL->file_tilde_expand($CONFIG->get_log_dir());
-    my $day = lc(gmtime()->day()); # lower case day of week, e.g. sun, mon
-    my $out_file = catfile($log_dir, "$THIS-$day.log");
+    my $now = gmtime();
+    my $day_of_week = lc($now->day_of_week()); # 0=sun, 1=mon, etc
+    my $day = lc($now->day()); # lower case day of week, e.g. sun, mon
+    my $out_file = catfile($log_dir, "$THIS-$day_of_week$day.log");
     open(STDOUT, q{>}, $out_file)
         || die("$THIS: cannot redirect STDOUT ($!)\n");
     open(STDERR, q{>&}, \*STDOUT)
