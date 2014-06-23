@@ -56,7 +56,7 @@ __PACKAGE__->class({
     svn_group           => {isa => '$', default => 'apache'},
     svn_hook_path_env   => {isa => '$', default => q{}},
     svn_live_dir        => {isa => '$', default => '/srv/svn'},
-    svn_passwd_file     => {isa => '$', default => 'passwd'},
+    svn_passwd_file     => {isa => '$', default => q{}},
     svn_project_suffix  => {isa => '$', default => q{}},
 
     # Trac environments settings
