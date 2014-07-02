@@ -41,7 +41,6 @@ use FCM::Admin::Util qw{
     run_symlink
     write_file
 };
-use FCM::Util;
 use Fcntl qw{:mode}; # for S_IRGRP, S_IWGRP, S_IROTH, etc
 use File::Basename qw{basename dirname};
 use File::Find qw{find};
@@ -667,16 +666,9 @@ sub install_svn_hook {
             $RUNNER->run(
                 "install $dest <- ^/$name",
                 sub {
-                    open(my $dest_handle, '>', $dest) || die("$dest: $!\n");
-                    open(my $look_handle, '-|',
-                        'svnlook', 'cat', $project_path, $name,
-                    ) || die("svnlook cat $project_path $name: $!\n");
-                    while (my $conf_line = readline($look_handle)) {
-                        print($dest_handle $conf_line);
-                    }
-                    close($dest_handle) || die("$dest: $!\n");
-                    close($look_handle)
-                        || die("svnlook cat $project_path $name: $!\n");
+                    my $source = "file://$project_path/$name";
+                    !system(qw{svn export -q --force}, $source, $dest)
+                        || die("\n");
                     chmod((stat($dest))[2] | S_IRGRP | S_IROTH, $dest);
                 },
             );
@@ -1133,7 +1125,7 @@ sub _manage_users_in_trac_db_of {
         );
         my $attribute_update_statement = $db_handle->prepare(
             "UPDATE session_attribute SET value = ? "
-                . "WHERE sid = ? and authenticated == 1 AND name == ?",
+                . "WHERE sid = ? AND authenticated == 1 AND name == ?",
         );
         my $attribute_delete_statement = $db_handle->prepare(
             "DELETE FROM session_attribute WHERE sid == ?",
@@ -1372,8 +1364,7 @@ $project should be a L<FCM::Admin::Project|FCM::Admin::Project> object.
 L<FCM::Admin::Config|FCM::Admin::Config>,
 L<FCM::Admin::Project|FCM::Admin::Project>,
 L<FCM::Admin::Runner|FCM::Admin::Runner>,
-L<FCM::Admin::User|FCM::Admin::User>,
-L<FCM::Admin::Util|FCM::Admin::Util>
+L<FCM::Admin::User|FCM::Admin::User>
 
 =head1 COPYRIGHT
 
