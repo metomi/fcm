@@ -22,7 +22,7 @@
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
 if ! which svnadmin 1>/dev/null 2>/dev/null; then
-    skip_all 'svmadin not available'
+    skip_all 'svnadmin not available'
 fi
 tests 26
 #-------------------------------------------------------------------------------
