@@ -48,7 +48,7 @@ sub main {
     my ($author) = $CM_SYS->stdout(qw{svnlook author -r}, $rev, $repos);
 
     # Get list of new paths
-    my %names = (); # {$name1 => 1, $name2 => 2, ...}
+    my %names = (); # {$name1 => 1, $name2 => 1, ...}
     my @lines = $CM_SYS->stdout(qw{svnlook changed -r}, $rev, $repos);
     LINE:
     for my $line (@lines) {
