@@ -38,7 +38,7 @@ __PACKAGE__->class({util => '&'}, {action_of => {%ACTION_OF}});
 
 my $CONFIG = FCM::Admin::Config->instance();
 
-# Gets a HASH of users using the mail aliases and the POSIX password DB.
+# Gets a HASH of users via LDAP.
 # %user_of = ($name => <FCM::Admin::User instance>, ...)
 sub _get_users_info {
     my ($attrib_ref, @only_users) = @_;
