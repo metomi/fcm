@@ -17,5 +17,15 @@
 # You should have received a copy of the GNU General Public License
 # along with FCM. If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
-set -eu
-nohup $0-background "$@" 0</dev/null 1>/dev/null 2>&1 &
+# Wrapper for "fcm":
+# * Should be installed at a location like "/usr/bin".
+# * Modify the default value for FCM_HOME_ROOT to suit your site.
+#-------------------------------------------------------------------------------
+if [[ -z ${FCM_HOME:-} ]]; then
+    FCM_HOME_ROOT=${FCM_HOME_ROOT:-/opt}
+    FCM_HOME=$FCM_HOME_ROOT/fcm
+    if [[ -n ${FCM_VERSION:-} && -d $FCM_HOME_ROOT/fcm-$FCM_VERSION ]]; then
+        FCM_HOME=$FCM_HOME_ROOT/fcm-$FCM_VERSION
+    fi
+fi
+exec $FCM_HOME/bin/$(basename $0) "$@"

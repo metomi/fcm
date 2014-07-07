@@ -24,9 +24,10 @@ use warnings;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 use File::Basename qw{basename};
-use File::Spec;
+use File::Spec::Functions qw{catfile};
 use IO::File;
 use Mail::Mailer;
+use Time::Piece qw{gmtime};
 
 use FCM::Admin::Config;
 use FCM::Admin::Runner;
@@ -34,44 +35,50 @@ use FCM::Admin::System qw{
     backup_svn_repository
     backup_trac_environment
     backup_trac_files
-    distribute_wc
     get_projects_from_svn_live
     get_projects_from_trac_live
     get_users
+    housekeep_svn_hook_logs
     manage_users_in_svn_passwd
     manage_users_in_trac_passwd
     manage_users_in_trac_db_of
 };
 
-my $THIS   = basename($0);
+my $THIS = basename($0);
 my $CONFIG = FCM::Admin::Config->instance();
+my $UTIL = $FCM::Admin::Config::UTIL;
 
-my $OUT_FILE = File::Spec->catfile(
-    $CONFIG->get_fcm_home(), qw{public_html FCM}, qq{$THIS.out},
-);
-
-main();
+if (!caller()) {
+    main(@ARGV);
+}
 
 sub main {
-    # Redirects STDOUT and STDERR to the $OUT_FILE
+    local(@ARGV) = @_;
+
+    # Redirects STDOUT and STDERR to the $out_file
     open(my $old_out, q{>&}, \*STDOUT)
-        or die("$THIS: cannot duplicate STDOUT ($!)\n");
+        || die("$THIS: cannot duplicate STDOUT ($!)\n");
     open(my $old_err, q{>&}, \*STDERR)
-        or die("$THIS: cannot duplicate STDERR ($!)\n");
-    open(STDOUT, q{>}, $OUT_FILE)
-        or die("$THIS: cannot redirect STDOUT ($!)\n");
+        || die("$THIS: cannot duplicate STDERR ($!)\n");
+    my $log_dir = $UTIL->file_tilde_expand($CONFIG->get_log_dir());
+    my $now = gmtime();
+    my $day_of_week = lc($now->day_of_week()); # 0=sun, 1=mon, etc
+    my $day = lc($now->day()); # lower case day of week, e.g. sun, mon
+    my $out_file = catfile($log_dir, "$THIS-$day_of_week$day.log");
+    open(STDOUT, q{>}, $out_file)
+        || die("$THIS: cannot redirect STDOUT ($!)\n");
     open(STDERR, q{>&}, \*STDOUT)
-        or die("$THIS: cannot redirect STDERR ($!)\n");
+        || die("$THIS: cannot redirect STDERR ($!)\n");
 
     do_tasks();
 
     # Restores STDOUT and STDERR
     open(STDERR, q{>&}, $old_err)
-        or die("$THIS: cannot reinstate STDERR ($!)\n");
+        || die("$THIS: cannot reinstate STDERR ($!)\n");
     open(STDOUT, q{>&}, $old_out)
-        or die("$THIS: cannot reinstate STDOUT ($!)\n");
+        || die("$THIS: cannot reinstate STDOUT ($!)\n");
 
-    notify();
+    notify($out_file);
 }
 
 # ------------------------------------------------------------------------------
@@ -87,14 +94,18 @@ sub do_tasks {
         sub {$user_ref = get_users(); 1;},
     );
     if (defined($user_ref)) {
-        $RUNNER->run_continue(
-            "updating SVN user accounts",
-            sub {manage_users_in_svn_passwd($user_ref)},
-        );
-        $RUNNER->run_continue(
-            "updating Trac user accounts",
-            sub {manage_users_in_trac_passwd($user_ref)},
-        );
+        if ($CONFIG->get_svn_passwd_file()) {
+            $RUNNER->run_continue(
+                "updating SVN user accounts",
+                sub {manage_users_in_svn_passwd($user_ref)},
+            );
+        }
+        if ($CONFIG->get_trac_passwd_file()) {
+            $RUNNER->run_continue(
+                "updating Trac user accounts",
+                sub {manage_users_in_trac_passwd($user_ref)},
+            );
+        }
         for my $project (@trac_projects) {
             $RUNNER->run_continue(
                 "updating Trac accounts in $project",
@@ -103,6 +114,10 @@ sub do_tasks {
         }
     }
     for my $project (@svn_projects) {
+        $RUNNER->run_continue(
+            "housekeep SVN repository logs for $project",
+            sub {housekeep_svn_hook_logs($project)},
+        );
         $RUNNER->run_continue(
             "backing up SVN repository for $project",
             sub {backup_svn_repository({}, $project)},
@@ -115,15 +130,12 @@ sub do_tasks {
         );
     }
     $RUNNER->run_continue("backing up Trac files", \&backup_trac_files);
-    $RUNNER->run_continue(
-        "distributing FCM to standard locations", \&distribute_wc,
-    );
 }
 
 # ------------------------------------------------------------------------------
 # Notifies on completion.
 sub notify {
-    # (no argument)
+    my ($out_file) = @_;
     # Reports number of arguments in subject.
     my @exceptions = FCM::Admin::Runner->instance()->get_exceptions();
     my $subject
@@ -131,7 +143,7 @@ sub notify {
 
     my $mailer = Mail::Mailer->new();
     $mailer->open({
-        From    => $CONFIG->get_admin_email(),
+        From    => $CONFIG->get_notification_from(),
         To      => $CONFIG->get_admin_email(),
         Subject => $subject,
     });
@@ -147,7 +159,7 @@ sub notify {
     $mailer->print(q{#} x 72 . qq{\n});
     $mailer->print(qq{# Output and error output of $THIS:\n});
     $mailer->print(q{#} x 72 . qq{\n});
-    my $out_file_handle = IO::File->new($OUT_FILE);
+    my $out_file_handle = IO::File->new($out_file);
     if (defined($out_file_handle)) {
         while (my $line = $out_file_handle->getline()) {
             $mailer->print($line);

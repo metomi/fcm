@@ -28,7 +28,6 @@ use FCM::Admin::Runner;
 use File::Basename qw{dirname};
 use File::Copy qw{copy};
 use File::Path qw{mkpath rmtree};
-use File::Temp qw{tempfile};
 use IO::File;
 use SVN::Client;
 
@@ -102,7 +101,8 @@ sub run_copy {
     FCM::Admin::Runner->instance()->run(
         "copy $source_path to $dest_path",
         sub {
-            my $rc = copy($source_path, $dest_path);
+            my $mode = (stat($source_path))[2];
+            my $rc = copy($source_path, $dest_path) && chmod($mode, $dest_path);
             if (!$rc) {
                 die($!);
             }
@@ -272,6 +272,7 @@ sub sed_file {
 # Writes content to a file.
 sub write_file {
     my ($path, @contents) = @_;
+    mkpath(dirname($path));
     my $file = IO::File->new($path, q{w});
     if (!defined($file)) {
         die("$path: cannot open for writing ($!).\n");

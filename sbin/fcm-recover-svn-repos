@@ -54,7 +54,7 @@ sub main {
     }
     option2config(\%option);
     my @projects = filter_projects([get_projects_from_svn_backup()], \@ARGV);
-    for my $project (@projects) {
+    for my $project (sort {$a->get_name() cmp $b->get_name()} @projects) {
         recover_svn_repository(
             $project,
             !$option{q{no-recover-dumps}},
@@ -108,7 +108,8 @@ L<FCM::Admin::Config|FCM::Admin::Config> for the current default.
 
 =item --svn-project-suffix=NAME
 
-Specifies the suffix added to the project name. The default is "_svn".
+Specifies the suffix added to the project name. See
+L<FCM::Admin::Config|FCM::Admin::Config> for the current default.
 
 =back
 

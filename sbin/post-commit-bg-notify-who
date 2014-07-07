@@ -1,0 +1,103 @@
+#!/usr/bin/perl
+# ------------------------------------------------------------------------------
+# (C) British Crown Copyright 2006-14 Met Office.
+#
+# This file is part of FCM, tools for managing and building source code.
+#
+# FCM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FCM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FCM. If not, see <http://www.gnu.org/licenses/>.
+# ------------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+use FCM::Admin::System qw{get_users};
+use FCM::System::CM::SVN;
+use FCM::Util;
+
+our @IGNORES = qw{Config Rel Share};
+
+my $UTIL = FCM::Util->new();
+my $CM_SYS = FCM::System::CM::SVN->new({'util' => $UTIL});
+
+if (!caller()) {
+    main(@ARGV);
+}
+
+sub main {
+    local(@ARGV) = @_;
+    my ($repos, $rev, $txn) = @ARGV;
+
+    my %layout_config = $CM_SYS->load_layout_config('file://' . $repos);
+    if (!$layout_config{'level-owner-branch'}) {
+        return;
+    }
+
+    my ($author) = $CM_SYS->stdout(qw{svnlook author -r}, $rev, $repos);
+
+    # Get list of new paths
+    my %names = (); # {$name1 => 1, $name2 => 1, ...}
+    my @lines = $CM_SYS->stdout(qw{svnlook changed -r}, $rev, $repos);
+    LINE:
+    for my $line (@lines) {
+        my $status = substr($line, 0, 1);
+        my $path = substr($line, 4);
+        my $layout = $CM_SYS->get_layout_common(
+            $repos,
+            ($status eq 'D' ? $rev - 1 : $rev),
+            $path,
+            1, # $is_local=1
+        );
+        my $owner = $layout->get_branch_owner();
+        if ($owner && $owner ne $author && !grep {$_ eq $owner} @IGNORES) {
+            $names{$owner} = 1;
+        }
+    }
+
+    # Get emails, if necessary
+    if (%names) {
+        local($FCM::Admin::System::UTIL) = $UTIL;
+        my @names = ($author, keys(%names));
+        my @emails
+            = sort grep {$_} map {$_->get_email()} values(%{get_users(@names)});
+        print(join(q{,}, @emails) . "\n");
+    }
+}
+
+1;
+__END__
+
+=head1 NAME
+
+post-commit-bg-notify-who
+
+=head1 SYNOPSIS
+
+    post-commit-bg-notify-who $REPOS $REV $TXN
+
+=head1 ARGUMENTS
+
+Accept the same arguments as a Subversion post-commit hook.
+
+=head1 DESCRIPTION
+
+This program prints email addresses who should be notified of the change. E.g.
+If this commit is performed by an author on someone else's branch.
+
+=head1 COPYRIGHT
+
+E<169> Crown copyright Met Office. All rights reserved.
+
+=cut

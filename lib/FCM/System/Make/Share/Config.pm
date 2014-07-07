@@ -177,7 +177,7 @@ sub _parse_use {
     my $DEST = $attrib_ref->{shared_util_of}{dest};
     my $inherit_ctx_list_ref = $m_ctx->get_inherit_ctx_list();
     for my $value ($entry->get_values()) {
-        $value =~ s{\A~([^/]*)}{$1 ? (getpwnam($1))[7] : (getpwuid($<))[7]}exms;
+        $value = $attrib_ref->{util}->file_tilde_expand($value);
         my $i_m_ctx = eval {
             $DEST->ctx_load(
                 $DEST->path($value, 'sys-ctx'),

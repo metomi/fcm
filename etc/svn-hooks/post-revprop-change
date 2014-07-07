@@ -18,17 +18,6 @@
 # along with FCM. If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
 set -eu
-
-REPOS="$1"
-REV="$2"
-USER="$3"
-PROPNAME="$4"
-ACTION="$5"
-
-REPOS_NAME=${REPOS##*/}
-if [[ $PROPNAME != 'svn:log' || $ACTION != 'M' ]]; then
-    echo "$REPOS_NAME: can only modify svn:log property." >&2
-    exit 1
-fi
-
-exit
+mkdir -p "$1/log"
+nohup "$FCM_HOME/sbin/post-revprop-change-bg" "$@" \
+    <&0 >>"$1/log/post-revprop-change.log" 2>&1 &

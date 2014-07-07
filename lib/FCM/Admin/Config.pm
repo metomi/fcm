@@ -21,50 +21,77 @@ use strict;
 use warnings;
 
 package FCM::Admin::Config;
+use base qw{FCM::Class::HASH};
 
 use FCM::Context::Locator;
 use FCM::Util;
+use File::Basename qw{dirname};
 use File::Spec::Functions qw{catfile};
+use FindBin;
 
-my $USER = (getpwuid($<))[0];
-my $HOME = (getpwuid($<))[7];
+our $UTIL = FCM::Util->new();
 
-# Default values for read-only attributes
-my %DEFAULT_R = (
-    admin_email     => $USER,
-    fcm_home        => $HOME,
-    fcm_wc          => catfile($HOME, qw{fcm}),
-    fcm_site_wc     => catfile($HOME, qw{fcm_admin}),
-    mirror_dests    => q{},
-    mirror_keys     => q{fcm_wc fcm_site_wc},
-    trac_gid        => scalar(getgrnam(q{apache})),
-    user_number_min => 500,
-);
+my $TRAC_LIVE_URL_TMPL = 'https://{host}/trac/{project}';
+my $USER_ID = (getpwuid($<))[0];
 
-# Default values for read-write attributes
-my %DEFAULT_RW = (
-    svn_backup_dir     => catfile($HOME, qw{svn backups}),
-    svn_dump_dir       => catfile($HOME, qw{svn dumps}),
-    svn_live_dir       => catfile($HOME, qw{svn live}),
-    svn_passwd_file    => q{passwd},
-    svn_project_suffix => q{_svn},
-    trac_backup_dir    => catfile($HOME, qw{trac backups}),
-    trac_host_id       => q{localhost},
-    trac_ini_file      => q{trac.ini},
-    trac_live_dir      => catfile($HOME, qw{trac live}),
-    trac_passwd_file   => q{trac.htpasswd},
-);
+__PACKAGE__->class({
+    # Emails
+    admin_email         => {isa => '$', default => $USER_ID},
+    notification_from   => {isa => '$'},
 
-my $INSTANCE;
+    # Location for log files
+    log_dir             => {isa => '$', default => '/var/log/fcm'},
 
-# ------------------------------------------------------------------------------
+    # FCM installation locations
+    fcm_home            => {isa => '$', default => dirname($FindBin::Bin)},
+    fcm_site_home       => {isa => '$', default => q{}},
+
+    # FCM installation mirror locations
+    mirror_dests        => {isa => '$', default => q{}},
+    mirror_keys         => {isa => '$', default => q{}},
+
+    # Subversion repositories settings
+    svn_backup_dir      => {isa => '$', default => '/var/svn/backups'},
+    svn_dump_dir        => {isa => '$', default => '/var/svn/dumps'},
+    svn_group           => {isa => '$', default => 'apache'},
+    svn_hook_path_env   => {isa => '$', default => q{}},
+    svn_live_dir        => {isa => '$', default => '/srv/svn'},
+    svn_passwd_file     => {isa => '$', default => q{}},
+    svn_project_suffix  => {isa => '$', default => q{}},
+
+    # Trac environments settings
+    trac_admin_users    => {isa => '$', default => q{}},
+    trac_backup_dir     => {isa => '$', default => '/var/trac/backups'},
+    trac_group          => {isa => '$', default => 'apache'},
+    trac_host_name      => {isa => '$', default => 'localhost'},
+    trac_ini_file       => {isa => '$', default => 'trac.ini'},
+    trac_live_dir       => {isa => '$', default => '/srv/trac'},
+    trac_live_url_tmpl  => {isa => '$', default => $TRAC_LIVE_URL_TMPL},
+    trac_passwd_file    => {isa => '$', default => q{}},
+
+    # User information tool settings
+    user_info_tool      => {isa => '$', default => 'passwd'},
+
+    # User information tool, LDAP settings
+    ldappw              => {isa => '$', default => '~/.ldappw'},
+    ldap_uri            => {isa => '$', default => q{}},
+    ldap_binddn         => {isa => '$', default => q{}},
+    ldap_basedn         => {isa => '$', default => q{}},
+    ldap_attrs          => {isa => '$', default => q{uid cn mail}},
+
+    # User information tool, passwd settings
+    passwd_email_domain => {isa => '$', default => q{}},
+    passwd_ok_uids      => {isa => '$', default => q{}},
+});
+
+
 # Returns a unique instance of this class.
+my $INSTANCE;
 sub instance {
     my ($class) = @_;
-    if (!$INSTANCE) {
-        $INSTANCE = bless({%DEFAULT_R, %DEFAULT_RW}, $class);
+    if (!defined($INSTANCE)) {
+        $INSTANCE = $class->new();
         # Load $FCM_HOME/etc/fcm/admin.cfg and $HOME/.metomi/fcm/admin.cfg
-        my $UTIL = FCM::Util->new();
         $UTIL->cfg_init(
             'admin.cfg',
             sub {
@@ -79,28 +106,6 @@ sub instance {
         );
     }
     return $INSTANCE;
-}
-
-# ------------------------------------------------------------------------------
-# Getters
-for my $name (keys(%DEFAULT_R), keys(%DEFAULT_RW)) {
-    no strict qw{refs};
-    my $getter = qq{get_$name};
-    *$getter = sub {
-        my ($self) = @_;
-        return $self->{$name};
-    };
-}
-
-# ------------------------------------------------------------------------------
-# Setters
-for my $name (keys(%DEFAULT_RW)) {
-    no strict qw{refs};
-    my $setter = qq{set_$name};
-    *$setter = sub {
-        my ($self, $value) = @_;
-        $self->{$name} = $value;
-    };
 }
 
 1;
@@ -121,6 +126,8 @@ FCM::Admin::Config
 This class is used to retrieve/store configurations required by FCM
 admininstration scripts.
 
+It is a sub-class of L<FCM::Class::HASH|FCM::Class::HASH>.
+
 =head1 METHODS
 
 =over 4
@@ -132,129 +139,190 @@ with the configurations set to their default values; and loads from the
 site/user configuration at $FCM_HOME/etc/fcm/admin.cfg and
 $HOME/.metomi/fcm/admin.cfg.
 
-=item $config->get_admin_email()
+=back
 
-Returns the e-mail address of the FCM administrator.
+=head1 ATTRIBUTES
 
-=item $config->get_fcm_home()
+Email addresses.
 
-Returns the HOME directory of the FCM administrator.
+=over 4
 
-=item $config->get_mirror_dests()
+=item admin_email
 
-Returns a string containing a list of destinations to mirror FCM installation.
+The e-mail address of the FCM administrator.
 
-=item $config->get_mirror_keys()
+=item notification_from
 
-Returns a string containing a list of source keys. Each source key should point
+Notification email address (for the "From:" field in notification emails).
+
+=back
+
+Location for log files.
+
+=over 4
+
+=item log_dir
+
+The location for log files.
+
+=back
+
+Locations of FCM installation.
+
+=over 4
+
+=item fcm_home
+
+The source path of the default FCM distribution.
+
+=item fcm_site_home
+
+The source path of the default FCM site distribution.
+
+=back
+
+Settings on how to mirror FCM installation.
+
+=over 4
+
+=item mirror_dests
+
+A space-delimited list of destinations to mirror FCM installation.
+
+=item mirror_keys
+
+A string containing a list of source keys. Each source key should point
 to a source location in this $config. The source locations will be distributed
-to the list of destinations in $config->get_mirror_dests().
+to the list of destinations in C<mirror_dests>.
 
-=item $config->get_fcm_wc()
+=back
 
-Returns the (working copy) source path of the default FCM distribution.
+Subversion repositories settings.
 
-=item $config->get_fcm_site_wc()
+=over 4
 
-Returns the (working copy) source path of the default FCM site distribution.
+=item svn_backup_dir
 
-=item $config->get_svn_backup_dir()
+The path to a directory containing the backups of SVN repositories.
 
-Returns the path to a directory containing the backups of SVN repositories.
+=item svn_dump_dir
 
-=item $config->get_svn_dump_dir()
-
-Returns the path to a directory containing the revision dumps of SVN
+The path to a directory containing the revision dumps of SVN
 repositories.
 
-=item $config->get_svn_hook_dir()
+=item svn_group
 
-Returns the path to a directory containing source files of SVN hook scripts.
+The group name in which Subversion repositories should be created in.
 
-=item $config->get_svn_live_dir()
+=item svn_hook_dir
 
-Returns the path to a directory containing the live SVN repositories.
+The path to a directory containing source files of SVN hook scripts.
 
-=item $config->get_svn_passwd_file()
+=item svn_hook_path_env
 
-Returns the base name of the SVN password file.
+The value of the PATH environment variable, in which SVN hook scripts
+should run with.
 
-=item $config->get_svn_project_suffix()
+=item svn_live_dir
 
-Returns the suffix added to the name of each SVN repository.
+The path to a directory containing the live SVN repositories.
 
-=item $config->get_trac_backup_dir()
+=item svn_passwd_file
 
-Returns the path to a directory containing the backups of Trac environments.
+The base name of the SVN password file.
 
-=item $config->get_trac_gid()
+=item svn_project_suffix
 
-Returns the group ID of the Trac server.
+The suffix added to the name of each SVN repository.
 
-=item $config->get_trac_host_id()
+=back
 
-Returns the host ID of the Trac server.
+Trac environment settings.
 
-=item $config->get_trac_ini_file()
+=over 4
 
-Returns the base name of the Trac INI file.
+=item trac_admin_users
 
-=item $config->get_trac_live_dir()
+A space-delimited list of admin users for all Trac environments.
 
-Returns the path to a directory containing the live Trac environments.
+=item trac_backup_dir
 
-=item $config->get_trac_passwd_file()
+The path to a directory containing the backups of Trac environments.
 
-Returns the base name of the Trac password file.
+=item trac_group
 
-=item $config->get_user_number_min()
+The group name in which Trac environment files should be created in.
 
-Returns the expected minimum number of users.
+=item trac_host_name
 
-=item $config->set_svn_backup_dir($value)
+The host name of the Trac server, from the user's perspective.
 
-Sets the path to a directory containing the backups of SVN repositories.
+=item trac_ini_file
 
-=item $config->set_svn_dump_dir($value)
+The base name of the Trac INI file.
 
-Sets the path to a directory containing the revision dumps of SVN
-repositories.
+=item trac_live_dir
 
-=item $config->set_svn_hook_dir($value)
+The path to a directory containing the live Trac environments.
 
-Sets the path to a directory containing source files of SVN hook scripts.
+=item trac_live_url_tmpl
 
-=item $config->set_svn_live_dir($value)
+The template string for determining the URL of the Trac environment of a
+project.
 
-Sets the path to a directory containing the live SVN repositories.
+=item trac_passwd_file
 
-=item $config->set_svn_passwd_file($value)
+The base name of the Trac password file.
 
-Sets the base name of the SVN password file.
+=back
 
-=item $config->set_svn_project_suffix($value)
+=over 4
 
-Sets the suffix added to the name of each SVN repository.
+User information tool settings.
 
-=item $config->set_trac_backup_dir($value)
+=item user_info_tool
 
-Sets the path to a directory containing the backups of Trac environments.
+The name of the tool for obtaining user information.
 
-=item $config->set_trac_host_id($id)
+=back
 
-Sets the host ID of the Trac server.
+LDAP settings, only relevant if C<user_info_tool = ldap>
 
-=item $config->set_trac_ini_file($value)
+=over 4
 
-Sets the base name of the Trac INI file.
+=item ldappw
 
-=item $config->set_trac_live_dir($value)
+File containing the password to the LDAP server, if required.
 
-Sets the path to a directory containing the live Trac environments.
+=item ldap_uri
 
-=item $config->set_trac_passwd_file($value)
+The URI of the LDAP server.
 
-Sets the base name of the Trac password file.
+=item ldap_binddn
+
+The DN in the LDAP server to bind with to search the directory.
+
+=item ldap_basedn
+
+The DN in the LDAP server that is the base for a search.
+
+=item ldap_attrs
+
+The attributes for UID, common name and email in the LDAP directory.
+
+=back
+
+PASSWD settings, only relevant if user_info_tool = passwd
+
+=over 4
+
+=item passwd_email_domain
+
+Domain name to suffix user IDs to create an email address.
+
+=item passwd_ok_uids
+
+UIDs < 1000 (with GID < 1000) that are considered normal users.
 
 =back
 

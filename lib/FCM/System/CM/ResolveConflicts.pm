@@ -369,7 +369,8 @@ sub _cm_tree_conflict_get_local_rename {
 
     # Get the pre-existing working copy files.
     my @wc_files
-        = grep {$_ && $_ =~ qr{[^/]$}msx} $attrib_ref->{svn}->stdout(qw{ls -R});
+        = grep {$_ && $_ =~ qr{[^/]$}msx}
+            $attrib_ref->{svn}->stdout(qw{svn ls -R});
 
     # Examine the files added with history at the revision log.
     # A single rename will be detected here.
@@ -533,7 +534,7 @@ sub _cm_tree_conflict_get_actions_for_laia {
     my $cdir = dirname($cfile);
     sub {
         if (!$keep_local) {
-            my $content = $attrib_ref->{svn}->stdout('cat', $url);
+            my $content = $attrib_ref->{svn}->stdout(qw{svn cat}, $url);
             $attrib_ref->{util}->file_save($cfile, $content);
         }
     };

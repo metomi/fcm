@@ -1,6 +1,78 @@
 #-------------------------------------------------------------------------------
 # FCM Admin Configuration Example
+# See also the Perl module FCM::Admin::Config
 #-------------------------------------------------------------------------------
-# For detail, please refer to the Perl module:
-# FCM::Admin::Config
+# To use, copy this file to "admin.cfg".
+# Uncomment a line to activate a setting.
+# Default values are given below.
 #-------------------------------------------------------------------------------
+## Email address of FCM system admin
+#  admin_email = $USER
+## Notification email address (for the "From:" field in notification emails).
+#  notification_from =
+
+## Location for log files
+#  log_dir = /var/log/fcm
+
+## Location where FCM is installed
+#  fcm_home = $FCM_HOME
+## Location where FCM site specific items are installed
+#  fcm_site_home =
+
+## Locations (space delimited) to mirror items in "mirror_keys"
+#  mirror_dests =
+## Items (space delimited) to mirror to "mirror_dests", e.g. "fcm_site_home"
+#  mirror_keys =
+
+## Location to backup Subversion repositories
+#  svn_backup_dir = /var/svn/backups
+## Location to create dumps for commits to Subversion repositories
+#  svn_dump_dir = /var/svn/dumps
+### Name of group where Subversion repositories should be created in
+#  svn_group = apache
+## PATH environment variable for Subversion hooks
+#  svn_hook_path_env =
+## Location to serve Subversion repositories
+#  svn_live_dir = /srv/svn
+## Name of svnserve password file
+#  svn_passwd_file =
+## File name suffix that may be added to each Subversion repository
+#  svn_project_suffix =
+
+## List of admin users for all Trac environments
+#  trac_admin_users =
+## Location to backup Trac environments
+#  trac_backup_dir = /var/trac/backups
+### Name of group where Trac files should be created in
+#  trac_group = apache
+## Host name (from a user's perspective) where Trac environments are served
+#  trac_host_name = localhost
+## Name of "trac.ini" in each Trac environment
+#  trac_ini_file = trac.ini
+## Location to serve Trac environments
+#  trac_live_dir = /srv/trac
+## Template to create a Trac environment URL (from a user's perspective)
+#  trac_live_url_tmpl = https://{host}/trac/{project}
+## Name of Trac password file (under Apache)
+#  trac_passwd_file =
+
+## Specify the name of the tool for obtaining user info (ldap or passwd)
+#  user_info_tool = passwd
+
+## LDAP settings, only relevant if user_info_tool = ldap
+## File containing the password to the LDAP server, if required
+# ldappw = ~/.ldappw
+## The URI of the LDAP server
+# ldap_uri =
+## The DN in the LDAP server to bind with to search the directory
+# ldap_binddn =
+## The DN in the LDAP server that is the base for a search
+# ldap_basedn =
+## The attributes for UID, common name and email in the LDAP directory
+# ldap_attrs = uid cn mail
+
+## PASSWD settings, only relevant if user_info_tool = passwd
+## Domain name to suffix user IDs to create an email address
+#  passwd_email_domain =
+## UIDs < 1000 (with GID < 1000) that are considered normal users
+#  passwd_ok_uids =

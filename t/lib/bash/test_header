@@ -56,6 +56,25 @@
 #         -e if not specified.
 #     file_grep TEST_KEY PATTERN FILE
 #         Run "grep -q PATTERN FILE". pass/fail $TEST_KEY accordingly.
+#     FINALLY
+#         This is run on EXIT or INT to remove the temporary working directory
+#         for the test. Call FINALLY_MORE if it is declared.
+#
+# VARIABLES
+#     FCM_HOME
+#         Root of FCM's installation. (Exported.)
+#     SIGNALS
+#         List of signals trapped by FINALLY, currently EXIT and INT.
+#     SVN_VERSION_IS_16
+#         True if "svn --version" returns 1.6*.
+#     TEST_DIR
+#         Temporary directory that is also the working directory for this test.
+#     TEST_KEY_BASE
+#         Base root name of current test file.
+#     TEST_NUMBER
+#         Test number of latest test.
+#     TEST_SOURCE_DIR
+#         Directory containing the current test file.
 #-------------------------------------------------------------------------------
 set -eu
 
@@ -69,6 +88,10 @@ function FINALLY() {
         cd ~
         rm -rf $TEST_DIR
     fi
+    if declare -F FINALLY_MORE >/dev/null; then
+        FINALLY_MORE
+    fi
+
 }
 for S in $SIGNALS; do
     trap "FINALLY $S" $S
@@ -126,7 +149,7 @@ function file_cmp() {
     local TEST_KEY=$1
     local FILE_ACTUAL=$2
     local FILE_EXPECT=${3:--}
-    if cmp $FILE_ACTUAL $FILE_EXPECT; then
+    if diff -u $FILE_EXPECT $FILE_ACTUAL >&2; then
         pass $TEST_KEY
         return
     fi

@@ -44,15 +44,18 @@ use FCM::Admin::Util qw{
 use Fcntl qw{:mode}; # for S_IRGRP, S_IWGRP, S_IROTH, etc
 use File::Basename qw{basename dirname};
 use File::Find qw{find};
-use File::Spec;
+use File::Spec::Functions qw{catfile rel2abs};
 use File::Temp qw{tempdir tempfile};
+use IO::Compress::Gzip qw{gzip};
 use IO::Dir;
 use IO::Pipe;
 use IO::Zlib;
 use List::Util qw{first};
+use POSIX qw{strftime};
 use Text::ParseWords qw{shellwords};
 
 our @EXPORT_OK = qw{
+    add_svn_repository
     add_trac_environment
     backup_svn_repository
     backup_trac_environment
@@ -64,6 +67,7 @@ our @EXPORT_OK = qw{
     get_projects_from_trac_backup
     get_projects_from_trac_live
     get_users
+    housekeep_svn_hook_logs
     install_svn_hook
     manage_users_in_svn_passwd
     manage_users_in_trac_passwd
@@ -72,15 +76,51 @@ our @EXPORT_OK = qw{
     recover_trac_environment
     recover_trac_files
     vacuum_trac_env_db
+    verify_users
 };
 
 our $NO_OVERWRITE = 1;
 our $BUFFER_SIZE = 4096;
+our @SVN_REPOS_ROOT_HOOK_ITEMS = qw{svnperms.conf};
+our %USER_INFO_TOOL_OF = (
+    'ldap'   => 'FCM::Admin::Users::LDAP',
+    'passwd' => 'FCM::Admin::Users::Passwd',
+);
+our $USER_INFO_TOOL;
+
+our $UTIL = $FCM::Admin::Config::UTIL;
+my $CONFIG = FCM::Admin::Config->instance();
+my $RUNNER = FCM::Admin::Runner->instance();
+
+# ------------------------------------------------------------------------------
+# Adds a new Subversion repository.
+sub add_svn_repository {
+    my ($project_name) = @_;
+    my $project = FCM::Admin::Project->new({name => $project_name});
+    if (-e $project->get_svn_live_path()) {
+        die(sprintf(
+            "%s: Subversion repository already exists at %s.\n",
+            $project_name,
+            $project->get_svn_live_path(),
+        ));
+    }
+    my $repos_path = $project->get_svn_live_path();
+    $RUNNER->run(
+        "creating Subversion repository at $repos_path",
+        sub {!system(qw{svnadmin create}, $repos_path)},
+    );
+    my $group = $CONFIG->get_svn_group();
+    if ($group) {
+        _chgrp_and_chmod($project->get_svn_live_path(), $group);
+    }
+    install_svn_hook($project);
+    housekeep_svn_hook_logs($project);
+}
 
 # ------------------------------------------------------------------------------
 # Adds a new Trac environment.
 sub add_trac_environment {
-    my ($project_name, $admin_user_list_ref, $authorised_option) = @_;
+    my ($project_name) = @_;
     my $project = FCM::Admin::Project->new({name => $project_name});
     if (-e $project->get_trac_live_path()) {
         die(sprintf(
@@ -93,11 +133,11 @@ sub add_trac_environment {
     if (-d $project->get_svn_live_path()) {
         @repository_arguments = (q{svn}, $project->get_svn_live_path());
     }
-    my $RUNNER = sub{FCM::Admin::Runner->instance()->run(@_)};
+    my $RUN = sub{$RUNNER->run(@_)};
     my $TRAC_ADMIN = sub {
         my ($log, @args) = @_;
         my @command = (q{trac-admin}, $project->get_trac_live_path(), @args);
-        $RUNNER->($log, sub {!system(@command)});
+        $RUN->($log, sub {!system(@command)});
     };
     $TRAC_ADMIN->(
         "initialising Trac environment",
@@ -107,7 +147,10 @@ sub add_trac_environment {
         @repository_arguments,
         q{--inherit=../../trac.ini},
     );
-    _chgrp_and_chmod_trac_environment_for($project);
+    my $group = $CONFIG->get_trac_group();
+    if ($group) {
+        _chgrp_and_chmod($project->get_trac_live_path(), $group);
+    }
     for my $item (qw{component1 component2}) {
         $TRAC_ADMIN->(
             "removing example component $item", q{component remove}, $item,
@@ -136,35 +179,29 @@ sub add_trac_environment {
     $TRAC_ADMIN->(
         "adding admin permission", qw{permission add admin TRAC_ADMIN},
     );
-    if (ref($admin_user_list_ref) eq 'ARRAY') {
-        for my $item (@{$admin_user_list_ref}) {
-            $TRAC_ADMIN->(
-                "adding admin user $item", qw{permission add}, $item, q{admin},
-            );
-        }
+    my @admin_users = shellwords($CONFIG->get_trac_admin_users());
+    for my $item (@admin_users) {
+        $TRAC_ADMIN->(
+            "adding admin user $item", qw{permission add}, $item, q{admin},
+        );
     }
-    if ($authorised_option) {
-        for my $item (qw{TICKET_CREATE TICKET_MODIFY WIKI_CREATE WIKI_MODIFY}) {
-            $TRAC_ADMIN->(
-                "removing authenticated write permission",
-                qw{permission remove authenticated}, $item,
-            );
-            $TRAC_ADMIN->(
-                "adding authorised write permission",
-                qw{permission add authorised}, $item,
-            );
-	}
-    }
-    my $auth = $authorised_option ? q{authorised} : q{authenticated};
     $TRAC_ADMIN->(
-        "adding TICKET_EDIT_CC permission to $auth",
-        qw{permission add}, $auth, qw{TICKET_EDIT_CC},
+        "adding TICKET_EDIT_CC permission to authenticated",
+        qw{permission add}, 'authenticated', qw{TICKET_EDIT_CC},
     );
     $TRAC_ADMIN->(
-        "adding TICKET_EDIT_DESCRIPTION permission to $auth",
-        qw{permission add}, $auth, qw{TICKET_EDIT_DESCRIPTION},
+        "adding TICKET_EDIT_DESCRIPTION permission to authenticated",
+        qw{permission add}, 'authenticated', qw{TICKET_EDIT_DESCRIPTION},
     );
-    $RUNNER->(
+    $TRAC_ADMIN->(
+        "adding TICKET_EDIT_COMMENT permission to authenticated",
+        qw{permission add}, 'authenticated', qw{TICKET_EDIT_COMMENT},
+    );
+    $RUN->(
+        "adding names and emails of users",
+        sub {manage_users_in_trac_db_of($project, {get_users()})},
+    );
+    $RUN->(
         "updating configuration file",
         sub {
             my $trac_ini_path = $project->get_trac_live_ini_path();
@@ -188,12 +225,12 @@ sub add_trac_environment {
             return $trac_ini->RewriteConfig();
         },
     );
-    $RUNNER->(
+    $RUN->(
         "updating InterTrac",
         sub {
-            my $trac_ini_path = File::Spec->catfile(
-                FCM::Admin::Config->instance()->get_trac_live_dir(),
-                FCM::Admin::Config->instance()->get_trac_ini_file(),
+            my $trac_ini_path = catfile(
+                $CONFIG->get_trac_live_dir(),
+                $CONFIG->get_trac_ini_file(),
             );
             my $trac_ini = Config::IniFiles->new(q{-file} => $trac_ini_path);
             if (!$trac_ini) {
@@ -224,17 +261,22 @@ sub add_trac_environment {
 # Backup the SVN repository of a project.
 sub backup_svn_repository {
     my ($option_hash_ref, $project) = @_;
-    my $RUNNER = sub {FCM::Admin::Runner->instance()->run(@_)};
+    my $RUN = sub {FCM::Admin::Runner->instance()->run(@_)};
     if (!exists($option_hash_ref->{'no-pack'})) {
-        $RUNNER->(
+        $RUN->(
             sprintf("packing %s", $project->get_svn_live_path()),
             sub {!system(qw{svnadmin pack}, $project->get_svn_live_path())},
         );
     }
-    my $work_dir = tempdir(CLEANUP => 1);
-    my $work_path
-        = File::Spec->catfile($work_dir, $project->get_svn_base_name());
-    $RUNNER->(
+    my $base_name = $project->get_svn_base_name();
+    run_mkpath($CONFIG->get_svn_backup_dir());
+    my $work_dir = tempdir(
+        "$base_name.backup.XXXXXX",
+        DIR => $CONFIG->get_svn_backup_dir(),
+        CLEANUP => 1,
+    );
+    my $work_path = catfile($work_dir, $base_name);
+    $RUN->(
         sprintf(
             "hotcopying %s to %s", $project->get_svn_live_path(), $work_path,
         ),
@@ -245,7 +287,7 @@ sub backup_svn_repository {
     );
     if (!exists($option_hash_ref->{'no-verify-integrity'})) {
         my $VERIFIED_REVISION_REGEX = qr{\A\*\s+Verified\s+revision\s+\d+\.}xms;
-        $RUNNER->(
+        $RUN->(
             "verifying integrity of SVN repository of $project",
             sub {
                 my $pipe = IO::Pipe->new();
@@ -264,23 +306,29 @@ sub backup_svn_repository {
     }
     _create_backup_archive(
         $work_path,
-        FCM::Admin::Config->instance()->get_svn_backup_dir(),
+        $CONFIG->get_svn_backup_dir(),
         $project->get_svn_archive_base_name(),
     );
     if (!exists($option_hash_ref->{'no-housekeep-dumps'})) {
-        my $dump_path = $project->get_svn_dump_path();
+        my $base_name = $project->get_svn_base_name();
+        my $dump_path = $CONFIG->get_svn_dump_dir();
         my $youngest = _svnlook_youngest($work_path);
         # Note: could use SVN::Repos for "youngest"
-        $RUNNER->(
-            "housekeeping dumps in $dump_path",
+        $RUN->(
+            "housekeeping $dump_path/$base_name-*.gz",
             sub {
                 my @rev_dump_paths;
                 _get_files_from(
                     $dump_path,
                     sub {
-                        my ($base_name, $path) = @_;
-                        my $rev = basename($base_name, '.gz');
-                        if ($rev > $youngest) {
+                        my ($dump_base_name, $path) = @_;
+                        my ($name, $rev)
+                            = $dump_base_name =~ qr{\A(.*)-(\d+)\.gz\z}msx;
+                        if (    !$name
+                            ||  !$rev
+                            ||  $name ne $base_name
+                            ||  $rev > $youngest
+                        ) {
                             return;
                         }
                         push(@rev_dump_paths, $path);
@@ -293,6 +341,7 @@ sub backup_svn_repository {
             }
         );
     }
+    run_rmtree($work_dir);
     return 1;
 }
 
@@ -301,16 +350,15 @@ sub backup_svn_repository {
 sub backup_trac_environment {
     my ($option_hash_ref, $project) = @_;
     my $trac_live_path = $project->get_trac_live_path();
-    # Make sure the project INI file is owned by the correct group
-    #my $project_trac_ini_file = $project->get_trac_live_ini_path();
-    #my $gid = FCM::Admin::Config->instance()->get_trac_gid();
-    #FCM::Admin::Runner->instance()->run(
-    #    "changing group ownership for $project_trac_ini_file",
-    #    sub {return chown(-1, $gid, $project_trac_ini_file)},
-    #);
-    my $work_dir = tempdir(CLEANUP => 1);
-    my $work_path = File::Spec->catfile($work_dir, $project->get_name());
-    FCM::Admin::Runner->instance()->run_with_retries(
+    my $base_name = $project->get_name();
+    run_mkpath($CONFIG->get_trac_backup_dir());
+    my $work_dir = tempdir(
+        "$base_name.backup.XXXXXX",
+        DIR => $CONFIG->get_trac_backup_dir(),
+        CLEANUP => 1,
+    );
+    my $work_path = catfile($work_dir, $base_name);
+    $RUNNER->run_with_retries(
         sprintf(
             qq{hotcopying %s to %s},
             $project->get_trac_live_path(),
@@ -326,9 +374,9 @@ sub backup_trac_environment {
         },
     );
     if (!exists($option_hash_ref->{'no-verify-integrity'})) {
-        my $db_path = File::Spec->catfile($work_path, qw{db trac.db});
-        my $db_name = File::Spec->catfile($project->get_name(), qw{db trac.db});
-        FCM::Admin::Runner->instance()->run(
+        my $db_path = catfile($work_path, qw{db trac.db});
+        my $db_name = catfile($project->get_name(), qw{db trac.db});
+        $RUNNER->run(
             "checking $db_name for integrity",
             sub {
                 my $db_handle
@@ -344,9 +392,10 @@ sub backup_trac_environment {
     }
     _create_backup_archive(
         $work_path,
-        FCM::Admin::Config->instance()->get_trac_backup_dir(),
+        $CONFIG->get_trac_backup_dir(),
         $project->get_trac_archive_base_name(),
     );
+    run_rmtree($work_dir);
     return 1;
 }
 
@@ -354,7 +403,6 @@ sub backup_trac_environment {
 # Backup misc files in the Trac live directory to the Trac backup directory.
 sub backup_trac_files {
     # (no argument)
-    my $CONFIG = FCM::Admin::Config->instance();
     _copy_files($CONFIG->get_trac_live_dir(), $CONFIG->get_trac_backup_dir());
 }
 
@@ -362,13 +410,13 @@ sub backup_trac_files {
 # Distributes the central FCM working copy to standard locations.
 sub distribute_wc {
     my $rc = 1;
-    my $CONFIG = FCM::Admin::Config->instance();
-    my $RUNNER = FCM::Admin::Runner->instance();
     my @RSYNC_OPTS = qw{--timeout=1800 --exclude=.*};
     my @sources;
     for my $source_key (shellwords($CONFIG->get_mirror_keys())) {
         my $method = "get_$source_key";
-        push(@sources, $CONFIG->$method());
+        if ($CONFIG->can($method)) {
+            push(@sources, $CONFIG->$method());
+        }
     }
     for my $dest (shellwords($CONFIG->get_mirror_dests())) {
         $rc = $RUNNER->run_continue(
@@ -412,11 +460,10 @@ sub filter_projects {
 # Returns a list of projects by searching the backup SVN directory.
 sub get_projects_from_svn_backup {
     # (no dummy argument)
-    my $SVN_PROJECT_SUFFIX
-        = FCM::Admin::Config->instance()->get_svn_project_suffix();
+    my $SVN_PROJECT_SUFFIX = $CONFIG->get_svn_project_suffix();
     my @projects;
     _get_files_from(
-        FCM::Admin::Config->instance()->get_svn_backup_dir(),
+        $CONFIG->get_svn_backup_dir(),
         sub {
             my ($base_name, $path) = @_;
             my $name = $base_name;
@@ -436,11 +483,10 @@ sub get_projects_from_svn_backup {
 # Returns a list of projects by searching the live SVN directory.
 sub get_projects_from_svn_live {
     # (no dummy argument)
-    my $SVN_PROJECT_SUFFIX
-        = FCM::Admin::Config->instance()->get_svn_project_suffix();
+    my $SVN_PROJECT_SUFFIX = $CONFIG->get_svn_project_suffix();
     my @projects;
     _get_files_from(
-        FCM::Admin::Config->instance()->get_svn_live_dir(),
+        $CONFIG->get_svn_live_dir(),
         sub {
             my ($base_name, $path) = @_;
             my $name = $base_name;
@@ -460,7 +506,7 @@ sub get_projects_from_trac_backup {
     # (no dummy argument)
     my @projects;
     _get_files_from(
-        FCM::Admin::Config->instance()->get_trac_backup_dir(),
+        $CONFIG->get_trac_backup_dir(),
         sub {
             my ($base_name, $path) = @_;
             my $name = $base_name;
@@ -482,7 +528,7 @@ sub get_projects_from_trac_live {
     # (no dummy argument)
     my @projects;
     _get_files_from(
-        FCM::Admin::Config->instance()->get_trac_live_dir(),
+        $CONFIG->get_trac_live_dir(),
         sub {
             my ($name, $path) = @_;
             if (!-d $path) {
@@ -495,80 +541,89 @@ sub get_projects_from_trac_live {
 }
 
 # ------------------------------------------------------------------------------
-# Gets a list of users using the mail aliases and the POSIX password DB.
+# Return a HASH of valid users. If @only_users, then return only users matching
+# these IDs.
 sub get_users {
-    # (no dummy argument)
-    my %email_of;
-    FCM::Admin::Runner->instance()->run(
-        "retrieving entries from the mail aliases",
-        sub {
-            my $pipe = IO::Pipe->new();
-            $pipe->reader(qw{getent aliases});
-            ALIASES_LINE:
-            while (my $line = $pipe->getline()) {
-                chomp($line);
-                my ($name, @emails) = split(qr{\s*[:,]\s*}xms, $line);
-                if (scalar(@emails) != 1) {
-                    next ALIASES_LINE;
-                }
-                $emails[0] =~ s{\s}{}gxms;
-                $emails[0] =~ s{\@metoffice\.com\z}{\@metoffice.gov.uk}xms;
-                if ($emails[0] !~ qr{\.uk\z}xms) { # is a .uk e-mail address
-                    next ALIASES_LINE;
-                }
-                $email_of{$name} = $emails[0];
+    my @only_users = @_;
+    if (!defined($USER_INFO_TOOL)) {
+        my $name = $CONFIG->get_user_info_tool();
+        my $class = $UTIL->class_load($USER_INFO_TOOL_OF{$name});
+        $USER_INFO_TOOL = $class->new({util => $UTIL});
+    }
+    return $USER_INFO_TOOL->get_users_info(@only_users);
+}
+
+# ------------------------------------------------------------------------------
+# Housekeep logs generated by hook scripts of a SVN project.
+sub housekeep_svn_hook_logs {
+    my ($project) = @_;
+    my $project_path = $project->get_svn_live_path();
+    my $hook_source_dir = catfile($CONFIG->get_fcm_home(), 'etc', 'svn-hooks');
+    my $today = strftime("%Y%m%d", gmtime());
+    my $date_p1w = strftime("%Y%m%d", gmtime(time() - 604800)); # 1 week ago
+    my $date_p4w = strftime("%Y%m%d", gmtime(time() - 2419200)); # 4 weeks ago
+    my @hook_names = map {basename($_)} glob(catfile($hook_source_dir, q{*}));
+    for my $hook_name (sort @hook_names) {
+        my $log_path = catfile($project_path, 'log', $hook_name . '.log');
+        my $log_path_cur;
+        # Determine whether log file is more than a week old
+        if (    -l $log_path
+            &&  index(readlink($log_path), $hook_name . '.log.') == 0
+        ) {
+            my $path = readlink($log_path);
+            my ($date) = $path =~ qr{\.log\.(\d{8}\d*)\z}msx;
+            if ($date && $date > $date_p1w) {
+                $log_path_cur = catfile($project_path, 'log', $path);
             }
-            return $pipe->close();
-        },
-    );
-    my %user_of;
-    USER:
-    while (my ($name, $gecos, $dir, $shell) = (getpwent())[0, 6, 7, 8]) {
-        if (exists($user_of{$name})) {
-            next USER;
         }
-        if (!$dir || index($dir, '/home') != 0) {
-            next USER;
+        # Create latest log, if necessary
+        if (!$log_path_cur) {
+            $log_path_cur = "$log_path.$today";
+            write_file($log_path_cur);
         }
-        if (!$shell || $shell =~ qr{false\z}xms) { # ends with "false"
-            next USER;
+        if (    !-e $log_path
+            ||  !-l $log_path
+            ||  readlink($log_path) ne basename($log_path_cur)
+        ) {
+            run_rmtree($log_path);
+            run_symlink(basename($log_path_cur), $log_path);
         }
-        my $email = $email_of{$name};
-        if (!$email && $name =~ qr{\A([a-z]+(?:\.[a-z]+)+)\z}xms) {
-            # Handles user IDs such as john.smith
-            $email = $name . q{@metoffice.gov.uk};
+        # Remove logs older than $keep_threshold
+        for my $path (
+            glob(catfile($project_path, 'log', $hook_name . '*.log.*'))
+        ) {
+            my ($date, $dot_gz) = $path =~ qr{\.log\.(\d{8}\d*)(\.gz)?\z}msx;
+            if (    $date && $date <= $date_p4w
+                ||  $date && $date <= $date_p1w && !-s $path
+            ) {
+                run_rmtree($path);
+            }
+            elsif ($date && $date <= $date_p1w && !$dot_gz) {
+                $RUNNER->run(
+                    "gzip $path",
+                    sub {gzip($path, "$path.gz") && unlink($path)},
+                );
+            }
         }
-        if (!$email) {
-            next USER;
-        }
-        $user_of{$name} = FCM::Admin::User->new({
-            name         => $name,
-            display_name => (split(qr{\s*,\s*}xms, $gecos))[0],
-                            # $gecos contains "display name, location, phone"
-            email        => $email,
-        });
     }
-    endpwent();
-    if (keys(%user_of) < FCM::Admin::Config->instance()->get_user_number_min()) {
-        die("Number of users below minimum threshold.\n");
+    my $group = $CONFIG->get_svn_group();
+    if ($group) {
+        _chgrp_and_chmod(catfile($project_path, 'log'), $group);
     }
-    return (wantarray() ? %user_of : \%user_of);
 }
 
 # ------------------------------------------------------------------------------
 # Installs hook scripts to a SVN project.
 sub install_svn_hook {
-    my ($project) = @_;
+    my ($project, $clean_mode) = @_;
     my %path_of;
-    my $CONFIG = FCM::Admin::Config->instance();
     for (
-        [$CONFIG->get_fcm_wc(), 'svn-hooks'],
-        [$CONFIG->get_fcm_site_wc(), 'svn-hooks'],
-        [$CONFIG->get_fcm_site_wc(), 'svn-hooks', $project->get_name()],
+        [$CONFIG->get_fcm_site_home(), 'svn-hooks', $project->get_name()],
+        [$CONFIG->get_fcm_home(), 'etc', 'svn-hooks'],
     ) {
-        my $dir = File::Spec->catfile(@{$_});
+        my $hook_source_dir = catfile(@{$_});
         _get_files_from(
-            $dir,
+            $hook_source_dir,
             sub {
                 my ($base_name, $path) = @_;
                 if (index($base_name, q{.}) == 0 || -d $path) {
@@ -578,23 +633,60 @@ sub install_svn_hook {
             },
         );
     }
-    for my $key (keys(%path_of)) {
+    # Write hook environment configuration
+    my $project_path = $project->get_svn_live_path();
+    my $conf_dest = catfile($project_path, qw{conf hooks-env});
+    write_file(
+        $conf_dest,
+        "[default]\n",
+        map {sprintf("%s=%s\n", @{$_});}
+        grep {$_->[1];} (
+            ['FCM_HOME', $CONFIG->get_fcm_home()],
+            ['FCM_SVN_HOOK_ADMIN_EMAIL', $CONFIG->get_admin_email()],
+            ['FCM_SVN_HOOK_COMMIT_DUMP_DIR', $CONFIG->get_svn_dump_dir()],
+            ['FCM_SVN_HOOK_NOTIFICATION_FROM', $CONFIG->get_notification_from()],
+            ['FCM_SVN_HOOK_REPOS_SUFFIX', $CONFIG->get_svn_project_suffix()],
+            ['FCM_SVN_HOOK_TRAC_ROOT_DIR', $CONFIG->get_trac_live_dir()],
+            ['PATH', $CONFIG->get_svn_hook_path_env()],
+            ['TZ', 'UTC'],
+        )
+    );
+    # Install hook scripts and associated files
+    for my $key (sort keys(%path_of)) {
         my $hook_source = $path_of{$key};
-        my $hook_dest
-            = File::Spec->catfile($project->get_svn_live_hook_path(), $key);
-        if (-l $hook_dest) {
-            my $symlink = readlink($hook_dest);
-            if ($symlink ne $hook_source) {
-                run_rmtree($hook_dest);
-                run_symlink($hook_source, $hook_dest);
+        my $hook_dest = catfile($project->get_svn_live_hook_path(), $key);
+        run_copy($hook_source, $hook_dest);
+    }
+    # Install hook configurations from repository root, e.g. svnperms.conf
+    for my $line (qx{svnlook tree -N $project_path}) {
+        chomp($line);
+        my ($name) = $line =~ qr{\A\s*(.*)\z}msx;
+        if (grep {$_ eq $name} @SVN_REPOS_ROOT_HOOK_ITEMS) {
+            my $dest = catfile($project->get_svn_live_hook_path(), $name);
+            $RUNNER->run(
+                "install $dest <- ^/$name",
+                sub {
+                    my $source = "file://$project_path/$name";
+                    !system(qw{svn export -q --force}, $source, $dest)
+                        || die("\n");
+                    chmod((stat($dest))[2] | S_IRGRP | S_IROTH, $dest);
+                },
+            );
+            $path_of{$name} = "^/$name";
+        }
+    }
+    # Clean hook destination, if necessary
+    if ($clean_mode) {
+        my $hook_path = $project->get_svn_live_hook_path();
+        for my $path (sort glob(catfile($hook_path, q{*}))) {
+            if (!exists($path_of{basename($path)})) {
+                run_rmtree($path);
             }
         }
-        else {
-            if (-e $hook_dest) {
-                run_rename($hook_dest, "$hook_dest.old");
-            }
-            run_symlink($hook_source, $hook_dest);
-        }
+    }
+    my $group = $CONFIG->get_svn_group();
+    if ($group) {
+        _chgrp_and_chmod($project->get_svn_live_hook_path(), $group);
     }
     return 1;
 }
@@ -603,11 +695,14 @@ sub install_svn_hook {
 # Updates the SVN password file.
 sub manage_users_in_svn_passwd {
     my ($user_ref) = @_;
-    my $svn_passwd_file = File::Spec->catfile(
-        FCM::Admin::Config->instance()->get_svn_live_dir(),
-        FCM::Admin::Config->instance()->get_svn_passwd_file(),
+    if (!$CONFIG->get_svn_passwd_file()) {
+        return 1;
+    }
+    my $svn_passwd_file = catfile(
+        $CONFIG->get_svn_live_dir(),
+        $CONFIG->get_svn_passwd_file(),
     );
-    FCM::Admin::Runner->instance()->run(
+    $RUNNER->run(
         "updating $svn_passwd_file",
         sub {
             my $USERS_SECTION = q{users};
@@ -625,7 +720,7 @@ sub manage_users_in_svn_passwd {
             }
             for my $name (($svn_passwd_ini->Parameters($USERS_SECTION))) {
                 if (!exists($user_ref->{$name})) {
-                    FCM::Admin::Runner->instance()->run(
+                    $RUNNER->run(
                         "removing $name from $svn_passwd_file",
                         sub {
                             return
@@ -637,11 +732,15 @@ sub manage_users_in_svn_passwd {
             }
             for my $user (values(%{$user_ref})) {
                 if (!defined($svn_passwd_ini->val($USERS_SECTION, "$user"))) {
-                    FCM::Admin::Runner->instance()->run(
+                    $RUNNER->run(
                         "adding $user to $svn_passwd_file",
-                        sub {return $svn_passwd_ini->newval(
-                            $USERS_SECTION, $user->get_name(), q{},
-                        )},
+                        sub {
+                            my $password = qx{uuidgen};
+                            chomp($password);
+                            $svn_passwd_ini->newval(
+                                $USERS_SECTION, $user->get_name(), $password,
+                            ),
+                        },
                     );
                     $is_changed = 1;
                 }
@@ -656,11 +755,14 @@ sub manage_users_in_svn_passwd {
 # Updates the Trac password file.
 sub manage_users_in_trac_passwd {
     my ($user_ref) = @_;
-    my $trac_passwd_file = File::Spec->catfile(
-        FCM::Admin::Config->instance()->get_trac_live_dir(),
-        FCM::Admin::Config->instance()->get_trac_passwd_file(),
+    if (!$CONFIG->get_trac_passwd_file()) {
+        return 1;
+    }
+    my $trac_passwd_file = catfile(
+        $CONFIG->get_trac_live_dir(),
+        $CONFIG->get_trac_passwd_file(),
     );
-    FCM::Admin::Runner->instance()->run(
+    $RUNNER->run(
         "updating $trac_passwd_file",
         sub {
             my %old_names;
@@ -692,7 +794,7 @@ sub manage_users_in_trac_passwd {
             }
             if (%old_names || %new_names) {
                 for my $name (keys(%old_names)) {
-                    FCM::Admin::Runner->instance()->run(
+                    $RUNNER->run(
                         "removing $name from $trac_passwd_file",
                         sub {
                             return !system(
@@ -702,7 +804,7 @@ sub manage_users_in_trac_passwd {
                     );
                 }
                 for my $name (keys(%new_names)) {
-                    FCM::Admin::Runner->instance()->run(
+                    $RUNNER->run(
                         "adding $name to $trac_passwd_file",
                         sub {
                             return !system(
@@ -724,7 +826,7 @@ sub manage_users_in_trac_passwd {
 # Manages the session* tables in the DB of a Trac environment.
 sub manage_users_in_trac_db_of {
     my ($project, $user_ref) = @_;
-    return FCM::Admin::Runner->instance()->run_with_retries(
+    return $RUNNER->run_with_retries(
         sprintf(
             qq{checking/updating %s},
             $project->get_trac_live_db_path(),
@@ -737,52 +839,49 @@ sub manage_users_in_trac_db_of {
 # Recovers a SVN repository from its backup.
 sub recover_svn_repository {
     my ($project, $recover_dumps_option, $recover_hooks_option) = @_;
-    my $config = FCM::Admin::Config->instance();
     if (-e $project->get_svn_live_path()) {
         die(sprintf(
             "%s: live repository exists.\n",
             $project->get_svn_live_path(),
         ));
     }
-    run_mkpath($config->get_svn_live_dir());
+    run_mkpath($CONFIG->get_svn_live_dir());
     my $base_name = $project->get_svn_base_name();
     my $work_dir = tempdir(
         qq{$base_name.XXXXXX},
-        DIR => $config->get_svn_live_dir(),
+        DIR => $CONFIG->get_svn_live_dir(),
         CLEANUP => 1,
     );
-    my $work_path = File::Spec->catfile($work_dir, $base_name);
+    my $work_path = catfile($work_dir, $base_name);
     _extract_backup_archive($project->get_svn_backup_path(), $work_path);
     if ($recover_dumps_option) {
         my $youngest = _svnlook_youngest($work_path);
-        my @rev_dump_paths;
+        my %dump_path_of;
         _get_files_from(
-            $project->get_svn_dump_path(),
+            $CONFIG->get_svn_dump_dir(),
             sub {
-                my ($base_name, $path) = @_;
-                my $rev = basename($base_name, '.gz');
-                if ($rev <= $youngest) {
+                my ($dump_base_name, $path) = @_;
+                my ($name, $rev) = $dump_base_name =~ qr{\A(.*)-(\d+)\.gz\z}msx;
+                if (    !$name
+                    ||  !$rev
+                    ||  $name ne $base_name
+                    ||  $rev <= $youngest
+                ) {
                     return;
                 }
-                push(@rev_dump_paths, $path);
+                $dump_path_of{$rev} = $path;
             },
         );
-        # Note: sorts basenames of @rev_dump_paths into numeric ascending order
-        # using a Schwartzian Transform
-        @rev_dump_paths
-            = map {$_->[0]}
-              sort {$a->[1] <=> $b->[1]}
-              map {[$_, basename($_, '.gz')]}
-              @rev_dump_paths;
-        for my $rev_dump_path (@rev_dump_paths) {
-            FCM::Admin::Runner->instance()->run(
-                "loading $rev_dump_path into $work_path",
+        for my $rev (sort {$a <=> $b} keys(%dump_path_of)) {
+            my $dump_path = $dump_path_of{$rev};
+            $RUNNER->run(
+                "loading $dump_path into $work_path",
                 sub {
                     my $pipe = IO::Pipe->new();
                     $pipe->writer(qw{svnadmin load}, $work_path);
-                    my $handle = IO::Zlib->new($rev_dump_path, 'rb');
+                    my $handle = IO::Zlib->new($dump_path, 'rb');
                     if (!$handle) {
-                        die("$rev_dump_path: $!\n");
+                        die("$dump_path: $!\n");
                     }
                     while ($handle->read(my $buffer, $BUFFER_SIZE)) {
                         $pipe->print($buffer);
@@ -794,8 +893,13 @@ sub recover_svn_repository {
         }
     }
     run_rename($work_path, $project->get_svn_live_path());
+    my $group = $CONFIG->get_svn_group();
+    if ($group) {
+        _chgrp_and_chmod($project->get_svn_live_path(), $group);
+    }
     if ($recover_hooks_option) {
         install_svn_hook($project);
+        housekeep_svn_hook_logs($project);
     }
     return 1;
 }
@@ -810,25 +914,26 @@ sub recover_trac_environment {
             $project->get_trac_live_path(),
         ));
     }
-    my $config = FCM::Admin::Config->instance();
-    run_mkpath($config->get_trac_live_dir());
+    run_mkpath($CONFIG->get_trac_live_dir());
     my $base_name = $project->get_name();
     my $work_dir = tempdir(
         qq{$base_name.XXXXXX},
-        DIR => $config->get_trac_live_dir(),
+        DIR => $CONFIG->get_trac_live_dir(),
         CLEANUP => 1,
     );
-    my $work_path = File::Spec->catfile($work_dir, $base_name);
+    my $work_path = catfile($work_dir, $base_name);
     _extract_backup_archive($project->get_trac_backup_path(), $work_path);
     run_rename($work_path, $project->get_trac_live_path());
-    _chgrp_and_chmod_trac_environment_for($project);
+    my $group = $CONFIG->get_trac_group();
+    if ($group) {
+        _chgrp_and_chmod($project->get_trac_live_path(), $group);
+    }
 }
 
 # ------------------------------------------------------------------------------
 # Recover a file from the Trac backup directory to the Trac live directory.
 sub recover_trac_files {
     # (no argument)
-    my $CONFIG = FCM::Admin::Config->instance();
     _copy_files(
         $CONFIG->get_trac_backup_dir(),
         $CONFIG->get_trac_live_dir(),
@@ -841,7 +946,7 @@ sub recover_trac_files {
 # Vacuum the database of a Trac environment.
 sub vacuum_trac_env_db {
     my ($project) = @_;
-    FCM::Admin::Runner->instance()->run(
+    $RUNNER->run(
         "performing vacuum on database of Trac environment for $project",
         sub {
             my $db_handle = _get_trac_db_handle_for($project);
@@ -854,24 +959,36 @@ sub vacuum_trac_env_db {
 }
 
 # ------------------------------------------------------------------------------
-# Changes/restores ownership and permission of a project's Trac environment.
-sub _chgrp_and_chmod_trac_environment_for {
-    my ($project) = @_;
-    my $gid  = FCM::Admin::Config->instance()->get_trac_gid();
+# Verify users. Return a list of bad users from @users.
+sub verify_users {
+    my @users = @_;
+    if (!defined($USER_INFO_TOOL)) {
+        my $name = $CONFIG->get_user_info_tool();
+        my $class = $UTIL->class_load($USER_INFO_TOOL_OF{$name});
+        $USER_INFO_TOOL = $class->new({util => $UTIL});
+    }
+    return $USER_INFO_TOOL->verify_users(@users);
+}
+
+# ------------------------------------------------------------------------------
+# Changes/restores ownership and permission of a given $path to a given $group.
+sub _chgrp_and_chmod {
+    my ($path, $group) = @_;
+    my $gid = $group ? scalar(getgrnam($group)) : -1;
     find(
         sub {
             my $file = $File::Find::name;
-            FCM::Admin::Runner->instance()->run(
+            $RUNNER->run(
                 "changing group ownership for $file",
                 sub {return chown(-1, $gid, $file)},
             );
-            my $mode = (stat($file))[2] | S_IWGRP;
-            FCM::Admin::Runner->instance()->run(
+            my $mode = (stat($file))[2] | S_IRGRP | S_IWGRP;
+            $RUNNER->run(
                 "adding group write permission for $file",
                 sub {return chmod($mode, $file)},
             );
         },
-        $project->get_trac_live_path(),
+        $path,
     );
     return 1;
 }
@@ -883,8 +1000,8 @@ sub _copy_files {
     my @bases;
     opendir(my $handle, $source) || die("$source: $!\n");
     while (my $base = readdir($handle)) {
-        if (-f File::Spec->catfile($source, $base)) {
-            if ($no_overwrite && -f File::Spec->catfile($target, $base)) {
+        if (-f catfile($source, $base)) {
+            if ($no_overwrite && -f catfile($target, $base)) {
                 warn("[SKIP] $base: already exists in $target.\n");
             }
             elsif (!$re_skip || ($base !~ $re_skip)) {
@@ -895,7 +1012,7 @@ sub _copy_files {
     closedir($handle);
     run_mkpath($target);
     for my $base (@bases) {
-        run_copy(map {File::Spec->catfile($_, $base)} ($source, $target));
+        run_copy(map {catfile($_, $base)} ($source, $target));
     }
     return 1;
 }
@@ -911,7 +1028,7 @@ sub _create_backup_archive {
         = tempfile(qq{$archive_base_name.XXXXXX}, DIR => $backup_dir);
     close($fh);
     run_create_archive($work_backup_path, $source_dir, $source_base_name);
-    my $backup_path = File::Spec->catfile($backup_dir, $archive_base_name);
+    my $backup_path = catfile($backup_dir, $archive_base_name);
     run_rename($work_backup_path, $backup_path);
     my $mode = (stat($backup_path))[2] | S_IRGRP | S_IROTH;
     return chmod($mode, $backup_path);
@@ -939,7 +1056,7 @@ sub _get_files_from {
     }
     BASE_NAME:
     while (my $base_name = $dir_handle->read()) {
-        my $path = File::Spec->catfile($dir_path, $base_name);
+        my $path = catfile($dir_path, $base_name);
         if (index($base_name, q{.}) == 0) {
             next BASE_NAME;
         }
@@ -982,7 +1099,7 @@ sub _manage_users_in_trac_db_of {
                 $session_old_users{$sid} = 1;
             }
             else {
-                FCM::Admin::Runner->instance()->run(
+                $RUNNER->run(
                     "session: removing $sid",
                     sub{return $session_delete_statement->execute($sid)},
                 );
@@ -991,7 +1108,7 @@ sub _manage_users_in_trac_db_of {
         }
         for my $sid (keys(%{$user_ref})) {
             if (!exists($session_old_users{$sid})) {
-                FCM::Admin::Runner->instance()->run(
+                $RUNNER->run(
                     "session: adding $sid",
                     sub {return $session_insert_statement->execute($sid)},
                 );
@@ -1005,19 +1122,19 @@ sub _manage_users_in_trac_db_of {
     SESSION_ATTRIBUTE: {
         my $attribute_select_statement = $db_handle->prepare(
             "SELECT sid,name,value FROM session_attribute "
-                . "WHERE authenticated == 1",
+                . "WHERE authenticated == 1 AND (name == ? OR name == ?)",
         );
         my $attribute_insert_statement = $db_handle->prepare(
             "INSERT INTO session_attribute VALUES (?, 1, ?, ?)",
         );
         my $attribute_update_statement = $db_handle->prepare(
             "UPDATE session_attribute SET value = ? "
-                . "WHERE sid = ? and authenticated == 1 and name == ?",
+                . "WHERE sid = ? AND authenticated == 1 AND name == ?",
         );
         my $attribute_delete_statement = $db_handle->prepare(
             "DELETE FROM session_attribute WHERE sid == ?",
         );
-        $attribute_select_statement->execute();
+        $attribute_select_statement->execute('name', 'email');
         my %attribute_old_users;
         ROW:
         while (my @row = $attribute_select_statement->fetchrow_array()) {
@@ -1034,7 +1151,7 @@ sub _manage_users_in_trac_db_of {
                 }
                 if ($user->$getter() ne $value) {
                     my $new_value = $user->$getter();
-                    FCM::Admin::Runner->instance()->run(
+                    $RUNNER->run(
                         "session_attribute: updating $name: $sid: $new_value",
                         sub {return $attribute_update_statement->execute(
                             $new_value, $sid, $name,
@@ -1043,7 +1160,7 @@ sub _manage_users_in_trac_db_of {
                 }
             }
             else {
-                FCM::Admin::Runner->instance()->run(
+                $RUNNER->run(
                     "session_attribute: removing $sid",
                     sub {return $attribute_delete_statement->execute($sid)},
                 );
@@ -1057,13 +1174,13 @@ sub _manage_users_in_trac_db_of {
             my $user = $user_ref->{$sid};
             my $display_name = $user->get_display_name();
             my $email        = $user->get_email();
-            FCM::Admin::Runner->instance()->run(
+            $RUNNER->run(
                 "session_attribute: adding name: $sid: $display_name",
                 sub {return $attribute_insert_statement->execute(
                     $sid, 'name', $display_name,
                 )},
             );
-            FCM::Admin::Runner->instance()->run(
+            $RUNNER->run(
                 "session_attribute: adding email: $sid: $email",
                 sub {return $attribute_insert_statement->execute(
                     $sid, 'email', $email,
@@ -1108,7 +1225,11 @@ repositories and Trac environments hosted by the FCM team.
 
 =over 4
 
-=item add_trac_environment($project_name, $admin_user_list_ref, $authorised_option)
+=item add_svn_repository($project_name)
+
+Creates a new Subversion repository.
+
+=item add_trac_environment($project_name)
 
 Creates a new Trac environment.
 
@@ -1168,20 +1289,31 @@ directory.
 Similar to get_projects_from_svn_backup(), but it searches the Trac live
 directory.
 
-=item get_users()
+=item get_users(@only_users)
 
-Retrieves a list of users using the mail aliases and the POSIX password
-database. It also makes a naive attempt to filter out admin accounts. In LIST
-context, returns a hash with keys = user IDs and values = user details (as
-L<FCM::Admin::System::User|FCM::Admin::System::User> objects). In SCALAR
-context, returns a reference to the same hash.
+Retrieves a list of users. Store results in a HASH, {user ID => user info, ...}
+where each user info is stored in an instance of
+L<FCM::Admin::System::User|FCM::Admin::System::User>.
 
-=item install_svn_hook($project)
+If no argument, return all valid users. If @only_users, return only those users
+with matching user ID in @only_users.
+
+=item housekeep_svn_hook_logs($project)
+
+Housekeep logs generated by the hook scripts of the $project's SVN live
+repository.
+
+$project should be a L<FCM::Admin::Project|FCM::Admin::Project> object.
+
+=item install_svn_hook($project, $clean_mode)
 
 Searches for hook scripts in the standard location and install them (as symbolic
 links) in the I<hooks> directory of the $project's SVN live repository.
 
 $project should be a L<FCM::Admin::Project|FCM::Admin::Project> object.
+
+If $clean_mode is specified and is true, remove any items in the I<hooks>
+directory that are not known to this install.
 
 =item manage_users_in_svn_passwd($user_ref)
 
@@ -1236,8 +1368,7 @@ $project should be a L<FCM::Admin::Project|FCM::Admin::Project> object.
 L<FCM::Admin::Config|FCM::Admin::Config>,
 L<FCM::Admin::Project|FCM::Admin::Project>,
 L<FCM::Admin::Runner|FCM::Admin::Runner>,
-L<FCM::Admin::User|FCM::Admin::User>,
-L<FCM::Admin::Util|FCM::Admin::Util>
+L<FCM::Admin::User|FCM::Admin::User>
 
 =head1 COPYRIGHT
 

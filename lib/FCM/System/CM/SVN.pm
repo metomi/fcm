@@ -27,6 +27,7 @@ use Cwd qw{cwd};
 use FCM::Context::Event;
 use FCM::Context::Locator;
 use FCM::System::Exception;
+use Memoize qw{memoize};
 use File::Basename qw{dirname};
 use File::Spec::Functions qw{catfile rel2abs};
 use Time::Piece;
@@ -65,15 +66,20 @@ my %SVN_LOG_TEXT_HANDLER_FOR = (
     'path' => \&_get_log_handle_text_path,
 );
 
+our $SUBVERSION_SERVERS_CONF = catfile((getpwuid($<))[7], qw{.subversion/servers});
+
 my %ACTION_OF = (
-    'call'        => \&_call,
-    'get_info'    => \&_get_info,
-    'get_layout'  => \&_get_layout,
-    'get_list'    => \&_get_list,
-    'get_log'     => \&_get_log,
-    'get_wc_root' => \&_get_wc_root,
-    'split_by_peg'=> \&_split_by_peg,
-    'stdout'      => \&_stdout,
+    'call'               => \&_call,
+    'get_info'           => \&_get_info,
+    'get_layout'         => \&_get_layout,
+    'get_layout_common'  => \&_get_layout_common,
+    'get_list'           => \&_get_list,
+    'get_log'            => \&_get_log,
+    'get_username'       => \&_get_username,
+    'get_wc_root'        => \&_get_wc_root,
+    'load_layout_config' => \&_load_layout_config,
+    'split_by_peg'       => \&_split_by_peg,
+    'stdout'             => \&_stdout,
 );
 
 # Creates the class.
@@ -104,6 +110,7 @@ sub _call {
 }
 
 # Invokes "svn info --xml @paths", and returns a LIST of info entries.
+memoize('_get_info');
 sub _get_info {
     my $attrib_ref = shift();
     my %option = ('recursive' => undef, 'revision' => undef);
@@ -122,7 +129,7 @@ sub _get_info {
     });
     $parser->parse(scalar(_stdout(
         $attrib_ref,
-        qw{info --xml},
+        qw{svn info --xml},
         ($option{'recursive'} ? '--recursive' : ()),
         ($option{'revision'} ? ('--revision', $option{'revision'}) : ()),
         @paths,
@@ -184,19 +191,32 @@ sub _get_layout {
     my %info = %{_get_info($attrib_ref, $url_arg)->[0]};
     my ($url, $root, $peg_rev) = @info{'url', 'repository:root', 'revision'};
     my $path = substr($url, length($root));
-    my %layout_config = _load_layout_config($attrib_ref, $root);
+    my $layout = _get_layout_common($attrib_ref, $root, $peg_rev, $path);
+    $layout->set_url($root . $path . '@' . $peg_rev);
+    $layout->set_username(_get_username($attrib_ref, $root));
+    $layout;
+}
+
+# Return an object containing the repository layout information of a URL.
+sub _get_layout_common {
+    my ($attrib_ref, $root, $rev, $path, $is_local) = @_;
+
+    my %layout_config = _load_layout_config(
+        $attrib_ref, ($is_local ? 'file://' . $root : $root),
+    );
     my ($project, $branch, $category, $owner, $sub_tree);
-    my @paths = split(qr{/+}msx, $path);
-    shift(@paths); # element 1 should be an empty string
+    my @names = split(qr{/+}msx, $path);
+    shift(@names); # element 1 should be an empty string
+
     # Search for the project
     my $depth = $layout_config{'depth-project'};
     if (defined($depth)) {
-        if (@paths >= $depth) {
-            my @project_paths = ();
+        if (@names >= $depth) {
+            my @project_names = ();
             for (1 .. $layout_config{'depth-project'}) {
-                push(@project_paths, shift(@paths));
+                push(@project_names, shift(@names));
             }
-            $project = join('/', @project_paths);
+            $project = join('/', @project_names);
         }
     }
     elsif (!grep {!defined($layout_config{"dir-$_"})} qw{trunk branch tag}) {
@@ -204,72 +224,64 @@ sub _get_layout {
         # the project
         my @dirs = map {$layout_config{"dir-$_"}} qw{trunk branch tag};
         my @head = ();
-        my @tail = @paths;
-        while (my $path = shift(@tail)) {
-            if (grep {$_ eq $path} @dirs) {
+        my @tail = @names;
+        while (my $name = shift(@tail)) {
+            if (grep {$_ eq $name} @dirs) {
                 $project = join('/', @head);
-                @paths = ($path, @tail);
+                @names = ($name, @tail);
                 last;
             }
-            push(@head, $path);
+            push(@head, $name);
         }
         if (!defined($project)) {
             # $path does not contain the specific sub-directories that
             # contain the trunk, branches and tags, but $path itself may be
             # the project
-            my $target
-                = $url . '/' .  $layout_config{'dir-trunk'} . '@' . $peg_rev;
-            my $target_url
-                = eval {_get_info($attrib_ref, $target)->[0]->{url}};
-            $@ = undef;
-            if ($target_url) {
-                $project = join('/', @paths);
+            my $target = $path . '/' . $layout_config{'dir-trunk'};
+            if (_verify_path($attrib_ref, $root, $rev, $target, $is_local)) {
+                $project = join('/', @names);
             }
-            @paths = ();
+            @names = ();
         }
     }
     else {
         # Can only assume that trunk is in a specific sub-directory under the
         # project
         my @head = ();
-        my @tail = @paths;
-        while (my $path = shift(@tail)) {
-            if ($path eq $layout_config{'dir-trunk'}) {
+        my @tail = @names;
+        while (my $name = shift(@tail)) {
+            if ($name eq $layout_config{'dir-trunk'}) {
                 $project = join('/', @head);
-                @paths = ($path, @tail);
+                @names = ($name, @tail);
                 last;
             }
-            push(@head, $path);
+            push(@head, $name);
         }
         if (!defined($project)) {
             # $path does not contain the trunk sub-directory, need to search
             # for it 
             my @head = ();
-            my @tail = @paths;
-            while (@head <= @paths) {
-                my $target
-                    = join('/', $root, @head, $layout_config{'dir-trunk'})
-                    . '@' . $peg_rev;
-                my $target_url
-                    = eval {_get_info($attrib_ref, $target)->[0]->{url}};
-                $@ = undef;
-                if ($target_url) {
+            my @tail = @names;
+            while (@head <= @names) {
+                my $target = join('/', @head, $layout_config{'dir-trunk'});
+                if (_verify_path($attrib_ref, $root, $rev, $target, $is_local)) {
                     $project = join('/', @head);
-                    @paths = @tail;
+                    @names = @tail;
                     last;
                 }
                 push(@head, shift(@tail));
             }
         }
     }
+
     # Search for the branch
-    if (defined($project) && @paths) {
+    if (defined($project) && @names) {
         KEY:
         for my $key (qw{trunk branch tag}) {
-            my @branch_paths;
+            my @branch_names;
             if ($layout_config{"dir-$key"}) {
-                if ($paths[0] eq $layout_config{"dir-$key"}) {
-                    @branch_paths = (shift(@paths));
+                if ($names[0] eq $layout_config{"dir-$key"}) {
+                    @branch_names = (shift(@names));
                 }
                 else {
                     next KEY;
@@ -277,17 +289,17 @@ sub _get_layout {
             }
             my $depth = $layout_config{"depth-$key"}
                 ? $layout_config{"depth-$key"} : 0;
-            if (@paths >= $depth) {
+            if (@names >= $depth) {
                 for my $i (1 .. $depth) {
-                    my $path = shift(@paths);
-                    push(@branch_paths, $path);
+                    my $name = shift(@names);
+                    push(@branch_names, $name);
                     if (    $layout_config{"level-owner-$key"}
                         &&  $layout_config{"level-owner-$key"} == $i
                     ) {
-                        $owner = $path;
+                        $owner = $name;
                     }
                 }
-                $branch = join('/', @branch_paths);
+                $branch = join('/', @branch_names);
                 $category = $key;
             }
             last KEY;
@@ -295,14 +307,13 @@ sub _get_layout {
     }
     # Remainder is the sub-tree under the branch
     if (defined($branch)) {
-        $sub_tree = join('/', @paths);
+        $sub_tree = join('/', @names);
     }
     FCM::System::CM::SVN::Layout->new({
         config          => \%layout_config,
-        url             => $root . $path . '@' . $peg_rev,
         root            => $root, 
         path            => $path, 
-        peg_rev         => $peg_rev, 
+        peg_rev         => $rev,
         project         => $project, 
         branch          => $branch, 
         branch_category => $category, 
@@ -320,7 +331,7 @@ sub _get_list {
     while (my $item = shift(@items)) {
         my ($url, $depth) = @{$item};
         ++$depth;
-        my @lines = _stdout($attrib_ref, 'list', $url . '@' . $rev);
+        my @lines = _stdout($attrib_ref, qw{svn list}, $url . '@' . $rev);
         for my $line (@lines) {
             my ($this_name, $is_dir) = $line =~ qr{\A(.*?)(/?)\z};
             my $this_url = $url . '/' . $this_name ;
@@ -359,7 +370,7 @@ sub _get_log {
     });
     $parser->parse(scalar(_stdout(
         $attrib_ref,
-        qw{log --xml -v},
+        qw{svn log --xml -v},
         ($option{'revision'} ? ('--revision', $option{'revision'}) : ()),
         ($option{'stop-on-copy'} ? ('--stop-on-copy') : ()),
         @paths,
@@ -439,6 +450,73 @@ sub _get_log_handle_text_path {
     $entries_ref->[-1]->{'paths'}->[-1]->{'path'} .= $text;
 }
 
+# Return the username of the host of a given target URL.
+memoize('_get_username');
+sub _get_username {
+    my ($attrib_ref, $target) = @_;
+    my ($scheme, $sps) = $attrib_ref->{util}->uri_match($target);
+    my ($host) = $sps =~ qr{\A//([^/]+)(?:/|\z)}msx;
+    # Note: can use Config::IniFiles, but best to avoid another dependency.
+    # Note: not very efficient logic here, but should not yet matter.
+    my $subversion_servers_conf = exists($ENV{'FCM_SUBVERSION_SERVERS_CONF'})
+        ? $ENV{'FCM_SUBVERSION_SERVERS_CONF'} : $SUBVERSION_SERVERS_CONF;
+    my $handle
+        = $attrib_ref->{'util'}->file_load_handle($subversion_servers_conf);
+    my $is_in_section;
+    my $group;
+    LINE:
+    while (my $line = readline($handle)) {
+        chomp($line);
+        if ($line =~ qr{\A\s*(?:[#;]|\z)}msx) {
+            next LINE;
+        }
+        if ($line =~ qr{\A\s*\[\s*groups\s*\]\s*\z}msx) {
+            $is_in_section = 1;
+        }
+        elsif ($line =~ qr{\A\s*\[}msx) {
+            $is_in_section = 0;
+        }
+        elsif ($is_in_section) {
+            my ($lhs, $rhs) = $line =~ qr{\A\s*(\S+)\s*=\s*(\S+)\s*\z}msx;
+            if ($rhs) {
+                $rhs =~ s{[.]}{\\.}gmsx;
+                $rhs =~ s{[*]}{.*}gmsx;
+                $rhs =~ s{[?]}{.?}gmsx;
+                if ($host && $host =~ qr{\A$rhs\z}msx) {
+                    $group = $lhs;
+                    last LINE;
+                }
+            }
+        }
+    }
+    my $username = scalar(getpwuid($<)); # current user ID
+    if ($group) {
+        seek($handle, 0, 0);
+        LINE:
+        while (my $line = readline($handle)) {
+            chomp($line);
+            if ($line =~ qr{\A\s*(?:[#;]|\z)}msx) {
+                next LINE;
+            }
+            if ($line =~ qr{\A\s*\[\s*$group\s*\]\s*\z}msx) {
+                $is_in_section = 1;
+            }
+            elsif ($line =~ qr{\A\s*\[}msx) {
+                $is_in_section = 0;
+            }
+            elsif ($is_in_section) {
+                my ($rhs) = $line =~ qr{\A\s*username\s*=\s*(\S+)\s*\z}msx;
+                if ($rhs) {
+                    $username = $rhs;
+                    last LINE;
+                }
+            }
+        }
+    }
+    close($handle);
+    return $username;
+}
+
 # Return path to the root working copy directory of the argument.
 sub _get_wc_root {
     my ($attrib_ref, $path) = @_;
@@ -475,6 +553,7 @@ sub _get_wc_root {
 }
 
 # Load layout related configuration for a given URL root.
+memoize('_load_layout_config');
 sub _load_layout_config {
     my ($attrib_ref, $root) = @_;
     if (exists($attrib_ref->{layout_config_of}{$root})) {
@@ -509,7 +588,9 @@ sub _load_layout_config {
         $attrib_ref->{layout_config_of}{q{}} = {%site_layout_config};
     }
     $attrib_ref->{layout_config_of}{$root} = {%site_layout_config};
-    my @prop_lines = eval {_stdout($attrib_ref, 'propget', 'fcm:layout', $root)};
+    my @prop_lines = eval {
+        _stdout($attrib_ref, qw{svn propget fcm:layout}, $root);
+    };
     if ($@) {
         $@ = undef;
     }
@@ -536,8 +617,7 @@ sub _split_by_peg {
 
 # Calls "svn", return its standard output.
 sub _stdout {
-    my ($attrib_ref, @args) = @_;
-    my @command = ('svn', @args);
+    my ($attrib_ref, @command) = @_;
     my %value_of = %{$attrib_ref->{util}->shell_simple(\@command)};
     if ($value_of{rc}) {
         return $E->throw(
@@ -546,6 +626,31 @@ sub _stdout {
         );
     }
     wantarray() ? split("\n", $value_of{o}) : $value_of{o};
+}
+
+# Return true if $path is in $repos for this $rev
+sub _verify_path {
+    my ($attrib_ref, $root, $rev, $path, $is_local) = @_;
+    if ($is_local) {
+        my $opt = $rev =~ qr{\A\d+\z}msx ? '-r' : '-t';
+        eval {
+            _stdout($attrib_ref, qw{svnlook tree -N}, $opt, $rev, $root, $path);
+        };
+        if ($@) {
+            $@ = q{};
+            return;
+        }
+        return ($root, $rev, $path);
+    }
+    else {
+        my $target = $root . '/' . $path . '@' . $rev;
+        my $url = eval {_get_info($attrib_ref, $target)->[0]->{url}};
+        if ($@ || !$url) {
+            $@ = q{};
+            return;
+        }
+        return ($root, $rev, $path);
+    }
 }
 
 #-------------------------------------------------------------------------------
@@ -564,6 +669,7 @@ __PACKAGE__->class({
     branch_category => '$',
     branch_owner    => '$',
     sub_tree        => '$',
+    username        => {isa => '$', default => scalar(getpwuid($<))},
 });
 
 sub is_trunk {
@@ -580,7 +686,7 @@ sub is_tag {
 
 sub is_owned_by_user {
     my ($self, $user) = @_;
-    $user ||= scalar(getpwuid($<));
+    $user ||= $self->get_username();
     $self->{branch_owner} && $self->{branch_owner} eq $user;
 }
 
@@ -675,7 +781,15 @@ colon in the name. For example, a return structure may look like this:
 =item $instance->get_layout($url)
 
 Return an instance of L<FCM::System::CM::SVN::Layout|/FCM::System::CM::SVN::Layout>
-containing the repository layout information of $url:
+containing the repository layout information of $url.
+
+=item $instance->get_layout_common($root, $rev, $path, $is_local)
+
+Return an instance of L<FCM::System::CM::SVN::Layout|/FCM::System::CM::SVN::Layout>
+containing the repository layout information for $path in $root at $rev. If
+$is_local is true, use "svnlook" to verify the existence of $path in $root
+at $rev. Otherwise, it uses "svn info" instead. If $rev is assumed to be a
+transaction if it is not numeric.
 
 =item $instance->get_list($url_arg, $filter_func)
 
@@ -731,21 +845,30 @@ log entry. The data structure should look like:
         },
     ]
 
+=item $instance->get_username($target)
+
+Return the user name associated with $target.
+
 =item $instance->get_wc_root($path)
 
 Return the path to the root working copy directory of the argument.
+
+=item $instance->load_layout_config($root)
+
+Return a HASH (not a reference) containing the layout configuration of $root.
+See %LAYOUT_CONFIG for default settings. $root should be the URL to a
+repository root.
 
 =item $instance->split_by_peg($location)
 
 Split a location string (either a URL@PEG or a PATH@PEG) and return a
 two-element list: either (URL, PEG) or (PATH, PEG).
 
-=item $instance->stdout(@args)
+=item $instance->stdout(@command)
 
-Call the command line "svn" with a list of arguments in @args, capture and
-return the STDOUT on success. In scalar context, return the STDOUT as-is. In
-array context, return it as a list of lines with the new line characters
-removed.
+Call a @command, capture and return the STDOUT on success. In scalar context,
+return the STDOUT as-is. In array context, return it as a list of lines with the
+new line characters removed.
 
 =back
 

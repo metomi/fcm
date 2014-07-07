@@ -23,6 +23,7 @@ use warnings;
 package FCM::Admin::Runner;
 
 use IO::Handle;
+use POSIX qw{strftime};
 
 # The default values of the attributes
 my %DEFAULT = (
@@ -111,8 +112,7 @@ sub run {
     my ($self, $message, $sub_ref, @arguments) = @_;
     printf(
         {$self->get_stdout_handle()}
-        qq{%s: %s\n},
-        scalar(localtime()), $message,
+        qq{%s: %s\n}, strftime("%Y-%m-%dT%H:%M:%SZ", gmtime()), $message,
     );
     eval {
         if (!$sub_ref->(@arguments)) {
