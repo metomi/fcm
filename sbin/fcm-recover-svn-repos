@@ -108,7 +108,8 @@ L<FCM::Admin::Config|FCM::Admin::Config> for the current default.
 
 =item --svn-project-suffix=NAME
 
-Specifies the suffix added to the project name. The default is "_svn".
+Specifies the suffix added to the project name. See
+L<FCM::Admin::Config|FCM::Admin::Config> for the current default.
 
 =back
 
