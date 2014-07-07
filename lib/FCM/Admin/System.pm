@@ -893,6 +893,10 @@ sub recover_svn_repository {
         }
     }
     run_rename($work_path, $project->get_svn_live_path());
+    my $group = $CONFIG->get_svn_group();
+    if ($group) {
+        _chgrp_and_chmod($project->get_svn_live_path(), $group);
+    }
     if ($recover_hooks_option) {
         install_svn_hook($project);
         housekeep_svn_hook_logs($project);

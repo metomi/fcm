@@ -65,9 +65,9 @@ main() {
         THRESHOLD=$(<"$SIZE_THRESHOLD_FILE")
     fi
     local TXN_FILE="$REPOS/db/txn-protorevs/$TXN.rev"
-    local SIZE=$(du -b -s "$TXN_FILE" | cut -f 1)
+    local SIZE=$(du -b "$TXN_FILE" | cut -f 1)
     if ((SIZE > THRESHOLD * MB)); then
-        SIZE=$(du -h -s "$TXN_FILE" | cut -f 1)
+        SIZE=$(du -h "$TXN_FILE" | cut -f 1)
         echo "$NAME@$TXN: changeset size ${SIZE}B exceeds ${THRESHOLD}MB." >&2
         echo "Email $ADMIN_EMAIL if you need to bypass this restriction." >&2
         return 1
