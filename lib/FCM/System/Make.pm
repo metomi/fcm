@@ -169,6 +169,15 @@ sub _dest_init {
 # The main function of an instance of this class.
 sub _main {
     my ($attrib_ref, $option_hash_ref, @args) = @_;
+    my @bad_args;
+    for my $i (0 .. $#args) {
+        if (index($args[$i], "=") < 0) {
+            push(@bad_args, [$i, $args[$i]]);
+        }
+    }
+    if (@bad_args) {
+        return $E->throw($E->MAKE_ARG, \@bad_args);
+    }
     # Starts the system
     my $m_ctx = FCM::Context::Make->new({option_of => $option_hash_ref});
     my $T = sub {_timer_wrap($attrib_ref, @_)};

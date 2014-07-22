@@ -39,6 +39,7 @@ our %ACTION_OF = (
     parse             => \&_parse,
     reader            => \&_reader,
     read_property     => sub {},
+    test_exists       => \&_test_exists,
     trunk_at_head     => sub {},
 );
 # Alias to the exception class
@@ -147,6 +148,16 @@ sub _parse {
     return (wantarray() ? ($value, undef) : $value);
 }
 
+# Return a true value if the location $value exists.
+sub _test_exists {
+    my ($attrib_ref, $value) = @_;
+    my ($auth, $path) = split(':', $value, 2);
+    my $value_hash_ref = $attrib_ref->{util}->shell_simple([
+        _shell_cmd_list($attrib_ref, 'ssh'), $auth, "test -e '$path'",
+    ]);
+    return !$value_hash_ref->{rc};
+}
+
 # Get a named command and its flags, return a list.
 sub _shell_cmd_list {
     my ($attrib_ref, $key) = @_;
@@ -222,6 +233,10 @@ Returns a file handle for $value, if it is a readable regular file.
 =item $util->read_property($value,$property_name)
 
 Dummy. Always returns undef.
+
+=item $util->test_exists($value)
+
+Return a true value if the location $value exists.
 
 =item $util->trunk_at_head($value)
 

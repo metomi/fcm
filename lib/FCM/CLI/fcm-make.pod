@@ -17,9 +17,13 @@ configuration file.
 
 =over 4
 
+=item --config-file-path=PATH, -F PATH
+
+Specify paths for searching configuration files specified in relative paths.
+
 =item --config-file=PATH, --file=PATH, -f PATH
 
-Specify the path to the configuration file. (default = fcm-make.cfg in the
+Specify paths to the configuration files. (default = fcm-make.cfg in the
 current working directory)
 
 =item --directory=PATH, -C PATH

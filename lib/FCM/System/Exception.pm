@@ -63,6 +63,9 @@ use constant {
     MIRROR_SOURCE    => 'MIRROR_SOURCE',
     MIRROR_TARGET    => 'MIRROR_TARGET',
     MAKE             => 'MAKE',
+    MAKE_ARG         => 'MAKE_ARG',
+    MAKE_CFG         => 'MAKE_CFG',
+    MAKE_CFG_FILE    => 'MAKE_CFG_FILE',
     MAKE_PROP_NS     => 'MAKE_PROP_NS',
     MAKE_PROP_VALUE  => 'MAKE_PROP_VALUE',
     SHELL            => 'SHELL',
@@ -356,6 +359,26 @@ exception that triggers this failure.
 
 A named step in a make is not implemented. Expects $e->get_ctx() to return the
 name of the step.
+
+=item FCM::System::Exception->MAKE_ARG
+
+A make sub-system fails because of bad command line arguments. Expects
+$e->get_ctx() to return an ARRAY reference of something like this:
+
+    my @list = @{$e->get_ctx()};
+    for (@list) {
+        my ($arg_index, $arg) = @{$_};
+        warn("Argument $arg_index ($arg) is invalid\n");
+    }
+
+=item FCM::System::Exception->MAKE_CFG
+
+A make sub-system fails because it can find no configuration.
+
+=item FCM::System::Exception->MAKE_CFG_FILE
+
+A make sub-system fails because it cannot file a named configuration file.
+Expects $e->get_ctx() to return the configuration file name.
 
 =item FCM::System::Exception->MAKE_PROP_NS
 

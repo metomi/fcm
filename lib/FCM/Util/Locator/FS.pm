@@ -37,6 +37,7 @@ our %ACTION_OF = (
     parse             => \&_parse,
     reader            => \&_reader,
     read_property     => sub {},
+    test_exists       => \&_test_exists,
     trunk_at_head     => sub {},
 );
 
@@ -91,14 +92,6 @@ sub _find {
     return $found;
 }
 
-# Returns a reader (file handle) for a given file system value.
-sub _reader {
-    my ($attrib_ref, $value) = @_;
-    $value = _parse($attrib_ref, $value);
-    open(my $handle, '<', $value) || die("$!\n");
-    return $handle;
-}
-
 # Returns $value in scalar context, or ($value,undef) in list context.
 sub _parse {
     my ($attrib_ref, $value) = @_;
@@ -118,6 +111,20 @@ sub _parse {
     }
     $value = File::Spec->catpath($vol, File::Spec->catdir(@dir_names), $base);
     return (wantarray() ? ($value, undef) : $value);
+}
+
+# Returns a reader (file handle) for a given file system value.
+sub _reader {
+    my ($attrib_ref, $value) = @_;
+    $value = _parse($attrib_ref, $value);
+    open(my $handle, '<', $value) || die("$!\n");
+    return $handle;
+}
+
+# Return a true value if the location $value exists.
+sub _test_exists {
+    my ($attrib_ref, $value) = @_;
+    -e $value;
 }
 
 # ------------------------------------------------------------------------------
@@ -177,6 +184,10 @@ Returns a file handle for $value, if it is a readable regular file.
 =item $util->read_property($value,$property_name)
 
 Dummy. Always returns undef.
+
+=item $util->test_exists($value)
+
+Return a true value if the location $value exists.
 
 =item $util->trunk_at_head($value)
 

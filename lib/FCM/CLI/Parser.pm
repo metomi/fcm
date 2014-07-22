@@ -48,7 +48,8 @@ our %OPTION_OF = map {
     [['check'              ,            ], ['c'], OPT_BOOL],
     [['clean'              ,            ], [   ], OPT_BOOL],
     [['create'             ,            ], ['c'], OPT_BOOL],
-    [['config-file'        , 'file'     ], ['f'], OPT_SCAL],
+    [['config-file'        , 'file'     ], ['f'], OPT_LIST],
+    [['config-file-path'   ,            ], ['F'], OPT_LIST],
     [['custom'             ,            ], [   ], OPT_BOOL],
     [['delete'             ,            ], ['d'], OPT_BOOL],
     [['diff-cmd'           ,            ], [   ], OPT_SCAL],
@@ -113,21 +114,18 @@ our $HELP_APP = 'help';
 our %OPTIONS_FOR = (
     'add'           => [$OPTION_OF{check}],
     'branch'        => [@OPTION_OF{
-        qw{
-            branch-of-branch create delete info list name non-interactive
+        qw{ branch-of-branch create delete info list name non-interactive
             password quiet revision rev-flag show-all show-children
             show-siblings svn-non-interactive ticket type user verbose
         }
     }],
     'branch-create' => [@OPTION_OF{
-        qw{
-            branch-of-branch non-interactive password rev-flag
+        qw{ branch-of-branch non-interactive password rev-flag
             svn-non-interactive switch ticket type
         }
     }],
     'branch-delete' => [@OPTION_OF{
-        qw{
-            non-interactive password quiet show-all show-children show-siblings
+        qw{ non-interactive password quiet show-all show-children show-siblings
             svn-non-interactive switch verbose
         }
     }],
@@ -165,7 +163,9 @@ our %OPTIONS_FOR = (
     }],
     'mkpatch'       => [@OPTION_OF{qw{exclude organisation revision}}],
     'make'          => [@OPTION_OF{
-        qw{directory ignore-lock jobs config-file new quiet verbose}
+        qw{ directory ignore-lock jobs config-file config-file-path new quiet
+            verbose
+        }
     }],
     'project-create'=> [@OPTION_OF{
         qw{non-interactive password svn-non-interactive}

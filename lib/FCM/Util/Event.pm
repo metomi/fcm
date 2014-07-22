@@ -155,6 +155,8 @@ our %E_SYS_FORMATTER_FOR = (
     MIRROR_SOURCE    => _format_e_func('e_sys_mirror_source', $IS_MULTI_LINE),
     MIRROR_TARGET    => _format_e_func('e_sys_mirror_target'),
     MAKE             => _format_e_func('e_sys_make'),
+    MAKE_ARG         => \&_format_e_sys_make_arg,
+    MAKE_CFG         => _format_e_func('e_sys_make_cfg'),
     MAKE_PROP_NS     => \&_format_e_sys_make_prop_ns,
     MAKE_PROP_VALUE  => \&_format_e_sys_make_prop_value,
     SHELL            => \&_format_e_sys_shell,
@@ -237,6 +239,9 @@ our %S = (
     e_sys_mirror_source          => '%s: cannot mirror this step',
     e_sys_mirror_target          => '%s: cannot create mirror target',
     e_sys_make                   => '%s: step is not implemented',
+    e_sys_make_arg               => 'arg %d (%s): invalid config declaration',
+    e_sys_make_cfg               => 'no configuration specified or found',
+    e_sys_make_arg_more          => 'did you mean "%s"?',
     e_sys_make_prop_ns           => '%s.prop{%s}[%s] = %s: bad name-space',
     e_sys_make_prop_value        => '%s.prop{%s}[%s] = %s: bad value',
     e_sys_shell                  => '%s # rc=%d',
@@ -530,6 +535,26 @@ sub _format_e_sys_mirror {
     my ($e) = @_;
     my ($target, @sources) = @{$e->get_ctx()};
     sprintf($S{e_sys_mirror}, $target, _format_shell_words(@sources));
+}
+
+# Formats a system exception - MAKE_ARG
+sub _format_e_sys_make_arg {
+    my ($e) = @_;
+    my @return;
+    for (@{$e->get_ctx()}) {
+        my ($arg_index, $arg_value) = @{$_};
+        push(@return, sprintf($S{e_sys_make_arg}, $arg_index, $arg_value));
+        my $advice
+            = $arg_value =~ qr{\.cfg\z}msx ? '-f ' . $arg_value
+            : $arg_value eq '0'            ? '-q'
+            : $arg_value eq '2'            ? '-v'
+            : $arg_value eq '3'            ? '-v -v'
+            :                                undef;
+        if (defined($advice)) {
+            push(@return, sprintf($S{e_sys_make_arg_more}, $advice));
+        }
+    }
+    return @return;
 }
 
 # Formats a system exception - MAKE_PROP_NS

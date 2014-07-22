@@ -106,7 +106,7 @@ sub _export_items {
     my $UTIL = $attrib_ref->{util};
     # Options and arguments
     $option_ref->{directory} ||= cwd();
-    $option_ref->{'config-file'} ||= 'fcm-export-items.cfg';
+    $option_ref->{'config-file'} ||= ['fcm-export-items.cfg'];
     my $locator = FCM::Context::Locator->new($location);
     $UTIL->loc_as_invariant($locator);
     # Timer
@@ -128,7 +128,7 @@ sub _export_items {
     $EVENT{'timer'}->();
     # Reads configuration file
     my $config_reader = $attrib_ref->{util}->config_reader(
-        FCM::Context::Locator->new($option_ref->{'config-file'}),
+        FCM::Context::Locator->new($option_ref->{'config-file'}->[0]),
         {   %FCM::Util::ConfigReader::FCM1_ATTRIB,
             event_level => $attrib_ref->{util}->util_of_report()->LOW,
         },

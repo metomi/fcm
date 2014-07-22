@@ -142,13 +142,35 @@ include = $HERE/another-config-file
 include = ~/path/to/config/file ~fred/path/to/config/file
 </pre>
 
+  <p>If the value of an <code>include</code> declaration is a relative path,
+  the system will search the directory containing the current configuration
+  file for the include file. More include search paths can be specified using
+  the <code>include-path</code> declaration. E.g.:</p>
+
+  <pre>
+# Define or replace include search paths
+include-path=/path/to/some/cfg /path/to/more/cfg
+# Append to include search paths
+include-path{+}=host2:/path/to/cfg
+include-path{type:svn,+}=https://host1/path/to/cfg
+# ... Include files can now be relative paths
+include=foo.cfg bar.cfg
+</pre>
+
+  <p>Some commands, e.g. <code>fcm make</code>, accept one or more
+  <code>--config-file-path=PATH</code> command line option, which can be used
+  to pre-define the include search paths when they read their configuration
+  files.</p>
+
   <p>Currently, the location can be a path in the file system, a Subversion URL
-  or a FCM keyword pointing to a Subversion URL. The system will attempt to
-  make an intelligent guess of the location type. To allow for future
-  expansion, the declaration accepts a <var>type:TYPE</var> modifier (where
-  TYPE can currently be <samp>fs</samp> for a file system path or
-  <samp>svn</samp> for a Subversion location) to allow the location type to be
-  defined where it is ambiguous.</p>
+  a FCM keyword pointing to a Subversion URL, or a location in the file system
+  of a remote host accessible via passphrase-less SSH. The system will attempt
+  to make an intelligent guess of the location type. To allow for future
+  expansion, both the <code>include</code> and the <code>include-path</code>
+  declarations accept a <var>type:TYPE</var> modifier (where TYPE can currently
+  be <samp>fs</samp> for a file system path or <samp>svn</samp> for a
+  Subversion location) to allow the location type to be defined where it is
+  ambiguous.</p>
 
   <h2 id="keyword">FCM Keyword Configuration</h2>
 

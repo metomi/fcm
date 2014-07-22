@@ -49,16 +49,30 @@ fcm make [OPTIONS] [DECLARAION ...]
 </pre>
 
   <p>The FCM make system relies on a configuration file to tell it what to do.
-  By default, it locates the configuration file from
-  <samp>$PWD/fcm-make.cfg</samp>. You can use the
-  <code>--config-file=PATH</code> (or <code>-f PATH</code>) option to specify
-  an alternate path to the FCM make configuration file. For full details of the
-  other command line options please see <a href="command_ref.html#fcm-make">FCM
-  Command Reference &gt; fcm make</a>.</p>
+  It looks for configurations with the following logic:</p>
 
-  <p>You can override the settings in the configuration file using command line
-  arguments. Each command line argument is considered a declaration line to
-  append to the configuration file.</p>
+  <ol>
+    <li>It reads each configuration file specified using the
+    <code>--config-file=PATH</code> option in the order they are
+    specified.</li>
+    
+    <li>If the <code>--config-file=PATH</code> option is not specified, it will
+    attempt to read <code>fcm-make.cfg</code> if it exists.</li>
+
+    <li>It looks at the current working directory, or the directory specified
+    in the <code>--directory=PATH</code> option for configuration files
+    specified as relative paths.</li>
+
+    <li>If one or more <code>--config-file-path=PATH</code> option is
+    specified, it also searches for configuration files under the specified
+    values, in the order the options are specified.</li>
+
+    <li>Finally, each <var>KEY=VALUE</var> command line argument is considered
+    a configuration declaration line.</li>
+  </ol>
+
+  <p>For details of the other command line options please see <a href=
+  "command_ref.html#fcm-make">FCM Command Reference &gt; fcm make</a>.</p>
 
   <p>The FCM make configuration file is expected to be an FCM configuration
   file. (See <a href="annex_cfg.html">Annex: FCM Configuration File</a>.) A
