@@ -78,6 +78,7 @@ __PACKAGE__->class({
     ldap_binddn         => {isa => '$', default => q{}},
     ldap_basedn         => {isa => '$', default => q{}},
     ldap_attrs          => {isa => '$', default => q{uid cn mail}},
+    ldap_filter_more    => {isa => '$', default => q{}},
 
     # User information tool, passwd settings
     passwd_email_domain => {isa => '$', default => q{}},
@@ -309,6 +310,10 @@ The DN in the LDAP server that is the base for a search.
 =item ldap_attrs
 
 The attributes for UID, common name and email in the LDAP directory.
+
+=item ldap_filter_more
+
+If specified, use the value as extra (AND) filters to an LDAP search.
 
 =back
 

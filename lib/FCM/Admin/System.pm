@@ -211,8 +211,9 @@ sub add_trac_environment {
             }
             for (
                 #section    #key        #value
-                ['project', 'descr'   , $project->get_name()         ],
-                ['trac'   , 'base_url', $project->get_trac_live_url()],
+                ['inherit', 'file'    , '../../trac.ini,../../intertrac.ini'],
+                ['project', 'descr'   , $project->get_name()                ],
+                ['trac'   , 'base_url', $project->get_trac_live_url()       ],
             ) {
                 my ($section, $key, $value) = @{$_};
                 if (!$trac_ini->SectionExists($section)) {
@@ -228,13 +229,13 @@ sub add_trac_environment {
     $RUN->(
         "updating InterTrac",
         sub {
-            my $trac_ini_path = catfile(
+            my $ini_path = catfile(
                 $CONFIG->get_trac_live_dir(),
-                $CONFIG->get_trac_ini_file(),
+                'intertrac.ini',
             );
-            my $trac_ini = Config::IniFiles->new(q{-file} => $trac_ini_path);
+            my $trac_ini = Config::IniFiles->new(q{-file} => $ini_path);
             if (!$trac_ini) {
-                die("$trac_ini_path: cannot open.\n");
+                die("$ini_path: cannot open.\n");
             }
             if (!$trac_ini->SectionExists(q{intertrac})) {
                 $trac_ini->AddSection(q{intertrac});
@@ -248,7 +249,7 @@ sub add_trac_environment {
                 my ($key, $value) = @{$_};
                 my $option = lc($name) . q{.} . $key;
                 if (!$trac_ini->newval(q{intertrac}, $option, $value)) {
-                    die("$trac_ini_path: intertrac:$option: cannot set value.\n");
+                    die("$ini_path: intertrac:$option: cannot set value.\n");
                 }
             }
             return $trac_ini->RewriteConfig();

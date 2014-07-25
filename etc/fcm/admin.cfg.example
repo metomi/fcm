@@ -70,6 +70,8 @@
 # ldap_basedn =
 ## The attributes for UID, common name and email in the LDAP directory
 # ldap_attrs = uid cn mail
+## If specified, use the value as extra (AND) filters to an LDAP search
+# ldap_filter_more =
 
 ## PASSWD settings, only relevant if user_info_tool = passwd
 ## Domain name to suffix user IDs to create an email address

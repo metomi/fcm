@@ -95,7 +95,11 @@ sub _ldap_search {
     my ($uid_attr) = @attrs;
     my $filter = @users
         ? "(|($uid_attr=" . join(")($uid_attr=", @users) . '))'
-        : "&($uid_attr=*)";
+        : "(&($uid_attr=*))";
+    my $ldap_filter_more = $CONFIG->get_ldap_filter_more();
+    if ($ldap_filter_more) {
+        $filter = '(&' . $filter . $ldap_filter_more . ')';
+    }
     my $res = $ldap->search(
         base   => $CONFIG->get_ldap_basedn(),
         filter => $filter,
