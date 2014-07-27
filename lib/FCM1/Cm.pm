@@ -1064,7 +1064,7 @@ sub cm_mkpatch {
 
       # Handle deleted files
       if ($log{$rev}{paths}{$path}{action} eq 'D') {
-        push @after_script, 'svn delete ' . $file;
+        push @after_script, 'svn delete "' . $file . '"';
 
       } else {
         # Skip property changes (if not done earlier)
@@ -1088,7 +1088,7 @@ sub cm_mkpatch {
           if (exists $log{$rev}{paths}{$path}{'copyfrom-path'}) {
             if ($is_dir) {
               # A copied directory needs to be exported and added recursively
-              push @after_script, 'svn add ' . $file;
+              push @after_script, 'svn add "' . $file . '"';
               $export_required = 1;
               push @copied_dirs, $file;
             } else {
@@ -1157,7 +1157,7 @@ sub cm_mkpatch {
               }
 
               # Copy the file, if required
-              push @before_script, 'svn copy ' . $copyfrom_path .  ' ' . $file
+              push @before_script, 'svn copy ' . $copyfrom_path .  ' "' . $file . '"'
                 if not $is_newfile;
             }
 
@@ -1166,8 +1166,8 @@ sub cm_mkpatch {
             if ($is_dir) {
               # If it's a directory then create it and add it immediately
               # (in case it contains any copied files)
-              push @before_script, 'mkdir ' . $file;
-              push @before_script, 'svn add ' . $file;
+              push @before_script, 'mkdir "' . $file. '"';
+              push @before_script, 'svn add "' . $file . '"';
             } else {
               $is_newfile = 1;
 	    }
@@ -1175,7 +1175,7 @@ sub cm_mkpatch {
 
           # Add the file, if required
           if ($is_newfile) {
-            push @after_script, 'svn add ' . $file;
+            push @after_script, 'svn add "' . $file . '"';
           }
         }
 
@@ -1190,13 +1190,13 @@ sub cm_mkpatch {
               ')" $target/' . $file;
             push @script, 'svn update --non-interactive';
             # The replaced directory needs to be exported and added recursively
-            push @after_script, 'svn add ' . $file;
+            push @after_script, 'svn add "' . $file . '"';
             $export_required = 1;
             push @copied_dirs, $file;
           } else {
             # Delete the old file and then add the new file
-            push @before_script, 'svn delete ' . $file;
-            push @after_script, 'svn add ' . $file;
+            push @before_script, 'svn delete "' . $file . '"';
+            push @after_script, 'svn add "' . $file . '"';
           }
         }
 
@@ -1211,14 +1211,14 @@ sub cm_mkpatch {
           );
           if ($was_symlink and not $is_symlink) {
             # A symbolic link has been changed to a normal file
-            push @after_script, 'svn propdel -q svn:special ' . $file;
+            push @after_script, 'svn propdel -q svn:special "' . $file . '"';
           } elsif ($is_symlink and not $was_symlink) {
             # A normal file has been changed to a symbolic link
-            push @after_script, 'svn propset -q svn:special \* ' . $file;
+            push @after_script, 'svn propset -q svn:special \* "' . $file . '"';
 	  } elsif ($is_symlink and $was_symlink) {
             # If a symbolic link has been modified then remove the old
             # copy first to allow the copy to work
-            push @before_script, 'rm ' . $file
+            push @before_script, 'rm "' . $file . '"'
               if ($log{$rev}{paths}{$path}{action} eq 'M');
           }
         }
@@ -1247,7 +1247,7 @@ sub cm_mkpatch {
 
           # Copy the exported file into the file
           push @before_script,
-               'cp -r ${fcm_patch_dir}/' . $export_file . ' ' . $file;
+               'cp -r ${fcm_patch_dir}/' . $export_file . ' "' . $file . '"';
           $export_file++;
         }
       }
@@ -1404,7 +1404,7 @@ fcm_patches_dir=\$PWD
 cd \$fcm_working_copy || exit 1
 
 # Set the language to avoid encoding problems
-if locale -a | grep -q en_GB; then
+if locale -a | grep -q en_GB\$; then
   export LANG=en_GB
 fi
 
