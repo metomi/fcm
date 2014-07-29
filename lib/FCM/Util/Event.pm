@@ -57,6 +57,8 @@ my %ACTION_OF = (
     $CTX->MAKE_BUILD_SHELL_OUT          => \&_event_make_build_shell_out,
     $CTX->MAKE_BUILD_SOURCE_ANALYSE     => \&_event_make_build_source_analyse,
     $CTX->MAKE_BUILD_SOURCE_SUMMARY     => _func('make_build_source_summary'),
+    $CTX->MAKE_BUILD_TARGET_DONE        => \&_event_make_build_target_done,
+    $CTX->MAKE_BUILD_TARGET_FAIL        => \&_event_make_build_target_fail,
     $CTX->MAKE_BUILD_TARGET_FROM_NS     => \&_event_make_build_target_from_ns,
     $CTX->MAKE_BUILD_TARGET_SELECT      => \&_event_make_build_target_select,
     $CTX->MAKE_BUILD_TARGET_SELECT_TIMER=> _func('make_build_target_select_t'),
@@ -64,8 +66,7 @@ my %ACTION_OF = (
     $CTX->MAKE_BUILD_TARGET_STACK       => \&_event_make_build_target_stack,
     $CTX->MAKE_BUILD_TARGET_SUMMARY     => _func('make_build_target_sum'),
     $CTX->MAKE_BUILD_TARGET_TASK_SUMMARY=> _func('make_build_target_task_sum'),
-    $CTX->MAKE_BUILD_TARGET_UPDATED     => \&_event_make_build_target_updated,
-    $CTX->MAKE_BUILD_TARGET_UP2DATE     => \&_event_make_build_target_up2date,
+    $CTX->MAKE_BUILD_TARGETS_FAIL       => \&_event_make_build_targets_fail,
     $CTX->MAKE_DEST                     => \&_event_make_dest,
     $CTX->MAKE_EXTRACT_PROJECT_TREE     => \&_event_make_extract_project_tree,
     $CTX->MAKE_EXTRACT_RUNNER_SUMMARY   => \&_event_make_extract_runner_summary,
@@ -296,6 +297,8 @@ our %S = (
     make_build_source_analyse_1  => '             -> (%9s) %s',
     make_build_source_summary    => 'sources: total=%d, analysed=%d,'
                                     . ' elapsed-time=%.1fs, total-time=%.1fs',
+    make_build_target_done_0     => '%-9s ---- %s %-20s <- %s',
+    make_build_target_done_1     => '%-9s %4.1f %s %-20s <- %s',
     make_build_target_from_ns    => 'source->target %s -> (%s) %s/ %s',
     make_build_target_select     => 'required-target: %-9s %-7s %s',
     make_build_target_select_t   => 'target-tree-analysis: elapsed-time=%.1fs',
@@ -303,13 +306,13 @@ our %S = (
     make_build_target_stack_more => ' (n-deps=%d)',
     make_build_target_missing_dep=> '%-30s: ignore-missing-dep: (%3$9s) %2$s',
     make_build_target_sum        => 'TOTAL     targets:'
-                                    . ' modified=%d, unchanged=%d,'
+                                    . ' modified=%d, unchanged=%d, failed=%d,'
                                     . ' elapsed-time=%.1fs',
     make_build_target_task_sum   => '%-9s targets:'
-                                    . ' modified=%d, unchanged=%d,'
+                                    . ' modified=%d, unchanged=%d, failed=%d,'
                                     . ' total-time=%.1fs',
-    make_build_target_updated    => '%-9s %4.1f %s %-20s <- %s',
-    make_build_target_up2date    => '%-9s ---- %s %-20s <- %s',
+    make_build_targets_fail_0    => '! %-20s: depends on failed target: %s',
+    make_build_targets_fail_1    => '! %-20s: update task failed',
     make_dest                    => 'dest=%s',
     make_dest_use                => 'use=%s',
     make_extract_project_tree    => 'location %5s:%2d: %s%s',
@@ -928,6 +931,43 @@ sub _event_make_build_source_analyse {
     }
 }
 
+# Notification when make-build has updated or does not need to update a target.
+sub _event_make_build_target_done {
+    my ($target, $elapsed_time) = @_;
+    my $tmpl = defined($elapsed_time)
+        ? $S{make_build_target_done_1} : $S{make_build_target_done_0};
+    $R->report(
+        {level => $R->MEDIUM},
+        sprintf(
+            $tmpl,
+            $target->get_task(),
+            (defined($elapsed_time) ? ($elapsed_time) : ()),
+            $MAKE_EXTRACT_TARGET_SYM_OF{$target->get_status()}[0],
+            $target->get_key(),
+            $target->get_ns(),
+        ),
+    );
+}
+
+# Notification when make-build a target fails to update or is failed by
+# dependencies.
+sub _event_make_build_target_fail {
+    my ($target, $elapsed_time) = @_;
+    my $tmpl = defined($elapsed_time)
+        ? $S{make_build_target_done_1} : $S{make_build_target_done_0};
+    $R->report(
+        {level => $R->FAIL, type => $R->TYPE_ERR},
+        sprintf(
+            $tmpl,
+            $target->get_task(),
+            (defined($elapsed_time) ? ($elapsed_time) : ()),
+            '!',
+            $target->get_key(),
+            $target->get_ns(),
+        ),
+    );
+}
+
 # Notification when make-build ignores a missing dependency from a target.
 sub _event_make_build_target_missing_dep {
     $R->report(
@@ -979,34 +1019,33 @@ sub _event_make_build_target_stack {
     );
 }
 
-# Notification when make-build updates a target.
-sub _event_make_build_target_updated {
-    my ($target, $elapse) = @_;
+# Notification when make-build fails to update some targets.
+sub _event_make_build_targets_fail {
+    my ($targets_ref) = @_;
     $R->report(
-        {level => $R->MEDIUM},
-        sprintf(
-            $S{make_build_target_updated},
-            $target->get_task(),
-            $elapse,
-            $MAKE_EXTRACT_TARGET_SYM_OF{$target->get_status()}[0],
-            $target->get_key(),
-            $target->get_ns(),
-        ),
-    );
-}
-
-# Notification when a target in make-build is unchanged.
-sub _event_make_build_target_up2date {
-    my ($target) = @_;
-    $R->report(
-        {level => $R->HIGH},
-        sprintf(
-            $S{make_build_target_up2date},
-            $target->get_task(),
-            $MAKE_EXTRACT_TARGET_SYM_OF{$target->get_status()}[0],
-            $target->get_key(),
-            $target->get_ns(),
-        ),
+        {type => $R->TYPE_ERR, level => $R->FAIL},
+        (map {
+            my $target = $_;
+            my @failed_by = @{$target->get_failed_by()};
+            my @lines;
+            if (grep {$_ eq $target->get_key()} @failed_by) {
+                push(
+                    @lines,
+                    sprintf($S{make_build_targets_fail_1}, $target->get_key()),
+                );
+            }
+            for my $failed_by_key (grep {$_ ne $target->get_key()} @failed_by) {
+                push(
+                    @lines,
+                    sprintf(
+                        $S{make_build_targets_fail_0},
+                        $target->get_key(),
+                        $failed_by_key,
+                    ),
+                );
+            }
+            @lines;
+        } sort {$a->get_key() cmp $b->get_key()} @{$targets_ref}),
     );
 }
 

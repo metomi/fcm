@@ -59,10 +59,10 @@ file_cmp "$TEST_KEY.mtime" "$TEST_KEY.mtime.old" "$TEST_KEY.mtime"
 sed '/^\[info\] \(compile\|link\)   targets:/!d; s/total-time=.*$//' \
     .fcm-make/log >"$TEST_KEY.log"
 file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<'__LOG__'
-[info] compile   targets: modified=0, unchanged=1, 
-[info] compile   targets: modified=0, unchanged=1, 
-[info] compile   targets: modified=0, unchanged=1, 
-[info] compile   targets: modified=0, unchanged=1, 
+[info] compile   targets: modified=0, unchanged=1, failed=0, 
+[info] compile   targets: modified=0, unchanged=1, failed=0, 
+[info] compile   targets: modified=0, unchanged=1, failed=0, 
+[info] compile   targets: modified=0, unchanged=1, failed=0, 
 __LOG__
 #-------------------------------------------------------------------------------
 exit 0
