@@ -22,7 +22,8 @@ use strict;
 use warnings;
 
 my %IMPL = ('fcm-dummy-diff' => \&_fcm_dummy_diff,
-            'xxdiff' => \&_xxdiff);
+            'xxdiff' => \&_xxdiff,
+            'kdiff3' => \&_kdiff3);
 
 my %UNRESOLVED = (
     'nodecision' => "You have made no decision.\n",
@@ -72,6 +73,23 @@ sub _xxdiff {
         return 1;
     }
     printf("You %s all the changes.\n", $decision);
+    return 0;
+}
+
+sub _kdiff3 {
+    my ($base, $mine, $older, $yours) = @_;
+    my @command = (qw{kdiff3 -o}, $base, $mine, $older, $yours);
+    my @out_lines = qx{@command};
+    my $rc = $?;
+    # kdiff3 produces a file called $base.orig, so we delete that
+    unlink $base . ".orig";
+    # kdiff3 doesn't produce any output, so we just assume a non-zero
+    # exit code means unresolved merges
+    if ($rc) {
+        print($UNRESOLVED{'merged'});
+        return 1;
+    }
+    printf("You merged all the changes.\n");
     return 0;
 }
 

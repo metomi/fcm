@@ -28,6 +28,7 @@ below:
 * Dave Matthews (Met Office, UK)
 * Stephen Oxley (Met Office, UK)
 * Matt Shin (Met Office, UK)
+* Matt Pryor (Met Office, UK)
 
 (All contributors are identifiable with email addresses in the version
 control logs or otherwise.)
