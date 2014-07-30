@@ -233,8 +233,15 @@ sub add_trac_environment {
                 $CONFIG->get_trac_live_dir(),
                 'intertrac.ini',
             );
-            my $trac_ini = Config::IniFiles->new(q{-file} => $ini_path);
-            if (!$trac_ini) {
+            if (!-e $ini_path) {
+                open(my $handle, '>', $ini_path) || die("$ini_path: $!\n");
+                close($handle) || die("$ini_path: $!\n");
+            }
+            my $trac_ini = Config::IniFiles->new(
+                q{-allowempty} => 1,
+                q{-file} => $ini_path,
+            );
+            if (!defined($trac_ini)) {
                 die("$ini_path: cannot open.\n");
             }
             if (!$trac_ini->SectionExists(q{intertrac})) {
