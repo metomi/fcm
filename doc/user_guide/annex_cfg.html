@@ -162,15 +162,14 @@ include=foo.cfg bar.cfg
   to pre-define the include search paths when they read their configuration
   files.</p>
 
-  <p>Currently, the location can be a path in the file system, a Subversion URL
+  <p>Currently, the location can be a path in the file system, a Subversion URL,
   a FCM keyword pointing to a Subversion URL, or a location in the file system
   of a remote host accessible via passphrase-less SSH. The system will attempt
   to make an intelligent guess of the location type. To allow for future
   expansion, both the <code>include</code> and the <code>include-path</code>
   declarations accept a <var>type:TYPE</var> modifier (where TYPE can currently
-  be <samp>fs</samp> for a file system path or <samp>svn</samp> for a
-  Subversion location) to allow the location type to be defined where it is
-  ambiguous.</p>
+  be <samp>fs</samp> for a file system path or <samp>svn</samp> for a Subversion
+  location) to allow the location type to be defined where it is ambiguous.</p>
 
   <h2 id="keyword">FCM Keyword Configuration</h2>
 
