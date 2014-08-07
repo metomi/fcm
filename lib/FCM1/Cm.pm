@@ -106,6 +106,7 @@ our %CLI_MESSAGE_FOR_ERROR = (
     NOT_EXIST           => "%s: does not exist.\n",
     PARENT_NOT_EXIST    => "%s: parent %s no longer exists.\n",
     RMTREE              => "%s: cannot remove.\n",
+    ST_CI_MESG_FILE     => "Attempt to add commit message file:\n%s",
     ST_CONFLICT         => "File(s) in conflicts:\n%s",
     ST_MISSING          => "File(s) missing:\n%s",
     ST_OOD              => "File(s) out of date:\n%s",
@@ -471,6 +472,16 @@ sub cm_commit {
   # Abort if there is no change in the working copy
   if (!@status) {
     return _cm_abort(FCM1::Cm::Abort->NULL);
+  }
+
+  # Abort if attempt to add commit message file
+  my $ci_mesg_file_base = $COMMIT_MESSAGE_UTIL->path_base();
+  my @bad_status = grep {$_ =~ qr{^A.*?\s$ci_mesg_file_base\n}m} @status;
+  if (@bad_status) {
+    for my $bad_status (@bad_status) {
+      $CLI_MESSAGE->('ST_CI_MESG_FILE', $bad_status);
+    }
+    return _cm_abort(FCM1::Cm::Abort->FAIL);
   }
 
   # Get associated URL of current working copy
