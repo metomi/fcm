@@ -49,13 +49,14 @@ our $SUBVERSION_CONFIG_FILE = catfile((getpwuid($<))[7], qw{.subversion/config})
 
 __PACKAGE__->class({gui => '$', util => '&'},
     {action_of => {
-        'ctx'     => sub {$CTX->new()},
-        'edit'    => \&_edit,
-        'load'    => \&_load,
-        'notify'  => \&_notify,
-        'path'    => \&_path,
-        'save'    => \&_save,
-        'temp'    => \&_temp,
+        'ctx'       => sub {$CTX->new()},
+        'edit'      => \&_edit,
+        'load'      => \&_load,
+        'notify'    => \&_notify,
+        'path'      => \&_path,
+        'path_base' => sub {$COMMIT_MESSAGE_BASE},
+        'save'      => \&_save,
+        'temp'      => \&_temp,
     }},
 );
 
@@ -288,6 +289,10 @@ Raise a CM_COMMIT_MESSAGE event with the $commit_message_ctx.
 
 Return the path to the commit message file in $dir or the current working
 directory if $dir is not specified.
+
+=item $commit_message_util->path($dir)
+
+Return the base name of the commit message file.
 
 =item $commit_message_util->save($commit_message_ctx, $path)
 
