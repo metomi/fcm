@@ -1393,7 +1393,7 @@ if [[ \$target == svn://*  || \$target == svn+ssh://* || \\
   svn checkout -q \$target \$fcm_working_copy || exit 1
 else
   fcm_working_copy=\$target
-  target=`svn info \$fcm_working_copy | grep "URL: " | sed 's/URL: //'` || exit 1
+  target=`svn info \$fcm_working_copy | grep "^URL: " | sed 's/URL: //'` || exit 1
 fi
 
 # Location of the patches, base on the location of this script
