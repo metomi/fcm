@@ -1,6 +1,6 @@
 # FCM Changes
 
-Go to https://github.com/metomi/fcm/issues/milestones?state=closed
+Go to https://github.com/metomi/fcm/milestones?state=closed
 for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
