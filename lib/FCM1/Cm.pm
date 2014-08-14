@@ -1003,9 +1003,11 @@ sub cm_mkpatch {
       if ($patch) {
         # Don't use the patch if it may contain subversion keywords or
         # any changes to PDF files or any changes to symbolic links or
-        # any carriage returns in the middle of a line
+        # any carriage returns in the middle of a line or
+        # any differences in binary files
         for (split(qr{\n}msx, $patch)) {
-          if (/\$[a-zA-Z:]+ *\$/ or /^--- .+\.pdf\t/ or /^\+link / or /\r.+/) {
+          if (/\$[a-zA-Z:]+ *\$/ or /^--- .+\.pdf\t/ or /^\+link / or /\r.+/ or
+              /Cannot display: file marked as a binary type./) {
             $use_patch = 0;
             last;
           }
@@ -1146,10 +1148,10 @@ sub cm_mkpatch {
                 }
               }
 
-              # Check whether file is copied from an excluded path
+              # Check whether file is copied from an excluded or copied path
               if (not $is_newfile) {
-                for my $exclude (@exclude) {
-                  if ($copyfrom_path =~ m#^$exclude(?:/|$)#) {
+                for my $path (@exclude,@copied_dirs) {
+                  if ($copyfrom_path =~ m#^$path(?:/|$)#) {
                     $is_newfile = 1;
                     last;
                   }
