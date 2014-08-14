@@ -1127,17 +1127,19 @@ sub cm_mkpatch {
                       URL => $url->root . $attrib{'copyfrom-path'} . '@' .
                              $attrib{'copyfrom-rev'},
                     );
-                    $cp_cp_url->url_peg(
-                      $cp_cp_url->project_url()
-                      . '/' . $url->branch()
-                      . '/' . $cp_cp_url->subdir()
-                      . '@' . $cp_cp_url->pegrev(),
-                    );
-                    if ($cp_cp_url->url_exists ($rev - 1)) {
-                      ($copyfrom_path = $cp_cp_url->path) =~ s#^$url_path/*##;
-                      # Check path is defined - if not it probably means the
-                      # branch doesn't follow the FCM naming convention
-                      $is_newfile = 0 if $copyfrom_path;
+                    if ($cp_cp_url->subdir()) {
+                      $cp_cp_url->url_peg(
+                        $cp_cp_url->project_url()
+                        . '/' . $url->branch()
+                        . '/' . $cp_cp_url->subdir()
+                        . '@' . $cp_cp_url->pegrev(),
+                      );
+                      if ($cp_cp_url->url_exists ($rev - 1)) {
+                        ($copyfrom_path = $cp_cp_url->path) =~ s#^$url_path/*##;
+                        # Check path is defined - if not it probably means the
+                        # branch doesn't follow the FCM naming convention
+                        $is_newfile = 0 if $copyfrom_path;
+                      }
                     }
                   }
 
