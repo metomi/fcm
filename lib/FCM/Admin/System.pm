@@ -193,10 +193,14 @@ sub add_trac_environment {
         "adding TICKET_EDIT_DESCRIPTION permission to authenticated",
         qw{permission add}, 'authenticated', qw{TICKET_EDIT_DESCRIPTION},
     );
-    $TRAC_ADMIN->(
+    eval {$TRAC_ADMIN->(
         "adding TICKET_EDIT_COMMENT permission to authenticated",
         qw{permission add}, 'authenticated', qw{TICKET_EDIT_COMMENT},
-    );
+    )};
+    if ($@) {
+        # Expected to fail for Trac < 0.12
+        $@ = undef;
+    }
     $RUN->(
         "adding names and emails of users",
         sub {manage_users_in_trac_db_of($project, {get_users()})},
