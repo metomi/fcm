@@ -36,24 +36,6 @@ if [[ -z $T_HOST ]]; then
     skip_all 'fcm/t.cfg: "host" not defined'
 fi
 #-------------------------------------------------------------------------------
-run_tests() {
-    local TEST_KEY=$1
-    shift
-    rm -fr \
-        .fcm-make \
-        build \
-        fcm-make-as-parsed.cfg \
-        fcm-make-on-success.cfg \
-        fcm-make.log
-    run_pass "$TEST_KEY" fcm make "$@"
-    cat "$TEST_KEY.err" >&2
-    file_test "$TEST_KEY.hello.exe" $PWD/build/bin/hello.exe
-    $PWD/build/bin/hello.exe >"$TEST_KEY.hello.exe.out"
-    file_cmp "$TEST_KEY.hello.exe.out" "$TEST_KEY.hello.exe.out" <<'__OUT__'
-Hello World!
-__OUT__
-}
-#-------------------------------------------------------------------------------
 tests 6
 #-------------------------------------------------------------------------------
 mkdir etc
@@ -79,14 +61,15 @@ cat >fcm-make.cfg <<'__CFG__'
 include = fcm-make-build.cfg
 __CFG__
 
-run_tests "$TEST_KEY_BASE-config-file-path" -F $T_HOST:$T_HOST_WORK_DIR/etc
+fcm_make_build_hello_tests "$TEST_KEY_BASE-config-file-path" '.exe' \
+    -F "$T_HOST:$T_HOST_WORK_DIR/etc"
 #-------------------------------------------------------------------------------
 cat >fcm-make.cfg <<__CFG__
 include-path=$T_HOST:$T_HOST_WORK_DIR/etc
 include=fcm-make-build.cfg
 __CFG__
 
-run_tests "$TEST_KEY_BASE-include-paths"
+fcm_make_build_hello_tests "$TEST_KEY_BASE-include-paths" '.exe'
 #-------------------------------------------------------------------------------
 ssh -oBatchMode=yes $T_HOST rm -r $T_HOST_WORK_DIR
 exit 0

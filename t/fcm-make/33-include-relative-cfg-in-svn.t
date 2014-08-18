@@ -20,24 +20,6 @@
 # Tests "fcm make", include relative config in a Subversion repository
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
-
-run_tests() {
-    local TEST_KEY=$1
-    shift
-    rm -fr \
-        .fcm-make \
-        build \
-        fcm-make-as-parsed.cfg \
-        fcm-make-on-success.cfg \
-        fcm-make.log
-    run_pass "$TEST_KEY" fcm make "$@"
-    cat "$TEST_KEY.err" >&2
-    file_test "$TEST_KEY.hello.exe" $PWD/build/bin/hello.exe
-    $PWD/build/bin/hello.exe >"$TEST_KEY.hello.exe.out"
-    file_cmp "$TEST_KEY.hello.exe.out" "$TEST_KEY.hello.exe.out" <<'__OUT__'
-Hello World!
-__OUT__
-}
 #-------------------------------------------------------------------------------
 tests 12
 #-------------------------------------------------------------------------------
@@ -64,26 +46,28 @@ cat >fcm-make.cfg <<'__CFG__'
 include = fcm-make-build.cfg
 __CFG__
 
-run_tests "$TEST_KEY_BASE-config-file-path" -F file://$PWD/svn-repos/etc
+fcm_make_build_hello_tests \
+    "$TEST_KEY_BASE-config-file-path" '.exe' -F "file://$PWD/svn-repos/etc"
 #-------------------------------------------------------------------------------
 cat >fcm-make.cfg <<'__CFG__'
 include = fcm-make-build.cfg
 __CFG__
 
-run_tests "$TEST_KEY_BASE-config-file-path-1" -F file://$PWD/svn-repos/etc@1
+fcm_make_build_hello_tests\
+    "$TEST_KEY_BASE-config-file-path-1" '.exe' -F "file://$PWD/svn-repos/etc@1"
 #-------------------------------------------------------------------------------
 cat >fcm-make.cfg <<'__CFG__'
 include-path=file://$PWD/svn-repos/etc
 include=fcm-make-build.cfg
 __CFG__
 
-run_tests "$TEST_KEY_BASE-include-paths"
+fcm_make_build_hello_tests "$TEST_KEY_BASE-include-paths" '.exe'
 #-------------------------------------------------------------------------------
 cat >fcm-make.cfg <<'__CFG__'
 include-path=file://$PWD/svn-repos/etc@1
 include=fcm-make-build.cfg
 __CFG__
 
-run_tests "$TEST_KEY_BASE-include-path-1"
+fcm_make_build_hello_tests "$TEST_KEY_BASE-include-path-1" '.exe'
 #-------------------------------------------------------------------------------
 exit 0

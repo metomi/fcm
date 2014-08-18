@@ -20,24 +20,6 @@
 # Tests "fcm make", include relative config
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
-
-run_tests() {
-    local TEST_KEY=$1
-    shift
-    rm -fr \
-        .fcm-make \
-        build \
-        fcm-make-as-parsed.cfg \
-        fcm-make-on-success.cfg \
-        fcm-make.log
-    run_pass "$TEST_KEY" fcm make "$@"
-    cat "$TEST_KEY.err" >&2
-    file_test "$TEST_KEY.hello.exe" $PWD/build/bin/hello.exe
-    $PWD/build/bin/hello.exe >"$TEST_KEY.hello.exe.out"
-    file_cmp "$TEST_KEY.hello.exe.out" "$TEST_KEY.hello.exe.out" <<'__OUT__'
-Hello World!
-__OUT__
-}
 #-------------------------------------------------------------------------------
 tests 6
 #-------------------------------------------------------------------------------
@@ -60,13 +42,13 @@ cat >fcm-make.cfg <<'__CFG__'
 include = fcm-make-build.cfg
 __CFG__
 
-run_tests "$TEST_KEY_BASE-config-file-path" -F $PWD/etc
+fcm_make_build_hello_tests "$TEST_KEY_BASE-config-file-path" '.exe' -F $PWD/etc
 #-------------------------------------------------------------------------------
 cat >fcm-make.cfg <<'__CFG__'
 include-path=$HERE/etc
 include=fcm-make-build.cfg
 __CFG__
 
-run_tests "$TEST_KEY_BASE-include-path"
+fcm_make_build_hello_tests "$TEST_KEY_BASE-include-path" '.exe'
 #-------------------------------------------------------------------------------
 exit 0

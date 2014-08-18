@@ -20,24 +20,6 @@
 # Tests "fcm make", relative config in a Subversion repository
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
-
-run_tests() {
-    local TEST_KEY=$1
-    local AT_REV=${2:-}
-    rm -fr \
-        .fcm-make \
-        build \
-        fcm-make-as-parsed.cfg \
-        fcm-make-on-success.cfg \
-        fcm-make.log
-    run_pass "$TEST_KEY" \
-        fcm make -F file://$PWD/svn-repos$AT_REV -f etc/fcm-make.cfg
-    file_test "$TEST_KEY.hello.exe" $PWD/build/bin/hello.exe
-    $PWD/build/bin/hello.exe >"$TEST_KEY.hello.exe.out"
-    file_cmp "$TEST_KEY.hello.exe.out" "$TEST_KEY.hello.exe.out" <<'__OUT__'
-Hello World!
-__OUT__
-}
 #-------------------------------------------------------------------------------
 tests 9
 #-------------------------------------------------------------------------------
@@ -60,8 +42,11 @@ svn import -m 'test stuff' etc file://$PWD/svn-repos/etc
 rm -fr etc
 
 #-------------------------------------------------------------------------------
-run_tests "$TEST_KEY_BASE"
-run_tests "$TEST_KEY_BASE-1" '@1'
-run_tests "$TEST_KEY_BASE-HEAD" '@HEAD'
+fcm_make_build_hello_tests "$TEST_KEY_BASE" \
+    '.exe' -F "file://$PWD/svn-repos" -f 'etc/fcm-make.cfg'
+fcm_make_build_hello_tests "$TEST_KEY_BASE-1" \
+    '.exe' -F "file://$PWD/svn-repos@1" -f 'etc/fcm-make.cfg'
+fcm_make_build_hello_tests "$TEST_KEY_BASE-HEAD" \
+    '.exe' -F "file://$PWD/svn-repos@HEAD" -f 'etc/fcm-make.cfg'
 #-------------------------------------------------------------------------------
 exit 0
