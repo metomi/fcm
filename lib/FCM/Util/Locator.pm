@@ -53,6 +53,7 @@ my %ACTION_OF = (
     origin           => _locator_func(sub {$_[0]->origin($_[1])}),
     reader           => \&_reader,
     rel2abs          => \&_rel2abs,
+    test_exists      => \&_test_exists,
     trunk_at_head    => \&_trunk_at_head,
     what_type        => \&_what_type,
     up_iter          => \&_up_iter,
@@ -511,6 +512,13 @@ sub _rel2abs {
     $locator;
 }
 
+# Test if $locator location exists.
+sub _test_exists {
+    my ($attrib_ref, $locator) = @_;
+    _as_normalised($attrib_ref, $locator);
+    _util_of_type($attrib_ref, $locator)->test_exists($locator->get_value());
+}
+
 # Transforms a revision from/to a keyword, and returns the result.
 sub _transform_rev_keyword {
     my ($attrib_ref, $locator, $rev, $rev_entry_func, $result_func) = @_;
@@ -705,6 +713,10 @@ Should return a file handle for reading the content of $locator_value.
 
 Should return the value of the named property in $locator_value, or undef if
 not relevant for the $locator_value.
+
+=item $util_of_type->test_exists($locator_value)
+
+Should return a true value if the location $locator_value exists.
 
 =item $util_of_type->trunk_at_head($locator_value)
 

@@ -68,6 +68,7 @@ our %ACTION_OF = (
     loc_dir              => _util_of_loc_func('dir'),
     loc_export           => _util_of_loc_func('export'),
     loc_export_ok        => _util_of_loc_func('export_ok'),
+    loc_exists           => _util_of_loc_func('test_exists'),
     loc_find             => _util_of_loc_func('find'),
     loc_kw_ctx           => _util_of_loc_func('kw_ctx'),
     loc_kw_ctx_load      => _util_of_loc_func('kw_ctx_load'),
@@ -766,6 +767,12 @@ Calls $u->loc_as_parsed($locator) if $locator->get_value_level() is below
 FCM::Context::Locator->L_PARSED. Determines the "directory" name of the value of
 the $locator according to the $locator type. Returns a new FCM::Context::Locator
 that represents the resulting value.
+
+=item $u->loc_exists($locator)
+
+Calls $u->loc_as_normalised($locator) if $locator->get_value_level() is below
+FCM::Context::Locator->L_NORMALISED. Return a true value if the location
+represented by $locator exists.
 
 =item $u->loc_export($locator,$dest)
 

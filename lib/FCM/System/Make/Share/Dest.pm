@@ -64,6 +64,7 @@ my %ACTION_OF = (
     dest_init => \&_dest_init,
     path      => \&_path,
     paths     => \&_paths,
+    path_of   => sub {$_[0]->{'path_of'}{$_[1]}},
     save      => \&_save,
     tidy      => \&_tidy,
 );
@@ -342,6 +343,10 @@ Returns the path of a named item ($key) relative to $ctx, which can either be a
 blessed object with a $ctx->get_dest() method, a scalar path, or undef (in which
 case, cwd() is used). If @paths are specified, they are concatenated at the end
 of the path.
+
+=item $instance->path_of($key)
+
+Returns the value of the named item in a make destination.
 
 =item $instance->paths($ctx,$key,@paths)
 

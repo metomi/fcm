@@ -23,9 +23,11 @@ use warnings;
 package FCM::System::Make::Share::Config;
 use base qw{FCM::Class::CODE};
 
+use Cwd qw{cwd};
 use FCM::Context::ConfigEntry;
 use FCM::Context::Locator;
 use FCM::System::Exception;
+use File::Spec::Functions qw{file_name_is_absolute};
 use File::Temp;
 use Scalar::Util qw{blessed};
 
@@ -49,43 +51,91 @@ __PACKAGE__->class(
 # populate the context of the current make.
 sub _parse {
     my ($attrib_ref, $entry_callback_ref, $m_ctx, @args) = @_;
-    my $path = $m_ctx->get_option_of('config-file');
-    if (!defined($path)) {
-        my $dir = $m_ctx->get_option_of('directory');
-        $path = $attrib_ref->{shared_util_of}{dest}->path($dir, 'config');
+    my $dir = $m_ctx->get_option_of('directory')
+        ? $m_ctx->get_option_of('directory') : cwd();
+    my $dir_locator = FCM::Context::Locator->new($dir);
+    my @config_file_paths = $m_ctx->get_option_of('config-file-path')
+        ? @{$m_ctx->get_option_of('config-file-path')} : ();
+    my @config_file_path_locators
+        = map {FCM::Context::Locator->new($_)} @config_file_paths;
+    my @config_file_names = $m_ctx->get_option_of('config-file')
+        ? @{$m_ctx->get_option_of('config-file')} : (undef);
+    my @config_reader_refs;
+    for my $config_file_name (@config_file_names) {
+        my $is_specified_name = 1;
+        if (!defined($config_file_name)) {
+            $config_file_name
+                = $attrib_ref->{shared_util_of}{dest}->path_of('config');
+            $is_specified_name = 0;
+        }
+        if (    $attrib_ref->{util}->uri_match($config_file_name)
+            ||  file_name_is_absolute($config_file_name)
+        ) {
+            push(@config_reader_refs, _get_config_reader(
+                $attrib_ref, $config_file_name, [@config_file_path_locators],
+            ));
+        }
+        else {  # $config_file_name is relative
+            my $config_reader_ref;
+            HEAD:
+            for my $head_locator ($dir_locator, @config_file_path_locators) {
+                my $locator = $attrib_ref->{util}->loc_cat(
+                    $head_locator, $config_file_name,
+                );
+                if ($attrib_ref->{util}->loc_exists($locator)) {
+                    $config_reader_ref = _get_config_reader(
+                        $attrib_ref, $locator, [@config_file_path_locators],
+                    );
+                    last HEAD;
+                }
+            }
+            if (defined($config_reader_ref)) {
+                push(@config_reader_refs, $config_reader_ref);
+            }
+            elsif ($is_specified_name) {
+                return $E->throw($E->MAKE_CFG_FILE, $config_file_name);
+            }
+        }
     }
-    my $locator = FCM::Context::Locator->new($path);
-    my $config_reader_ref = $attrib_ref->{util}->config_reader(
-        $locator, {event_level => $attrib_ref->{util}->util_of_report()->LOW},
-    );
-    my ($args_config_handle, $args_config_reader_ref);
+    if (!@config_reader_refs) {
+        my $config_file_name = $attrib_ref->{shared_util_of}{dest}->path(
+            $dir_locator->get_value(), 'config',
+        );
+        if (-f $config_file_name) {
+            push(@config_reader_refs, _get_config_reader(
+                $attrib_ref, $config_file_name, [@config_file_path_locators],
+            ));
+        }
+    }
+    my $args_config_handle;
     if (@args) {
-        $args_config_handle = File::Temp->new();
+        $args_config_handle = File::Temp->new(
+            SUFFIX   => '-fcm-make-args.cfg',
+            TEMPLATE => 'XXXXXX',
+            TMPDIR   => 1,
+        );
         for my $arg (@args) {
             print($args_config_handle "$arg\n");
         }
         $args_config_handle->seek(0, 0);
-        my $locator = FCM::Context::Locator->new($args_config_handle->filename());
-        $args_config_reader_ref = $attrib_ref->{util}->config_reader(
-            FCM::Context::Locator->new($args_config_handle->filename()),
-            {event_level => $attrib_ref->{util}->util_of_report()->LOW},
-        );
+        push(@config_reader_refs, _get_config_reader(
+            $attrib_ref,
+            $args_config_handle->filename(),
+            [@config_file_path_locators],
+        ));
+    }
+    if (!@config_reader_refs) {
+        return $E->throw($E->MAKE_CFG);
     }
     my $entry_iter_ref = sub {
-        my $entry;
-        if (defined($config_reader_ref)) {
-            $entry = $config_reader_ref->();
-            if (!defined($entry)) {
-                $config_reader_ref = undef;
+        while (@config_reader_refs) {
+            my $entry = $config_reader_refs[0]->();
+            if (defined($entry)) {
+                return $entry;
             }
+            shift(@config_reader_refs);
         }
-        if (!defined($entry) && defined($args_config_reader_ref)) {
-            $entry = $args_config_reader_ref->();
-            if (!defined($entry)) {
-                $args_config_reader_ref = undef;
-            }
-        }
-        $entry;
+        return undef;
     };
     my @unknown_entries;
     while (defined(my $entry = $entry_iter_ref->())) {
@@ -99,7 +149,8 @@ sub _parse {
         }
         else {
             my ($id, $label) = split(qr{\.}msx, $entry->get_label(), 2);
-            if (    $label eq 'prop'
+            if (    $label
+                &&  $label eq 'prop'
                 &&  exists($entry->get_modifier_of()->{'class'})
                 &&  exists($attrib_ref->{subsystem_of}{$id})
             ) {
@@ -128,10 +179,27 @@ sub _parse {
             }
         }
     }
+    if (defined($args_config_handle)) {
+        $args_config_handle->close();
+    }
     if (@unknown_entries) {
         return $E->throw($E->CONFIG_UNKNOWN, \@unknown_entries);
     }
     $m_ctx;
+}
+
+# Returns a config reader.
+sub _get_config_reader {
+    my ($attrib_ref, $locator, $config_file_path_locators_ref) = @_;
+    if (!blessed($locator)) {
+        $locator = FCM::Context::Locator->new($locator);
+    }
+    $attrib_ref->{util}->config_reader(
+        $locator,
+        {   event_level   => $attrib_ref->{util}->util_of_report()->LOW,
+            include_paths => $config_file_path_locators_ref,
+        },
+    );
 }
 
 # Reads the dest declaration.

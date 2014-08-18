@@ -178,6 +178,25 @@ function file_grep() {
     fail $TEST_KEY
 }
 
+function fcm_make_build_hello_tests() {
+    local TEST_KEY=$1
+    local HELLO_EXT=${2:-}
+    shift 2
+    rm -fr \
+        .fcm-make \
+        build \
+        fcm-make-as-parsed.cfg \
+        fcm-make-on-success.cfg \
+        fcm-make.log
+    run_pass "$TEST_KEY" fcm make "$@"
+    file_test "$TEST_KEY.hello$HELLO_EXT" "$PWD/build/bin/hello$HELLO_EXT"
+    "$PWD/build/bin/hello$HELLO_EXT" >"$TEST_KEY.hello$HELLO_EXT.out"
+    file_cmp "$TEST_KEY.hello$HELLO_EXT.out" \
+        "$TEST_KEY.hello$HELLO_EXT.out" <<'__OUT__'
+Hello World!
+__OUT__
+}
+
 FCM_HOME=${FCM_HOME:-$(cd $(dirname $(readlink -f $BASH_SOURCE))/../../.. && pwd)}
 export FCM_HOME
 PATH=$FCM_HOME/bin:$PATH

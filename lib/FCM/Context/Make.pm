@@ -110,9 +110,9 @@ following elements:
 
 =over 4
 
-=item config-path
+=item config-file
 
-The path to the configuration file.
+An ARRAY of configuration file names.
 
 =item directory
 

@@ -40,6 +40,7 @@ our %ACTION_OF = (
     parse             => \&_parse,
     reader            => \&_reader,
     read_property     => \&_read_property,
+    test_exists       => \&_test_exists,
     trunk_at_head     => \&_trunk_at_head,
 );
 
@@ -318,6 +319,14 @@ sub _svn_info_last_changed_date {
     $head->epoch() - int($tz_sign . 1) * ($tz_h * 3600 + $tz_m * 60);
 }
 
+# Return a true value if the location $value exists.
+sub _test_exists {
+    my ($attrib_ref, $value) = @_;
+    my $url;
+    eval {_svn_info($attrib_ref, sub {$url = $_[0]->{URL}}, [$value])};
+    return $url;
+}
+
 # Returns a tidied version of a Subversion URL.
 sub _tidy {
     my ($url) = @_;
@@ -431,6 +440,10 @@ Returns a file handle for reading the content in $value, if possible.
 =item $util->read_property($value,$name)
 
 Returns the value of a property $name of $value.
+
+=item $util->test_exists($value)
+
+Return a true value if the location $value exists.
 
 =item $util->trunk_at_head($value)
 

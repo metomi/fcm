@@ -27,17 +27,18 @@ use FCM::Context::ConfigEntry;
 use FCM::Context::Event;
 use FCM::Context::Locator;
 use FCM::Util::Exception;
+use File::Spec::Functions qw{file_name_is_absolute};
 use Text::Balanced   qw{extract_bracketed};
 use Text::ParseWords qw{parse_line shellwords};
 
 # Alias
-our $EVENT;
+our $UTIL;
 # Alias to exception class
 my $E = 'FCM::Util::Exception';
 # The variable name, which means the container of the current configuration file
 my $HERE = 'HERE';
 # Element indices in a stack item
-my ($I_LOCATOR, $I_LINE_NUM, $I_HANDLE, $I_HERE_FUNC) = (0 .. 3);
+my ($I_LOCATOR, $I_LINE_NUM, $I_HANDLE, $I_HERE_LOCATOR) = (0 .. 3);
 # Patterns for extracting/matching strings
 my %PATTERN_OF = (
     # Config: comment delimiter, e.g. "... #comment"
@@ -60,6 +61,8 @@ my %PATTERN_OF = (
     fcm1_include => qr/\Ainc\z/ixms,
     # Config: label of an include statement
     fcm2_include => qr/\Ainclude\z/ixms,
+    # Config: label of an include-path statement
+    fcm2_include_path => qr/\Ainclude-path\z/ixms,
     # Config: label
     fcm2_label => qr/
         \A \s*          (?# start and optional spaces)
@@ -127,6 +130,8 @@ our %FCM2_ATTRIB = (
     processor => sub {
         _process_assign_func('$', '?')->(@_)
         ||
+        _process_include_path_func('fcm2_include_path')->(@_)
+        ||
         _process_include_func('fcm2_include')->(@_)
         ;
     },
@@ -148,17 +153,19 @@ sub _main {
     if (!defined($locator)) {
         return;
     }
+    my %reader_attrib
+        = defined($reader_attrib_ref) ? %{$reader_attrib_ref} : ();
+    my @include_paths = exists($reader_attrib{include_paths})
+        ?  @{$reader_attrib{include_paths}} : ();
     my %state = (
         cont  => undef,
         ctx   => undef,
         line  => undef,
+        include_paths => \@include_paths,
         stack => [[$locator, 0]],
         var   => {},
     );
-    my %attrib = (
-        %{$attrib_ref},
-        (defined($reader_attrib_ref) ? %{$reader_attrib_ref} : ()),
-    );
+    my %attrib = (%{$attrib_ref}, %reader_attrib);
     sub {_read(\%attrib, \%state)};
 }
 
@@ -266,7 +273,7 @@ sub _parse_fcm1_var {
             :                                        undef
             ;
         if (!defined($substitute)) {
-            $EVENT->(
+            $UTIL->event(
                 FCM::Context::Event->CONFIG_VAR_UNDEF,
                 $state_ref->{ctx},
                 $symbol,
@@ -343,9 +350,8 @@ sub _parse_var_here {
             next VALUE;
         }
         $tail = index($tail, '/') == 0 ? substr($tail, 1) : q{}; # FIXME
-        my ($locator, $here_func)
-            = @{$state_ref->{stack}->[-1]}[$I_LOCATOR, $I_HERE_FUNC];
-        $value = $here_func->($tail)->get_value();
+        my $here = $state_ref->{stack}->[-1]->[$I_HERE_LOCATOR];
+        $value = $UTIL->loc_cat($here, $tail)->get_value();
     }
     $state_ref->{ctx}->set_value(join(
         q{ },
@@ -389,6 +395,35 @@ sub _process_fcm1_label {
     return;
 }
 
+# Processes an include-path declaration.
+sub _process_include_path_func {
+    my ($key) = @_;
+    my $PATTERN = $PATTERN_OF{$key};
+    sub {
+        my ($state_ref) = @_;
+        if ($state_ref->{ctx}->get_label() !~ $PATTERN) {
+            return;
+        }
+        my $M = $state_ref->{ctx}->get_modifier_of();
+        my $type = exists($M->{type}) ? $M->{type} : undef;
+        if (exists($M->{'+'})) {
+            push(@{$state_ref->{include_paths}}, (
+                map {
+                    FCM::Context::Locator->new($_, {type => $type});
+                } shellwords($state_ref->{ctx}->get_value()),
+            )),
+        }
+        else {
+            $state_ref->{include_paths} = [
+                map {
+                    FCM::Context::Locator->new($_, {type => $type});
+                } shellwords($state_ref->{ctx}->get_value())
+            ],
+        }
+        return 1;
+    };
+}
+
 # Processes an include declaration.
 sub _process_include_func {
     my ($key) = @_;
@@ -400,14 +435,34 @@ sub _process_include_func {
         }
         my $M = $state_ref->{ctx}->get_modifier_of();
         my $type = exists($M->{type}) ? $M->{type} : undef;
-        push(
-            @{$state_ref->{stack}},
-            (   map {
-                    my $locator = FCM::Context::Locator->new($_, {type => $type});
-                    [$locator, 0, undef, undef];
-                } shellwords($state_ref->{ctx}->get_value())
-            ),
-        );
+        push(@{$state_ref->{stack}}, (map {
+            my $name = $_;
+            my $locator;
+            if (    $UTIL->uri_match($name)
+                ||  file_name_is_absolute($name)
+            ) {
+                $locator = FCM::Context::Locator->new($name, {type => $type});
+            }
+            if (!defined($locator)) {
+                HEAD:
+                for my $head (
+                    $state_ref->{stack}->[-1]->[$I_HERE_LOCATOR],
+                    @{$state_ref->{include_paths}},
+                ) {
+                    my $locator_at_head = $UTIL->loc_cat($head, $name);
+                    if ($UTIL->loc_exists($locator_at_head)) {
+                        $locator = $locator_at_head;
+                        last HEAD;
+                    }
+                }
+            }
+            if (!defined($locator)) {
+                return $E->throw(
+                    $E->CONFIG_LOAD, $state_ref->{stack}, "include=$name",
+                );
+            }
+            [$locator, 0, undef, undef];
+        } shellwords($state_ref->{ctx}->get_value())));
         return 1;
     };
 }
@@ -415,8 +470,7 @@ sub _process_include_func {
 # Reads the next entry of a configuration file.
 sub _read {
     my ($attrib_ref, $state_ref) = @_;
-    my $UTIL = $attrib_ref->{util};
-    local($EVENT) = sub {$UTIL->event(@_)};
+    local($UTIL) = $attrib_ref->{util};
     STACK:
     while (@{$state_ref->{stack}}) {
         my $S = $state_ref->{stack}->[-1];
@@ -433,8 +487,7 @@ sub _read {
                     }
                 }
                 $S->[$I_HANDLE] = $UTIL->loc_reader($S->[$I_LOCATOR]);
-                $S->[$I_HERE_FUNC]
-                    = sub {$UTIL->loc_cat($UTIL->loc_dir($S->[$I_LOCATOR]), @_)};
+                $S->[$I_HERE_LOCATOR] = $UTIL->loc_dir($S->[$I_LOCATOR]);
             };
             if (my $e = $@) {
                 if ($E->caught($e) && $e->get_code() eq $E->CONFIG_CYCLIC) {
@@ -442,7 +495,7 @@ sub _read {
                 }
                 return $E->throw($E->CONFIG_LOAD, $state_ref->{stack}, $e);
             }
-            $EVENT->(
+            $UTIL->event(
                 FCM::Context::Event->CONFIG_OPEN,
                 _stack_cp($state_ref->{stack}),
                 $attrib_ref->{event_level},
