@@ -110,20 +110,17 @@ __PACKAGE__->class(
 
 # Returns true if target has a usable dest status.
 sub can_be_source {
-    my ($self) = @_;
-    $self->get_category() && $self->get_category() eq CT_SRC;
+    $_[0]->get_category() && $_[0]->get_category() eq CT_SRC;
 }
 
 # Returns true if target has an OK status.
 sub is_ok {
-    my ($self) = @_;
-    $self->get_status() eq ST_MODIFIED || $self->get_status() eq ST_UNCHANGED;
+    $_[0]->get_status() eq ST_MODIFIED || $_[0]->get_status() eq ST_UNCHANGED;
 }
 
 # Returns true if target has a failed status.
 sub is_failed {
-    my ($self) = @_;
-    $self->get_status() eq ST_FAILED;
+    $_[0]->get_status() eq ST_FAILED;
 }
 
 # Shorthand for $target->get_status() eq $target->ST_MODIFIED.
