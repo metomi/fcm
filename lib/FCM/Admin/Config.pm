@@ -53,7 +53,7 @@ __PACKAGE__->class({
     # Subversion repositories settings
     svn_backup_dir      => {isa => '$', default => '/var/svn/backups'},
     svn_dump_dir        => {isa => '$', default => '/var/svn/dumps'},
-    svn_group           => {isa => '$', default => 'apache'},
+    svn_group           => {isa => '$', default => q{}},
     svn_hook_path_env   => {isa => '$', default => q{}},
     svn_live_dir        => {isa => '$', default => '/srv/svn'},
     svn_passwd_file     => {isa => '$', default => q{}},
@@ -62,7 +62,7 @@ __PACKAGE__->class({
     # Trac environments settings
     trac_admin_users    => {isa => '$', default => q{}},
     trac_backup_dir     => {isa => '$', default => '/var/trac/backups'},
-    trac_group          => {isa => '$', default => 'apache'},
+    trac_group          => {isa => '$', default => q{}},
     trac_host_name      => {isa => '$', default => 'localhost'},
     trac_ini_file       => {isa => '$', default => 'trac.ini'},
     trac_live_dir       => {isa => '$', default => '/srv/trac'},
@@ -78,6 +78,7 @@ __PACKAGE__->class({
     ldap_binddn         => {isa => '$', default => q{}},
     ldap_basedn         => {isa => '$', default => q{}},
     ldap_attrs          => {isa => '$', default => q{uid cn mail}},
+    ldap_filter_more    => {isa => '$', default => q{}},
 
     # User information tool, passwd settings
     passwd_email_domain => {isa => '$', default => q{}},
@@ -309,6 +310,10 @@ The DN in the LDAP server that is the base for a search.
 =item ldap_attrs
 
 The attributes for UID, common name and email in the LDAP directory.
+
+=item ldap_filter_more
+
+If specified, use the value as extra (AND) filters to an LDAP search.
 
 =back
 

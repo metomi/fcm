@@ -29,7 +29,7 @@
 ## Location to create dumps for commits to Subversion repositories
 #  svn_dump_dir = /var/svn/dumps
 ### Name of group where Subversion repositories should be created in
-#  svn_group = apache
+#  svn_group =
 ## PATH environment variable for Subversion hooks
 #  svn_hook_path_env =
 ## Location to serve Subversion repositories
@@ -44,7 +44,7 @@
 ## Location to backup Trac environments
 #  trac_backup_dir = /var/trac/backups
 ### Name of group where Trac files should be created in
-#  trac_group = apache
+#  trac_group =
 ## Host name (from a user's perspective) where Trac environments are served
 #  trac_host_name = localhost
 ## Name of "trac.ini" in each Trac environment
@@ -70,6 +70,8 @@
 # ldap_basedn =
 ## The attributes for UID, common name and email in the LDAP directory
 # ldap_attrs = uid cn mail
+## If specified, use the value as extra (AND) filters to an LDAP search
+# ldap_filter_more =
 
 ## PASSWD settings, only relevant if user_info_tool = passwd
 ## Domain name to suffix user IDs to create an email address

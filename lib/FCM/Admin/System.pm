@@ -193,10 +193,14 @@ sub add_trac_environment {
         "adding TICKET_EDIT_DESCRIPTION permission to authenticated",
         qw{permission add}, 'authenticated', qw{TICKET_EDIT_DESCRIPTION},
     );
-    $TRAC_ADMIN->(
+    eval {$TRAC_ADMIN->(
         "adding TICKET_EDIT_COMMENT permission to authenticated",
         qw{permission add}, 'authenticated', qw{TICKET_EDIT_COMMENT},
-    );
+    )};
+    if ($@) {
+        # Expected to fail for Trac < 0.12
+        $@ = undef;
+    }
     $RUN->(
         "adding names and emails of users",
         sub {manage_users_in_trac_db_of($project, {get_users()})},
@@ -211,8 +215,9 @@ sub add_trac_environment {
             }
             for (
                 #section    #key        #value
-                ['project', 'descr'   , $project->get_name()         ],
-                ['trac'   , 'base_url', $project->get_trac_live_url()],
+                ['inherit', 'file'    , '../../trac.ini,../../intertrac.ini'],
+                ['project', 'descr'   , $project->get_name()                ],
+                ['trac'   , 'base_url', $project->get_trac_live_url()       ],
             ) {
                 my ($section, $key, $value) = @{$_};
                 if (!$trac_ini->SectionExists($section)) {
@@ -228,13 +233,20 @@ sub add_trac_environment {
     $RUN->(
         "updating InterTrac",
         sub {
-            my $trac_ini_path = catfile(
+            my $ini_path = catfile(
                 $CONFIG->get_trac_live_dir(),
-                $CONFIG->get_trac_ini_file(),
+                'intertrac.ini',
             );
-            my $trac_ini = Config::IniFiles->new(q{-file} => $trac_ini_path);
-            if (!$trac_ini) {
-                die("$trac_ini_path: cannot open.\n");
+            if (!-e $ini_path) {
+                open(my $handle, '>', $ini_path) || die("$ini_path: $!\n");
+                close($handle) || die("$ini_path: $!\n");
+            }
+            my $trac_ini = Config::IniFiles->new(
+                q{-allowempty} => 1,
+                q{-file} => $ini_path,
+            );
+            if (!defined($trac_ini)) {
+                die("$ini_path: cannot open.\n");
             }
             if (!$trac_ini->SectionExists(q{intertrac})) {
                 $trac_ini->AddSection(q{intertrac});
@@ -248,7 +260,7 @@ sub add_trac_environment {
                 my ($key, $value) = @{$_};
                 my $option = lc($name) . q{.} . $key;
                 if (!$trac_ini->newval(q{intertrac}, $option, $value)) {
-                    die("$trac_ini_path: intertrac:$option: cannot set value.\n");
+                    die("$ini_path: intertrac:$option: cannot set value.\n");
                 }
             }
             return $trac_ini->RewriteConfig();
