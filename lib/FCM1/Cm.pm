@@ -1183,28 +1183,21 @@ sub cm_mkpatch {
           }
         }
 
-        if ($log{$rev}{paths}{$path}{action} eq 'R') {
-          if ($is_dir) {
-            # Subversion does not appear to support replacing a directory in a
-            # single transaction from a working copy (other than as the result
-            # of a merge). Therefore the delete of the old directory must be
-            # done in advance as a separate commit.
-            push @script, 'svn delete -m "Delete directory in preparation for' .
-              ' replacing it (part of ' . $organisation . '_changeset:' . $rev .
-              ')" $target/' . $file;
-            push @script, 'svn update --non-interactive';
-            # The replaced directory needs to be exported and added recursively
-            push @after_script, 'svn add "' . $file . '"';
-            $export_required = 1;
-            push @copied_dirs, $file;
-          } else {
-            # Delete the old file and then add the new file
-            push @before_script, 'svn delete "' . $file . '"';
-            push @after_script, 'svn add "' . $file . '"';
-          }
+        if ($is_dir and $log{$rev}{paths}{$path}{action} eq 'R') {
+          # Subversion does not appear to support replacing a directory in a
+          # single transaction from a working copy (other than as the result
+          # of a merge). Therefore the delete of the old directory must be
+          # done in advance as a separate commit.
+          push @script, 'svn delete -m "Delete directory in preparation for' .
+            ' replacing it (part of ' . $organisation . '_changeset:' . $rev .
+            ')" $target/' . $file;
+          push @script, 'svn update --non-interactive';
+          # The replaced directory needs to be exported and added recursively
+          push @after_script, 'svn add "' . $file . '"';
+          $export_required = 1;
+          push @copied_dirs, $file;
         }
 
-        # Handle symbolic links
         if (not $is_dir and $log{$rev}{paths}{$path}{action} ne 'A') {
           my ($was_symlink) = $SVN->stdout(
             qw{svn propget svn:special},
@@ -1215,15 +1208,19 @@ sub cm_mkpatch {
           );
           if ($was_symlink and not $is_symlink) {
             # A symbolic link has been changed to a normal file
-            push @after_script, 'svn propdel -q svn:special "' . $file . '"';
+            push @before_script, 'svn propdel -q svn:special "' . $file . '"';
+            push @before_script, 'rm "' . $file . '"';
+	  } elsif ($log{$rev}{paths}{$path}{action} eq 'R') {
+            # Delete the old file and then add the new file
+            push @before_script, 'svn delete "' . $file . '"';
+            push @after_script, 'svn add "' . $file . '"';
           } elsif ($is_symlink and not $was_symlink) {
             # A normal file has been changed to a symbolic link
             push @after_script, 'svn propset -q svn:special \* "' . $file . '"';
-	  } elsif ($is_symlink and $was_symlink) {
+          } elsif ($is_symlink and $was_symlink) {
             # If a symbolic link has been modified then remove the old
             # copy first to allow the copy to work
-            push @before_script, 'rm "' . $file . '"'
-              if ($log{$rev}{paths}{$path}{action} eq 'M');
+            push @before_script, 'rm "' . $file . '"';
           }
         }
 
