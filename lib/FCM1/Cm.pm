@@ -1160,6 +1160,13 @@ sub cm_mkpatch {
                 }
               }
 
+              # Check whether file is copied from a file which has been replaced
+              if (not $is_newfile) {
+                my $copyfrom_fullpath = $url->branch_path . "/" . $copyfrom_path;
+                $is_newfile = 1 if ($log{$rev}{paths}{$copyfrom_fullpath}{action} and
+                                    $log{$rev}{paths}{$copyfrom_fullpath}{action} eq 'R');
+              }
+
               # Copy the file, if required
               push @before_script, 'svn copy ' . $copyfrom_path .  ' "' . $file . '"'
                 if not $is_newfile;
