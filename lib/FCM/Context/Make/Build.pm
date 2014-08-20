@@ -79,6 +79,7 @@ use constant {
     POLICY_CAPTURE          => 'POLICY_CAPTURE',
     POLICY_FILTER           => 'POLICY_FILTER',
     POLICY_FILTER_IMMEDIATE => 'POLICY_FILTER_IMMEDIATE',
+    ST_FAILED               => 'ST_FAILED',
     ST_MODIFIED             => 'ST_MODIFIED',
     ST_OOD                  => 'ST_OOD',
     ST_UNCHANGED            => 'ST_UNCHANGED',
@@ -90,6 +91,7 @@ __PACKAGE__->class(
         checksum        => '$',
         deps            => '@',
         dep_policy_of   => '%',
+        failed_by       => '@',
         info_of         => '%',
         key             => '$',
         ns              => '$',
@@ -108,14 +110,17 @@ __PACKAGE__->class(
 
 # Returns true if target has a usable dest status.
 sub can_be_source {
-    my ($self) = @_;
-    $self->get_category() && $self->get_category() eq CT_SRC;
+    $_[0]->get_category() && $_[0]->get_category() eq CT_SRC;
 }
 
 # Returns true if target has an OK status.
 sub is_ok {
-    my ($self) = @_;
-    $self->get_status() eq ST_MODIFIED || $self->get_status() eq ST_UNCHANGED;
+    $_[0]->get_status() eq ST_MODIFIED || $_[0]->get_status() eq ST_UNCHANGED;
+}
+
+# Returns true if target has a failed status.
+sub is_failed {
+    $_[0]->get_status() eq ST_FAILED;
 }
 
 # Shorthand for $target->get_status() eq $target->ST_MODIFIED.
@@ -298,6 +303,11 @@ A HASH to contain a map between each relevant dependency type of this target and
 its policy to apply to the dependency type. The policy should take the value of
 POLICY_CAPTURE, POLICY_FILTER or POLICY_FILTER_IMMEDIATE.
 
+=item failed_by
+
+On failure, set to an ARRAY containing the names of the targets that cause the
+failure of this target.
+
 =item info_of
 
 A HASH to contain the extra information of the target. E.g. The {paths} => ARRAY
@@ -369,6 +379,10 @@ source file of a subsequent a make (step).
 
 Returns true if the target has a OK destination status.
 
+=item $target->is_failed()
+
+Returns true if the target has a failed destination status.
+
 =item $target->is_modified()
 
 Shorthand for $target->get_status() eq $target->ST_MODIFIED.
@@ -437,6 +451,10 @@ engine may float the dependency target up the dependency tree as well.
 Indicates that the dependency type is relevant to the target but only if the
 dependency target is an immediate dependency of this target, and the build
 engine may float the dependency target up the dependency tree as well.
+
+=item FCM::Context::Make::Build::Target->ST_FAILED
+
+Indicates that the build has failed to update the target.
 
 =item FCM::Context::Make::Build::Target->ST_MODIFIED
 

@@ -49,6 +49,8 @@ use constant {
     MAKE_BUILD_SHELL_OUT          => 'MAKE_BUILD_SHELL_OUT',
     MAKE_BUILD_SOURCE_ANALYSE     => 'MAKE_BUILD_SOURCE_ANALYSE',
     MAKE_BUILD_SOURCE_SUMMARY     => 'MAKE_BUILD_SOURCE_SUMMARY',
+    MAKE_BUILD_TARGET_DONE        => 'MAKE_BUILD_TARGET_DONE',
+    MAKE_BUILD_TARGET_FAIL        => 'MAKE_BUILD_TARGET_FAIL',
     MAKE_BUILD_TARGET_FROM_NS     => 'MAKE_BUILD_TARGET_FROM_NS',
     MAKE_BUILD_TARGET_MISSING_DEP => 'MAKE_BUILD_TARGET_MISSING_DEP',
     MAKE_BUILD_TARGET_SELECT      => 'MAKE_BUILD_TARGET_SELECT',
@@ -56,8 +58,7 @@ use constant {
     MAKE_BUILD_TARGET_STACK       => 'MAKE_BUILD_TARGET_STACK',
     MAKE_BUILD_TARGET_SUMMARY     => 'MAKE_BUILD_TARGET_SUMMARY',
     MAKE_BUILD_TARGET_TASK_SUMMARY=> 'MAKE_BUILD_TARGET_TASK_SUMMARY',
-    MAKE_BUILD_TARGET_UPDATED     => 'MAKE_BUILD_TARGET_UPDATED',
-    MAKE_BUILD_TARGET_UP2DATE     => 'MAKE_BUILD_TARGET_UP2DATE',
+    MAKE_BUILD_TARGETS_FAIL       => 'MAKE_BUILD_TARGETS_FAIL',
     MAKE_DEST                     => 'MAKE_DEST',
     MAKE_EXTRACT_PROJECT_TREE     => 'MAKE_EXTRACT_PROJECT_TREE',
     MAKE_EXTRACT_RUNNER_SUMMARY   => 'MAKE_EXTRACT_RUNNER_SUMMARY',
@@ -235,6 +236,20 @@ should be the number analysed. The 3rd argument should be the elapsed time. The
 4th argument should be the total time, which may differ from the elapsed time if
 the analysis is run on more than 1 process.
 
+=item FCM::Context::Event->MAKE_BUILD_TARGET_DONE
+
+This event is raised when the make/build system has successfully updated a
+target or an update is unnecessary. The 1st argument is the target (as an
+instance of FCM::Context::Make::Build::Target), the 2nd argument is the elapsed
+time of the update, if relevant.
+
+=item FCM::Context::Event->MAKE_BUILD_TARGET_FAIL
+
+This event is raised when the make/build system failed to update a target or the
+target is failed by its dependencies. The 1st argument is the target (as an
+instance of FCM::Context::Make::Build::Target), the 2nd argument is the elapsed
+time, if the target is failed by its update.
+
 =item FCM::Context::Event->MAKE_BUILD_TARGET_FROM_NS
 
 This event is raised when the make/build system has generated a build target
@@ -269,28 +284,22 @@ is the first check for the task.
 
 This event is raised when the make/build system has finished updating its
 targets, and is ready to give a total summary. The 1st argument is the number of
-modified targets, the 2nd argument is the number unchanged, and the 3rd argument
-is the elapsed time.
+modified targets, the 2nd argument is the number unchanged, the 3rd argument is
+the number failed, the 4th argument is the elapsed time.
 
 =item FCM::Context::Event->MAKE_BUILD_TARGET_TASK_SUMMARY
 
 This event is raised when the make/build system has finished updating its
 targets, and is ready to give a summary of each type of task. The 1st argument
 is the task type name, the 2nd argument is the number of modified targets, the
-3rd argument is the number unchanged, and the 4th argument is the total time
-spent on this task type.
+3rd argument is the number unchanged, the 4th argument is the number failed, and
+the 5th argument is the total time spent on this task type.
 
-=item FCM::Context::Event->MAKE_BUILD_TARGET_UPDATED
+=item FCM::Context::Event->MAKE_BUILD_TARGETS_FAIL
 
-This event is raised when the make/build system updates a target. The 1st
-argument is the task ID, the 2nd argument is the elapsed time. The 3rd argument
-is the target name. The 4th argument is the target namespace.
-
-=item FCM::Context::Event->MAKE_BUILD_TARGET_UP2DATE
-
-This event is raised when the make/build system detects an up-to-date target. The
-1st argument is the task ID, the 2nd argument is the target name. The 3rd
-argument is the target namespace.
+This event is raised when the make/build system has finished updating its
+targets, but some targets failed to update. The 1st argument is an ARRAY of
+FCM::Context::Make::Build::Target objects representing the failed targets.
 
 =item FCM::Context::Event->MAKE_DEST
 

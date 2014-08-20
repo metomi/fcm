@@ -654,12 +654,14 @@ sub _targets_update {
     for my $key (sort(keys(%stat_of))) {
         $stat_of{$key}{n}{$ctx->CTX_TARGET->ST_MODIFIED} ||= 0;
         $stat_of{$key}{n}{$ctx->CTX_TARGET->ST_UNCHANGED} ||= 0;
+        $stat_of{$key}{n}{$ctx->CTX_TARGET->ST_FAILED} ||= 0;
         $stat_of{$key}{t} ||= 0.0;
         $EVENT->(
             FCM::Context::Event->MAKE_BUILD_TARGET_TASK_SUMMARY,
             $key,
             $stat_of{$key}{n}{$ctx->CTX_TARGET->ST_MODIFIED},
             $stat_of{$key}{n}{$ctx->CTX_TARGET->ST_UNCHANGED},
+            $stat_of{$key}{n}{$ctx->CTX_TARGET->ST_FAILED},
             $stat_of{$key}{t},
         );
     }
@@ -667,8 +669,17 @@ sub _targets_update {
         FCM::Context::Event->MAKE_BUILD_TARGET_SUMMARY,
         scalar(grep {$_->is_modified() } @targets),
         scalar(grep {$_->is_unchanged()} @targets),
+        scalar(grep {$_->is_failed()   } @targets),
         $timer->(),
     );
+    my @failed_targets = grep {$_->is_failed()} @targets;
+    if (@failed_targets) {
+        $EVENT->(
+            FCM::Context::Event->MAKE_BUILD_TARGETS_FAIL,
+            \@failed_targets
+        );
+        die("\n");
+    }
 }
 
 # Updates a target.
@@ -689,7 +700,9 @@ sub _target_update {
     my $checksum = $UTIL->file_md5($target->get_path());
     if ($target->get_checksum() && $checksum eq $target->get_checksum()) {
         $target->set_status($target->ST_UNCHANGED);
-        $target->set_path($target->get_path_of_prev());
+        if ($target->get_path_of_prev()) {
+            $target->set_path($target->get_path_of_prev());
+        }
     }
     $target->set_checksum($checksum);
     $target->set_prop_of_prev_of({}); # unset
@@ -708,47 +721,63 @@ sub _targets_manager_funcs {
         = _targets_select($attrib_ref, $m_ctx, $ctx, \@targets);
 
     my $get_action_ref = sub {
+        STATE:
         while (my $state = pop(@{$stack_ref})) {
-            my $target = $state->get_target();
-            if (    $state->is_ready()
-                &&  _target_deps_are_done($state, $state_hash_ref, $stack_ref)
+            if (    !$state->is_ready()
+                ||  !_target_deps_are_done($state, $state_hash_ref, $stack_ref)
             ) {
-                if (_target_check_ood($state, $state_hash_ref)) {
-                    _target_prep($state, $ctx);
-                    $state->set_value($STATE->PENDING);
-                    # Adds tasks that can be triggered by this task
-                    for my $key (@{$target->get_triggers()}) {
-                        if (    exists($state_hash_ref->{$key})
-                            &&  !$state_hash_ref->{$key}->is_done()
-                            &&  !grep {$_->get_id() eq $key} @{$stack_ref}
-                        ) {
-                            my $trigger_target
-                                = $state_hash_ref->{$key}->get_target();
-                            $trigger_target->set_status($trigger_target->ST_OOD);
-                            push(@{$stack_ref}, $state_hash_ref->{$key});
-                        }
+                next STATE;
+            }
+            my $target = $state->get_target();
+            if (_target_check_failed_dep($state, $state_hash_ref)) {
+                _target_update_failed(
+                    $stat_hash_ref, $ctx, $target, $state_hash_ref, $stack_ref,
+                );
+            }
+            elsif (_target_check_ood($state, $state_hash_ref)) {
+                _target_prep($state, $ctx);
+                $state->set_value($STATE->PENDING);
+                # Adds tasks that can be triggered by this task
+                for my $key (@{$target->get_triggers()}) {
+                    if (    exists($state_hash_ref->{$key})
+                        &&  !$state_hash_ref->{$key}->is_done()
+                        &&  !grep {$_->get_id() eq $key} @{$stack_ref}
+                    ) {
+                        my $trigger_target
+                            = $state_hash_ref->{$key}->get_target();
+                        $trigger_target->set_status($trigger_target->ST_OOD);
+                        push(@{$stack_ref}, $state_hash_ref->{$key});
                     }
-                    return FCM::Context::Task->new(
-                        {ctx => $target, id => $state->get_id()},
-                    );
                 }
-                _target_update_done($target, $state_hash_ref, $stack_ref);
-                _target_update_done_null($stat_hash_ref, $ctx, $target);
+                return FCM::Context::Task->new(
+                    {ctx => $target, id => $state->get_id()},
+                );
+            }
+            else {
+                _target_update_ok(
+                    $stat_hash_ref, $ctx, $target, $state_hash_ref, $stack_ref,
+                );
             }
         }
         return;
     };
     my $put_action_ref = sub {
         my $task = shift();
-        if ($task->get_state() eq $task->ST_FAILED) {
-            die($task->get_error());
-        }
-        my $key = $task->get_id();
         my $target = $task->get_ctx();
-        _target_update_done($target, $state_hash_ref, $stack_ref);
-        _target_update_done_task(
-            $stat_hash_ref, $ctx, $target, $task->get_elapse(),
-        );
+        if ($task->get_state() eq $task->ST_FAILED) {
+            $EVENT->(FCM::Context::Event->E, $task->get_error());
+            _target_update_failed(
+                $stat_hash_ref, $ctx, $target, $state_hash_ref, $stack_ref,
+                $task->get_elapse(),
+            );
+        }
+        else {
+            my $target = $task->get_ctx();
+            _target_update_ok(
+                $stat_hash_ref, $ctx, $target, $state_hash_ref, $stack_ref,
+                $task->get_elapse(),
+            );
+        }
     };
     ($get_action_ref, $put_action_ref);
 }
@@ -1244,6 +1273,25 @@ sub _target_deps_are_done {
     return 1;
 }
 
+# Returns true if $target has failed dependencies.
+sub _target_check_failed_dep {
+    my ($state, $state_hash_ref) = @_;
+    my $target = $state->get_target();
+    for my $dep (@{$state->get_deps()}) {
+        my ($target_of_dep, $type_of_dep) = @{$dep};
+        if ($target_of_dep->is_failed()) {
+            return 1;
+        }
+        if (    exists($target_of_dep->get_status_of()->{$type_of_dep})
+            &&  $target_of_dep->get_status_of()->{$type_of_dep}
+                    eq $target->ST_FAILED
+        ) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 # Returns true if $target is out of date.
 sub _target_check_ood {
     my ($state, $state_hash_ref) = @_;
@@ -1330,49 +1378,109 @@ sub _target_prep {
     }
 }
 
-# Sets state and stack when a $target is done.
-sub _target_update_done {
-    my ($target, $state_hash_ref, $stack_ref) = @_;
+# Sets state and stack when a $target has failed to update or cannot be updated
+# due to failed dependencies.
+sub _target_update_failed {
+    my ($stat_hash_ref,
+        $ctx,
+        $target,
+        $state_hash_ref,
+        $stack_ref,
+        $elapsed_time, # only defined if target update action is done
+    ) = @_;
     my $key = $target->get_key();
     my $state = $state_hash_ref->{$key};
     $state->set_value($STATE->DONE);
+    # If this target is needed by other targets...
     while (my ($k, $s) = each(%{$state->get_needed_by()})) {
         my $pending_for_ref = $s->get_pending_for();
         delete($pending_for_ref->{$key});
         if (!keys(%{$pending_for_ref})) {
+            $s->set_value($STATE->DONE);
+            # Remove from stack
+            @{$stack_ref} = grep {$_->get_id() ne $k} @{$stack_ref};
+            $s->get_target()->set_status($target->ST_FAILED);
+            push(@{$s->get_target()->get_failed_by()}, $key);
+        }
+    }
+    if (defined($elapsed_time)) { # Done target update
+        my $target0 = $ctx->get_target_of()->{$target->get_key()};
+        $target0->set_info_of({}); # unset
+        $target0->set_checksum(undef);
+        $target0->set_path(undef);
+        $target0->set_prop_of_prev_of({}); # unset
+        $target0->set_path_of_prev(undef); # unset
+        $target0->set_status($target->ST_FAILED);
+        push(@{$target0->get_failed_by()}, $target->get_key());
+        ++$stat_hash_ref->{$target->get_task()}{n}{$target->ST_FAILED};
+        $stat_hash_ref->{$target->get_task()}{t} += $elapsed_time;
+    }
+    else { # No target update required
+        $target->set_path(undef);
+        $target->set_prop_of_prev_of({}); # unset
+        $target->set_path_of_prev(undef); # unset
+        $target->set_status($target->ST_FAILED);
+        for my $dep (@{$state->get_deps()}) {
+            my ($dep_target, $dep_type) = @{$dep};
+            my $dep_key = $dep_target->get_key();
+            if (    $dep_target->is_failed()
+                &&  !grep {$_ eq $dep_key} @{$target->get_failed_by()}
+            ) {
+                push(@{$target->get_failed_by()}, $dep_key);
+            }
+        }
+        ++$stat_hash_ref->{$target->get_task()}{n}{$target->ST_FAILED};
+    }
+    $EVENT->(
+        FCM::Context::Event->MAKE_BUILD_TARGET_FAIL, $target, $elapsed_time,
+    );
+}
+
+# Sets state and stack when a $target is up to date or updated successfully.
+sub _target_update_ok {
+    my ($stat_hash_ref,
+        $ctx,
+        $target,
+        $state_hash_ref,
+        $stack_ref,
+        $elapsed_time, # only defined if target update action is done
+    ) = @_;
+    my $key = $target->get_key();
+    my $state = $state_hash_ref->{$key};
+    $state->set_value($STATE->DONE);
+    # If this target is needed by other targets...
+    while (my ($k, $s) = each(%{$state->get_needed_by()})) {
+        my $pending_for_ref = $s->get_pending_for();
+        delete($pending_for_ref->{$key});
+        if ($s->is_pending() && !keys(%{$pending_for_ref})) {
             $s->set_value($STATE->READY);
             if (!grep {$_->get_id() eq $k} @{$stack_ref}) {
                 push(@{$stack_ref}, $s);
             }
         }
     }
-}
-
-# Callback when a target and its dependencies are up to date.
-sub _target_update_done_null {
-    my ($stat_hash_ref, $ctx, $target) = @_;
-    $target->set_path($target->get_path_of_prev());
-    $target->set_prop_of_prev_of({}); # unset
-    $target->set_path_of_prev(undef); # unset
-    $target->set_status($target->ST_UNCHANGED);
-    ++$stat_hash_ref->{$target->get_task()}{n}{$target->ST_UNCHANGED};
-    $EVENT->(FCM::Context::Event->MAKE_BUILD_TARGET_UP2DATE, $target);
-}
-
-# Callback when the task to update the target is completed.
-sub _target_update_done_task {
-    my ($stat_hash_ref, $ctx, $target, $elapsed_time) = @_;
-    my $target0 = $ctx->get_target_of()->{$target->get_key()};
-    $target0->set_info_of({}); # unset
-    $target0->set_checksum($target->get_checksum());
-    $target0->set_path($target->get_path());
-    $target0->set_prop_of_prev_of({}); # unset
-    $target0->set_path_of_prev(undef); # unset
-    $target0->set_status($target->get_status());
-    ++$stat_hash_ref->{$target->get_task()}{n}{$target->get_status()};
-    $stat_hash_ref->{$target->get_task()}{t} += $elapsed_time;
+    if (defined($elapsed_time)) { # Done target update
+        my $target0 = $ctx->get_target_of()->{$target->get_key()};
+        $target0->set_info_of({}); # unset
+        $target0->set_checksum($target->get_checksum());
+        $target0->set_path($target->get_path());
+        $target0->set_prop_of_prev_of({}); # unset
+        $target0->set_path_of_prev(undef); # unset
+        $target0->set_status($target->get_status());
+        ++$stat_hash_ref->{$target->get_task()}{n}{$target->get_status()};
+        $stat_hash_ref->{$target->get_task()}{t} += $elapsed_time;
+    }
+    else { # No target update required
+        if ($target->get_path_of_prev()) {
+            $target->set_path($target->get_path_of_prev());
+        }
+        $target->set_prop_of_prev_of({}); # unset
+        $target->set_path_of_prev(undef); # unset
+        $target->set_status($target->ST_UNCHANGED);
+        ++$stat_hash_ref->{$target->get_task()}{n}{$target->ST_UNCHANGED};
+    }
     $EVENT->(
-        FCM::Context::Event->MAKE_BUILD_TARGET_UPDATED, $target, $elapsed_time,
+        FCM::Context::Event->MAKE_BUILD_TARGET_DONE, $target, $elapsed_time,
     );
 }
 
@@ -1409,7 +1517,6 @@ use base qw{FCM::Class::HASH};
 
 use constant {
     DONE       => 'DONE',       # state value
-    FAILED     => 'FAILED',     # state value
     READY      => 'READY',      # state value
     PENDING    => 'PENDING',    # state value
 };
