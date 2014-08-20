@@ -5,6 +5,77 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## Next Release (2014-Q3?)
+
+This will be the 20th release of FCM.
+
+### Highlighted Changes
+
+[#138](https://github.com/metomi/fcm/pull/138):
+fcm make: build: continue on failure.
+* The build system will continue as much as possible after a failure, and
+  only repeat failed tasks in incremental modes.
+* This change also fixes a problem where the system could lose information
+  after a failure. Tasks that would be run after the failed task would not get
+  their context recorded correctly. In a subsequent incremental build, the
+  system would end up doing more work than necessary.
+
+[#135](https://github.com/metomi/fcm/pull/135):
+fcm make: multiple config files and search paths.
+* You can now specify multiple `-F PATH` options to specify the search paths
+  for locating configuration files specified as relative paths.
+* You can now specify multiple `-f FILE` options.
+* New `include-path` configuration declaration for specifying the search path
+  for configuration files specified as relative paths.
+* Improve CLI argument diagnostics.
+  * The command dies if an argument is missing an equal sign.
+  * Suggest command line syntax if argument ends with `.cfg`.
+
+[#136](https://github.com/metomi/fcm/pull/136),
+[#129](https://github.com/metomi/fcm/pull/129):
+Major improvements to the admin sub-system:
+* Improve hook installation.
+  Write, store and housekeep hook logs at `$REPOS/log/`.
+  Clean options for hook installation.
+  Install `svnperms.conf` from repository root.
+  `TZ=UTC` for all hook scripts.
+* Improve diagnostics for hooks.
+  Custom configuations per repositories.
+  No longer support custom executables.
+  Configurable `pre-revprop-change` permissions.
+  Hooks to work best under Subversion 1.8+.
+  Add modified `svnperms.py` in distribution.
+  Trac 0.12+ changeset added and modified notification.
+* Trac URL template.
+* `fcm-add-trac-env`: add Trac comment edit permission.
+* Separate `InterTrac` configurations from `trac.ini` into `intertrac.ini`.
+* Fix usage of `FCM_CONF_PATH` for admin.
+* Improve documentation and logic for admin configuration.
+* Get user info via LDAP or traditional Unix password file.
+* Use UUID to generate initial `svnserve` passwords.
+* New admin commands:
+  * `fcm-add-svn-repos-and-trac-env`
+  * `fcm-add-svn-repos`
+  * `fcm-manage-trac-env-session`
+* `pre-commit`: block branch create with bad owner.
+* `post-commit-bg`: rename repository dump.
+* `post-commit-bg`: branch owner notification.
+* `post-*` hooks: configurable notification `From:` field.
+* Test batteries for hooks, and selected admin utilities.
+
+### Noteworthy Changes
+
+[#139](https://github.com/metomi/fcm/pull/139):
+fcm commit: fail a commit if it includes the `#commit_message#` file.
+
+[#137](https://github.com/metomi/fcm/pull/137):
+fcm merge: basic support for `kdiff3`.
+
+[#129](https://github.com/metomi/fcm/pull/129):
+`fcm commit`/`fcm branch-rm`: fix branch owner test to use correct user ID.
+
+--------------------------------------------------------------------------------
+
 ## 2014.06.0 (2014-06-10)
 
 ### Highlighted Changes
