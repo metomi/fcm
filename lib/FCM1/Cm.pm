@@ -1003,11 +1003,9 @@ sub cm_mkpatch {
       if ($patch) {
         # Don't use the patch if it may contain subversion keywords or
         # any changes to PDF files or any changes to symbolic links or
-        # any carriage returns in the middle of a line or
-        # any differences in binary files
+        # any carriage returns in the middle of a line
         for (split(qr{\n}msx, $patch)) {
-          if (/\$[a-zA-Z:]+ *\$/ or /^--- .+\.pdf\t/ or /^\+link / or /\r.+/ or
-              /Cannot display: file marked as a binary type./) {
+          if (/\$[a-zA-Z:]+ *\$/ or /^--- .+\.pdf\t/ or /^\+link / or /\r.+/) {
             $use_patch = 0;
             last;
           }
@@ -1237,11 +1235,11 @@ sub cm_mkpatch {
             $export_required = 1;
           } else {
             # Export the file if it is binary
-            my @mime_type = $SVN->stdout(
-              qw{svn propget svn:mime-type}, $url_file,
+            my @file_diff = $SVN->stdout(
+              qw{svn diff --no-diff-deleted -c}, $rev, $url_file,
             );
-            for (@mime_type) {
-              $export_required = 1 if not /^text\//;
+            for (@file_diff) {
+              $export_required = 1 if /Cannot display: file marked as a binary type./;
             }
             # Only create a patch file if necessary
             $patch_needed = 1 if not $export_required;
