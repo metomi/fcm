@@ -1075,7 +1075,7 @@ sub cm_mkpatch {
 
       # Handle deleted files
       if ($log{$rev}{paths}{$path}{action} eq 'D') {
-        push @after_script, 'svn delete ' . $file;
+        push @after_script, 'svn delete "' . $file . '"';
 
       } else {
         # Skip property changes (if not done earlier)
@@ -1099,7 +1099,7 @@ sub cm_mkpatch {
           if (exists $log{$rev}{paths}{$path}{'copyfrom-path'}) {
             if ($is_dir) {
               # A copied directory needs to be exported and added recursively
-              push @after_script, 'svn add ' . $file;
+              push @after_script, 'svn add "' . $file . '"';
               $export_required = 1;
               push @copied_dirs, $file;
             } else {
@@ -1136,17 +1136,19 @@ sub cm_mkpatch {
                       URL => $url->root . $attrib{'copyfrom-path'} . '@' .
                              $attrib{'copyfrom-rev'},
                     );
-                    $cp_cp_url->url_peg(
-                      $cp_cp_url->project_url()
-                      . '/' . $url->branch()
-                      . '/' . $cp_cp_url->subdir()
-                      . '@' . $cp_cp_url->pegrev(),
-                    );
-                    if ($cp_cp_url->url_exists ($rev - 1)) {
-                      ($copyfrom_path = $cp_cp_url->path) =~ s#^$url_path/*##;
-                      # Check path is defined - if not it probably means the
-                      # branch doesn't follow the FCM naming convention
-                      $is_newfile = 0 if $copyfrom_path;
+                    if ($cp_cp_url->subdir()) {
+                      $cp_cp_url->url_peg(
+                        $cp_cp_url->project_url()
+                        . '/' . $url->branch()
+                        . '/' . $cp_cp_url->subdir()
+                        . '@' . $cp_cp_url->pegrev(),
+                      );
+                      if ($cp_cp_url->url_exists ($rev - 1)) {
+                        ($copyfrom_path = $cp_cp_url->path) =~ s#^$url_path/*##;
+                        # Check path is defined - if not it probably means the
+                        # branch doesn't follow the FCM naming convention
+                        $is_newfile = 0 if $copyfrom_path;
+                      }
                     }
                   }
 
@@ -1157,18 +1159,25 @@ sub cm_mkpatch {
                 }
               }
 
-              # Check whether file is copied from an excluded path
+              # Check whether file is copied from an excluded or copied path
               if (not $is_newfile) {
-                for my $exclude (@exclude) {
-                  if ($copyfrom_path =~ m#^$exclude(?:/|$)#) {
+                for my $path (@exclude,@copied_dirs) {
+                  if ($copyfrom_path =~ m#^$path(?:/|$)#) {
                     $is_newfile = 1;
                     last;
                   }
                 }
               }
 
+              # Check whether file is copied from a file which has been replaced
+              if (not $is_newfile) {
+                my $copyfrom_fullpath = $url->branch_path . "/" . $copyfrom_path;
+                $is_newfile = 1 if ($log{$rev}{paths}{$copyfrom_fullpath}{action} and
+                                    $log{$rev}{paths}{$copyfrom_fullpath}{action} eq 'R');
+              }
+
               # Copy the file, if required
-              push @before_script, 'svn copy ' . $copyfrom_path .  ' ' . $file
+              push @before_script, 'svn copy ' . $copyfrom_path .  ' "' . $file . '"'
                 if not $is_newfile;
             }
 
@@ -1177,8 +1186,8 @@ sub cm_mkpatch {
             if ($is_dir) {
               # If it's a directory then create it and add it immediately
               # (in case it contains any copied files)
-              push @before_script, 'mkdir ' . $file;
-              push @before_script, 'svn add ' . $file;
+              push @before_script, 'mkdir "' . $file. '"';
+              push @before_script, 'svn add "' . $file . '"';
             } else {
               $is_newfile = 1;
 	    }
@@ -1186,32 +1195,25 @@ sub cm_mkpatch {
 
           # Add the file, if required
           if ($is_newfile) {
-            push @after_script, 'svn add ' . $file;
+            push @after_script, 'svn add "' . $file . '"';
           }
         }
 
-        if ($log{$rev}{paths}{$path}{action} eq 'R') {
-          if ($is_dir) {
-            # Subversion does not appear to support replacing a directory in a
-            # single transaction from a working copy (other than as the result
-            # of a merge). Therefore the delete of the old directory must be
-            # done in advance as a separate commit.
-            push @script, 'svn delete -m "Delete directory in preparation for' .
-              ' replacing it (part of ' . $organisation . '_changeset:' . $rev .
-              ')" $target/' . $file;
-            push @script, 'svn update --non-interactive';
-            # The replaced directory needs to be exported and added recursively
-            push @after_script, 'svn add ' . $file;
-            $export_required = 1;
-            push @copied_dirs, $file;
-          } else {
-            # Delete the old file and then add the new file
-            push @before_script, 'svn delete ' . $file;
-            push @after_script, 'svn add ' . $file;
-          }
+        if ($is_dir and $log{$rev}{paths}{$path}{action} eq 'R') {
+          # Subversion does not appear to support replacing a directory in a
+          # single transaction from a working copy (other than as the result
+          # of a merge). Therefore the delete of the old directory must be
+          # done in advance as a separate commit.
+          push @script, 'svn delete -m "Delete directory in preparation for' .
+            ' replacing it (part of ' . $organisation . '_changeset:' . $rev .
+            ')" $target/' . $file;
+          push @script, 'svn update --non-interactive';
+          # The replaced directory needs to be exported and added recursively
+          push @after_script, 'svn add "' . $file . '"';
+          $export_required = 1;
+          push @copied_dirs, $file;
         }
 
-        # Handle symbolic links
         if (not $is_dir and $log{$rev}{paths}{$path}{action} ne 'A') {
           my ($was_symlink) = $SVN->stdout(
             qw{svn propget svn:special},
@@ -1222,15 +1224,19 @@ sub cm_mkpatch {
           );
           if ($was_symlink and not $is_symlink) {
             # A symbolic link has been changed to a normal file
-            push @after_script, 'svn propdel -q svn:special ' . $file;
+            push @before_script, 'svn propdel -q svn:special "' . $file . '"';
+            push @before_script, 'rm "' . $file . '"';
+	  } elsif ($log{$rev}{paths}{$path}{action} eq 'R') {
+            # Delete the old file and then add the new file
+            push @before_script, 'svn delete "' . $file . '"';
+            push @after_script, 'svn add "' . $file . '"';
           } elsif ($is_symlink and not $was_symlink) {
             # A normal file has been changed to a symbolic link
-            push @after_script, 'svn propset -q svn:special \* ' . $file;
-	  } elsif ($is_symlink and $was_symlink) {
+            push @after_script, 'svn propset -q svn:special \* "' . $file . '"';
+          } elsif ($is_symlink and $was_symlink) {
             # If a symbolic link has been modified then remove the old
             # copy first to allow the copy to work
-            push @before_script, 'rm ' . $file
-              if ($log{$rev}{paths}{$path}{action} eq 'M');
+            push @before_script, 'rm "' . $file . '"';
           }
         }
 
@@ -1240,11 +1246,11 @@ sub cm_mkpatch {
             $export_required = 1;
           } else {
             # Export the file if it is binary
-            my @mime_type = $SVN->stdout(
-              qw{svn propget svn:mime-type}, $url_file,
+            my @file_diff = $SVN->stdout(
+              qw{svn diff --no-diff-deleted -c}, $rev, $url_file,
             );
-            for (@mime_type) {
-              $export_required = 1 if not /^text\//;
+            for (@file_diff) {
+              $export_required = 1 if /Cannot display: file marked as a binary type./;
             }
             # Only create a patch file if necessary
             $patch_needed = 1 if not $export_required;
@@ -1258,7 +1264,7 @@ sub cm_mkpatch {
 
           # Copy the exported file into the file
           push @before_script,
-               'cp -r ${fcm_patch_dir}/' . $export_file . ' ' . $file;
+               'cp -r ${fcm_patch_dir}/' . $export_file . ' "' . $file . '"';
           $export_file++;
         }
       }
@@ -1404,7 +1410,7 @@ if [[ \$target == svn://*  || \$target == svn+ssh://* || \\
   svn checkout -q \$target \$fcm_working_copy || exit 1
 else
   fcm_working_copy=\$target
-  target=`svn info \$fcm_working_copy | grep "URL: " | sed 's/URL: //'` || exit 1
+  target=`svn info \$fcm_working_copy | grep "^URL: " | sed 's/URL: //'` || exit 1
 fi
 
 # Location of the patches, base on the location of this script
@@ -1415,7 +1421,7 @@ fcm_patches_dir=\$PWD
 cd \$fcm_working_copy || exit 1
 
 # Set the language to avoid encoding problems
-if locale -a | grep -q en_GB; then
+if locale -a | grep -q en_GB\$; then
   export LANG=en_GB
 fi
 
