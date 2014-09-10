@@ -747,10 +747,8 @@ sub manage_users_in_svn_passwd {
                     $RUNNER->run(
                         "adding $user to $svn_passwd_file",
                         sub {
-                            my $password = qx{uuidgen};
-                            chomp($password);
                             $svn_passwd_ini->newval(
-                                $USERS_SECTION, $user->get_name(), $password,
+                                $USERS_SECTION, $user->get_name(), q{},
                             ),
                         },
                     );
