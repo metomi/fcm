@@ -52,7 +52,6 @@ Major improvements to the admin sub-system:
 * Fix usage of `FCM_CONF_PATH` for admin.
 * Improve documentation and logic for admin configuration.
 * Get user info via LDAP or traditional Unix password file.
-* Use UUID to generate initial `svnserve` passwords.
 * New admin commands:
   * `fcm-add-svn-repos-and-trac-env`
   * `fcm-add-svn-repos`
@@ -64,6 +63,12 @@ Major improvements to the admin sub-system:
 * Test batteries for hooks, and selected admin utilities.
 
 ### Noteworthy Changes
+
+[#140](https://github.com/metomi/fcm/pull/140):
+fcm mkpatch: improve handling of binary files. Re-enable use of patches with
+binary files. Improve detection of binary files by using diff rather than
+checking the `svn:mime-type` property (previous check was not safe since it did
+not check the property for the old and new revisions).
 
 [#139](https://github.com/metomi/fcm/pull/139):
 fcm commit: fail a commit if it includes the `#commit_message#` file.
