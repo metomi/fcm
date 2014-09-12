@@ -82,7 +82,10 @@ __PACKAGE__->class({
 
     # User information tool, passwd settings
     passwd_email_domain => {isa => '$', default => q{}},
-    passwd_ok_uids      => {isa => '$', default => q{}},
+    passwd_gid_max      => {isa => '$'},
+    passwd_uid_max      => {isa => '$'},
+    passwd_gid_min      => {isa => '$', default => 1000},
+    passwd_uid_min      => {isa => '$', default => 1000},
 });
 
 
@@ -325,9 +328,21 @@ PASSWD settings, only relevant if user_info_tool = passwd
 
 Domain name to suffix user IDs to create an email address.
 
-=item passwd_ok_uids
+=item passwd_gid_max
 
-UIDs < 1000 (with GID < 1000) that are considered normal users.
+Maximum GID considered to be a normal user group.
+
+=item passwd_uid_max
+
+Maximum UID considered to be a normal user.
+
+=item passwd_gid_min
+
+Minimum GID considered to be a normal user group. (default=1000)
+
+=item passwd_uid_min
+
+Minimum UID considered to be a normal user. (default=1000)
 
 =back
 
