@@ -76,5 +76,11 @@
 ## PASSWD settings, only relevant if user_info_tool = passwd
 ## Domain name to suffix user IDs to create an email address
 #  passwd_email_domain =
-## UIDs < 1000 (with GID < 1000) that are considered normal users
-#  passwd_ok_uids =
+## Maximum GID considered to be a normal user group.
+#  passwd_gid_max =
+## Maximum UID considered to be a normal user.
+#  passwd_uid_max =
+## Minimum GID considered to be a normal user group.
+#  passwd_gid_min = 1000
+## Minimum UID considered to be a normal user.
+#  passwd_uid_min = 1000

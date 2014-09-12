@@ -47,13 +47,17 @@ sub _get_users_info {
     if ($domain) {
         $domain = '@' . $domain;
     }
-    my @ok_uids = shellwords($CONFIG->get_passwd_ok_uids());
+    my $gid_max = $CONFIG->get_passwd_gid_max();
+    my $uid_max = $CONFIG->get_passwd_uid_max();
+    my $gid_min = $CONFIG->get_passwd_gid_min();
+    my $uid_min = $CONFIG->get_passwd_uid_min();
     my %user_of;
     USER:
     while (my ($name, $uid, $gid, $gecos) = (getpwent())[0, 2, 3, 6]) {
         if (    exists($user_of{$name})
-            ||  (($uid < 1000 || $gid < 1000) && !grep {$_ == $uid} @ok_uids)
-            ||  !$gecos || $gecos !~ qr{\A[\w\.\-]+\.[\w\.\-]+\z}msx
+            ||  defined($uid_max) && $uid > $uid_max || $uid < $uid_min
+            ||  defined($gid_max) && $gid > $gid_max || $gid < $gid_min
+            ||  !$gecos
             ||  (@only_users && grep {$_ eq $name} @only_users)
         ) {
             next USER;
