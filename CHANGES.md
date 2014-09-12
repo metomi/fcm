@@ -31,8 +31,10 @@ fcm make: multiple config files and search paths.
   * The command dies if an argument is missing an equal sign.
   * Suggest command line syntax if argument ends with `.cfg`.
 
+[#129](https://github.com/metomi/fcm/pull/129),
 [#136](https://github.com/metomi/fcm/pull/136),
-[#129](https://github.com/metomi/fcm/pull/129):
+[#143](https://github.com/metomi/fcm/pull/143),
+[#144](https://github.com/metomi/fcm/pull/144):
 Major improvements to the admin sub-system:
 * Improve hook installation.
   Write, store and housekeep hook logs at `$REPOS/log/`.
@@ -41,7 +43,6 @@ Major improvements to the admin sub-system:
   `TZ=UTC` for all hook scripts.
 * Improve diagnostics for hooks.
   Custom configuations per repositories.
-  No longer support custom executables.
   Configurable `pre-revprop-change` permissions.
   Hooks to work best under Subversion 1.8+.
   Add modified `svnperms.py` in distribution.
@@ -56,9 +57,9 @@ Major improvements to the admin sub-system:
   * `fcm-add-svn-repos-and-trac-env`
   * `fcm-add-svn-repos`
   * `fcm-manage-trac-env-session`
-* `pre-commit`: block branch create with bad owner.
+* `pre-commit`: optionally block branch create with bad owner.
 * `post-commit-bg`: rename repository dump.
-* `post-commit-bg`: branch owner notification.
+* `post-commit-bg`: optionally notify branch owner if author is not owner.
 * `post-*` hooks: configurable notification `From:` field.
 * Test batteries for hooks, and selected admin utilities.
 
