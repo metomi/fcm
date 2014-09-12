@@ -101,30 +101,36 @@ main() {
         echo "REV_FILE_SIZE=$REV_FILE_SIZE # within $REV_FILE_SIZE_THRESHOLD"
     fi
 
-    # Install svnperms.conf, if necessary
-    local CHANGED=$(svnlook changed -r "$REV" "$REPOS")
-    if grep -q '^....svnperms.conf$' <<<"$CHANGED"; then
-        # Don't specify revision, so always look at latest.
-        if svnlook filesize "$REPOS" svnperms.conf >/dev/null 2>&1; then
-            echo "svnlook cat $REPOS svnperms.conf >$REPOS/hooks/svnperms.conf"
-            svnlook cat "$REPOS" 'svnperms.conf' >"$REPOS/hooks/svnperms.conf"
-        else
-            echo "rm -f $REPOS/hooks/svnperms.conf"
-            rm -f "$REPOS/hooks/svnperms.conf"
+    # Install commit.conf and svnperms.conf, if necessary
+    local CHANGED=$(svnlook changed -r "${REV}" "${REPOS}")
+    local NAME=
+    for NAME in 'commit.conf' 'svnperms.conf'; do
+        if grep -q "^....${NAME}\$" <<<"${CHANGED}"; then
+            # Don't specify revision, so always look at latest.
+            if svnlook filesize "${REPOS}" "${NAME}" >/dev/null 2>&1; then
+                echo "svnlook cat ${REPOS} ${NAME} >${REPOS}/hooks/${NAME}"
+                svnlook cat "${REPOS}" "${NAME}" >"${REPOS}/hooks/${NAME}"
+            else
+                echo "rm -f ${REPOS}/hooks/${NAME}"
+                rm -f "${REPOS}/hooks/${NAME}"
+            fi
         fi
-    fi
+    done
 
     # On commit to a branch, notify the branch owner if author is not him/her
-    local ADDRS=$(post-commit-bg-notify-who "$REPOS" "$REV" "$TXN")
-    if [[ -n $ADDRS ]]; then
-        SUBJECT="-s$(basename $REPOS)@$REV by $AUTHOR"
-        FROM=
-        if [[ -n ${FCM_SVN_HOOK_NOTIFICATION_FROM:-} ]]; then
-            FROM="-r${FCM_SVN_HOOK_NOTIFICATION_FROM:-}"
+    local COMMIT_CONFIG="${REPOS}/hooks/commit.conf"
+    if ! grep -q 'no-notify-branch-owner' "$COMMIT_CONFIG" 2>/dev/null; then
+        local ADDRS=$(post-commit-bg-notify-who "$REPOS" "$REV" "$TXN")
+        if [[ -n $ADDRS ]]; then
+            SUBJECT="-s$(basename $REPOS)@$REV by $AUTHOR"
+            FROM=
+            if [[ -n ${FCM_SVN_HOOK_NOTIFICATION_FROM:-} ]]; then
+                FROM="-r${FCM_SVN_HOOK_NOTIFICATION_FROM:-}"
+            fi
+            echo -n "svn log -v -r \"$REV\" \"file://$REPOS\""
+            echo " | mail \"$FROM\" \"$SUBJECT\" \"$ADDRS\""
+            svn log -v -r "$REV" "file://$REPOS" | mail "$FROM" "$SUBJECT" "$ADDRS"
         fi
-        echo -n "svn log -v -r \"$REV\" \"file://$REPOS\""
-        echo " | mail \"$FROM\" \"$SUBJECT\" \"$ADDRS\""
-        svn log -v -r "$REV" "file://$REPOS" | mail "$FROM" "$SUBJECT" "$ADDRS"
     fi
 
     # Custom hook

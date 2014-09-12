@@ -81,7 +81,7 @@ our @EXPORT_OK = qw{
 
 our $NO_OVERWRITE = 1;
 our $BUFFER_SIZE = 4096;
-our @SVN_REPOS_ROOT_HOOK_ITEMS = qw{svnperms.conf};
+our @SVN_REPOS_ROOT_HOOK_ITEMS = qw{commit.conf svnperms.conf};
 our %USER_INFO_TOOL_OF = (
     'ldap'   => 'FCM::Admin::Users::LDAP',
     'passwd' => 'FCM::Admin::Users::Passwd',

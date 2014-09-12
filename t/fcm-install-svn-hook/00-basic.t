@@ -25,7 +25,7 @@
 if ! which svnadmin 1>/dev/null 2>/dev/null; then
     skip_all 'svnadmin not available'
 fi
-tests 125
+tests 149
 #-------------------------------------------------------------------------------
 FCM_REAL_HOME=$(readlink -f "$FCM_HOME")
 TODAY=$(date -u +%Y%m%d)
@@ -110,22 +110,35 @@ run_tests() {
         "$TEST_SOURCE_DIR/$TEST_KEY_BASE/$NAME-2.out" >"$TEST_KEY-2.out.exp"
     file_cmp "$TEST_KEY-2.out" "$TEST_KEY-2.out.parsed" "$TEST_KEY-2.out.exp"
 }
+
 # New install, single repository
 TEST_KEY="$TEST_KEY_BASE-new"
 NAME=new run_tests
 TEST_KEY="$TEST_KEY_BASE-new-foo"
 NAME=new run_tests foo
+
 # Clean install, single repository
 TEST_KEY="$TEST_KEY_BASE-clean"
 NAME=clean run_tests --clean
 TEST_KEY="$TEST_KEY_BASE-clean-foo"
 NAME=clean run_tests --clean foo
+
 # New install, single repository, with svnperms.conf
 TEST_KEY="$TEST_KEY_BASE-svnperms.conf"
-mkdir svn-import
-echo '[foo]' >svn-import/svnperms.conf
-NAME=conf run_tests
+mkdir -p 'svn-import'
+echo '[foo]' >'svn-import/svnperms.conf'
+NAME='svnperms-conf' run_tests
 file_cmp "$TEST_KEY-ls-svnperms.conf" \
-    svn-repos/foo/hooks/svnperms.conf svn-import/svnperms.conf
+    'svn-repos/foo/hooks/svnperms.conf' 'svn-import/svnperms.conf'
+
+# New install, single repository, with commit.conf
+TEST_KEY="$TEST_KEY_BASE-commit.conf"
+{
+    echo 'no-notify-branch-owner'
+    echo 'no-verify-branch-owner'
+} >'svn-import/commit.conf'
+NAME='commit-conf' run_tests
+file_cmp "$TEST_KEY-ls-svnperms.conf" \
+    'svn-repos/foo/hooks/commit.conf' 'svn-import/commit.conf'
 #-------------------------------------------------------------------------------
 exit

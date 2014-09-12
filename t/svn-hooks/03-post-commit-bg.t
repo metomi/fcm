@@ -27,6 +27,7 @@ test_tidy() {
     rm -f \
         "$REPOS_PATH/hooks/post-commit-bg-custom" \
         "$REPOS_PATH/hooks/post-commit-background-custom" \
+        "$REPOS_PATH/hooks/commit.conf" \
         "$REPOS_PATH/log/post-commit.log" \
         file1 \
         file2 \
@@ -36,7 +37,7 @@ test_tidy() {
         mail.out
 }
 #-------------------------------------------------------------------------------
-tests 25
+tests 32
 #-------------------------------------------------------------------------------
 cp -p "$FCM_HOME/etc/svn-hooks/post-commit" "$REPOS_PATH/hooks/"
 sed -i "/set -eu/a\
@@ -71,72 +72,78 @@ fi
 run_pass "$TEST_KEY.dump" test -s "$PWD/svn-dumps/foo-$REV.gz"
 run_fail "$TEST_KEY.mail.out" test -e mail.out
 #-------------------------------------------------------------------------------
-TEST_KEY="$TEST_KEY_BASE-add-svnperms.conf"
-test_tidy
-cat >svnperms.conf <<'__CONF__'
+# Install and remove commit.conf, svnperms.conf
+for NAME in 'commit.conf' 'svnperms.conf'; do
+    TEST_KEY="$TEST_KEY_BASE-add-${NAME}"
+    test_tidy
+    # (Use "svnperms.conf" syntax. Doesn't matter for the purpose of this test.)
+    cat >${NAME} <<'__CONF__'
 [foo]
 .*=*(add,remove,update)
 __CONF__
-svn import --no-auth-cache -q -m"$TEST_KEY" svnperms.conf \
-    "$REPOS_URL/svnperms.conf"
-REV=$(<rev)
-poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
-date2datefmt "$REPOS_PATH/log/post-commit.log" \
-    | sed '/^trac-admin/d; s/^\(REV_FILE_SIZE=\).*\( #\)/\1???\2/' \
-    >"$TEST_KEY.log"
-file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<__LOG__
+    svn import --no-auth-cache -q -m"$TEST_KEY" ${NAME} \
+        "$REPOS_URL/${NAME}"
+    REV=$(<rev)
+    poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
+    date2datefmt "$REPOS_PATH/log/post-commit.log" \
+        | sed '/^trac-admin/d; s/^\(REV_FILE_SIZE=\).*\( #\)/\1???\2/' \
+        >"$TEST_KEY.log"
+    file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<__LOG__
 YYYY-mm-ddTHH:MM:SSZ+ $REV by $USER
 svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip 1>$PWD/svn-dumps/foo-$REV.gz
 * Dumped revision $REV.
 REV_FILE_SIZE=??? # within 1048576
-svnlook cat $REPOS_PATH svnperms.conf >$REPOS_PATH/hooks/svnperms.conf
+svnlook cat $REPOS_PATH ${NAME} >$REPOS_PATH/hooks/${NAME}
 RET_CODE=0
 __LOG__
-file_cmp "$TEST_KEY.conf" svnperms.conf "$REPOS_PATH/hooks/svnperms.conf"
-#-------------------------------------------------------------------------------
-TEST_KEY="$TEST_KEY_BASE-modify-svnperms.conf"
-test_tidy
-svn co -q "$REPOS_URL" work
-cat >work/svnperms.conf <<'__CONF__'
+    file_cmp "$TEST_KEY.conf" ${NAME} "$REPOS_PATH/hooks/${NAME}"
+
+    TEST_KEY="$TEST_KEY_BASE-modify-${NAME}"
+    test_tidy
+    svn co -q "$REPOS_URL" work
+    # (Use "svnperms.conf" syntax. Doesn't matter for the purpose of this test.)
+    cat >work/${NAME} <<'__CONF__'
 [foo]
 .*=*(add,remove,update)
 
 [bar]
 __CONF__
-svn commit --no-auth-cache -q -m"$TEST_KEY" work
-REV=$(<rev)
-poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
-date2datefmt "$REPOS_PATH/log/post-commit.log" \
-    | sed '/^trac-admin/d; s/^\(REV_FILE_SIZE=\).*\( #\)/\1???\2/' \
-    >"$TEST_KEY.log"
-file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<__LOG__
+    svn commit --no-auth-cache -q -m"$TEST_KEY" work
+    REV=$(<rev)
+    poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
+    date2datefmt "$REPOS_PATH/log/post-commit.log" \
+        | sed '/^trac-admin/d; s/^\(REV_FILE_SIZE=\).*\( #\)/\1???\2/' \
+        >"$TEST_KEY.log"
+    file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<__LOG__
 YYYY-mm-ddTHH:MM:SSZ+ $REV by $USER
 svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip 1>$PWD/svn-dumps/foo-$REV.gz
 * Dumped revision $REV.
 REV_FILE_SIZE=??? # within 1048576
-svnlook cat $REPOS_PATH svnperms.conf >$REPOS_PATH/hooks/svnperms.conf
+svnlook cat $REPOS_PATH ${NAME} >$REPOS_PATH/hooks/${NAME}
 RET_CODE=0
 __LOG__
-file_cmp "$TEST_KEY.conf" work/svnperms.conf "$REPOS_PATH/hooks/svnperms.conf"
-rm -f -r work
-#-------------------------------------------------------------------------------
-TEST_KEY="$TEST_KEY_BASE-remove-svnperms.conf"
-test_tidy
-svn rm --no-auth-cache -q -m'remove svnperms.conf' "$REPOS_URL/svnperms.conf"
-REV=$(<rev)
-poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
-date2datefmt "$REPOS_PATH/log/post-commit.log" \
-    | sed '/^trac-admin/d; s/^\(REV_FILE_SIZE=\).*\( #\)/\1???\2/' \
-    >"$TEST_KEY.log"
-file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<__LOG__
+    file_cmp "$TEST_KEY.conf" work/${NAME} "$REPOS_PATH/hooks/${NAME}"
+    rm -f -r work
+
+    TEST_KEY="$TEST_KEY_BASE-remove-${NAME}"
+    test_tidy
+    touch "$REPOS_PATH/hooks/${NAME}"
+    svn rm --no-auth-cache -q -m'remove ${NAME}' "$REPOS_URL/${NAME}"
+    REV=$(<rev)
+    poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
+    date2datefmt "$REPOS_PATH/log/post-commit.log" \
+        | sed '/^trac-admin/d; s/^\(REV_FILE_SIZE=\).*\( #\)/\1???\2/' \
+        >"$TEST_KEY.log"
+    file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<__LOG__
 YYYY-mm-ddTHH:MM:SSZ+ $REV by $USER
 svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip 1>$PWD/svn-dumps/foo-$REV.gz
 * Dumped revision $REV.
 REV_FILE_SIZE=??? # within 1048576
-rm -f $REPOS_PATH/hooks/svnperms.conf
+rm -f $REPOS_PATH/hooks/${NAME}
 RET_CODE=0
 __LOG__
-run_fail "$TEST_KEY.conf" test -e "$REPOS_PATH/hooks/svnperms.conf"
+    run_fail "$TEST_KEY.conf" test -e "$REPOS_PATH/hooks/${NAME}"
+done
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE-size"
 test_tidy
@@ -239,10 +246,22 @@ svn cp -q -m '' --parents \
     --no-auth-cache \
     "$REPOS_URL/hello/trunk" \
     "$REPOS_URL/hello/branches/test/$USER/whatever"
+REV=$(<rev)
 poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
 file_grep "$TEST_KEY.mail.out.1" \
-    '^-rnotifications@localhost -sfoo@10 by root' mail.out
-file_grep "$TEST_KEY.mail.out.2" '^r10 | root' mail.out
+    "^-rnotifications@localhost -sfoo@${REV} by root" mail.out
+file_grep "$TEST_KEY.mail.out.2" "^r${REV} | root" mail.out
+
+TEST_KEY="$TEST_KEY_BASE-branch-create-owner-3" # same as 2, but no notify
+test_tidy
+echo 'no-notify-branch-owner' >"${REPOS_PATH}/hooks/commit.conf"
+svn cp -q -m '' --parents \
+    --username=root \
+    --no-auth-cache \
+    "$REPOS_URL/hello/trunk" \
+    "$REPOS_URL/hello/branches/test/$USER/whatever2"
+poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
+run_fail "$TEST_KEY.mail.out" test -s mail.out
 
 TEST_KEY="$TEST_KEY_BASE-branch-modify-owner-1" # modify author is owner
 test_tidy
@@ -258,9 +277,10 @@ test_tidy
 echo 'Hello Alien' >hello/file
 svn ci -q -m'Hello Earth' --username=root --no-auth-cache hello/file
 poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
+REV=$(<rev)
 file_grep "$TEST_KEY.mail.out.1" \
-    '^-rnotifications@localhost -sfoo@12 by root' mail.out
-file_grep "$TEST_KEY.mail.out.2" '^r12 | root' mail.out
+    "^-rnotifications@localhost -sfoo@${REV} by root" mail.out
+file_grep "$TEST_KEY.mail.out.2" "^r${REV} | root" mail.out
 
 TEST_KEY="$TEST_KEY_BASE-branch-delete-owner-1" # delete author is owner
 test_tidy
@@ -273,8 +293,9 @@ test_tidy
 svn rm -q -m'No Hello' --username=root --no-auth-cache \
     "$REPOS_URL/hello/branches/test/$USER/whatever"
 poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
+REV=$(<rev)
 file_grep "$TEST_KEY.mail.out.1" \
-    '^-rnotifications@localhost -sfoo@14 by root' mail.out
-file_grep "$TEST_KEY.mail.out.2" '^r14 | root' mail.out
+    "^-rnotifications@localhost -sfoo@${REV} by root" mail.out
+file_grep "$TEST_KEY.mail.out.2" "^r${REV} | root" mail.out
 #-------------------------------------------------------------------------------
 exit

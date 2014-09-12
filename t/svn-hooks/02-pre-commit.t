@@ -27,6 +27,7 @@ test_tidy() {
     rm -f \
         "$REPOS_PATH/hooks/pre-commit-custom" \
         "$REPOS_PATH/hooks/pre-commit-size-threshold.conf" \
+        "$REPOS_PATH/hooks/commit.conf" \
         "$REPOS_PATH/hooks/svnperms.conf" \
         "$REPOS_PATH/log/pre-commit.log" \
         README \
@@ -40,7 +41,7 @@ test_tidy() {
         svnperms.py.out
 }
 #-------------------------------------------------------------------------------
-tests 48
+tests 50
 #-------------------------------------------------------------------------------
 cp -p "$FCM_HOME/etc/svn-hooks/pre-commit" "$REPOS_PATH/hooks/"
 sed -i "/set -eu/a\
@@ -274,5 +275,13 @@ A   hello/branches/dev/nosuchuser/
 A   hello/branches/dev/nosuchuser/whatever/
 [INVALID BRANCH OWNER] A   hello/branches/dev/nosuchuser/whatever/
 __LOG__
+#-------------------------------------------------------------------------------
+# Branch create owner no verify, bad
+test_tidy
+TEST_KEY="$TEST_KEY_BASE-branch-owner-no-verify-bad"
+echo 'no-verify-branch-owner' >"$REPOS_PATH/hooks/commit.conf"
+run_pass "$TEST_KEY" svn cp --parents -m "$TEST_KEY" \
+    "$REPOS_URL/hello/trunk" "$REPOS_URL/hello/branches/dev/nosuchuser/whatever"
+run_fail "$TEST_KEY.pre-commit.log" test -s "$REPOS_PATH/log/pre-commit.log"
 #-------------------------------------------------------------------------------
 exit
