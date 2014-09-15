@@ -602,7 +602,7 @@ sub housekeep_svn_hook_logs {
         }
         # Remove logs older than $keep_threshold
         for my $path (
-            glob(catfile($project_path, 'log', $hook_name . '*.log.*'))
+            sort glob(catfile($project_path, 'log', $hook_name . '*.log.*'))
         ) {
             my ($date, $dot_gz) = $path =~ qr{\.log\.(\d{8}\d*)(\.gz)?\z}msx;
             if (    $date && $date <= $date_p4w
