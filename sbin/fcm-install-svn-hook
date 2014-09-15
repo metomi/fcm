@@ -52,7 +52,7 @@ sub main {
     }
     option2config(\%option);
     my @projects = filter_projects([get_projects_from_svn_live()], \@ARGV);
-    for my $project (@projects) {
+    for my $project (sort {$a->get_name() cmp $b->get_name()} @projects) {
         install_svn_hook($project, $option{clean});
         housekeep_svn_hook_logs($project);
     }

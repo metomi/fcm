@@ -1,21 +1,3 @@
-YYYY-mm-ddTHH:MM:SSZ: copy FCM_HOME/etc/svn-hooks/post-commit to PWD/svn-repos/foo/hooks/post-commit
-YYYY-mm-ddTHH:MM:SSZ: copy FCM_HOME/etc/svn-hooks/post-revprop-change to PWD/svn-repos/foo/hooks/post-revprop-change
-YYYY-mm-ddTHH:MM:SSZ: copy FCM_HOME/etc/svn-hooks/pre-commit to PWD/svn-repos/foo/hooks/pre-commit
-YYYY-mm-ddTHH:MM:SSZ: copy FCM_HOME/etc/svn-hooks/pre-revprop-change to PWD/svn-repos/foo/hooks/pre-revprop-change
-YYYY-mm-ddTHH:MM:SSZ: removing PWD/svn-repos/foo/log/post-commit.log
-YYYY-mm-ddTHH:MM:SSZ: creating symlink: post-commit.log.TODAY -> PWD/svn-repos/foo/log/post-commit.log
-YYYY-mm-ddTHH:MM:SSZ: removing PWD/svn-repos/foo/log/post-commit.log.DATE_P28D.gz
-YYYY-mm-ddTHH:MM:SSZ: gzip PWD/svn-repos/foo/log/post-commit.log.DATE_P7D
-YYYY-mm-ddTHH:MM:SSZ: removing PWD/svn-repos/foo/log/post-revprop-change.log
-YYYY-mm-ddTHH:MM:SSZ: creating symlink: post-revprop-change.log.TODAY -> PWD/svn-repos/foo/log/post-revprop-change.log
-YYYY-mm-ddTHH:MM:SSZ: gzip PWD/svn-repos/foo/log/post-revprop-change.log.DATE_P7D
-YYYY-mm-ddTHH:MM:SSZ: removing PWD/svn-repos/foo/log/pre-commit.log
-YYYY-mm-ddTHH:MM:SSZ: creating symlink: pre-commit.log.TODAY -> PWD/svn-repos/foo/log/pre-commit.log
-YYYY-mm-ddTHH:MM:SSZ: removing PWD/svn-repos/foo/log/pre-commit.log.DATE_P28D.gz
-YYYY-mm-ddTHH:MM:SSZ: gzip PWD/svn-repos/foo/log/pre-commit.log.DATE_P7D
-YYYY-mm-ddTHH:MM:SSZ: removing PWD/svn-repos/foo/log/pre-revprop-change.log
-YYYY-mm-ddTHH:MM:SSZ: creating symlink: pre-revprop-change.log.TODAY -> PWD/svn-repos/foo/log/pre-revprop-change.log
-YYYY-mm-ddTHH:MM:SSZ: gzip PWD/svn-repos/foo/log/pre-revprop-change.log.DATE_P7D
 YYYY-mm-ddTHH:MM:SSZ: copy FCM_HOME/etc/svn-hooks/post-commit to PWD/svn-repos/bar/hooks/post-commit
 YYYY-mm-ddTHH:MM:SSZ: copy FCM_HOME/etc/svn-hooks/post-revprop-change to PWD/svn-repos/bar/hooks/post-revprop-change
 YYYY-mm-ddTHH:MM:SSZ: copy FCM_HOME/etc/svn-hooks/pre-commit to PWD/svn-repos/bar/hooks/pre-commit
@@ -34,3 +16,21 @@ YYYY-mm-ddTHH:MM:SSZ: gzip PWD/svn-repos/bar/log/pre-commit.log.DATE_P7D
 YYYY-mm-ddTHH:MM:SSZ: removing PWD/svn-repos/bar/log/pre-revprop-change.log
 YYYY-mm-ddTHH:MM:SSZ: creating symlink: pre-revprop-change.log.TODAY -> PWD/svn-repos/bar/log/pre-revprop-change.log
 YYYY-mm-ddTHH:MM:SSZ: gzip PWD/svn-repos/bar/log/pre-revprop-change.log.DATE_P7D
+YYYY-mm-ddTHH:MM:SSZ: copy FCM_HOME/etc/svn-hooks/post-commit to PWD/svn-repos/foo/hooks/post-commit
+YYYY-mm-ddTHH:MM:SSZ: copy FCM_HOME/etc/svn-hooks/post-revprop-change to PWD/svn-repos/foo/hooks/post-revprop-change
+YYYY-mm-ddTHH:MM:SSZ: copy FCM_HOME/etc/svn-hooks/pre-commit to PWD/svn-repos/foo/hooks/pre-commit
+YYYY-mm-ddTHH:MM:SSZ: copy FCM_HOME/etc/svn-hooks/pre-revprop-change to PWD/svn-repos/foo/hooks/pre-revprop-change
+YYYY-mm-ddTHH:MM:SSZ: removing PWD/svn-repos/foo/log/post-commit.log
+YYYY-mm-ddTHH:MM:SSZ: creating symlink: post-commit.log.TODAY -> PWD/svn-repos/foo/log/post-commit.log
+YYYY-mm-ddTHH:MM:SSZ: removing PWD/svn-repos/foo/log/post-commit.log.DATE_P28D.gz
+YYYY-mm-ddTHH:MM:SSZ: gzip PWD/svn-repos/foo/log/post-commit.log.DATE_P7D
+YYYY-mm-ddTHH:MM:SSZ: removing PWD/svn-repos/foo/log/post-revprop-change.log
+YYYY-mm-ddTHH:MM:SSZ: creating symlink: post-revprop-change.log.TODAY -> PWD/svn-repos/foo/log/post-revprop-change.log
+YYYY-mm-ddTHH:MM:SSZ: gzip PWD/svn-repos/foo/log/post-revprop-change.log.DATE_P7D
+YYYY-mm-ddTHH:MM:SSZ: removing PWD/svn-repos/foo/log/pre-commit.log
+YYYY-mm-ddTHH:MM:SSZ: creating symlink: pre-commit.log.TODAY -> PWD/svn-repos/foo/log/pre-commit.log
+YYYY-mm-ddTHH:MM:SSZ: removing PWD/svn-repos/foo/log/pre-commit.log.DATE_P28D.gz
+YYYY-mm-ddTHH:MM:SSZ: gzip PWD/svn-repos/foo/log/pre-commit.log.DATE_P7D
+YYYY-mm-ddTHH:MM:SSZ: removing PWD/svn-repos/foo/log/pre-revprop-change.log
+YYYY-mm-ddTHH:MM:SSZ: creating symlink: pre-revprop-change.log.TODAY -> PWD/svn-repos/foo/log/pre-revprop-change.log
+YYYY-mm-ddTHH:MM:SSZ: gzip PWD/svn-repos/foo/log/pre-revprop-change.log.DATE_P7D

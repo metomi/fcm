@@ -81,7 +81,7 @@ our @EXPORT_OK = qw{
 
 our $NO_OVERWRITE = 1;
 our $BUFFER_SIZE = 4096;
-our @SVN_REPOS_ROOT_HOOK_ITEMS = qw{svnperms.conf};
+our @SVN_REPOS_ROOT_HOOK_ITEMS = qw{commit.conf svnperms.conf};
 our %USER_INFO_TOOL_OF = (
     'ldap'   => 'FCM::Admin::Users::LDAP',
     'passwd' => 'FCM::Admin::Users::Passwd',
@@ -602,7 +602,7 @@ sub housekeep_svn_hook_logs {
         }
         # Remove logs older than $keep_threshold
         for my $path (
-            glob(catfile($project_path, 'log', $hook_name . '*.log.*'))
+            sort glob(catfile($project_path, 'log', $hook_name . '*.log.*'))
         ) {
             my ($date, $dot_gz) = $path =~ qr{\.log\.(\d{8}\d*)(\.gz)?\z}msx;
             if (    $date && $date <= $date_p4w
