@@ -66,10 +66,7 @@ Major improvements to the admin sub-system:
 ### Noteworthy Changes
 
 [#140](https://github.com/metomi/fcm/pull/140):
-fcm mkpatch: improve handling of binary files. Re-enable use of patches with
-binary files. Improve detection of binary files by using diff rather than
-checking the `svn:mime-type` property (previous check was not safe since it did
-not check the property for the old and new revisions).
+fcm mkpatch: Changes required for use with svn 1.8 + other minor bug fixes.
 
 [#139](https://github.com/metomi/fcm/pull/139):
 fcm commit: fail a commit if it includes the `#commit_message#` file.
