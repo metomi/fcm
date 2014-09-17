@@ -5,9 +5,9 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
-## Next Release (2014-Q3?)
+## 2014.09.0 (2014-09-17)
 
-This will be the 20th release of FCM.
+FCM release 20.
 
 ### Highlighted Changes
 
