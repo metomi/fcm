@@ -35,6 +35,7 @@ my %S = (
 my %LABELS_HANDLER_FOR = (
     'tkdiff' => sub {map {('-L', $_)} @_},
     'xxdiff' => sub {('--title1', $_[0], '--title2', $_[1])},
+    'meld'   => sub {map {('-L', $_)} @_},
 );
 
 if (!caller()) {
@@ -115,10 +116,11 @@ If OLD_LABEL and NEW_LABEL are set, they are printed in the format:
     ++++ NEW_LABEL
 
 The command makes use of the labels when the diff command is either
-L<xxdiff|xxdiff> or L<tkdiff|tkdiff>:
+L<xxdiff|xxdiff>, L<tkdiff|tkdiff>, or L<meld|meld>:
 
     xxdiff --title1 OLD_LABEL --title2 NEW_LABEL OLD NEW
     tkdiff -L OLD_LABEL -L NEW_LABEL OLD NEW
+    meld   -L OLD_LABEL -L NEW_LABEL OLD NEW
 
 The command returns 0 if the files are the same or 1 if the files differ. All
 other return codes should be regarded as fatal errors.

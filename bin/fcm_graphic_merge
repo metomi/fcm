@@ -23,6 +23,7 @@ use warnings;
 
 my %IMPL = ('fcm-dummy-diff' => \&_fcm_dummy_diff,
             'xxdiff' => \&_xxdiff,
+            'meld'   => \&_meld,
             'kdiff3' => \&_kdiff3);
 
 my %UNRESOLVED = (
@@ -93,6 +94,23 @@ sub _kdiff3 {
     return 0;
 }
 
+sub _meld {
+    my ($base, $mine, $older, $yours) = @_;
+    # Not using --auto-merge option as it alters the middle pane before user
+    # can review changes.
+    my @command = (qw{meld -a -o}, $base, $mine, $older, $yours);
+    my @out_lines = qx{@command};
+    my $rc = $?;
+    # meld doesn't produce any output, so we just assume a non-zero
+    # exit code means unresolved merges
+    if ($rc) {
+        print($UNRESOLVED{'merged'});
+        return 1;
+    }
+    printf("You merged all the changes.\n");
+    return 0;
+}
+
 __END__
 
 =head1 NAME
@@ -104,6 +122,9 @@ fcm_graphic_merge
     fcm_graphic_merge BASE MINE OLDER YOURS
 
 =head1 DESCRIPTION
+
+Invokes L<xxdiff|xxdiff> (or the command specified in the FCM_GRAPHIC_MERGE
+environment variable) to compare the CURRENT, ANCESTOR and NEW files, where possible.
 
 Wrap L<xxdiff|xxdiff>. Invoke L<xxdiff|xxdiff> as:
 
