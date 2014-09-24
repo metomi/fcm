@@ -118,12 +118,11 @@ sub run_create_archive {
     FCM::Admin::Runner->instance()->run(
         "creating archive $archive_path",
         sub {
-            return !system(
-                qw{tar -c -z},
-                q{-C} => $work_dir,
-                q{-f} => $archive_path,
-                @base_names,
-            );
+            my $command
+                = qq{tar -c -z -C '$work_dir' -f -}
+                . q{ } . join(q{ }, map {qq{'$_'}} @base_names)
+                . qq{ | dd 'conv=fsync' 'of=$archive_path'};
+            return !system($command);
             # Note: can use Archive::Tar, but "tar" is much faster.
         },
     );

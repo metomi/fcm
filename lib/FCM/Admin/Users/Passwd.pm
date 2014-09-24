@@ -80,7 +80,6 @@ sub _get_only_users_info {
     if ($domain) {
         $domain = '@' . $domain;
     }
-    my @ok_uids = shellwords($CONFIG->get_passwd_ok_uids());
     my %user_of;
     for my $user (@only_users) {
         my ($name, $gecos) = (getpwnam($user))[0, 6];

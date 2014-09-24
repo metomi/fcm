@@ -82,9 +82,18 @@ main() {
         fi
         local NAME=$(basename "$REPOS")
         local DUMP="$FCM_SVN_HOOK_COMMIT_DUMP_DIR/$NAME-$REV.gz"
-        echo "svnadmin dump -r$REV --incremental --deltas $REPOS | gzip 1>$DUMP"
-        svnadmin dump "-r$REV" --incremental --deltas "$REPOS" \
-            | gzip 1>"$DUMP" || RET_CODE=$?
+        local TMP_DUMP="$FCM_SVN_HOOK_COMMIT_DUMP_DIR/$NAME-$REV-tmp.gz"
+        echo "svnadmin dump -r$REV --incremental --deltas $REPOS | gzip \\"
+        echo "    | (dd 'conv=fsync' \"of=$TMP_DUMP\" 2>/dev/null)"
+        svnadmin dump "-r$REV" --incremental --deltas "$REPOS" | gzip \
+            | (dd 'conv=fsync' "of=$TMP_DUMP" 2>/dev/null) || RET_CODE=$?
+        if [[ -s "${TMP_DUMP}" ]]; then
+            echo "mv \"${TMP_DUMP}\" \"${DUMP}\""
+            mv "${TMP_DUMP}" "${DUMP}" || RET_CODE=$?
+        else
+            echo "[WARN] ${NAME}-${REV}: zero dump size" >&2
+            rm -f "${TMP_DUMP}"
+        fi
     fi
 
     # Resync Trac
@@ -129,7 +138,8 @@ main() {
             fi
             echo -n "svn log -v -r \"$REV\" \"file://$REPOS\""
             echo " | mail \"$FROM\" \"$SUBJECT\" \"$ADDRS\""
-            svn log -v -r "$REV" "file://$REPOS" | mail "$FROM" "$SUBJECT" "$ADDRS"
+            svn log -v -r "$REV" "file://$REPOS" \
+                | mail "$FROM" "$SUBJECT" "$ADDRS"
         fi
     fi
 

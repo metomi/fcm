@@ -54,8 +54,10 @@ date2datefmt "$REPOS_PATH/log/post-commit.log" \
     >"$TEST_KEY.log"
 file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<__LOG__
 YYYY-mm-ddTHH:MM:SSZ+ $REV by $USER
-svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip 1>$PWD/svn-dumps/foo-$REV.gz
+svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
+    | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
+mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
 REV_FILE_SIZE=??? # within 1048576
 RET_CODE=0
 __LOG__
@@ -90,8 +92,10 @@ __CONF__
         >"$TEST_KEY.log"
     file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<__LOG__
 YYYY-mm-ddTHH:MM:SSZ+ $REV by $USER
-svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip 1>$PWD/svn-dumps/foo-$REV.gz
+svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
+    | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
+mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
 REV_FILE_SIZE=??? # within 1048576
 svnlook cat $REPOS_PATH ${NAME} >$REPOS_PATH/hooks/${NAME}
 RET_CODE=0
@@ -116,8 +120,10 @@ __CONF__
         >"$TEST_KEY.log"
     file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<__LOG__
 YYYY-mm-ddTHH:MM:SSZ+ $REV by $USER
-svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip 1>$PWD/svn-dumps/foo-$REV.gz
+svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
+    | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
+mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
 REV_FILE_SIZE=??? # within 1048576
 svnlook cat $REPOS_PATH ${NAME} >$REPOS_PATH/hooks/${NAME}
 RET_CODE=0
@@ -136,8 +142,10 @@ __LOG__
         >"$TEST_KEY.log"
     file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<__LOG__
 YYYY-mm-ddTHH:MM:SSZ+ $REV by $USER
-svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip 1>$PWD/svn-dumps/foo-$REV.gz
+svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
+    | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
+mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
 REV_FILE_SIZE=??? # within 1048576
 rm -f $REPOS_PATH/hooks/${NAME}
 RET_CODE=0
@@ -156,8 +164,10 @@ date2datefmt "$REPOS_PATH/log/post-commit.log" \
     >"$TEST_KEY.log"
 file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<__LOG__
 YYYY-mm-ddTHH:MM:SSZ+ $REV by $USER
-svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip 1>$PWD/svn-dumps/foo-$REV.gz
+svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
+    | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
+mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
 REV_FILE_SIZE=??? # EXCEED 1048576
 RET_CODE=1
 __LOG__
@@ -167,8 +177,10 @@ date2datefmt mail.out \
 file_cmp "$TEST_KEY.mail.out" "$TEST_KEY.mail.out" <<__LOG__
 -s [post-commit-bg] $REPOS_PATH@$REV fcm.admin.team
 YYYY-mm-ddTHH:MM:SSZ+ $REV by $USER
-svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip 1>$PWD/svn-dumps/foo-$REV.gz
+svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
+    | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
+mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
 REV_FILE_SIZE=??? # EXCEED 1048576
 RET_CODE=1
 __LOG__
@@ -190,8 +202,10 @@ date2datefmt "$REPOS_PATH/log/post-commit.log" \
     >"$TEST_KEY.log"
 file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<__LOG__
 YYYY-mm-ddTHH:MM:SSZ+ $REV by $USER
-svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip 1>$PWD/svn-dumps/foo-$REV.gz
+svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
+    | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
+mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
 REV_FILE_SIZE=??? # within 1048576
 $REPOS_PATH/hooks/post-commit-bg-custom $REPOS_PATH $REV $TXN
 $REPOS_PATH $REV $TXN
@@ -217,8 +231,10 @@ date2datefmt "$REPOS_PATH/log/post-commit.log" \
     >"$TEST_KEY.log"
 file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<__LOG__
 YYYY-mm-ddTHH:MM:SSZ+ $REV by $USER
-svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip 1>$PWD/svn-dumps/foo-$REV.gz
+svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
+    | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
+mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
 REV_FILE_SIZE=??? # within 1048576
 $REPOS_PATH/hooks/post-commit-background-custom $REPOS_PATH $REV $TXN
 I have gone to the dark side.
