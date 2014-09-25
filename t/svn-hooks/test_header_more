@@ -91,6 +91,11 @@ then
     else
         TRAC_RESYNC=false
     fi
+    cat >>"${TRAC_ENV_PATH}/conf/trac.ini" <<'__TRAC_INI___'
+
+[components]
+tracopt.versioncontrol.svn.* = enabled
+__TRAC_INI___
 fi
 unset ADMIN_DIR
 cat >bin/mail <<__BASH__
