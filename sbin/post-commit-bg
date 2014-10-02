@@ -126,10 +126,10 @@ main() {
         fi
     done
 
-    # On commit to a branch, notify the branch owner if author is not him/her
+    # If relevant, notify owners
     local COMMIT_CONFIG="${REPOS}/hooks/commit.conf"
-    if ! grep -q 'no-notify-branch-owner' "$COMMIT_CONFIG" 2>/dev/null; then
-        local ADDRS=$(post-commit-bg-notify-who "$REPOS" "$REV" "$TXN")
+    if grep -q 'notify-owner' "$COMMIT_CONFIG" 2>/dev/null; then
+        local ADDRS=$('post-commit-bg-notify-who' "$REPOS" "$REV" "$TXN")
         if [[ -n $ADDRS ]]; then
             SUBJECT="-s$(basename $REPOS)@$REV by $AUTHOR"
             FROM=

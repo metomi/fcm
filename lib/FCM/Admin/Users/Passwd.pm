@@ -44,9 +44,6 @@ sub _get_users_info {
         return _get_only_users_info($attrib_ref, @only_users);
     }
     my $domain = $CONFIG->get_passwd_email_domain() || q{};
-    if ($domain) {
-        $domain = '@' . $domain;
-    }
     my $gid_max = $CONFIG->get_passwd_gid_max();
     my $uid_max = $CONFIG->get_passwd_uid_max();
     my $gid_min = $CONFIG->get_passwd_gid_min();
@@ -64,8 +61,8 @@ sub _get_users_info {
         }
         $user_of{$name} = FCM::Admin::User->new({
             name         => $name,
-            display_name => $gecos,
-            email        => $gecos . $domain,
+            display_name => (split(q{,}, $gecos))[0],
+            email        => $gecos . '@' . $domain,
         });
     }
     endpwent();
@@ -77,17 +74,14 @@ sub _get_users_info {
 sub _get_only_users_info {
     my ($attrib_ref, @only_users) = @_;
     my $domain = $CONFIG->get_passwd_email_domain() || q{};
-    if ($domain) {
-        $domain = '@' . $domain;
-    }
     my %user_of;
     for my $user (@only_users) {
         my ($name, $gecos) = (getpwnam($user))[0, 6];
-        if ($name && $gecos && $gecos =~ qr{\A[\w\.\-]+\.[\w\.\-]+\z}msx) {
+        if ($name && $gecos) {
             $user_of{$name} = FCM::Admin::User->new({
                 name         => $name,
-                display_name => $gecos,
-                email        => $gecos . $domain,
+                display_name => (split(q{,}, $gecos))[0],
+                email        => $gecos . '@' . $domain,
             });
         }
     }

@@ -244,6 +244,7 @@ rm README
 for KEY in $USER Share Config Rel; do
     test_tidy
     TEST_KEY="$TEST_KEY_BASE-branch-owner-$KEY"
+    echo 'verify-branch-owner' >"$REPOS_PATH/hooks/commit.conf"
     run_pass "$TEST_KEY" svn cp --parents -m "$TEST_KEY" \
         "$REPOS_URL/hello/trunk" "$REPOS_URL/hello/branches/dev/$KEY/whatever"
     run_fail "$TEST_KEY.pre-commit.log" test -s "$REPOS_PATH/log/pre-commit.log"
@@ -252,6 +253,7 @@ done
 # Branch create owner verify, bad
 test_tidy
 TEST_KEY="$TEST_KEY_BASE-branch-owner-bad"
+echo 'verify-branch-owner' >"$REPOS_PATH/hooks/commit.conf"
 run_fail "$TEST_KEY" svn cp --parents -m "$TEST_KEY" \
     "$REPOS_URL/hello/trunk" "$REPOS_URL/hello/branches/dev/nosuchuser/whatever"
 TXN=$(<txn)
@@ -279,7 +281,6 @@ __LOG__
 # Branch create owner no verify, bad
 test_tidy
 TEST_KEY="$TEST_KEY_BASE-branch-owner-no-verify-bad"
-echo 'no-verify-branch-owner' >"$REPOS_PATH/hooks/commit.conf"
 run_pass "$TEST_KEY" svn cp --parents -m "$TEST_KEY" \
     "$REPOS_URL/hello/trunk" "$REPOS_URL/hello/branches/dev/nosuchuser/whatever"
 run_fail "$TEST_KEY.pre-commit.log" test -s "$REPOS_PATH/log/pre-commit.log"

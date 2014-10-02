@@ -45,6 +45,7 @@ our %LAYOUT_CONFIG = (
     'dir-tag' => 'tags',
     'level-owner-branch' => 2,
     'level-owner-tag' => undef,
+    'owner' => undef,
     'template-branch' => '{category}/{owner}/{name_prefix}{name}',
     'template-tag' => undef,
 );

@@ -85,7 +85,7 @@ main() {
 
     # Verify owner of any new branches, if relevant
     local COMMIT_CONFIG="${REPOS}/hooks/commit.conf"
-    if ! grep -q 'no-verify-branch-owner' "$COMMIT_CONFIG" 2>/dev/null; then
+    if grep -q 'verify-branch-owner' "$COMMIT_CONFIG" 2>/dev/null; then
         pre-commit-verify-branch-owner "$REPOS" "$TXN" || return $?
     fi
 
