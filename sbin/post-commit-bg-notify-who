@@ -45,9 +45,19 @@ sub main {
     if (!$layout_config{'level-owner-branch'} && !$layout_config{'owner'}) {
         return;
     }
+
     my @owners;
-    if ($layout_config{'owner'}) {
-        @owners = shellwords($layout_config{'owner'});
+    if (open(my $handle, "$repos/hooks/commit.conf")) {
+        LINE:
+        while (my $line = readline($handle)) {
+            chomp($line);
+            my ($owners_str) = $line =~ qr{\A\s*owner\s*=\s*(.*)\z}msx;
+            if ($owners_str) {
+                @owners = shellwords($owners_str);
+                last LINE;
+            }
+        }
+        close($handle);
     }
 
     my ($author) = $CM_SYS->stdout(qw{svnlook author -r}, $rev, $repos);

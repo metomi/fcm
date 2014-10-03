@@ -319,17 +319,12 @@ file_grep "$TEST_KEY.mail.out.1" \
 file_grep "$TEST_KEY.mail.out.2" "^r${REV} | root" mail.out
 #-------------------------------------------------------------------------------
 # Test owner notification
-svn co -q "${REPOS_URL}" 'work'
-cat >'fcm-layout.txt' <<__LAYOUT__
-owner = $USER
-__LAYOUT__
-svn propset -q --file='fcm-layout.txt' 'fcm:layout' 'work'
-svn ci -q -m 'layout change' 'work'
-rm -fr 'fcm-layout.txt' 'work'
-
 TEST_KEY="${TEST_KEY_BASE}-owner-1" # trunk author is not owner
 test_tidy
-echo 'notify-owner' >"${REPOS_PATH}/hooks/commit.conf"
+cat >"${REPOS_PATH}/hooks/commit.conf" <<__CONF__
+notify-owner
+owner = $USER
+__CONF__
 rm -fr 'hello'
 svn co -q "${REPOS_URL}/hello/trunk" 'hello'
 echo 'Hello' >'hello/file'
