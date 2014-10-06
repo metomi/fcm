@@ -68,9 +68,6 @@ main() {
     local NOW=$(date -u +%FT%H:%M:%SZ)
     echo "$NOW+ $ACTION $PROP_NAME @$REV by $PROP_AUTHOR"
 
-    # Resync Trac
-    trac_hook "$REPOS" "$REV" modified || RET_CODE=$?
-
     # Diff old/new in log
     local OLD_FILE=$(mktemp "$REPOS/log/$THIS.$REV.XXXXXXXXXX.old")
     cat >"$OLD_FILE"
@@ -96,6 +93,9 @@ main() {
         mail "$FROM" "$SUBJECT" "$ADDRS" <"$DIFF_FILE" || true
     fi
     rm -f "$OLD_FILE" "$DIFF_FILE"
+
+    # Resync Trac
+    trac_hook "$REPOS" "$REV" modified || RET_CODE=$?
 
     echo "RET_CODE=$RET_CODE"
     return $RET_CODE

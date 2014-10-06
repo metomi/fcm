@@ -134,8 +134,8 @@ file_cmp "$TEST_KEY-ls-svnperms.conf" \
 # New install, single repository, with commit.conf
 TEST_KEY="$TEST_KEY_BASE-commit.conf"
 {
-    echo 'no-notify-branch-owner'
-    echo 'no-verify-branch-owner'
+    echo 'notify-branch-owner'
+    echo 'verify-branch-owner'
 } >'svn-import/commit.conf'
 NAME='commit-conf' run_tests
 file_cmp "$TEST_KEY-ls-svnperms.conf" \

@@ -26,6 +26,7 @@ use lib "$FindBin::Bin/../lib";
 use FCM::Admin::System qw{get_users};
 use FCM::System::CM::SVN;
 use FCM::Util;
+use Text::ParseWords qw{shellwords};
 
 our @IGNORES = qw{Config Rel Share};
 
@@ -41,8 +42,22 @@ sub main {
     my ($repos, $rev, $txn) = @ARGV;
 
     my %layout_config = $CM_SYS->load_layout_config('file://' . $repos);
-    if (!$layout_config{'level-owner-branch'}) {
+    if (!$layout_config{'level-owner-branch'} && !$layout_config{'owner'}) {
         return;
+    }
+
+    my @owners;
+    if (open(my $handle, "$repos/hooks/commit.conf")) {
+        LINE:
+        while (my $line = readline($handle)) {
+            chomp($line);
+            my ($owners_str) = $line =~ qr{\A\s*owner\s*=\s*(.*)\z}msx;
+            if ($owners_str) {
+                @owners = shellwords($owners_str);
+                last LINE;
+            }
+        }
+        close($handle);
     }
 
     my ($author) = $CM_SYS->stdout(qw{svnlook author -r}, $rev, $repos);
@@ -60,9 +75,16 @@ sub main {
             $path,
             1, # $is_local=1
         );
-        my $owner = $layout->get_branch_owner();
-        if ($owner && $owner ne $author && !grep {$_ eq $owner} @IGNORES) {
-            $names{$owner} = 1;
+        if (@owners && $layout->is_trunk()) {
+            for my $owner (grep {$_ ne $author} @owners) {
+                $names{$owner} = 1;
+            }
+        }
+        elsif ($layout->get_branch_owner()) {
+            my $owner = $layout->get_branch_owner();
+            if ($owner ne $author && !grep {$_ eq $owner} @IGNORES) {
+                $names{$owner} = 1;
+            }
         }
     }
 

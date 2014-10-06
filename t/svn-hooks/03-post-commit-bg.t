@@ -37,7 +37,7 @@ test_tidy() {
         mail.out
 }
 #-------------------------------------------------------------------------------
-tests 32
+tests 34
 #-------------------------------------------------------------------------------
 cp -p "$FCM_HOME/etc/svn-hooks/post-commit" "$REPOS_PATH/hooks/"
 sed -i "/set -eu/a\
@@ -67,7 +67,6 @@ if [[ -n ${TRAC_ENV_PATH:-} ]] && ! $TRAC_RESYNC; then
         >"$TEST_KEY.trac.db.expected"
     file_cmp "$TEST_KEY.trac.db" \
         "$TEST_KEY.trac.db.expected" <<<"$REV|$TEST_KEY"
-    cat "$TEST_KEY.trac.db.expected"
 else
     skip 1 '"trac-admin changeset added" not available'
 fi
@@ -249,6 +248,7 @@ poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
 
 TEST_KEY="$TEST_KEY_BASE-branch-create-owner-1" # create author is owner
 test_tidy
+echo 'notify-owner' >"${REPOS_PATH}/hooks/commit.conf"
 svn cp -q -m '' --parents \
     "$REPOS_URL/hello/trunk" \
     "$REPOS_URL/hello/branches/dev/$USER/whatever"
@@ -257,6 +257,7 @@ run_fail "$TEST_KEY.mail.out" test -s mail.out
 
 TEST_KEY="$TEST_KEY_BASE-branch-create-owner-2" # create author not owner
 test_tidy
+echo 'notify-owner' >"${REPOS_PATH}/hooks/commit.conf"
 svn cp -q -m '' --parents \
     --username=root \
     --no-auth-cache \
@@ -270,7 +271,6 @@ file_grep "$TEST_KEY.mail.out.2" "^r${REV} | root" mail.out
 
 TEST_KEY="$TEST_KEY_BASE-branch-create-owner-3" # same as 2, but no notify
 test_tidy
-echo 'no-notify-branch-owner' >"${REPOS_PATH}/hooks/commit.conf"
 svn cp -q -m '' --parents \
     --username=root \
     --no-auth-cache \
@@ -281,6 +281,7 @@ run_fail "$TEST_KEY.mail.out" test -s mail.out
 
 TEST_KEY="$TEST_KEY_BASE-branch-modify-owner-1" # modify author is owner
 test_tidy
+echo 'notify-owner' >"${REPOS_PATH}/hooks/commit.conf"
 svn co -q "$REPOS_URL/hello/branches/dev/$USER/whatever" hello
 echo 'Hello Earth' >hello/file
 svn ci -q -m'Hello Earth' hello/file
@@ -289,6 +290,7 @@ run_fail "$TEST_KEY.mail.out" test -s mail.out
 
 TEST_KEY="$TEST_KEY_BASE-branch-modify-owner-2" # modify author not owner
 test_tidy
+echo 'notify-owner' >"${REPOS_PATH}/hooks/commit.conf"
 #svn co -q "$REPOS_URL/hello/branches/dev/$USER/whatever" hello
 echo 'Hello Alien' >hello/file
 svn ci -q -m'Hello Earth' --username=root --no-auth-cache hello/file
@@ -300,12 +302,14 @@ file_grep "$TEST_KEY.mail.out.2" "^r${REV} | root" mail.out
 
 TEST_KEY="$TEST_KEY_BASE-branch-delete-owner-1" # delete author is owner
 test_tidy
+echo 'notify-owner' >"${REPOS_PATH}/hooks/commit.conf"
 svn rm -q -m'No Hello' "$REPOS_URL/hello/branches/dev/$USER/whatever"
 poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
 run_fail "$TEST_KEY.mail.out" test -s mail.out
 
 TEST_KEY="$TEST_KEY_BASE-branch-delete-owner-2" # delete author not owner
 test_tidy
+echo 'notify-owner' >"${REPOS_PATH}/hooks/commit.conf"
 svn rm -q -m'No Hello' --username=root --no-auth-cache \
     "$REPOS_URL/hello/branches/test/$USER/whatever"
 poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
@@ -313,5 +317,22 @@ REV=$(<rev)
 file_grep "$TEST_KEY.mail.out.1" \
     "^-rnotifications@localhost -sfoo@${REV} by root" mail.out
 file_grep "$TEST_KEY.mail.out.2" "^r${REV} | root" mail.out
+#-------------------------------------------------------------------------------
+# Test owner notification
+TEST_KEY="${TEST_KEY_BASE}-owner-1" # trunk author is not owner
+test_tidy
+cat >"${REPOS_PATH}/hooks/commit.conf" <<__CONF__
+notify-owner
+owner = $USER
+__CONF__
+rm -fr 'hello'
+svn co -q "${REPOS_URL}/hello/trunk" 'hello'
+echo 'Hello' >'hello/file'
+svn ci -q -m 'hello whatever' '--no-auth-cache' '--username=root' 'hello'
+poll 10 grep -q '^RET_CODE=' "${REPOS_PATH}/log/post-commit.log"
+REV="$(<rev)"
+file_grep "${TEST_KEY}.mail.out.1" \
+    "^-rnotifications@localhost -sfoo@${REV} by root" 'mail.out'
+file_grep "${TEST_KEY}.mail.out.2" "^r${REV} | root" 'mail.out'
 #-------------------------------------------------------------------------------
 exit
