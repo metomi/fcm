@@ -25,6 +25,7 @@
 # Original source downloaded from r1295006 at:
 # https://svn.apache.org/viewvc/subversion/trunk/tools/hook-scripts/svnperms.py
 # This version is modified to allow custom permission message per repository.
+# It also fixes the Config.get method.
 
 import sys, os
 import getopt
@@ -111,7 +112,7 @@ class Config:
         return list(self._sections_dict.get(section, {}).keys())
 
     def get(self, section, option, default=None):
-        return self._sections_dict.get(option, default)
+        return self._sections_dict.get(section, {}).get(option, default)
 
     def walk(self, section, option=None):
         ret = []
@@ -267,10 +268,10 @@ def check_perms(filename, section, repos, txn=None, rev=None, author=None):
         #    print "cdata=%s cprop=%s path=%s perms=%s" % \
         #          (str(changedata), str(changeprop), path, str(pathperms))
     if permerrors:
-        message = config.get("message", "permerrors_prefix")
+        message = config.get(" ".join((section, "message")),
+                             "permerrors_prefix")
         if message is None:
-            message = config.get(" ".join((section, "message")),
-                                 "permerrors_prefix")
+            message = config.get("message", "permerrors_prefix")
         if message is None:
             message = "you don't have enough permissions for this transaction:"
         permerrors.insert(0, message)
