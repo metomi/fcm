@@ -5,6 +5,33 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## Next Release (2014-Q4?)
+
+This will be FCM release 21.
+
+### Highlighted Changes
+
+-none yet-
+
+### Noteworthy Changes
+
+[#149](https://github.com/metomi/fcm/pull/149):
+svnperms.py: fix bug, alter message override, and add tests.
+
+[#148](https://github.com/metomi/fcm/pull/148):
+Reverse `commit.conf` logic. To verify branch owner, specify
+`verify-branch-owner`.  To notify branch owner, specify `notify-owner`.
+`post-commit-bg` now supports owner notification on trunk commit.
+
+[#147](https://github.com/metomi/fcm/pull/147):
+Use `dd conv=fsync` to create backup and dump to ensure that backup and dump
+data is written to disk before returning a good status.
+
+[#146](https://github.com/metomi/fcm/pull/146):
+fcm merge: basic support for `meld`.
+
+--------------------------------------------------------------------------------
+
 ## 2014.09.0 (2014-09-17)
 
 FCM release 20.
