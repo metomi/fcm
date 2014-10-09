@@ -1132,7 +1132,7 @@ sub _manage_users_in_trac_db_of {
     SESSION_ATTRIBUTE: {
         my $attribute_select_statement = $db_handle->prepare(
             "SELECT sid,name,value FROM session_attribute "
-                . "WHERE authenticated == 1 AND (name == ? OR name == ?)",
+                . "WHERE authenticated == 1",
         );
         my $attribute_insert_statement = $db_handle->prepare(
             "INSERT INTO session_attribute VALUES (?, 1, ?, ?)",
@@ -1144,8 +1144,12 @@ sub _manage_users_in_trac_db_of {
         my $attribute_delete_statement = $db_handle->prepare(
             "DELETE FROM session_attribute WHERE sid == ?",
         );
-        $attribute_select_statement->execute('name', 'email');
+        my $attribute_delete_name_statement = $db_handle->prepare(
+            "DELETE FROM session_attribute WHERE sid == ? AND name == ?",
+        );
+        $attribute_select_statement->execute();
         my %attribute_old_users;
+        my %deleted_users;
         ROW:
         while (my @row = $attribute_select_statement->fetchrow_array()) {
             my ($sid, $name, $value) = @row;
@@ -1159,8 +1163,8 @@ sub _manage_users_in_trac_db_of {
                 if (!defined($getter)) {
                     next ROW;
                 }
-                if ($user->$getter() ne $value) {
-                    my $new_value = $user->$getter();
+                my $new_value = $user->$getter();
+                if ($new_value && $new_value ne $value) {
                     $RUNNER->run(
                         "session_attribute: updating $name: $sid: $new_value",
                         sub {return $attribute_update_statement->execute(
@@ -1168,8 +1172,17 @@ sub _manage_users_in_trac_db_of {
                         )},
                     );
                 }
+                elsif (!$new_value && $value) {
+                    $RUNNER->run(
+                        "session_attribute: removing $name: $sid",
+                        sub {return $attribute_delete_name_statement->execute(
+                            $sid, $name,
+                        )},
+                    );
+                }
             }
-            else {
+            elsif (!exists($deleted_users{$sid})) {
+                $deleted_users{$sid} = 1;
                 $RUNNER->run(
                     "session_attribute: removing $sid",
                     sub {return $attribute_delete_statement->execute($sid)},
@@ -1182,20 +1195,20 @@ sub _manage_users_in_trac_db_of {
                 next USER;
             }
             my $user = $user_ref->{$sid};
-            my $display_name = $user->get_display_name();
-            my $email        = $user->get_email();
-            $RUNNER->run(
-                "session_attribute: adding name: $sid: $display_name",
-                sub {return $attribute_insert_statement->execute(
-                    $sid, 'name', $display_name,
-                )},
-            );
-            $RUNNER->run(
-                "session_attribute: adding email: $sid: $email",
-                sub {return $attribute_insert_statement->execute(
-                    $sid, 'email', $email,
-                )},
-            );
+            for (
+                ['name' , $user->get_display_name()],
+                ['email', $user->get_email()       ],
+            ) {
+                my ($key, $value) = @{$_};
+                if ($value) {
+                    $RUNNER->run(
+                        "session_attribute: adding $key: $sid: $value",
+                        sub {$attribute_insert_statement->execute(
+                            $sid, $key, $value,
+                        )},
+                    );
+                }
+            }
         }
         $attribute_select_statement->finish();
         $attribute_insert_statement->finish();
