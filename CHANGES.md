@@ -15,6 +15,9 @@ This will be FCM release 21.
 
 ### Noteworthy Changes
 
+[#150](https://github.com/metomi/fcm/pull/150):
+fcm-manage-trac-env-session: improve removal logic.
+
 [#149](https://github.com/metomi/fcm/pull/149):
 svnperms.py: fix bug, alter message override, and add tests.
 
