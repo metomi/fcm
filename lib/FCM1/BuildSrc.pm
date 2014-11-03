@@ -407,7 +407,8 @@ sub exebase {
 sub interfacebase {
   my $self = shift();
   if (
-        uc($self->get_setting(qw/TOOL GENINTERFACE/)) ne 'NONE'
+        $self->get_setting(qw/TOOL GENINTERFACE/)
+    &&  uc($self->get_setting(qw/TOOL GENINTERFACE/)) ne 'NONE'
     &&  $self->progname()
     &&  $self->is_type_all(qw/SOURCE/)
     &&  $self->is_type_any(qw/FORTRAN9X FPP9X/)

@@ -241,9 +241,11 @@ sub read_cfg {
       }
     }
 
-    if (exists $exp_inc{uc ($self->type)} and
-        uc ($start ? $start->label : $label) eq $self->cfglabel ('INC') and
-        not defined $cont) {
+    if (    $self->type()
+        &&  exists($exp_inc{uc($self->type())})
+        &&  uc($start ? $start->label() : $label) eq $self->cfglabel('INC')
+        &&  !defined($cont)
+    ) {
       # Current configuration file requires expansion of INC declarations
       # The start/current line is an INC declaration
       # The current line is not a continuation or is the end of the continuation
