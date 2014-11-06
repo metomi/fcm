@@ -217,7 +217,7 @@ for my $name (qw/label slabel/) {
     my @all_fields = $self->$method;
 
     for my $i (0 .. $#fields) {
-      next if lc ($fields[$i]) eq lc ($all_fields[$i]);
+      next if $all_fields[$i] && lc($fields[$i]) eq lc($all_fields[$i]);
       $return = 0;
       last;
     }

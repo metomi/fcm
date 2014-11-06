@@ -606,7 +606,9 @@ sub parse_cfg_dest {
   for my $line (@lines) {
     my ($d, $method) = $line->slabel_fields;
     $d = lc $d;
-    $method = lc $method;
+    if ($method) {
+      $method = lc($method);
+    }
 
     # Backward compatibility
     $d = 'dest' if $d eq 'dir';
