@@ -110,7 +110,6 @@ our %E_CM_FORMAT_FOR = (
     ST_OUT_OF_DATE    => "File(s) out of date:\n%s",
     SWITCH_UNSAFE     => "%s: merge template exists."
                          . " Please remove before retrying.\n",
-    WC_EXIST          => "%s: working copy already exists.\n",
     WC_INVALID_BRANCH => "%s: not a working copy of a standard FCM branch.\n",
     WC_URL_NOT_EXIST  => "%s: working copy URL does not exists at HEAD.\n",
 );
