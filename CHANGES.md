@@ -15,6 +15,19 @@ This will be FCM release 21.
 
 ### Noteworthy Changes
 
+[#158](https://github.com/metomi/fcm/pull/158):
+fcm make: extract: imporve checking of primary location in inherited mode.
+Compare old value with normalised version of new value. E.g. use of location
+keywords and extra slashes at the end of the path will no longer result in a
+configuration conflict.
+
+[#156](https://github.com/metomi/fcm/pull/156):
+fcm extract and fcm build: fix warnings from Perl 5.12+ when parsing
+configuration file.
+
+[#155](https://github.com/metomi/fcm/pull/155):
+fcm make: fix report of no such config file.
+
 [#150](https://github.com/metomi/fcm/pull/150):
 fcm-manage-trac-env-session: improve removal logic.
 
