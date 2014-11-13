@@ -209,15 +209,20 @@ sub _config_parse_location_primary {
             $ctx->get_project_of()->{$ns} = $ctx->CTX_PROJECT->new({ns => $ns});
         }
         my $project = $ctx->get_project_of()->{$ns};
-        if ($project->get_inherited()) {
-            if ($project->get_locator()->get_value() ne $entry->get_value()) {
-                return $E->throw($E->CONFIG_CONFLICT, $entry);
-            }
-        }
-        elsif ($entry->get_value()) {
-            $project->set_locator(
-                FCM::Context::Locator->new($entry->get_value(), \%option),
+        if ($entry->get_value()) {
+            my $locator = FCM::Context::Locator->new(
+                $entry->get_value(), \%option,
             );
+            $attrib_ref->{util}->loc_as_normalised($locator);
+            if ($project->get_inherited()) {
+                my $project_locator = $project->get_locator();
+                if ($project_locator->get_value() ne $locator->get_value()) {
+                    return $E->throw($E->CONFIG_CONFLICT, $entry);
+                }
+            }
+            else {
+                $project->set_locator($locator);
+            }
         }
         else {
             $project->set_locator(undef);
