@@ -300,8 +300,10 @@ sub _cm_branch_create {
 sub _cm_branch_list {
     my ($attrib_ref, $option_ref, @args) = @_;
     _parse_args($attrib_ref, $option_ref, \@args);
+    my $used_default_arg;
     if (!@args) {
         @args = cwd() . '@HEAD';
+        $used_default_arg = 1;
     }
     my %common_patterns_at;
     if ($option_ref->{'only'} && @{$option_ref->{'only'}}) {
@@ -317,6 +319,10 @@ sub _cm_branch_list {
         my %patterns_at = %{dclone(\%common_patterns_at)};
         my %info = eval {%{$attrib_ref->{svn}->get_info($arg)->[0]}};
         if ($@) {
+            if ($used_default_arg) {
+                # Can't complain about a bad arg if we put it there.
+                return $E->throw($E->SHELL, $@->{ctx}, $@->{ctx}->{e});
+            }
             return $E->throw($E->CM_ARG, $arg);
         }
         my $url = $info{'url'} . '@' . $info{'revision'};
