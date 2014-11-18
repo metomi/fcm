@@ -623,7 +623,8 @@ sub _stdout {
     if ($value_of{rc}) {
         return $E->throw(
             $E->SHELL,
-            {command_list => \@command, %value_of}
+            {command_list => \@command, %value_of},
+            $value_of{e}
         );
     }
     wantarray() ? split("\n", $value_of{o}) : $value_of{o};
