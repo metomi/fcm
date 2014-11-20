@@ -260,7 +260,7 @@ sub _get_layout_common {
         }
         if (!defined($project)) {
             # $path does not contain the trunk sub-directory, need to search
-            # for it 
+            # for it
             my @head = ();
             my @tail = @names;
             while (@head <= @names) {

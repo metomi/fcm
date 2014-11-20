@@ -48,13 +48,13 @@ sub main {
 
     my @owners;
     if (open(my $handle, "$repos/hooks/commit.conf")) {
-        LINE:
+        COMMIT_CONF_LINE:
         while (my $line = readline($handle)) {
             chomp($line);
             my ($owners_str) = $line =~ qr{\A\s*owner\s*=\s*(.*)\z}msx;
             if ($owners_str) {
                 @owners = shellwords($owners_str);
-                last LINE;
+                last COMMIT_CONF_LINE;
             }
         }
         close($handle);
@@ -63,26 +63,52 @@ sub main {
     my ($author) = $CM_SYS->stdout(qw{svnlook author -r}, $rev, $repos);
 
     # Get list of new paths
+    my %branches = ();  # {$project/$branch1 => 1, $project/$branch2 => 1, ...}
     my %names = (); # {$name1 => 1, $name2 => 1, ...}
     my @lines = $CM_SYS->stdout(qw{svnlook changed -r}, $rev, $repos);
-    LINE:
+    CHANGED_LINE:
     for my $line (@lines) {
         my $status = substr($line, 0, 1);
         my $path = substr($line, 4);
         my $layout = $CM_SYS->get_layout_common(
             $repos,
             ($status eq 'D' ? $rev - 1 : $rev),
-            $path,
+            '/' . $path, # must start with a '/'
             1, # $is_local=1
         );
+        my $project = $layout->get_project();
+        my $branch = $layout->get_branch();
+        if (!$branch || exists($branches{"$project/$branch"})) {
+            next CHANGED_LINE;
+        }
+        $branches{"$project/$branch"} = 1; # so we only do each branch once
         if (@owners && $layout->is_trunk()) {
             for my $owner (grep {$_ ne $author} @owners) {
                 $names{$owner} = 1;
             }
         }
-        elsif ($layout->get_branch_owner()) {
+        elsif ($layout->is_branch()) {
             my $owner = $layout->get_branch_owner();
-            if ($owner ne $author && !grep {$_ eq $owner} @IGNORES) {
+            if (!$owner || $layout->is_shared()) {
+                # If owner is not in the branch name,
+                # assume owner is branch creator
+                my $url = 'file://' . $layout->get_root();
+                if ($project) {
+                    $url .= '/' . $project;
+                }
+                $url .= '/' . $branch . '@' . $rev;
+                my @lines = $CM_SYS->stdout(
+                    qw{svn log -q --incremental --stop-on-copy}, $url,
+                );
+                LOG_LINE:
+                for my $line (reverse(@lines)) {
+                    ($owner) = $line =~ qr{\Ar\d+\s\|\s([^\|]+)\s\|}msx;
+                    if ($owner) {
+                        last LOG_LINE;
+                    }
+                }
+            }
+            if ($owner && $owner ne $author) {
                 $names{$owner} = 1;
             }
         }
