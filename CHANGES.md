@@ -15,6 +15,15 @@ This will be FCM release 21.
 
 ### Noteworthy Changes
 
+[#161](https://github.com/metomi/fcm/pull/161):
+post-commit-bg-notify-who: use branch creator as branch owner if it cannot be
+determined by the branch name.
+
+[#159](https://github.com/metomi/fcm/pull/159),
+[#160](https://github.com/metomi/fcm/pull/160):
+FCM's Subversion wrappers: display error messages when `svn info` commands
+fail.
+
 [#158](https://github.com/metomi/fcm/pull/158):
 fcm make: extract: imporve checking of primary location in inherited mode.
 Compare old value with normalised version of new value. E.g. use of location
