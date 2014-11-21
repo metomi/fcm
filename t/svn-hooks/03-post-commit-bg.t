@@ -37,7 +37,7 @@ test_tidy() {
         mail.out
 }
 #-------------------------------------------------------------------------------
-tests 34
+tests 38
 #-------------------------------------------------------------------------------
 cp -p "$FCM_HOME/etc/svn-hooks/post-commit" "$REPOS_PATH/hooks/"
 sed -i "/set -eu/a\
@@ -299,6 +299,33 @@ REV=$(<rev)
 file_grep "$TEST_KEY.mail.out.1" \
     "^-rnotifications@localhost -sfoo@${REV} by root" mail.out
 file_grep "$TEST_KEY.mail.out.2" "^r${REV} | root" mail.out
+
+TEST_KEY="$TEST_KEY_BASE-share-branch-owner-1" # modify share author is owner
+test_tidy
+echo 'notify-owner' >"${REPOS_PATH}/hooks/commit.conf"
+svn cp -q -m '' --parents \
+    "$REPOS_URL/hello/trunk" \
+    "$REPOS_URL/hello/branches/dev/Share/whatever"
+poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
+run_fail "$TEST_KEY.create.mail.out" test -s mail.out
+test_tidy
+echo 'Greet Alien' >'greet.txt'
+svn import -q -m '' 'greet.txt' \
+    "$REPOS_URL/hello/branches/dev/Share/whatever/greet.txt"
+poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
+run_fail "$TEST_KEY.modify.mail.out" test -s mail.out
+
+TEST_KEY="$TEST_KEY_BASE-share-branch-owner-2" # modify share author not owner
+test_tidy
+echo 'notify-owner' >"${REPOS_PATH}/hooks/commit.conf"
+echo 'Hail Alien' >'hail.txt'
+svn import -q -m '' --username=root --no-auth-cache 'hail.txt' \
+    "$REPOS_URL/hello/branches/dev/Share/whatever/hail.txt"
+poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
+REV=$(<rev)
+file_grep "$TEST_KEY.mail.out.1" \
+    "^-rnotifications@localhost -sfoo@${REV} by root" 'mail.out'
+file_grep "$TEST_KEY.mail.out.2" "^r${REV} | root" 'mail.out'
 
 TEST_KEY="$TEST_KEY_BASE-branch-delete-owner-1" # delete author is owner
 test_tidy
