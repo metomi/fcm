@@ -98,7 +98,9 @@ sub main {
                 }
                 $url .= '/' . $branch . '@' . $rev;
                 my @lines = $CM_SYS->stdout(
-                    qw{svn log -q --incremental --stop-on-copy}, $url,
+                    qw{svn log -q --incremental --stop-on-copy --limit 1},
+                    '-r1:' . $rev,
+                    $url,
                 );
                 LOG_LINE:
                 for my $line (reverse(@lines)) {
