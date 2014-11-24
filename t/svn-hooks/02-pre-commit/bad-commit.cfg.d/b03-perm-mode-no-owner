@@ -1,0 +1,7 @@
+#LOG YYYY-mm-ddTHH:MM:SSZ+ $TXN by $USER
+#LOG A   commit.cfg
+#LOG PERMISSION DENIED: A   commit.cfg
+#LOG 	BAD CONF: owner[] undefined with permission-modes=repository|project
+#LOG 	BAD CONF: owner[] undefined with notification-modes=repository|project
+permission-modes=repository project branch
+notification-modes=repository project branch

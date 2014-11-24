@@ -1,0 +1,4 @@
+owner=root
+owner[hello]=bin $USER
+permission-modes=repository project branch
+notification-modes=repository project branch

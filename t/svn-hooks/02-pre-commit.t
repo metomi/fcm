@@ -25,24 +25,27 @@ FCM_SVN_HOOK_ADMIN_EMAIL='your.admin.team'
 
 test_tidy() {
     rm -f \
-        "$REPOS_PATH/hooks/pre-commit-custom" \
-        "$REPOS_PATH/hooks/pre-commit-size-threshold.conf" \
-        "$REPOS_PATH/hooks/commit.conf" \
-        "$REPOS_PATH/hooks/svnperms.conf" \
-        "$REPOS_PATH/log/pre-commit.log" \
-        README \
-        bin/svnperms.py \
-        file1 \
-        file2 \
-        file3 \
-        file4 \
-        mail.out \
-        pre-commit-custom.out \
-        svnperms.py.out
+        "${REPOS_PATH}/hooks/pre-commit-custom" \
+        "${REPOS_PATH}/hooks/pre-commit-size-threshold.conf" \
+        "${REPOS_PATH}/hooks/commit.cfg" \
+        "${REPOS_PATH}/hooks/svnperms.conf" \
+        "${REPOS_PATH}/log/pre-commit.log" \
+        'README' \
+        'bin/svnperms.py' \
+        'file1' \
+        'file2' \
+        'file3' \
+        'file4' \
+        'mail.out' \
+        'pre-commit-custom.out' \
+        'svnperms.py.out'
+    rm -fr \
+        'work'
 }
 #-------------------------------------------------------------------------------
-tests 50
+tests 82
 #-------------------------------------------------------------------------------
+export FCM_CONF_DIR=
 cp -p "$FCM_HOME/etc/svn-hooks/pre-commit" "$REPOS_PATH/hooks/"
 sed -i "/set -eu/a\
 echo \$2 >$PWD/txn" "$REPOS_PATH/hooks/pre-commit"
@@ -245,15 +248,16 @@ __OUT__
 run_fail "$TEST_KEY.pre-commit.log" test -s "$REPOS_PATH/log/pre-commit.log"
 run_fail "$TEST_KEY.mail.out" test -e mail.out
 #-------------------------------------------------------------------------------
-# Branch create owner verify, goods
+# Permission check, create user and share branches in normal layout
 echo 'Hello World' >README
-svn import -m "hello: new project" README "$REPOS_URL/hello/trunk/README"
+svn import --no-auth-cache -q -m "hello: new project" \
+    README "$REPOS_URL/hello/trunk/README"
 rm README
 for KEY in $USER Share Config Rel; do
     test_tidy
     TEST_KEY="$TEST_KEY_BASE-branch-owner-$KEY"
-    echo 'verify-branch-owner' >"$REPOS_PATH/hooks/commit.conf"
-    run_pass "$TEST_KEY" svn cp --parents -m "$TEST_KEY" \
+    echo 'permission-modes=project branch' >"$REPOS_PATH/hooks/commit.cfg"
+    run_pass "$TEST_KEY" svn cp --no-auth-cache --parents -m "$TEST_KEY" \
         "$REPOS_URL/hello/trunk" "$REPOS_URL/hello/branches/dev/$KEY/whatever"
     run_fail "$TEST_KEY.pre-commit.log" test -s "$REPOS_PATH/log/pre-commit.log"
 done
@@ -261,12 +265,12 @@ done
 # Branch create owner verify, bad
 test_tidy
 TEST_KEY="$TEST_KEY_BASE-branch-owner-bad"
-echo 'verify-branch-owner' >"$REPOS_PATH/hooks/commit.conf"
-run_fail "$TEST_KEY" svn cp --parents -m "$TEST_KEY" \
+echo 'permission-modes=project branch' >"$REPOS_PATH/hooks/commit.cfg"
+run_fail "$TEST_KEY" svn cp --no-auth-cache --parents -m "$TEST_KEY" \
     "$REPOS_URL/hello/trunk" "$REPOS_URL/hello/branches/dev/nosuchuser/whatever"
 TXN=$(<txn)
 file_grep "$TEST_KEY.err" \
-    '\[INVALID BRANCH OWNER\] A   hello/branches/dev/nosuchuser/whatever/' \
+    'PERMISSION DENIED: A   hello/branches/dev/nosuchuser/whatever/' \
     "$TEST_KEY.err"
 date2datefmt "$REPOS_PATH/log/pre-commit.log" \
     >"$TEST_KEY.pre-commit.log.expected"
@@ -275,7 +279,7 @@ file_cmp "$TEST_KEY.pre-commit.log" \
 YYYY-mm-ddTHH:MM:SSZ+ $TXN by $USER
 A   hello/branches/dev/nosuchuser/
 A   hello/branches/dev/nosuchuser/whatever/
-[INVALID BRANCH OWNER] A   hello/branches/dev/nosuchuser/whatever/
+PERMISSION DENIED: A   hello/branches/dev/nosuchuser/whatever/
 __LOG__
 date2datefmt mail.out >"$TEST_KEY.mail.out.expected"
 file_cmp  "$TEST_KEY.mail.out" "$TEST_KEY.mail.out.expected" <<__LOG__
@@ -283,14 +287,184 @@ file_cmp  "$TEST_KEY.mail.out" "$TEST_KEY.mail.out.expected" <<__LOG__
 YYYY-mm-ddTHH:MM:SSZ+ $TXN by $USER
 A   hello/branches/dev/nosuchuser/
 A   hello/branches/dev/nosuchuser/whatever/
-[INVALID BRANCH OWNER] A   hello/branches/dev/nosuchuser/whatever/
+PERMISSION DENIED: A   hello/branches/dev/nosuchuser/whatever/
+__LOG__
+#-------------------------------------------------------------------------------
+# Branch create owner verify, bad by repository owner
+test_tidy
+TEST_KEY="$TEST_KEY_BASE-branch-owner-bad-by-repository-owner"
+cat >"$REPOS_PATH/hooks/commit.cfg" <<__CONF__
+owner=${USER}
+permission-modes=project branch
+__CONF__
+run_fail "$TEST_KEY" svn cp --no-auth-cache --parents -m "$TEST_KEY" \
+    "$REPOS_URL/hello/trunk" "$REPOS_URL/hello/branches/dev/nosuchuser/whatever"
+TXN=$(<txn)
+file_grep "$TEST_KEY.err" \
+    'PERMISSION DENIED: A   hello/branches/dev/nosuchuser/whatever/' \
+    "$TEST_KEY.err"
+date2datefmt "$REPOS_PATH/log/pre-commit.log" \
+    >"$TEST_KEY.pre-commit.log.expected"
+file_cmp "$TEST_KEY.pre-commit.log" \
+    "$TEST_KEY.pre-commit.log.expected" <<__LOG__
+YYYY-mm-ddTHH:MM:SSZ+ $TXN by $USER
+A   hello/branches/dev/nosuchuser/
+A   hello/branches/dev/nosuchuser/whatever/
+PERMISSION DENIED: A   hello/branches/dev/nosuchuser/whatever/
+__LOG__
+date2datefmt mail.out >"$TEST_KEY.mail.out.expected"
+file_cmp  "$TEST_KEY.mail.out" "$TEST_KEY.mail.out.expected" <<__LOG__
+-s [pre-commit] $REPOS_PATH@$TXN your.admin.team
+YYYY-mm-ddTHH:MM:SSZ+ $TXN by $USER
+A   hello/branches/dev/nosuchuser/
+A   hello/branches/dev/nosuchuser/whatever/
+PERMISSION DENIED: A   hello/branches/dev/nosuchuser/whatever/
 __LOG__
 #-------------------------------------------------------------------------------
 # Branch create owner no verify, bad
 test_tidy
 TEST_KEY="$TEST_KEY_BASE-branch-owner-no-verify-bad"
-run_pass "$TEST_KEY" svn cp --parents -m "$TEST_KEY" \
+run_pass "$TEST_KEY" svn cp --no-auth-cache --parents -m "$TEST_KEY" \
     "$REPOS_URL/hello/trunk" "$REPOS_URL/hello/branches/dev/nosuchuser/whatever"
 run_fail "$TEST_KEY.pre-commit.log" test -s "$REPOS_PATH/log/pre-commit.log"
+#-------------------------------------------------------------------------------
+# Reject bad "commit.cfg"
+for KEY in $(ls "${TEST_SOURCE_DIR}/${TEST_KEY_BASE}/bad-commit.cfg.d"); do
+    test_tidy
+    TEST_KEY="${TEST_KEY_BASE}-bad-commit-conf-${KEY}"
+    run_fail "${TEST_KEY}" svn import --no-auth-cache -q -m "${TEST_KEY}" \
+        "${TEST_SOURCE_DIR}/${TEST_KEY_BASE}/bad-commit.cfg.d/${KEY}" \
+        "${REPOS_URL}/commit.cfg"
+    TXN=$(<'txn')
+    date2datefmt "${REPOS_PATH}/log/pre-commit.log" \
+        >"${TEST_KEY}.pre-commit.log"
+    sed '/^#LOG /!d; s/^#LOG //; '"s/\$USER/${USER}/; s/\$TXN/$TXN/" \
+        "${TEST_SOURCE_DIR}/${TEST_KEY_BASE}/bad-commit.cfg.d/${KEY}" \
+        >"${TEST_KEY}.pre-commit.log.expected"
+    file_cmp "${TEST_KEY}.pre-commit.log" \
+        "${TEST_KEY}.pre-commit.log" "${TEST_KEY}.pre-commit.log.expected"
+done
+#-------------------------------------------------------------------------------
+# Accept good "commit.cfg"
+test_tidy
+TEST_KEY="${TEST_KEY_BASE}-commit-conf-empty"
+touch 'commit.cfg'
+run_pass "${TEST_KEY}" svn import --no-auth-cache -q -m "${TEST_KEY}" \
+    'commit.cfg' "${REPOS_URL}/commit.cfg"
+run_fail "$TEST_KEY.pre-commit.log" test -s "$REPOS_PATH/log/pre-commit.log"
+rm -f 'commit.cfg'
+
+test_tidy
+svn co -q -N "${REPOS_URL}" 'work'
+for KEY in $(ls "${TEST_SOURCE_DIR}/${TEST_KEY_BASE}/good-commit.cfg.d"); do
+    TEST_KEY="${TEST_KEY_BASE}-good-commit-conf-${KEY}"
+    cp "${TEST_SOURCE_DIR}/${TEST_KEY_BASE}/good-commit.cfg.d/${KEY}" \
+        'work/commit.cfg'
+    sed -i "s/\$USER/${USER}/" 'work/commit.cfg'
+    run_pass "${TEST_KEY}" svn commit --no-auth-cache -q -m "${TEST_KEY}" \
+        'work/commit.cfg'
+    run_fail "${TEST_KEY}.pre-commit.log" \
+        test -s "${REPOS_PATH}/log/pre-commit.log"
+done
+rm -fr 'work'
+
+test_tidy
+TEST_KEY="${TEST_KEY_BASE}-commit-conf-delete"
+run_pass "${TEST_KEY}" svn delete --no-auth-cache -q -m "${TEST_KEY}" \
+    "${REPOS_URL}/commit.cfg"
+run_fail "$TEST_KEY.pre-commit.log" test -s "$REPOS_PATH/log/pre-commit.log"
+#-------------------------------------------------------------------------------
+# Check project A/U/D blocked when "permission-modes=repository" and
+# "owner=nosuchuser".
+# Check project A/U/D OK when "permission-modes=branch".
+
+# Create, bad
+test_tidy
+TEST_KEY="${TEST_KEY_BASE}-project-create-on-perm-mode-eq-repository"
+cat >"${REPOS_PATH}/hooks/commit.cfg" <<__CONF__
+owner=nosuchuser
+permission-modes=repository
+__CONF__
+echo 'Greeting Earthlings' >'README'
+run_fail "${TEST_KEY}" svn import --no-auth-cache -q -m 'greet: new project' \
+    'README' "${REPOS_URL}/greet/trunk/README"
+TXN=$(<'txn')
+date2datefmt "${REPOS_PATH}/log/pre-commit.log" >"${TEST_KEY}.pre-commit.log"
+file_cmp "${TEST_KEY}.pre-commit.log" "${TEST_KEY}.pre-commit.log" <<__LOG__
+YYYY-mm-ddTHH:MM:SSZ+ ${TXN} by ${USER}
+A   greet/
+A   greet/trunk/
+A   greet/trunk/README
+PERMISSION DENIED: A   greet/
+PERMISSION DENIED: A   greet/trunk/
+PERMISSION DENIED: A   greet/trunk/README
+__LOG__
+
+# Create, good
+test_tidy
+TEST_KEY="${TEST_KEY_BASE}-project-create-on-perm-mode-eq-branch"
+cat >"${REPOS_PATH}/hooks/commit.cfg" <<__CONF__
+permission-modes=branch
+__CONF__
+echo 'Greeting Earthlings' >'README'
+run_pass "${TEST_KEY}" svn import --no-auth-cache -q -m 'greet: new project' \
+    'README' "${REPOS_URL}/greet/trunk/README"
+run_fail "${TEST_KEY}.pre-commit.log" test -s "${REPOS_PATH}/log/pre-commit.log"
+
+# Modify, bad
+test_tidy
+TEST_KEY="${TEST_KEY_BASE}-project-modify-on-perm-mode-eq-repository"
+svn co -q "${REPOS_URL}/greet/trunk" 'work'
+echo 'Greeting Earthlings!' >'work/README'
+cat >"${REPOS_PATH}/hooks/commit.cfg" <<__CONF__
+owner=nosuchuser
+permission-modes=repository
+__CONF__
+run_fail "${TEST_KEY}" svn commit --no-auth-cache -q -m "${TEST_KEY}" 'work'
+TXN=$(<'txn')
+date2datefmt "${REPOS_PATH}/log/pre-commit.log" >"${TEST_KEY}.pre-commit.log"
+file_cmp "${TEST_KEY}.pre-commit.log" "${TEST_KEY}.pre-commit.log" <<__LOG__
+YYYY-mm-ddTHH:MM:SSZ+ ${TXN} by ${USER}
+U   greet/trunk/README
+PERMISSION DENIED: U   greet/trunk/README
+__LOG__
+
+# Modify, good
+test_tidy
+TEST_KEY="${TEST_KEY_BASE}-project-modify-on-perm-mode-eq-branch"
+svn co -q "${REPOS_URL}/greet/trunk" 'work'
+echo 'Greeting Earthlings!' >'work/README'
+cat >"${REPOS_PATH}/hooks/commit.cfg" <<__CONF__
+permission-modes=branch
+__CONF__
+run_pass "${TEST_KEY}" svn commit --no-auth-cache -q -m "${TEST_KEY}" 'work'
+run_fail "${TEST_KEY}.pre-commit.log" test -s "${REPOS_PATH}/log/pre-commit.log"
+
+# Delete, bad
+test_tidy
+TEST_KEY="${TEST_KEY_BASE}-project-delete-on-perm-mode-eq-repository"
+cat >"${REPOS_PATH}/hooks/commit.cfg" <<__CONF__
+owner=nosuchuser
+permission-modes=repository
+__CONF__
+run_fail "${TEST_KEY}" \
+    svn delete --no-auth-cache -q -m "${TEST_KEY}" "${REPOS_URL}/greet"
+TXN=$(<'txn')
+date2datefmt "${REPOS_PATH}/log/pre-commit.log" >"${TEST_KEY}.pre-commit.log"
+file_cmp "${TEST_KEY}.pre-commit.log" "${TEST_KEY}.pre-commit.log" <<__LOG__
+YYYY-mm-ddTHH:MM:SSZ+ ${TXN} by ${USER}
+D   greet/
+PERMISSION DENIED: D   greet/
+__LOG__
+
+# Delete, good
+test_tidy
+TEST_KEY="${TEST_KEY_BASE}-project-delete-on-perm-mode-eq-branch"
+cat >"${REPOS_PATH}/hooks/commit.cfg" <<__CONF__
+permission-modes=branch
+__CONF__
+run_pass "${TEST_KEY}" \
+    svn delete --no-auth-cache -q -m "${TEST_KEY}" "${REPOS_URL}/greet"
+run_fail "${TEST_KEY}.pre-commit.log" test -s "${REPOS_PATH}/log/pre-commit.log"
 #-------------------------------------------------------------------------------
 exit

@@ -23,6 +23,8 @@ use warnings;
 package FCM::System::CM::SVN;
 use base qw{FCM::Class::CODE};
 
+use constant IS_LOCAL => 1;
+
 use Cwd qw{cwd};
 use FCM::Context::Event;
 use FCM::Context::Locator;
@@ -694,8 +696,8 @@ sub is_owned_by_user {
 
 sub is_shared {
     my ($self) = @_;
-    $self->{branch_owner}
-        && grep {$_ eq $self->{branch_owner}} qw{Share Config Rel};
+    !$self->{branch_owner}
+        || grep {$_ eq $self->{branch_owner}} qw{Share Config Rel};
 }
 
 sub as_string {

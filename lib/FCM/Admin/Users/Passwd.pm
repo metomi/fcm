@@ -102,7 +102,7 @@ sub _guess_email_from_gecos {
 # Return a list of bad users in @users.
 sub _verify_users {
     my ($attrib_ref, @users) = @_;
-    grep {!getpwnam($_)} @users;
+    grep {!defined(getpwnam($_))} @users;
 }
 
 1;
