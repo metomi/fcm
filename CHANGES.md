@@ -5,13 +5,13 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
-## Next Release (2014-Q4?)
+## 2014.11.0 (2014-11-25)
 
-This will be FCM release 21.
+FCM release 21.
 
 ### Highlighted Changes
 
--none yet-
+-none-
 
 ### Noteworthy Changes
 
@@ -25,7 +25,7 @@ FCM's Subversion wrappers: display error messages when `svn info` commands
 fail.
 
 [#158](https://github.com/metomi/fcm/pull/158):
-fcm make: extract: imporve checking of primary location in inherited mode.
+fcm make: extract: improve checking of primary location in inherited mode.
 Compare old value with normalised version of new value. E.g. use of location
 keywords and extra slashes at the end of the path will no longer result in a
 configuration conflict.
