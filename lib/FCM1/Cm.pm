@@ -615,9 +615,6 @@ sub cm_merge {
 
   # Parse the revision option
   # ----------------------------------------------------------------------------
-  if ($option_ref->{reverse} && !$option_ref->{revision}) {
-    _cli_err('CLI_OPT_WITH_OPT', 'revision', 'reverse');
-  }
   my @revs
     = (grep {$option_ref->{$_}} qw{reverse custom}) && $option_ref->{revision}
     ? split(qr{:}xms, $option_ref->{revision})
@@ -631,23 +628,32 @@ sub cm_merge {
   if ($option_ref->{reverse}) {
     # Reverse merge
     # --------------------------------------------------------------------------
-    if (@revs == 1) {
+    if (@revs == 0) {
+      my $last_commit_rev = $source->svninfo('FLAG' => 'commit:revision');
+      @revs = ($last_commit_rev, $last_commit_rev - 1);
+    }
+    elsif (@revs == 1) {
       $revs[1] = ($revs[0] - 1);
-
-    } else {
+    }
+    else {
       @revs = sort {$b <=> $a} @revs;
     }
-    $source->url_peg(
-      $source->branch_url() . '/' . $subdir . '@' . $source->pegrev(),
-    );
+    #$source->url_peg(
+    #  $source->branch_url() . '/' . $subdir . '@' . $source->pegrev(),
+    #);
 
     # "Delta" of the "svn merge" command
     @delta = ('-r' . $revs[0] . ':' . $revs[1], $source->url_peg);
 
     # Template message
-    $mesg = 'Reversed r' . $revs[0] .
-            (($revs[1] < $revs[0] - 1) ? ':' . $revs[1] : '') . ' of ' .
-            $source->path . "\n";
+    $mesg = 'Reversed r' . $revs[0];
+    if ($revs[1] < $revs[0] - 1) {
+      $mesg .= ':' . $revs[1];
+    }
+    if ($source->path()) {
+      $mesg .= ' of ' . $source->path();
+    }
+    $mesg .= "\n";
 
   } elsif ($option_ref->{custom}) {
     # Custom merge
