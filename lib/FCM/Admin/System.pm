@@ -1147,7 +1147,6 @@ sub _manage_users_in_trac_db_of {
             my ($sid, $name, $value) = @row;
             my $user = exists($user_ref->{$sid})? $user_ref->{$sid} : undef;
             if (defined($user)) {
-                $attribute_old_users{$sid} = 1;
                 my $getter
                     = $name eq 'name'  ? 'get_display_name'
                     : $name eq 'email' ? 'get_email'
@@ -1155,6 +1154,7 @@ sub _manage_users_in_trac_db_of {
                 if (!defined($getter)) {
                     next ROW;
                 }
+                $attribute_old_users{"$sid|$name"} = 1;
                 my $new_value = $user->$getter();
                 if ($new_value && $new_value ne $value) {
                     $RUNNER->run(
@@ -1181,22 +1181,22 @@ sub _manage_users_in_trac_db_of {
                 );
             }
         }
-        USER:
         for my $sid (keys(%{$user_ref})) {
-            if (exists($attribute_old_users{$sid})) {
-                next USER;
-            }
             my $user = $user_ref->{$sid};
+            ATTRIB:
             for (
                 ['name' , $user->get_display_name()],
                 ['email', $user->get_email()       ],
             ) {
-                my ($key, $value) = @{$_};
+                my ($name, $value) = @{$_};
+                if (exists($attribute_old_users{"$sid|$name"})) {
+                    next ATTRIB;
+                }
                 if ($value) {
                     $RUNNER->run(
-                        "session_attribute: adding $key: $sid: $value",
+                        "session_attribute: adding $name: $sid: $value",
                         sub {$attribute_insert_statement->execute(
-                            $sid, $key, $value,
+                            $sid, $name, $value,
                         )},
                     );
                 }
