@@ -407,7 +407,7 @@ sub exebase {
 sub interfacebase {
   my $self = shift();
   if (
-        $self->get_setting(qw/TOOL GENINTERFACE/)
+        defined($self->get_setting(qw/TOOL GENINTERFACE/))
     &&  uc($self->get_setting(qw/TOOL GENINTERFACE/)) ne 'NONE'
     &&  $self->progname()
     &&  $self->is_type_all(qw/SOURCE/)

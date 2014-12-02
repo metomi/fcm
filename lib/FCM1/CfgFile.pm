@@ -241,7 +241,7 @@ sub read_cfg {
       }
     }
 
-    if (    $self->type()
+    if (    defined($self->type())
         &&  exists($exp_inc{uc($self->type())})
         &&  uc($start ? $start->label() : $label) eq $self->cfglabel('INC')
         &&  !defined($cont)
