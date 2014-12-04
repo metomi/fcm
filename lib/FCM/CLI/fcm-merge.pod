@@ -37,10 +37,12 @@ command will peg the URL with its last changed revision.
 =item 3.
 
 If --reverse is specified, the command performs a reverse merge of the
-changeset(s) specified by the --revision option. If a single revision is
-specified, the merge delta is N:(N - 1). Otherwise, the merge delta is M:N,
-where M > N. Note that you do not have to specify a SOURCE for a reverse merge,
-because the SOURCE should always be the branch your working copy is pointing to.
+changeset(s) specified by the --revision=M:N option. If a revision is not
+specified with --rev=M:N, it attempts to merge the delta COMMITTED:(COMMITTED -
+1). If a single revision N is specified, the merge delta is N:(N - 1).
+Otherwise, the merge delta is M:N, where M > N. Note that you do not have to
+specify a SOURCE for a reverse merge, because the SOURCE should always be the
+branch your working copy is pointing to.
   
 =back
 

@@ -1388,7 +1388,7 @@ browser = konqueror
     <dd><code>fcm merge [OPTIONS] SOURCE</code><br />
     <code>fcm merge --custom --revision N[:M] [OPTIONS] SOURCE</code><br />
     <code>fcm merge --custom [OPTIONS] URL1[@REV1] URL2[@REV2]</code><br />
-    <code>fcm merge --reverse --revision [M:]N [OPTIONS]</code></dd>
+    <code>fcm merge --reverse [--revision [M:]N] [OPTIONS]</code></dd>
 
     <dt>Description</dt>
 
@@ -1519,13 +1519,12 @@ browser = konqueror
 
         <dd>
           <p>The reverse mode is useful if you need to reverse a changeset (or
-          a range of changesets) in the current source of the working copy. In
-          this mode, you must specify a revision (range) using the
-          <code>--revision</code> option. If you specify a single revision
-          <var>N</var>, the merge delta is between revision <var>N</var> and
-          revision <var>N - 1</var> of the current branch. Otherwise, the merge
-          delta is between revision <var>M</var> and revision <var>N</var>,
-          where <var>M</var> &gt; <var>N</var>.</p>
+          a range of changesets) in the current source of the working copy. If
+          a revision is not specified with <code>--revision=M:N</code>, it
+          attempts to merge the delta <var>COMMITTED:(COMMITTED - 1)</var>. If
+          a single revision <var>N</var> is specified, the merge delta is
+          <var>N:(N - 1)</var>.  Otherwise, the merge delta is between revision
+          <var>M:N</var>, where <var>M</var> &gt; <var>N</var>.</p>
 
           <p>N.B. Like custom merges, reverse merges are not tracked or used by
           subsequent FCM <code>diff</code> or <code>merge</code> commands,
