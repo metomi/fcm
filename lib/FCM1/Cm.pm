@@ -638,9 +638,6 @@ sub cm_merge {
     else {
       @revs = sort {$b <=> $a} @revs;
     }
-    #$source->url_peg(
-    #  $source->branch_url() . '/' . $subdir . '@' . $source->pegrev(),
-    #);
 
     # "Delta" of the "svn merge" command
     @delta = ('-r' . $revs[0] . ':' . $revs[1], $source->url_peg);
