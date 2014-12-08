@@ -5,13 +5,32 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## 2014.12.0 (2014-12-08)
+
+FCM release 22.
+
+### Noteworthy Changes
+
+[#164](https://github.com/metomi/fcm/pull/164):
+fcm build: fix fortran interface generation, broken by
+[#156](https://github.com/metomi/fcm/pull/156).
+
+[#163](https://github.com/metomi/fcm/pull/163):
+fcm merge --reverse: improve logic. It now works with non-standard layout. The
+`--revision=[M:]N` option is no longer compulsory. It now uses the last changed
+revision of the working copy by default.
+
+[#162](https://github.com/metomi/fcm/pull/162):
+fcm-manage-trac-env-session: fix session logic. If a user already has some
+entries in the `session_attribute` table, the old logic will not insert a new
+`name` or `email` for the user. The new logic will only skip the `name` or
+`email` attribute if already set correctly.
+
+--------------------------------------------------------------------------------
+
 ## 2014.11.0 (2014-11-25)
 
 FCM release 21.
-
-### Highlighted Changes
-
--none-
 
 ### Noteworthy Changes
 
