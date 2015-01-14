@@ -351,7 +351,7 @@ sub cm_branch_diff {
             my $browser = $UTIL->external_cfg_get('browser');
             my $trac_url = FCM1::Keyword::get_browser_url($url->project_url());
             # FIXME: assuming that the browser URL uses the InterTrac syntax
-            $trac_url =~ s{/intertrac/.*$}{/intertrac/$wiki_syntax}xms;
+            $trac_url =~ s{/intertrac/.*$}{/search?q=$wiki_syntax}xms;
             my %value_of = %{$UTIL->shell_simple([$browser, $trac_url])};
             if ($value_of{rc}) {
                 return FCM::System::Exception->throw(
