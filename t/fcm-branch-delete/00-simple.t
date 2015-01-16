@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with FCM. If not, see <http://www.gnu.org/licenses/>.
 # ------------------------------------------------------------------------------
-# Basic tests for "fcm branch-create".
+# Basic tests for "fcm branch-delete".
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------

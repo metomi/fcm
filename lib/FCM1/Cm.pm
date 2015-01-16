@@ -257,11 +257,11 @@ sub _branch_url {
     my $url
         = $arg && is_url($arg) ? FCM1::CmUrl->new(URL => $arg)
         : $arg && is_wc($arg)  ? FCM1::CmUrl->new(URL => get_url_of_wc($arg))
-        : is_wc()              ? FCM1::CmUrl->new(URL => get_url_of_wc())
+        : !$arg && is_wc()     ? FCM1::CmUrl->new(URL => get_url_of_wc())
         :                        undef
         ;
     if (!$url) {
-        return _cm_err(FCM1::Cm::Exception->INVALID_TARGET, '.');
+        return _cm_err(FCM1::Cm::Exception->INVALID_TARGET, $arg ? $arg : q{.});
     }
     $url;
 }
