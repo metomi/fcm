@@ -136,8 +136,8 @@ file_cmp "$TEST_KEY-cmp" \
 # New install, single repository, with commit.cfg
 TEST_KEY="$TEST_KEY_BASE-commit.cfg"
 {
-    echo 'notify-branch-owner'
-    echo 'verify-branch-owner'
+    echo "owner=$USER"
+    echo 'notification-modes=repository project branch'
 } >'svn-import/commit.cfg'
 NAME='commit-conf' run_tests
 file_cmp "$TEST_KEY-cmp" \

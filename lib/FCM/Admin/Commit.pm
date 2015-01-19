@@ -199,11 +199,15 @@ sub pre_commit_perm {
             &&  defined($project)
         ) {
             if (!_perm_ok($commit_conf, $author, $project)) {
-                # Addition of paths as part of a branch creation is OK
-                # Permission denied for everything else under the project
+                # An author who is not a project owner can add paths under the
+                # project as part of a branch creation, etc.
+                # "$line_of_unknown_path{$path}" may be deleted if it is a part
+                # of a valid branch creation by an author who is not a project
+                # owner.
                 if ($status eq 'A' && !$branch) {
                     $line_of_unknown_path{$path} = $line;
                 }
+                # Permission denied for everything else under the project.
                 else {
                     push(@bads, [$line]);
                 }
@@ -213,11 +217,15 @@ sub pre_commit_perm {
         # Repository owner can do anything
         if ($commit_conf->get_permission_modes()->{'repository'}) {
             if (!_perm_ok($commit_conf, $author)) {
-                # Addition of paths as part of a project creation is OK
-                # Permission denied for everything else
+                # An author who is not a project owner can add paths under the
+                # project as part of a branch creation, project creation, etc.
+                # "$line_of_unknown_path{$path}" may be deleted if it is a part
+                # of a valid branch creation, project creation, etc. by an
+                # author who is not a project owner.
                 if ($status eq 'A' && !$project) {
                     $line_of_unknown_path{$path} = $line;
                 }
+                # Permission denied for everything else.
                 else {
                     push(@bads, [$line]);
                 }
@@ -494,23 +502,26 @@ A list of items that requires commit notifications. An C<ITEM> can be
 C<repository>, C<project> or C<branch>.
 
 =item owner=C<USER1> ...
-
-Specify the user IDs of the owners of the repository in a space delimited list.
-This setting is compulsory if C<repository> or C<project> is in
-C<permission-modes>. Owners of the repository can change any path in the
-repository. If C<repository> is in C<notification-modes>, owners will be
-informed of all changes that are outside of a project.
-
 =item owner[C<project>]=C<USER1> ...
 =item owner[C<project/branches/dev/Share/whatever>]=C<USER1> ...
 
-Specify the user IDs of the owners of a project (or a shared topic branches
-of). The owners of a project can make changes to the trunk and any branches in
-the project. The owners of a named shared branch can make changes to the shared
-branch. If C<project> is in C<notification-modes>, project owners will be
-informed of all changes that are within a project but outside of its topic
-branches. If C<branch> is in C<notification-modes>, branch owners will be
-informed of all changes that are within the branch.
+In the absence of a name-space, specify the user IDs of the owners of the
+repository in a space delimited list.  This setting is compulsory if
+C<repository> or C<project> is in C<permission-modes>. Owners of the repository
+can change any path in the repository. If C<repository> is in
+C<notification-modes>, owners will be informed of all changes that are outside
+of a project.
+
+With a name-space, specify the user IDs of the owners of a project (or a shared
+topic branches of). The owners of a project can make changes to the trunk and
+any branches in the project. The owners of a named shared branch can make
+changes to the shared branch. If C<project> is in C<notification-modes>, project
+owners will be informed of all changes that are within a project but outside of
+its topic branches. If C<branch> is in C<notification-modes>, branch owners will
+be informed of all changes that are within the branch.
+
+Finally, the program always removes the change author from the notification
+list.
 
 =item permission-modes=C<ITEM> ...
 
