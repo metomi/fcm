@@ -435,7 +435,7 @@ sub cm_commit {
     LINE:
     for my $line (@status) {
       for my $key (keys(%st_lines_of)) {
-        if ($ST_MATCHER_FOR{$key}->($line)) {
+        if ($line && $ST_MATCHER_FOR{$key}->($line)) {
           push(@{$st_lines_of{$key}}, $line);
           next LINE;
         }
@@ -1815,7 +1815,7 @@ sub _svn_status_get {
         }
     }
     my @options = ($show_updates ? qw{--show-updates} : ());
-    $SVN->stdout(qw{svn status}, @options, @targets);
+    $SVN->stdout(qw{svn status --ignore-externals}, @options, @targets);
 }
 
 # ------------------------------------------------------------------------------
