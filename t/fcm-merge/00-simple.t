@@ -21,12 +21,38 @@
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
-tests 18
+tests 42
 #-------------------------------------------------------------------------------
 setup
 init_repos
 init_merge_branches merge1 merge2 $REPOS_URL
 cd $TEST_DIR/wc
+#-------------------------------------------------------------------------------
+test_mergeinfo "$TEST_KEY_BASE-pre" \
+    $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
+begin-prop
+end-prop
+begin-info
+    youngest common ancestor
+    |         last full merge
+    |         |        tip of branch
+    |         |        |         repository path
+
+    1                  9       
+    |                  |       
+       --| |------------         branches/dev/Share/merge1
+      /                        
+     /                         
+  -------| |------------         trunk
+                       |       
+                       9       
+end-info
+begin-eligible
+r5
+end-eligible
+begin-merged
+end-merged
+__RESULTS__
 #-------------------------------------------------------------------------------
 # Tests fcm merge --dry-run
 TEST_KEY=$TEST_KEY_BASE-dry-run
@@ -317,5 +343,34 @@ Added: svn:mergeinfo
 __OUT__
 fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+#-------------------------------------------------------------------------------
+test_mergeinfo "$TEST_KEY_BASE-post" \
+    $ROOT_URL/branches/dev/Share/merge1 - <<__RESULTS__
+begin-prop
+/branches/dev/Share/merge1:4-5
+end-prop
+begin-info
+    youngest common ancestor
+    |         last full merge
+    |         |        tip of branch
+    |         |        |         repository path
+
+    1                  9       
+    |                  |       
+       --| |------------         branches/dev/Share/merge1
+      /                        
+     /                         
+  -------| |------------         trunk
+                       |       
+                       9       
+end-info
+begin-eligible
+end-eligible
+begin-merged
+r4
+r5
+end-merged
+__RESULTS__
+#-------------------------------------------------------------------------------
 teardown
 #-------------------------------------------------------------------------------
