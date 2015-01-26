@@ -709,6 +709,9 @@ MOD_FILE=$(find . -type f | sed "/\.svn/d" | sort | head -4 | tail -1)
 echo "call_extra_feature()" >>$MOD_FILE
 svn commit -q -m "Made branch change to add extra feature"
 svn update -q
+# Create a new branch to up the revision number, as a test.
+init_branch merge3 $REPOS_URL
+# Checkout the trunk.
 svn switch -q $ROOT_URL/trunk
 #-------------------------------------------------------------------------------
 # Test the various mergeinfo output before merging.
@@ -723,14 +726,14 @@ begin-info
     |         |        tip of branch
     |         |        |         repository path
 
-    1         11       13      
+    1         11       14      
     |         |        |       
        --| |------------         branches/dev/Share/merge1
       /        \               
      /          \              
   -------| |------------         trunk
                        |       
-                       13      
+                       14      
 end-info
 begin-eligible
 r13
@@ -755,7 +758,7 @@ Merge succeeded.
 __OUT__
 else
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-Eligible merge(s) from /${PROJECT}branches/dev/Share/merge1@13: 13
+Eligible merge(s) from /${PROJECT}branches/dev/Share/merge1@14: 13
 --------------------------------------------------------------------------------
 Merge: /${PROJECT}branches/dev/Share/merge1@13
  c.f.: /${PROJECT}branches/dev/Share/merge1@11
@@ -792,7 +795,7 @@ Modified: svn:mergeinfo
 
 Index: added_file
 ===================================================================
---- added_file	(revision 13)
+--- added_file	(revision 14)
 +++ added_file	(working copy)
 @@ -1 +1,2 @@
  INCLUDE 'hello_constants.INc'
@@ -802,14 +805,14 @@ else
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Index: added_file
 ===================================================================
---- added_file	(revision 13)
+--- added_file	(revision 14)
 +++ added_file	(working copy)
 @@ -1 +1,2 @@
  INCLUDE 'hello_constants.INc'
 +call_extra_feature()
 Index: .
 ===================================================================
---- .	(revision 13)
+--- .	(revision 14)
 +++ .	(working copy)
 
 Property changes on: .
@@ -851,8 +854,8 @@ Would you like to commit this change?
 Enter "y" or "n" (or just press <return> for "n"): Sending        .
 Sending        added_file
 Transmitting file data .
-Committed revision 14.
-At revision 14.
+Committed revision 15.
+At revision 15.
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
@@ -862,7 +865,7 @@ run_pass "$TEST_KEY" fcm log
 sed -i "s/\(.*|.*|\).*\(|.*\)$/\1 date \2/g" $TEST_DIR/$TEST_KEY.out
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 ------------------------------------------------------------------------
-r14 | $LOGNAME | date | 3 lines
+r15 | $LOGNAME | date | 3 lines
 
 foo
 Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@13 cf. /${PROJECT}branches/dev/Share/merge1@11
@@ -901,14 +904,14 @@ begin-info
     |         |        tip of branch
     |         |        |         repository path
 
-    1         13       14      
+    1         13       15      
     |         |        |       
        --| |------------         branches/dev/Share/merge1
       /        \               
      /          \              
   -------| |------------         trunk
                        |       
-                       14      
+                       15      
 end-info
 begin-eligible
 end-eligible
@@ -943,19 +946,19 @@ begin-info
     |         |        tip of branch
     |         |        |         repository path
 
-    1                  16      
+    1                  17      
     |                  |       
   -------| |------------         trunk
      \          /              
       \        /               
        --| |------------         branches/dev/Share/merge1
               |        |       
-              13       16      
+              13       17      
 end-info
 begin-eligible
 r12
-r14
 r15
+r16
 end-eligible
 begin-merged
 r8
@@ -967,17 +970,17 @@ TEST_KEY=$TEST_KEY_BASE-trunk-into-branch-2
 run_pass "$TEST_KEY" fcm merge --non-interactive trunk
 if $SVN_VERSION_IS_16; then
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-Eligible merge(s) from /${PROJECT}trunk@16: 15 14
+Eligible merge(s) from /${PROJECT}trunk@17: 16 15
 --------------------------------------------------------------------------------
-Merge: /${PROJECT}trunk@15
+Merge: /${PROJECT}trunk@16
  c.f.: /${PROJECT}branches/dev/Share/merge1@13
 Merge succeeded.
 __OUT__
 else
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-Eligible merge(s) from /${PROJECT}trunk@16: 15 14
+Eligible merge(s) from /${PROJECT}trunk@17: 16 15
 --------------------------------------------------------------------------------
-Merge: /${PROJECT}trunk@15
+Merge: /${PROJECT}trunk@16
  c.f.: /${PROJECT}branches/dev/Share/merge1@13
 Merge succeeded.
 --------------------------------------------------------------------------actual
@@ -1008,12 +1011,12 @@ if $SVN_VERSION_IS_16; then
 Property changes on: .
 ___________________________________________________________________
 Modified: svn:mergeinfo
-   Merged /${PROJECT}trunk:r10-15
+   Merged /${PROJECT}trunk:r10-16
    Merged /${PROJECT}branches/dev/Share/merge1:r2-3
 
 Index: added_file
 ===================================================================
---- added_file	(revision 16)
+--- added_file	(revision 17)
 +++ added_file	(working copy)
 @@ -1,2 +1,3 @@
  INCLUDE 'hello_constants.INc'
@@ -1024,7 +1027,7 @@ else
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Index: added_file
 ===================================================================
---- added_file	(revision 16)
+--- added_file	(revision 17)
 +++ added_file	(working copy)
 @@ -1,2 +1,3 @@
  INCLUDE 'hello_constants.INc'
@@ -1032,13 +1035,13 @@ Index: added_file
 +# trunk modification
 Index: .
 ===================================================================
---- .	(revision 16)
+--- .	(revision 17)
 +++ .	(working copy)
 
 Property changes on: .
 ___________________________________________________________________
 Modified: svn:mergeinfo
-   Merged /${PROJECT}trunk:r10-15
+   Merged /${PROJECT}trunk:r10-16
 __OUT__
 fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
@@ -1064,7 +1067,7 @@ M       added_file
 Commit message is as follows:
 --------------------------------------------------------------------------------
 foo
-Merged into /${PROJECT}branches/dev/Share/merge1: /${PROJECT}trunk@15 cf. /${PROJECT}branches/dev/Share/merge1@13
+Merged into /${PROJECT}branches/dev/Share/merge1: /${PROJECT}trunk@16 cf. /${PROJECT}branches/dev/Share/merge1@13
 --------------------------------------------------------------------------------
 
 *** WARNING: YOU ARE COMMITTING TO A Share BRANCH.
@@ -1074,8 +1077,8 @@ Would you like to commit this change?
 Enter "y" or "n" (or just press <return> for "n"): Sending        .
 Sending        added_file
 Transmitting file data .
-Committed revision 17.
-At revision 17.
+Committed revision 18.
+At revision 18.
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
@@ -1085,13 +1088,13 @@ run_pass "$TEST_KEY" fcm log
 sed -i "s/\(.*|.*|\).*\(|.*\)$/\1 date \2/g" $TEST_DIR/$TEST_KEY.out
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 ------------------------------------------------------------------------
-r17 | $LOGNAME | date | 3 lines
+r18 | $LOGNAME | date | 3 lines
 
 foo
-Merged into /${PROJECT}branches/dev/Share/merge1: /${PROJECT}trunk@15 cf. /${PROJECT}branches/dev/Share/merge1@13
+Merged into /${PROJECT}branches/dev/Share/merge1: /${PROJECT}trunk@16 cf. /${PROJECT}branches/dev/Share/merge1@13
 
 ------------------------------------------------------------------------
-r16 | $LOGNAME | date | 1 line
+r17 | $LOGNAME | date | 1 line
 
 Made branch change for merge repeat test
 ------------------------------------------------------------------------
@@ -1128,7 +1131,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 test_mergeinfo "$TEST_KEY_BASE-trunk-into-branch-2-post" \
     $ROOT_URL/trunk <<__RESULTS__
 begin-prop
-/trunk:2-15
+/trunk:2-16
 end-prop
 begin-info
     youngest common ancestor
@@ -1136,14 +1139,14 @@ begin-info
     |         |        tip of branch
     |         |        |         repository path
 
-    1         15       17      
+    1         16       18      
     |         |        |       
   -------| |------------         trunk
      \         \               
       \         \              
        --| |------------         branches/dev/Share/merge1
                        |       
-                       17      
+                       18      
 end-info
 begin-eligible
 end-eligible
@@ -1151,8 +1154,8 @@ begin-merged
 r8
 r9
 r12
-r14
 r15
+r16
 end-merged
 __RESULTS__
 #-------------------------------------------------------------------------------
@@ -1175,19 +1178,19 @@ begin-info
     |         |        tip of branch
     |         |        |         repository path
 
-    1                  18      
+    1                  19      
     |                  |       
        --| |------------         branches/dev/Share/merge1
       /         /              
      /         /               
   -------| |------------         trunk
               |        |       
-              15       18      
+              16       19      
 end-info
 begin-eligible
-r16
 r17
 r18
+r19
 end-eligible
 begin-merged
 r4
@@ -1202,18 +1205,18 @@ TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-3
 run_pass "$TEST_KEY" fcm merge --non-interactive branches/dev/Share/merge1
 if $SVN_VERSION_IS_16; then
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-Eligible merge(s) from /${PROJECT}branches/dev/Share/merge1@18: 18 17
+Eligible merge(s) from /${PROJECT}branches/dev/Share/merge1@19: 19 18
 --------------------------------------------------------------------------------
-Merge: /${PROJECT}branches/dev/Share/merge1@18
- c.f.: /${PROJECT}trunk@15
+Merge: /${PROJECT}branches/dev/Share/merge1@19
+ c.f.: /${PROJECT}trunk@16
 Merge succeeded.
 __OUT__
 else
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-Eligible merge(s) from /${PROJECT}branches/dev/Share/merge1@18: 18 17
+Eligible merge(s) from /${PROJECT}branches/dev/Share/merge1@19: 19 18
 --------------------------------------------------------------------------------
-Merge: /${PROJECT}branches/dev/Share/merge1@18
- c.f.: /${PROJECT}trunk@15
+Merge: /${PROJECT}branches/dev/Share/merge1@19
+ c.f.: /${PROJECT}trunk@16
 Merge succeeded.
 --------------------------------------------------------------------------actual
 --- Merging differences between repository URLs into '.':
@@ -1249,7 +1252,7 @@ Modified: svn:mergeinfo
 
 Index: added_directory/hello_constants_dummy.inc
 ===================================================================
---- added_directory/hello_constants_dummy.inc	(revision 18)
+--- added_directory/hello_constants_dummy.inc	(revision 19)
 +++ added_directory/hello_constants_dummy.inc	(working copy)
 @@ -1,2 +0,0 @@
 -INCLUDE 'hello_constants.INc'
@@ -1259,20 +1262,20 @@ else
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Index: added_directory/hello_constants_dummy.inc
 ===================================================================
---- added_directory/hello_constants_dummy.inc	(revision 18)
+--- added_directory/hello_constants_dummy.inc	(revision 19)
 +++ added_directory/hello_constants_dummy.inc	(working copy)
 @@ -1,2 +0,0 @@
 -INCLUDE 'hello_constants.INc'
 -# added this line for simple repeat testing
 Index: .
 ===================================================================
---- .	(revision 18)
+--- .	(revision 19)
 +++ .	(working copy)
 
 Property changes on: .
 ___________________________________________________________________
 Modified: svn:mergeinfo
-   Merged /${PROJECT}branches/dev/Share/merge1:r14-18
+   Merged /${PROJECT}branches/dev/Share/merge1:r14-19
 __OUT__
 fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
@@ -1299,7 +1302,7 @@ A  +    added_file.add
 Commit message is as follows:
 --------------------------------------------------------------------------------
 foo
-Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@18 cf. /${PROJECT}trunk@15
+Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@19 cf. /${PROJECT}trunk@16
 --------------------------------------------------------------------------------
 
 *** WARNING: YOU ARE COMMITTING TO THE TRUNK.
@@ -1310,8 +1313,8 @@ Enter "y" or "n" (or just press <return> for "n"): Sending        .
 Deleting       added_directory/hello_constants_dummy.inc
 Adding         added_file.add
 
-Committed revision 19.
-At revision 19.
+Committed revision 20.
+At revision 20.
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
@@ -1321,35 +1324,39 @@ run_pass "$TEST_KEY" fcm log $ROOT_URL
 sed -i "s/\(.*|.*|\).*\(|.*\)$/\1 date \2/g" $TEST_DIR/$TEST_KEY.out
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 ------------------------------------------------------------------------
-r19 | $LOGNAME | date | 3 lines
+r20 | $LOGNAME | date | 3 lines
 
 foo
-Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@18 cf. /${PROJECT}trunk@15
+Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@19 cf. /${PROJECT}trunk@16
 
 ------------------------------------------------------------------------
-r18 | $LOGNAME | date | 1 line
+r19 | $LOGNAME | date | 1 line
 
 Made branch change - deleted ./added_directory/hello_constants_dummy.inc, copied ./added_file
 ------------------------------------------------------------------------
-r17 | $LOGNAME | date | 3 lines
+r18 | $LOGNAME | date | 3 lines
 
 foo
-Merged into /${PROJECT}branches/dev/Share/merge1: /${PROJECT}trunk@15 cf. /${PROJECT}branches/dev/Share/merge1@13
+Merged into /${PROJECT}branches/dev/Share/merge1: /${PROJECT}trunk@16 cf. /${PROJECT}branches/dev/Share/merge1@13
 
 ------------------------------------------------------------------------
-r16 | $LOGNAME | date | 1 line
+r17 | $LOGNAME | date | 1 line
 
 Made branch change for merge repeat test
 ------------------------------------------------------------------------
-r15 | $LOGNAME | date | 1 line
+r16 | $LOGNAME | date | 1 line
 
 Made trunk change - a simple edit of ./added_file
 ------------------------------------------------------------------------
-r14 | $LOGNAME | date | 3 lines
+r15 | $LOGNAME | date | 3 lines
 
 foo
 Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@13 cf. /${PROJECT}branches/dev/Share/merge1@11
 
+------------------------------------------------------------------------
+r14 | $LOGNAME | date | 1 line
+
+Made a branch Created /branches/dev/Share/merge3 from /trunk@1.
 ------------------------------------------------------------------------
 r13 | $LOGNAME | date | 1 line
 
@@ -1414,7 +1421,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 test_mergeinfo "$TEST_KEY_BASE-branch-into-trunk-3-post" \
     $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
 begin-prop
-/branches/dev/Share/merge1:4-18
+/branches/dev/Share/merge1:4-19
 end-prop
 begin-info
     youngest common ancestor
@@ -1422,14 +1429,14 @@ begin-info
     |         |        tip of branch
     |         |        |         repository path
 
-    1         18       19      
+    1         19       20      
     |         |        |       
        --| |------------         branches/dev/Share/merge1
       /        \               
      /          \              
   -------| |------------         trunk
                        |       
-                       19      
+                       20      
 end-info
 begin-eligible
 end-eligible
@@ -1439,9 +1446,9 @@ r5
 r10
 r11
 r13
-r16
 r17
 r18
+r19
 end-merged
 __RESULTS__
 #-------------------------------------------------------------------------------
@@ -1467,23 +1474,23 @@ begin-info
     |         |        tip of branch
     |         |        |         repository path
 
-    1                  20      
+    1                  21      
     |                  |       
        --| |------------         branches/dev/Share/merge1
   ... /                        
       \                        
        --| |------------         branches/dev/Share/merge2
                        |       
-                       20      
+                       21      
 end-info
 begin-eligible
 r5
 r10
 r11
 r13
-r16
 r17
 r18
+r19
 end-eligible
 begin-merged
 end-merged
@@ -1496,8 +1503,8 @@ y
 __IN__
 if $SVN_VERSION_IS_16; then
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-Eligible merge(s) from /${PROJECT}branches/dev/Share/merge1@20: 18 17 16 13 11 10 5
-Enter a revision (or just press <return> for "18"): --------------------------------------------------------------------------------
+Eligible merge(s) from /${PROJECT}branches/dev/Share/merge1@21: 19 18 17 13 11 10 5
+Enter a revision (or just press <return> for "19"): --------------------------------------------------------------------------------
 Merge: /${PROJECT}branches/dev/Share/merge1@13
  c.f.: /${PROJECT}trunk@1
 -------------------------------------------------------------------------dry-run
@@ -1521,8 +1528,8 @@ Enter "y" or "n" (or just press <return> for "n"): Merge succeeded.
 __OUT__
 else
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-Eligible merge(s) from /${PROJECT}branches/dev/Share/merge1@20: 18 17 16 13 11 10 5
-Enter a revision (or just press <return> for "18"): --------------------------------------------------------------------------------
+Eligible merge(s) from /${PROJECT}branches/dev/Share/merge1@21: 19 18 17 13 11 10 5
+Enter a revision (or just press <return> for "19"): --------------------------------------------------------------------------------
 Merge: /${PROJECT}branches/dev/Share/merge1@13
  c.f.: /${PROJECT}trunk@1
 -------------------------------------------------------------------------dry-run
@@ -1614,21 +1621,21 @@ Added: svn:mergeinfo
 
 Index: subroutine/hello_sub_dummy.h
 ===================================================================
---- subroutine/hello_sub_dummy.h	(revision 20)
+--- subroutine/hello_sub_dummy.h	(revision 21)
 +++ subroutine/hello_sub_dummy.h	(working copy)
 @@ -1 +1,2 @@
  #include "hello_sub.h"
 +Modified a line
 Index: module/hello_constants_dummy.inc
 ===================================================================
---- module/hello_constants_dummy.inc	(revision 20)
+--- module/hello_constants_dummy.inc	(revision 21)
 +++ module/hello_constants_dummy.inc	(working copy)
 @@ -1 +1 @@
 -INCLUDE 'hello_constants.inc'
 +INCLUDE 'hello_constants.INc'
 Index: module/hello_constants.inc
 ===================================================================
---- module/hello_constants.inc	(revision 20)
+--- module/hello_constants.inc	(revision 21)
 +++ module/hello_constants.inc	(working copy)
 @@ -1 +1,2 @@
 -CHARACTER (LEN=80), PARAMETER :: hello_string = 'Hello Earth!'
@@ -1636,7 +1643,7 @@ Index: module/hello_constants.inc
 +LEN=80), PARAMETER :: hello_strINg = 'Hello Earth!!'
 Index: module/hello_constants.f90
 ===================================================================
---- module/hello_constants.f90	(revision 20)
+--- module/hello_constants.f90	(revision 21)
 +++ module/hello_constants.f90	(working copy)
 @@ -1,6 +1,6 @@
  MODULE Hello_Constants
@@ -1648,14 +1655,14 @@ Index: module/hello_constants.f90
  Second branch change
 Index: lib/python/info/__init__.py
 ===================================================================
---- lib/python/info/__init__.py	(revision 20)
+--- lib/python/info/__init__.py	(revision 21)
 +++ lib/python/info/__init__.py	(working copy)
 @@ -0,0 +1,2 @@
 +trunk change
 +another trunk change
 Index: lib/python/info/poems.py
 ===================================================================
---- lib/python/info/poems.py	(revision 20)
+--- lib/python/info/poems.py	(revision 21)
 +++ lib/python/info/poems.py	(working copy)
 @@ -1,24 +1,23 @@
 -#!/usr/bin/env python
@@ -1696,14 +1703,14 @@ else
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Index: lib/python/info/__init__.py
 ===================================================================
---- lib/python/info/__init__.py	(revision 20)
+--- lib/python/info/__init__.py	(revision 21)
 +++ lib/python/info/__init__.py	(working copy)
 @@ -0,0 +1,2 @@
 +trunk change
 +another trunk change
 Index: lib/python/info/poems.py
 ===================================================================
---- lib/python/info/poems.py	(revision 20)
+--- lib/python/info/poems.py	(revision 21)
 +++ lib/python/info/poems.py	(working copy)
 @@ -1,24 +1,23 @@
 -#!/usr/bin/env python
@@ -1741,7 +1748,7 @@ Index: lib/python/info/poems.py
 +prINt "\n",  __doc__
 Index: module/hello_constants.f90
 ===================================================================
---- module/hello_constants.f90	(revision 20)
+--- module/hello_constants.f90	(revision 21)
 +++ module/hello_constants.f90	(working copy)
 @@ -1,6 +1,6 @@
  MODULE Hello_Constants
@@ -1753,7 +1760,7 @@ Index: module/hello_constants.f90
  Second branch change
 Index: module/hello_constants.inc
 ===================================================================
---- module/hello_constants.inc	(revision 20)
+--- module/hello_constants.inc	(revision 21)
 +++ module/hello_constants.inc	(working copy)
 @@ -1 +1,2 @@
 -CHARACTER (LEN=80), PARAMETER :: hello_string = 'Hello Earth!'
@@ -1761,21 +1768,21 @@ Index: module/hello_constants.inc
 +LEN=80), PARAMETER :: hello_strINg = 'Hello Earth!!'
 Index: module/hello_constants_dummy.inc
 ===================================================================
---- module/hello_constants_dummy.inc	(revision 20)
+--- module/hello_constants_dummy.inc	(revision 21)
 +++ module/hello_constants_dummy.inc	(working copy)
 @@ -1 +1 @@
 -INCLUDE 'hello_constants.inc'
 +INCLUDE 'hello_constants.INc'
 Index: subroutine/hello_sub_dummy.h
 ===================================================================
---- subroutine/hello_sub_dummy.h	(revision 20)
+--- subroutine/hello_sub_dummy.h	(revision 21)
 +++ subroutine/hello_sub_dummy.h	(working copy)
 @@ -1 +1,2 @@
  #include "hello_sub.h"
 +Modified a line
 Index: .
 ===================================================================
---- .	(revision 20)
+--- .	(revision 21)
 +++ .	(working copy)
 
 Property changes on: .
@@ -1840,8 +1847,8 @@ Sending        module/hello_constants_dummy.inc
 Adding         module/tree_conflict_file
 Sending        subroutine/hello_sub_dummy.h
 Transmitting file data ......
-Committed revision 21.
-At revision 21.
+Committed revision 22.
+At revision 22.
 __OUT__
 else
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
@@ -1885,9 +1892,9 @@ Sending        module/hello_constants_dummy.inc
 Adding         module/tree_conflict_file
 Sending        subroutine/hello_sub_dummy.h
 Transmitting file data ......
-Committed revision 21.
+Committed revision 22.
 Updating '.':
-At revision 21.
+At revision 22.
 __OUT__
 fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
@@ -1898,45 +1905,49 @@ run_pass "$TEST_KEY" fcm log $REPOS_URL
 sed -i "s/\(.*|.*|\).*\(|.*\)$/\1 date \2/g" $TEST_DIR/$TEST_KEY.out
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 ------------------------------------------------------------------------
-r21 | $LOGNAME | date | 3 lines
+r22 | $LOGNAME | date | 3 lines
 
 foo
 Merged into /${PROJECT}branches/dev/Share/merge2: /${PROJECT}branches/dev/Share/merge1@13 cf. /${PROJECT}trunk@1
 
 ------------------------------------------------------------------------
-r20 | $LOGNAME | date | 1 line
+r21 | $LOGNAME | date | 1 line
 
 Made branch change - added to ./module/hello_constants.f90
 ------------------------------------------------------------------------
-r19 | $LOGNAME | date | 3 lines
+r20 | $LOGNAME | date | 3 lines
 
 foo
-Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@18 cf. /${PROJECT}trunk@15
+Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@19 cf. /${PROJECT}trunk@16
 
 ------------------------------------------------------------------------
-r18 | $LOGNAME | date | 1 line
+r19 | $LOGNAME | date | 1 line
 
 Made branch change - deleted ./added_directory/hello_constants_dummy.inc, copied ./added_file
 ------------------------------------------------------------------------
-r17 | $LOGNAME | date | 3 lines
+r18 | $LOGNAME | date | 3 lines
 
 foo
-Merged into /${PROJECT}branches/dev/Share/merge1: /${PROJECT}trunk@15 cf. /${PROJECT}branches/dev/Share/merge1@13
+Merged into /${PROJECT}branches/dev/Share/merge1: /${PROJECT}trunk@16 cf. /${PROJECT}branches/dev/Share/merge1@13
 
 ------------------------------------------------------------------------
-r16 | $LOGNAME | date | 1 line
+r17 | $LOGNAME | date | 1 line
 
 Made branch change for merge repeat test
 ------------------------------------------------------------------------
-r15 | $LOGNAME | date | 1 line
+r16 | $LOGNAME | date | 1 line
 
 Made trunk change - a simple edit of ./added_file
 ------------------------------------------------------------------------
-r14 | $LOGNAME | date | 3 lines
+r15 | $LOGNAME | date | 3 lines
 
 foo
 Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@13 cf. /${PROJECT}branches/dev/Share/merge1@11
 
+------------------------------------------------------------------------
+r14 | $LOGNAME | date | 1 line
+
+Made a branch Created /branches/dev/Share/merge3 from /trunk@1.
 ------------------------------------------------------------------------
 r13 | $LOGNAME | date | 1 line
 
@@ -2010,19 +2021,19 @@ begin-info
     |         |        tip of branch
     |         |        |         repository path
 
-    1         13       21      
+    1         13       22      
     |         |        |       
        --| |------------         branches/dev/Share/merge1
   ... /        \               
       \         \              
        --| |------------         branches/dev/Share/merge2
                        |       
-                       21      
+                       22      
 end-info
 begin-eligible
-r16
 r17
 r18
+r19
 end-eligible
 begin-merged
 r4
