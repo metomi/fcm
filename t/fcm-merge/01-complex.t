@@ -30,6 +30,7 @@ export SVN_EDITOR="sed -i 1i\foo"
 cd $TEST_DIR/wc
 svn switch -q $ROOT_URL/branches/dev/Share/merge1
 #-------------------------------------------------------------------------------
+# Test the various mergeinfo output before merging.
 test_mergeinfo "$TEST_KEY_BASE-trunk-into-branch-1-pre" \
     $ROOT_URL/trunk <<__RESULTS__
 begin-prop
@@ -235,6 +236,7 @@ initial trunk import
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
+# Test the various mergeinfo output after merging.
 test_mergeinfo "$TEST_KEY_BASE-trunk-into-branch-1-post" \
     $ROOT_URL/trunk <<__RESULTS__
 begin-prop
@@ -275,6 +277,7 @@ mkdir $TEST_DIR/wc
 svn checkout -q $ROOT_URL/trunk $TEST_DIR/wc
 cd $TEST_DIR/wc
 #-------------------------------------------------------------------------------
+# Test the various mergeinfo output before merging.
 test_mergeinfo "$TEST_KEY_BASE-branch-into-trunk-1-pre" \
     $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
 begin-prop
@@ -669,6 +672,7 @@ initial trunk import
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
+# Test the various mergeinfo output after merging.
 test_mergeinfo "$TEST_KEY_BASE-branch-into-trunk-1-post" \
     $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
 begin-prop
@@ -707,6 +711,7 @@ svn commit -q -m "Made branch change to add extra feature"
 svn update -q
 svn switch -q $ROOT_URL/trunk
 #-------------------------------------------------------------------------------
+# Test the various mergeinfo output before merging.
 test_mergeinfo "$TEST_KEY_BASE-branch-into-trunk-2-pre" \
     $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
 begin-prop
@@ -884,6 +889,7 @@ initial trunk import
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
+# Test the various mergeinfo output after merging.
 test_mergeinfo "$TEST_KEY_BASE-branch-into-trunk-2-post" \
     $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
 begin-prop
@@ -925,6 +931,7 @@ echo "# added another line for simple repeat testing" >>$BRANCH_MOD_FILE
 svn commit -q -m "Made branch change for merge repeat test"
 svn update -q
 #------------------------------------------------------------------------------
+# Test the various mergeinfo output before merging.
 test_mergeinfo "$TEST_KEY_BASE-trunk-into-branch-2-pre" \
     $ROOT_URL/trunk <<__RESULTS__
 begin-prop
@@ -1117,6 +1124,7 @@ initial trunk import
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
+# Test the various mergeinfo output after merging.
 test_mergeinfo "$TEST_KEY_BASE-trunk-into-branch-2-post" \
     $ROOT_URL/trunk <<__RESULTS__
 begin-prop
@@ -1155,6 +1163,7 @@ svn commit -q -m "Made branch change - deleted $BRANCH_MOD_FILE, copied $MOD_FIL
 svn update -q
 svn switch -q $ROOT_URL/trunk
 #-------------------------------------------------------------------------------
+# Test the various mergeinfo output before merging.
 test_mergeinfo "$TEST_KEY_BASE-branch-into-trunk-3-pre" \
     $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
 begin-prop
@@ -1401,6 +1410,7 @@ initial trunk import
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
+# Test the various mergeinfo output after merging.
 test_mergeinfo "$TEST_KEY_BASE-branch-into-trunk-3-post" \
     $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
 begin-prop
@@ -1446,6 +1456,7 @@ echo "Second branch change" >>$BRANCH_2_MOD_FILE
 svn commit -q -m "Made branch change - added to $BRANCH_2_MOD_FILE"
 svn update -q
 #------------------------------------------------------------------------------
+# Test the various mergeinfo output before merging.
 test_mergeinfo "$TEST_KEY_BASE-branch-into-branch-1-pre" \
     $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
 begin-prop
@@ -1986,6 +1997,7 @@ initial trunk import
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #------------------------------------------------------------------------------
+# Test the various mergeinfo output after merging.
 test_mergeinfo "$TEST_KEY_BASE-branch-into-branch-1-post" \
     $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
 begin-prop

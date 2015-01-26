@@ -28,6 +28,7 @@ init_repos
 init_merge_branches merge1 merge2 $REPOS_URL
 cd $TEST_DIR/wc
 #-------------------------------------------------------------------------------
+# Test the various mergeinfo output before merging.
 test_mergeinfo "$TEST_KEY_BASE-pre" \
     $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
 begin-prop
@@ -344,6 +345,7 @@ __OUT__
 fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
+# Test the various mergeinfo output after merging.
 test_mergeinfo "$TEST_KEY_BASE-post" \
     $ROOT_URL/branches/dev/Share/merge1 - <<__RESULTS__
 begin-prop
