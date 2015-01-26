@@ -21,16 +21,44 @@
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
-tests 90
+tests 234
 #-------------------------------------------------------------------------------
 setup
 init_repos
 init_merge_branches merge1 merge2 $REPOS_URL
 export SVN_EDITOR="sed -i 1i\foo"
 cd $TEST_DIR/wc
+svn switch -q $ROOT_URL/branches/dev/Share/merge1
+#-------------------------------------------------------------------------------
+# Test the various mergeinfo output before merging.
+test_mergeinfo "$TEST_KEY_BASE-trunk-into-branch-1-pre" \
+    $ROOT_URL/trunk <<__RESULTS__
+begin-prop
+end-prop
+begin-info
+    youngest common ancestor
+    |         last full merge
+    |         |        tip of branch
+    |         |        |         repository path
+
+    1                  9       
+    |                  |       
+  -------| |------------         trunk
+     \                         
+      \                        
+       --| |------------         branches/dev/Share/merge1
+                       |       
+                       9       
+end-info
+begin-eligible
+r8
+r9
+end-eligible
+begin-merged
+end-merged
+__RESULTS__
 #-------------------------------------------------------------------------------
 # Tests fcm merge of trunk-into-branch (1)
-svn switch -q $ROOT_URL/branches/dev/Share/merge1
 TEST_KEY=$TEST_KEY_BASE-trunk-into-branch-1-non-root
 cd module
 run_pass "$TEST_KEY" fcm merge --non-interactive trunk
@@ -208,6 +236,35 @@ initial trunk import
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
+# Test the various mergeinfo output after merging.
+test_mergeinfo "$TEST_KEY_BASE-trunk-into-branch-1-post" \
+    $ROOT_URL/trunk <<__RESULTS__
+begin-prop
+/trunk:2-9
+end-prop
+begin-info
+    youngest common ancestor
+    |         last full merge
+    |         |        tip of branch
+    |         |        |         repository path
+
+    1         9        10      
+    |         |        |       
+  -------| |------------         trunk
+     \         \               
+      \         \              
+       --| |------------         branches/dev/Share/merge1
+                       |       
+                       10      
+end-info
+begin-eligible
+end-eligible
+begin-merged
+r8
+r9
+end-merged
+__RESULTS__
+#-------------------------------------------------------------------------------
 # Tests fcm merge of branch-into-trunk (1)
 TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-1
 BRANCH_MOD_FILE=$(find . -type f | sed "/\.svn/d" | sort | head -3| tail -1)
@@ -219,6 +276,36 @@ rm -rf $TEST_DIR/wc
 mkdir $TEST_DIR/wc
 svn checkout -q $ROOT_URL/trunk $TEST_DIR/wc
 cd $TEST_DIR/wc
+#-------------------------------------------------------------------------------
+# Test the various mergeinfo output before merging.
+test_mergeinfo "$TEST_KEY_BASE-branch-into-trunk-1-pre" \
+    $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
+begin-prop
+end-prop
+begin-info
+    youngest common ancestor
+    |         last full merge
+    |         |        tip of branch
+    |         |        |         repository path
+
+    1                  11      
+    |                  |       
+       --| |------------         branches/dev/Share/merge1
+      /         /              
+     /         /               
+  -------| |------------         trunk
+              |        |       
+              9        11      
+end-info
+begin-eligible
+r5
+r10
+r11
+end-eligible
+begin-merged
+end-merged
+__RESULTS__
+#-------------------------------------------------------------------------------
 run_pass "$TEST_KEY" fcm merge --non-interactive branches/dev/Share/merge1
 if $SVN_VERSION_IS_16; then
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
@@ -585,6 +672,37 @@ initial trunk import
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
+# Test the various mergeinfo output after merging.
+test_mergeinfo "$TEST_KEY_BASE-branch-into-trunk-1-post" \
+    $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
+begin-prop
+/branches/dev/Share/merge1:4-11
+end-prop
+begin-info
+    youngest common ancestor
+    |         last full merge
+    |         |        tip of branch
+    |         |        |         repository path
+
+    1         11       12      
+    |         |        |       
+       --| |------------         branches/dev/Share/merge1
+      /        \               
+     /          \              
+  -------| |------------         trunk
+                       |       
+                       12      
+end-info
+begin-eligible
+end-eligible
+begin-merged
+r4
+r5
+r10
+r11
+end-merged
+__RESULTS__
+#-------------------------------------------------------------------------------
 # Tests fcm merge of branch-into-trunk (2)
 svn switch -q $ROOT_URL/branches/dev/Share/merge1
 MOD_FILE=$(find . -type f | sed "/\.svn/d" | sort | head -4 | tail -1)
@@ -592,6 +710,39 @@ echo "call_extra_feature()" >>$MOD_FILE
 svn commit -q -m "Made branch change to add extra feature"
 svn update -q
 svn switch -q $ROOT_URL/trunk
+#-------------------------------------------------------------------------------
+# Test the various mergeinfo output before merging.
+test_mergeinfo "$TEST_KEY_BASE-branch-into-trunk-2-pre" \
+    $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
+begin-prop
+/branches/dev/Share/merge1:4-11
+end-prop
+begin-info
+    youngest common ancestor
+    |         last full merge
+    |         |        tip of branch
+    |         |        |         repository path
+
+    1         11       13      
+    |         |        |       
+       --| |------------         branches/dev/Share/merge1
+      /        \               
+     /          \              
+  -------| |------------         trunk
+                       |       
+                       13      
+end-info
+begin-eligible
+r13
+end-eligible
+begin-merged
+r4
+r5
+r10
+r11
+end-merged
+__RESULTS__
+#-------------------------------------------------------------------------------
 TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-2
 run_pass "$TEST_KEY" fcm merge --non-interactive branches/dev/Share/merge1
 if $SVN_VERSION_IS_16; then
@@ -738,15 +889,81 @@ initial trunk import
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
+# Test the various mergeinfo output after merging.
+test_mergeinfo "$TEST_KEY_BASE-branch-into-trunk-2-post" \
+    $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
+begin-prop
+/branches/dev/Share/merge1:4-13
+end-prop
+begin-info
+    youngest common ancestor
+    |         last full merge
+    |         |        tip of branch
+    |         |        |         repository path
+
+    1         13       14      
+    |         |        |       
+       --| |------------         branches/dev/Share/merge1
+      /        \               
+     /          \              
+  -------| |------------         trunk
+                       |       
+                       14      
+end-info
+begin-eligible
+end-eligible
+begin-merged
+r4
+r5
+r10
+r11
+r13
+end-merged
+__RESULTS__
+#-------------------------------------------------------------------------------
 # Tests fcm merge of trunk-into-branch (2)
 echo "# trunk modification" >>$MOD_FILE
 svn commit -q -m "Made trunk change - a simple edit of $MOD_FILE"
 svn update -q
 svn switch -q $ROOT_URL/branches/dev/Share/merge1
-TEST_KEY=$TEST_KEY_BASE-trunk-into-branch-2
+
 echo "# added another line for simple repeat testing" >>$BRANCH_MOD_FILE
 svn commit -q -m "Made branch change for merge repeat test"
 svn update -q
+#------------------------------------------------------------------------------
+# Test the various mergeinfo output before merging.
+test_mergeinfo "$TEST_KEY_BASE-trunk-into-branch-2-pre" \
+    $ROOT_URL/trunk <<__RESULTS__
+begin-prop
+/trunk:2-9
+end-prop
+begin-info
+    youngest common ancestor
+    |         last full merge
+    |         |        tip of branch
+    |         |        |         repository path
+
+    1                  16      
+    |                  |       
+  -------| |------------         trunk
+     \          /              
+      \        /               
+       --| |------------         branches/dev/Share/merge1
+              |        |       
+              13       16      
+end-info
+begin-eligible
+r12
+r14
+r15
+end-eligible
+begin-merged
+r8
+r9
+end-merged
+__RESULTS__
+#------------------------------------------------------------------------------
+TEST_KEY=$TEST_KEY_BASE-trunk-into-branch-2
 run_pass "$TEST_KEY" fcm merge --non-interactive trunk
 if $SVN_VERSION_IS_16; then
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
@@ -907,12 +1124,80 @@ initial trunk import
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
+# Test the various mergeinfo output after merging.
+test_mergeinfo "$TEST_KEY_BASE-trunk-into-branch-2-post" \
+    $ROOT_URL/trunk <<__RESULTS__
+begin-prop
+/trunk:2-15
+end-prop
+begin-info
+    youngest common ancestor
+    |         last full merge
+    |         |        tip of branch
+    |         |        |         repository path
+
+    1         15       17      
+    |         |        |       
+  -------| |------------         trunk
+     \         \               
+      \         \              
+       --| |------------         branches/dev/Share/merge1
+                       |       
+                       17      
+end-info
+begin-eligible
+end-eligible
+begin-merged
+r8
+r9
+r12
+r14
+r15
+end-merged
+__RESULTS__
+#-------------------------------------------------------------------------------
 # Tests fcm merge of branch-into-trunk (3)
 svn delete -q $BRANCH_MOD_FILE
 svn copy -q $MOD_FILE $MOD_FILE.add
 svn commit -q -m "Made branch change - deleted $BRANCH_MOD_FILE, copied $MOD_FILE"
 svn update -q
 svn switch -q $ROOT_URL/trunk
+#-------------------------------------------------------------------------------
+# Test the various mergeinfo output before merging.
+test_mergeinfo "$TEST_KEY_BASE-branch-into-trunk-3-pre" \
+    $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
+begin-prop
+/branches/dev/Share/merge1:4-13
+end-prop
+begin-info
+    youngest common ancestor
+    |         last full merge
+    |         |        tip of branch
+    |         |        |         repository path
+
+    1                  18      
+    |                  |       
+       --| |------------         branches/dev/Share/merge1
+      /         /              
+     /         /               
+  -------| |------------         trunk
+              |        |       
+              15       18      
+end-info
+begin-eligible
+r16
+r17
+r18
+end-eligible
+begin-merged
+r4
+r5
+r10
+r11
+r13
+end-merged
+__RESULTS__
+#-------------------------------------------------------------------------------
 TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-3
 run_pass "$TEST_KEY" fcm merge --non-interactive branches/dev/Share/merge1
 if $SVN_VERSION_IS_16; then
@@ -1125,8 +1410,42 @@ initial trunk import
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
+# Test the various mergeinfo output after merging.
+test_mergeinfo "$TEST_KEY_BASE-branch-into-trunk-3-post" \
+    $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
+begin-prop
+/branches/dev/Share/merge1:4-18
+end-prop
+begin-info
+    youngest common ancestor
+    |         last full merge
+    |         |        tip of branch
+    |         |        |         repository path
+
+    1         18       19      
+    |         |        |       
+       --| |------------         branches/dev/Share/merge1
+      /        \               
+     /          \              
+  -------| |------------         trunk
+                       |       
+                       19      
+end-info
+begin-eligible
+end-eligible
+begin-merged
+r4
+r5
+r10
+r11
+r13
+r16
+r17
+r18
+end-merged
+__RESULTS__
+#-------------------------------------------------------------------------------
 # Tests fcm merge of branch-into-branch (1)
-TEST_KEY=$TEST_KEY_BASE-branch-into-branch-1
 cd $TEST_DIR
 rm -rf $TEST_DIR/wc
 mkdir $TEST_DIR/wc
@@ -1136,6 +1455,41 @@ BRANCH_2_MOD_FILE=$(find . -type f | sed "/\.svn/d" | sort | head -3| tail -1)
 echo "Second branch change" >>$BRANCH_2_MOD_FILE
 svn commit -q -m "Made branch change - added to $BRANCH_2_MOD_FILE"
 svn update -q
+#------------------------------------------------------------------------------
+# Test the various mergeinfo output before merging.
+test_mergeinfo "$TEST_KEY_BASE-branch-into-branch-1-pre" \
+    $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
+begin-prop
+end-prop
+begin-info
+    youngest common ancestor
+    |         last full merge
+    |         |        tip of branch
+    |         |        |         repository path
+
+    1                  20      
+    |                  |       
+       --| |------------         branches/dev/Share/merge1
+  ... /                        
+      \                        
+       --| |------------         branches/dev/Share/merge2
+                       |       
+                       20      
+end-info
+begin-eligible
+r5
+r10
+r11
+r13
+r16
+r17
+r18
+end-eligible
+begin-merged
+end-merged
+__RESULTS__
+#------------------------------------------------------------------------------
+TEST_KEY=$TEST_KEY_BASE-branch-into-branch-1
 run_pass "$TEST_KEY" fcm merge $ROOT_URL/branches/dev/Share/merge1 <<__IN__
 13
 y
@@ -1642,5 +1996,43 @@ initial trunk import
 ------------------------------------------------------------------------
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+#------------------------------------------------------------------------------
+# Test the various mergeinfo output after merging.
+test_mergeinfo "$TEST_KEY_BASE-branch-into-branch-1-post" \
+    $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
+begin-prop
+/branches/dev/Share/merge1:4-13
+/trunk:2-9
+end-prop
+begin-info
+    youngest common ancestor
+    |         last full merge
+    |         |        tip of branch
+    |         |        |         repository path
+
+    1         13       21      
+    |         |        |       
+       --| |------------         branches/dev/Share/merge1
+  ... /        \               
+      \         \              
+       --| |------------         branches/dev/Share/merge2
+                       |       
+                       21      
+end-info
+begin-eligible
+r16
+r17
+r18
+end-eligible
+begin-merged
+r4
+r5
+r10
+r11
+r13
+end-merged
+__RESULTS__
+
+#-------------------------------------------------------------------------------
 teardown
 #-------------------------------------------------------------------------------
