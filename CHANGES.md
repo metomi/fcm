@@ -5,6 +5,24 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## Next Release (2015-Q1?)
+
+FCM release 23?
+
+### Noteworthy Changes
+
+[#170](https://github.com/metomi/fcm/pull/170):
+fcm commit: now works in a working copy with *externals*.
+
+[#169](https://github.com/metomi/fcm/pull/169):
+fcm branch-delete: now fails if bad arguments specified.
+
+[#168](https://github.com/metomi/fcm/pull/168):
+fcm branch-diff: `--trac` now works correctly. The `/intertrac/` syntax did not
+appear to work any more. Use `/search?q=` syntax instead.
+
+--------------------------------------------------------------------------------
+
 ## 2014.12.0 (2014-12-08)
 
 FCM release 22.
