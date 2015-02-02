@@ -74,7 +74,7 @@ sub post_commit_notify_who {
         my $project = $layout->get_project();
         my $branch = $layout->get_branch();
 
-        # Notify branch owner
+        # Notify branch subscribers/owners
         if (    $commit_conf->get_notification_modes()->{'branch'}
             &&  $layout->is_branch()
             &&  defined($branch)
@@ -89,26 +89,26 @@ sub post_commit_notify_who {
                     $commit_conf->get_owners_of()->{$branch_path} = [$owner];
                 }
             }
-            for my $owner (@{$commit_conf->get_owners_of()->{$branch_path}}) {
-                $names{$owner} = 1;
+            for my $user ($commit_conf->get_notifiables_of($branch_path)) {
+                $names{$user} = 1;
             }
             next LINE;
         }
 
-        # Notify project owner
+        # Notify project subscribers/owners
         if (    $commit_conf->get_notification_modes()->{'project'}
             &&  defined($project)
         ) {
-            for my $owner (@{$commit_conf->get_owners_of()->{"$project/"}}) {
-                $names{$owner} = 1;
+            for my $user ($commit_conf->get_notifiables_of("$project/")) {
+                $names{$user} = 1;
             }
             next LINE;
         }
 
-        # Notify repository owner
+        # Notify repository subscribers/owners
         if ($commit_conf->get_notification_modes()->{'repository'}) {
-            for my $owner (@{$commit_conf->get_owners_of()->{q{}}}) {
-                $names{$owner} = 1;
+            for my $user ($commit_conf->get_notifiables_of(q{})) {
+                $names{$user} = 1;
             }
             next LINE;
         }
@@ -271,29 +271,35 @@ sub _check_commit_conf {
         if (!defined($conf_entry)) {
             last CONF_ENTRY;
         }
-        if ($conf_entry->get_label() eq 'owner') {
-            # Owners must be real users
-            my @bad_users = verify_users($conf_entry->get_values());
-            if (!$conf_entry->get_value() || @bad_users) {
-                my $problem = sprintf(
-                    $WARN_FMT_OF{'CONF_VALUE'}, $conf_entry->as_string());
-                push(@problems, $problem);
-            }
-            # Check NS of each owner[NS] setting
-            for my $ns (@{$conf_entry->get_ns_list()}) {
-                eval {
-                    $CM_SYS->stdout(qw{svnlook tree -N -t}, $txn, $repos, $ns);
-                };
-                if ($@) {
+        for (
+            ['owner', $commit_conf->get_owners_of()],
+            ['subscriber', $commit_conf->get_subscribers_of()],
+        ) {
+            my ($label, $users_map_ref) = @{$_};
+            if ($conf_entry->get_label() eq $label) {
+                # Owners must be real users
+                my @bad_users = verify_users($conf_entry->get_values());
+                if (!$conf_entry->get_value() || @bad_users) {
                     my $problem = sprintf(
-                        $WARN_FMT_OF{'CONF_NS'}, $conf_entry->get_lhs());
+                        $WARN_FMT_OF{'CONF_VALUE'}, $conf_entry->as_string());
                     push(@problems, $problem);
                 }
+                # Check NS of each owner[NS] setting
+                for my $ns (@{$conf_entry->get_ns_list()}) {
+                    eval {
+                        $CM_SYS->stdout(qw{svnlook tree -N -t}, $txn, $repos, $ns);
+                    };
+                    if ($@) {
+                        my $problem = sprintf(
+                            $WARN_FMT_OF{'CONF_NS'}, $conf_entry->get_lhs());
+                        push(@problems, $problem);
+                    }
+                }
+                if ($label eq 'owner' && !@{$conf_entry->get_ns_list()}) {
+                    $owner_conf_entry = $conf_entry;
+                }
+                next CONF_ENTRY;
             }
-            if (!@{$conf_entry->get_ns_list()}) {
-                $owner_conf_entry = $conf_entry;
-            }
-            next CONF_ENTRY;
         }
         for (
             ['permission-modes', $commit_conf->get_permission_modes()],
@@ -391,16 +397,22 @@ sub _load_commit_conf {
     my $commit_conf = FCM::Admin::Commit::Conf->new();
     CONF_ENTRY:
     while (defined(my $config_entry = $config_reader->())) {
-        if ($config_entry->get_label() eq 'owner') {
-            my @owners = $config_entry->get_values();
-            my @ns_list = @{$config_entry->get_ns_list()};
-            if (!@ns_list) {
-                @ns_list = (q{});
+        for (
+            ['owner', $commit_conf->get_owners_of()],
+            ['subscriber', $commit_conf->get_subscribers_of()],
+        ) {
+            my ($label, $users_map_ref) = @{$_};
+            if ($config_entry->get_label() eq $label) {
+                my @users = $config_entry->get_values();
+                my @ns_list = @{$config_entry->get_ns_list()};
+                if (!@ns_list) {
+                    @ns_list = (q{});
+                }
+                for my $ns (@ns_list) {
+                    $users_map_ref->{$ns} = \@users;
+                }
+                next CONF_ENTRY;
             }
-            for my $ns (@ns_list) {
-                $commit_conf->get_owners_of()->{$ns} = \@owners;
-            }
-            next CONF_ENTRY;
         }
         for (
             ['permission-modes', $commit_conf->get_permission_modes()],
@@ -454,7 +466,19 @@ __PACKAGE__->class({
     'notification_modes' => {'isa' => '%', default => {%MODES}},
     'owners_of'          => '%',
     'permission_modes'   => {'isa' => '%', default => {%MODES}},
+    'subscribers_of'     => '%',
 });
+
+# Return a list of subscribers/owners of a given path
+sub get_notifiables_of {
+    my ($self, $path) = @_;
+    if (exists($self->get_subscribers_of()->{$path})) {
+        return @{$self->get_subscribers_of()->{$path}};
+    }
+    elsif (exists($self->get_owners_of()->{$path})) {
+        return @{$self->get_owners_of()->{$path}};
+    }
+}
 
 1;
 __END__
@@ -506,7 +530,7 @@ C<repository>, C<project> or C<branch>.
 =item owner[C<project/branches/dev/Share/whatever>]=C<USER1> ...
 
 In the absence of a name-space, specify the user IDs of the owners of the
-repository in a space delimited list.  This setting is compulsory if
+repository in a space delimited list. This setting is compulsory if
 C<repository> or C<project> is in C<permission-modes>. Owners of the repository
 can change any path in the repository. If C<repository> is in
 C<notification-modes>, owners will be informed of all changes that are outside
@@ -527,6 +551,16 @@ list.
 
 A list of items that require permission checking. An C<ITEM> can be
 C<repository>, C<project> or C<branch>.
+
+=item subscriber=C<USER1> ...
+=item subscriber[C<project>]=C<USER1> ...
+=item subscriber[C<project/branches/dev/Share/whatever>]=C<USER1> ...
+
+A space delimited list of user IDs of the notification subscribers of the
+repository, a project or a shared topic branch. If not specified, the owners
+of a given level are the notification subscribers. If an empty list is
+specified for a given level, then there will be no notification email for
+changes under that.
 
 =back
 

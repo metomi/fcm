@@ -483,4 +483,40 @@ svn ci -q -m 'hello 2 whatever' '--no-auth-cache' '--username=root' 'hello'
 poll 10 grep -q '^RET_CODE=' "${REPOS_PATH}/log/post-commit.log"
 run_fail "${TEST_KEY}.mail.out" test -s 'mail.out'
 #-------------------------------------------------------------------------------
+# Test subscriber notification, configuration as in "owner-2" test, but
+# subscriber set to empty.
+# No notification
+TEST_KEY="${TEST_KEY_BASE}-subscriber-1"
+test_tidy
+cat >"${REPOS_PATH}/hooks/commit.cfg" <<__CONF__
+notification-modes=project
+owner[hello/]=${USER}
+subscriber[hello/]=
+__CONF__
+rm -fr 'hello'
+svn co -q "${REPOS_URL}/hello/trunk" 'hello'
+echo 'Hello Hello' >'hello/file'
+svn ci -q -m 'hello 2 whatever' '--no-auth-cache' '--username=root' 'hello'
+poll 10 grep -q '^RET_CODE=' "${REPOS_PATH}/log/post-commit.log"
+run_fail "${TEST_KEY}.mail.out" test -s 'mail.out'
+#-------------------------------------------------------------------------------
+# Test subscriber notification, configuration as in "owner-2" test, but
+# owner unset, and subscriber set to $USER.
+# No notification
+TEST_KEY="${TEST_KEY_BASE}-subscriber-2"
+test_tidy
+cat >"${REPOS_PATH}/hooks/commit.cfg" <<__CONF__
+notification-modes=project
+subscriber[hello/]=${USER}
+__CONF__
+rm -fr 'hello'
+svn co -q "${REPOS_URL}/hello/trunk" 'hello'
+echo 'Hello Hello Hello' >'hello/file'
+svn ci -q -m 'hello 2 whatever' '--no-auth-cache' '--username=root' 'hello'
+poll 10 grep -q '^RET_CODE=' "${REPOS_PATH}/log/post-commit.log"
+REV="$(<rev)"
+file_grep "${TEST_KEY}.mail.out.1" \
+    "^-rnotifications@localhost -sfoo@${REV} by root" 'mail.out'
+file_grep "${TEST_KEY}.mail.out.2" "^r${REV} | root" 'mail.out'
+#-------------------------------------------------------------------------------
 exit
