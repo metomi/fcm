@@ -5,9 +5,9 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
-## Next Release (2015-Q1?)
+## 2015.02.0 (2015-02-10)
 
-FCM release 23?
+FCM release 23.
 
 ### Noteworthy Changes
 
