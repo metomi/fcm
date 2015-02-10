@@ -11,6 +11,11 @@ FCM release 23?
 
 ### Noteworthy Changes
 
+[#176](https://github.com/metomi/fcm/pull/176):
+fcm make: build: fix creation of Fortran interface files where procedure
+arguments declared with `EXTERNAL` statements were incorrectly matched in
+case-sensitive mode.
+
 [#170](https://github.com/metomi/fcm/pull/170):
 fcm commit: now works in a working copy with *externals*.
 
