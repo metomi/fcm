@@ -1,6 +1,6 @@
 #!/bin/bash
 # ------------------------------------------------------------------------------
-# (C) British Crown Copyright 2006-14 Met Office.
+# (C) British Crown Copyright 2006-15 Met Office.
 #
 # This file is part of FCM, tools for managing and building source code.
 #
