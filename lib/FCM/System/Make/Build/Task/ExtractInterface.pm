@@ -306,7 +306,7 @@ sub _process {
     # Attribute Statements
     ($name) = $statement->{value} =~ $RE{TYPE_ATTR};
     if ($name) {
-        $statement->{name} = $name;
+        $statement->{name} = lc($name);
         $statement->{type} = 'attr';
     }
 }
@@ -407,7 +407,7 @@ STATEMENT:
         }
         if ($statement->{type} eq 'attr') {
             my ($spec, @tokens) = ($statement->{value} =~ /$RE{NAME_COMP}/g);
-            if (grep { exists($token_set{$_}) } @tokens) {
+            if (grep { exists($token_set{lc($_)}) } @tokens) {
                 for my $token (@tokens) {
                     $token_set{$token} = 1;
                 }

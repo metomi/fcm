@@ -147,6 +147,20 @@ external proc
 call proc()
 end subroutine sub_with_external
 
+! A subroutine with an external argument, 2
+! https://github.com/metomi/fcm/issues/175
+subroutine sub_with_external2(PROC)
+external proc
+call proc()
+end subroutine sub_with_external2
+
+! A subroutine with an external argument, 3
+! https://github.com/metomi/fcm/issues/175
+subroutine sub_with_external3(proc)
+external PROC
+call proc()
+end subroutine sub_with_external3
+
 ! A subroutine with a variable named "end"
 subroutine sub_with_end()
 integer :: end

@@ -65,6 +65,12 @@ end subroutine sub_with_renamed_import
 subroutine sub_with_external(proc)
 external proc
 end subroutine sub_with_external
+subroutine sub_with_external2(PROC)
+external proc
+end subroutine sub_with_external2
+subroutine sub_with_external3(proc)
+external PROC
+end subroutine sub_with_external3
 subroutine sub_with_end()
 end subroutine sub_with_end
 end interface
