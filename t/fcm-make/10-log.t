@@ -17,11 +17,11 @@
 # You should have received a copy of the GNU General Public License
 # along with FCM. If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
-# Basic tests for "fcm make".
+# Tests "fcm make", generation of log files.
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
-tests 7
+tests 11
 cp -r $TEST_SOURCE_DIR/$TEST_KEY_BASE/* .
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE"
@@ -40,6 +40,11 @@ if [[ $(ls .fcm-make/log-* | wc -l) == 1 ]]; then
 else
     fail "$TEST_KEY-n-logs"
 fi
+run_pass "$TEST_KEY-symlink-1" \
+    test "$(readlink 'fcm-make.log')" '=' '.fcm-make/log'
+run_pass "$TEST_KEY-symlink-2" \
+    test "$(readlink '.fcm-make/log')" \
+    '=' "$(cd '.fcm-make'; ls 'log-'* | sort | tail -1)"
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE-incr"
 sleep 1
@@ -50,5 +55,10 @@ if [[ $(ls .fcm-make/log-* | wc -l) == 2 ]]; then
 else
     fail "$TEST_KEY-n-logs"
 fi
+run_pass "$TEST_KEY-symlink-1" \
+    test "$(readlink 'fcm-make.log')" '=' '.fcm-make/log'
+run_pass "$TEST_KEY-symlink-2" \
+    test "$(readlink '.fcm-make/log')" \
+    '=' "$(cd '.fcm-make'; ls 'log-'* | sort | tail -1)"
 #-------------------------------------------------------------------------------
 exit 0
