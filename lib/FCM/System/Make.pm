@@ -31,9 +31,10 @@ use FCM::System::Make::Mirror;
 use FCM::System::Make::Preprocess;
 use FCM::System::Make::Share::Config;
 use FCM::System::Make::Share::Dest;
+use File::Basename qw{basename};
+use File::Copy qw{copy};
 use File::Path qw{rmtree};
 use File::Spec::Functions qw{catfile};
-use File::Copy qw{copy};
 use File::Temp;
 use POSIX qw{strftime};
 use Sys::Hostname qw{hostname};
@@ -138,7 +139,7 @@ sub _dest_init {
     my $now = strftime("%Y%m%dT%H%M%S", gmtime());
     my $log = $attrib_ref->{shared_util_of}{dest}->path($m_ctx, 'sys-log');
     my $log_actual = sprintf("%s-%s", $log, $now);
-    _symlink($log_actual, $log);
+    _symlink(basename($log_actual), $log);
     (       close($attrib_ref->{handle_log})
         &&  copy($attrib_ref->{handle_log}->filename(), $log)
         &&  open(my $handle_log, '>>', $log)
