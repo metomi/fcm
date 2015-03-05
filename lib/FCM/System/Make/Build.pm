@@ -404,13 +404,14 @@ sub _sources_locate_by_find {
             if (-d $path_found) {
                 return;
             }
-            my ($vol, $dir_name, $base) = splitpath($path_found);
-            for my $name (splitdir($dir_name), $base) {
-                if (index($name, q{.}) == 0) {
-                    return; # ignore Unix hidden/system files
+            my $ns = abs2rel($path_found, $path);
+            if ($ns ne q{.}) {
+                for my $name (split(q{/}, $ns)) {
+                    if (index($name, q{.}) == 0) {
+                        return; # ignore Unix hidden/system files
+                    }
                 }
             }
-            my $ns = abs2rel($path_found, $path);
             if ($key) {
                 $ns = $UTIL->ns_cat($key, $ns);
             }
