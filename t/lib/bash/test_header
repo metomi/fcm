@@ -56,6 +56,14 @@
 #         -e if not specified.
 #     file_grep TEST_KEY PATTERN FILE
 #         Run "grep -q PATTERN FILE". pass/fail $TEST_KEY accordingly.
+#     commit_sort INPUT_FILE OUTPUT_FILE
+#         Sort status and transmitting info within the commit output.
+#     diff_sort INPUT_FILE OUTPUT_FILE
+#         Sort Subversion diff output by filename.
+#     status_sort INPUT_FILE OUTPUT_FILE
+#         Sort Subversion status lines.
+#     merge_sort INPUT_FILE OUTPUT_FILE
+#         Sort Subversion merge status lines.
 #     FINALLY
 #         This is run on EXIT or INT to remove the temporary working directory
 #         for the test. Call FINALLY_MORE if it is declared.
@@ -176,6 +184,65 @@ function file_grep() {
         return
     fi
     fail $TEST_KEY
+}
+
+function commit_sort() {
+    local INPUT_FILE=$1
+    local OUTPUT_FILE=$2
+    local TMP_OUTPUT_FILE=$(mktemp)
+    status_sort $INPUT_FILE $TMP_OUTPUT_FILE
+    python -c 'import re, sys
+text = sys.stdin.read()
+sending_lines = re.findall("^\w+ing  +.*$", text, re.M)
+prefix = text[:text.index(sending_lines[0])]
+suffix = text[(text.index(sending_lines[-1]) + len(sending_lines[-1])):]
+sending_lines.sort()
+print prefix + "\n".join(sending_lines) + suffix.rstrip()
+' <"$TMP_OUTPUT_FILE" >"$OUTPUT_FILE"
+    rm "$TMP_OUTPUT_FILE"
+}
+
+function diff_sort() {
+    local INPUT_FILE=$1
+    local OUTPUT_FILE=$2
+    python -c 'import re, sys
+text = sys.stdin.read()
+print "\nIndex: ".join(
+    [l.strip() for l in sorted(re.compile("^Index: ", re.M).split(text))])
+' <"$INPUT_FILE" >"$OUTPUT_FILE"
+}
+
+function status_sort() {
+    local INPUT_FILE=$1
+    local OUTPUT_FILE=$2
+    python -c 'import re, sys
+text = sys.stdin.read()
+status_lines = re.findall("^.{7} [\w./].*$", text, re.M)
+prefix = text[:text.index(status_lines[0])]
+suffix = text[(text.index(status_lines[-1]) + len(status_lines[-1])):]
+status_lines.sort()
+print prefix + "\n".join(status_lines) + suffix.rstrip()
+' <"$INPUT_FILE" >"$OUTPUT_FILE"
+}
+
+function merge_sort() {
+    local INPUT_FILE=$1
+    local OUTPUT_FILE=$2
+    python -c 'import re, sys
+text = sys.stdin.read()
+status_lines = []
+for line in text.splitlines():
+    if re.search("^.{4} [\w./].*$", line):
+        status_lines.append(line)
+    elif status_lines:
+        print "\n".join(sorted(status_lines))
+        print line
+        status_lines = []
+    else:
+        print line
+if status_lines:
+    print "\n".join(sorted(status_lines))
+' <"$INPUT_FILE" >"$OUTPUT_FILE"
 }
 
 function fcm_make_build_hello_tests() {

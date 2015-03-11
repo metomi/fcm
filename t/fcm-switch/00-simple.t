@@ -32,20 +32,21 @@ cd $TEST_DIR/wc
 # Tests fcm switch trunk
 svn switch -q $ROOT_URL/branches/dev/Share/merge1
 TEST_KEY=$TEST_KEY_BASE-trunk
-run_pass "$TEST_KEY" fcm switch trunk <<<'y'
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+run_pass "$TEST_KEY" fcm switch trunk <<<"y"
+merge_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 switch: status of "$TEST_DIR/wc":
 ?       unversioned_file
 switch: continue?
 Enter "y" or "n" (or just press <return> for "n"): D    added_file
 D    added_directory
-U    subroutine/hello_sub_dummy.h
 D    module/tree_conflict_file
-U    module/hello_constants_dummy.inc
-U    module/hello_constants.inc
-U    module/hello_constants.f90
 U    lib/python/info/__init__.py
 U    lib/python/info/poems.py
+U    module/hello_constants.f90
+U    module/hello_constants.inc
+U    module/hello_constants_dummy.inc
+U    subroutine/hello_sub_dummy.h
 Updated to revision 9.
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
@@ -54,19 +55,20 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 rm unversioned_file
 TEST_KEY=$TEST_KEY_BASE-branch-1
 run_pass "$TEST_KEY" fcm switch branches/dev/Share/merge1 <<<'y'
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-U    subroutine/hello_sub_dummy.h
-A    added_file
+merge_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 A    added_directory
-A    added_directory/hello_constants_dummy.inc
-A    added_directory/hello_constants.inc
 A    added_directory/hello_constants.f90
+A    added_directory/hello_constants.inc
+A    added_directory/hello_constants_dummy.inc
+A    added_file
 A    module/tree_conflict_file
-U    module/hello_constants_dummy.inc
-U    module/hello_constants.inc
-U    module/hello_constants.f90
 U    lib/python/info/__init__.py
 U    lib/python/info/poems.py
+U    module/hello_constants.f90
+U    module/hello_constants.inc
+U    module/hello_constants_dummy.inc
+U    subroutine/hello_sub_dummy.h
 Updated to revision 9.
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
@@ -74,17 +76,18 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 # Tests fcm switch merge2 branch
 TEST_KEY=$TEST_KEY_BASE-branch-2
 run_pass "$TEST_KEY" fcm switch --non-interactive dev/Share/merge2
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-D    added_file
-D    added_directory
+merge_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
  U   subroutine/hello_sub.h
-U    subroutine/hello_sub_dummy.h
-D    module/tree_conflict_file
-U    module/hello_constants_dummy.inc
-U    module/hello_constants.inc
-U    module/hello_constants.f90
-U    lib/python/info/poems.py
 A    renamed_added_file
+D    added_directory
+D    added_file
+D    module/tree_conflict_file
+U    lib/python/info/poems.py
+U    module/hello_constants.f90
+U    module/hello_constants.inc
+U    module/hello_constants_dummy.inc
+U    subroutine/hello_sub_dummy.h
 Updated to revision 9.
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
@@ -96,9 +99,10 @@ if $SVN_VERSION_IS_16; then
 else
     rm -f .svn/entries
     run_pass "$TEST_KEY" fcm switch trunk <<<'y'
-    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
-D    renamed_added_file
+    merge_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
+    file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<'__OUT__'
  U   subroutine/hello_sub.h
+D    renamed_added_file
 U    lib/python/info/__init__.py
 Updated to revision 9.
 __OUT__

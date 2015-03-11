@@ -43,6 +43,7 @@ svn delete -q --force lib/python/info/poems.py
 # Tests fcm status result of fcm merge (1)
 TEST_KEY=$TEST_KEY_BASE-status
 run_pass "$TEST_KEY" fcm status --config-dir=$TEST_DIR/.subversion
+status_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
 if $SVN_VERSION_IS_16; then
     file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .

@@ -47,7 +47,9 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 # Tests fcm add unversioned directory
 TEST_KEY=$TEST_KEY_BASE-fcm-add-dir
 run_pass "$TEST_KEY" fcm add added_directory2
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
+# Add produces yet another format of status - just use 'sort'...
+sort "$TEST_DIR/$TEST_KEY.out" -o "$TEST_DIR/$TEST_KEY.sorted.out"
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<'__OUT__'
 A         added_directory2
 A         added_directory2/added_file2
 __OUT__
@@ -101,8 +103,8 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 # Tests fcm status after above tests
 TEST_KEY=$TEST_KEY_BASE-fcm-add-c-status
 run_pass "$TEST_KEY" fcm st
-sort $TEST_DIR/"$TEST_KEY.out" -o $TEST_DIR/"$TEST_KEY.out"
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
+status_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<'__OUT__'
 ?       versioned_directory/unversioned_file_3
 A       unversioned_directory
 A       unversioned_directory/unversioned_file_2
@@ -126,8 +128,8 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 # Tests fcm status after above tests
 TEST_KEY=$TEST_KEY_BASE-fcm-add-c-no-args-status
 run_pass "$TEST_KEY" fcm status
-sort $TEST_DIR/"$TEST_KEY.out" -o $TEST_DIR/"$TEST_KEY.out"
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<'__OUT__'
+status_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<'__OUT__'
 A       unversioned_directory
 A       unversioned_directory/unversioned_file_2
 A       unversioned_file

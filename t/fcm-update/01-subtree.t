@@ -21,7 +21,7 @@
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
-tests 6
+tests 7
 #-------------------------------------------------------------------------------
 setup
 init_repos
@@ -36,35 +36,36 @@ cd module
 run_pass "$TEST_KEY" fcm update -r PREV <<__IN__
 y
 __IN__
+merge_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
 if $SVN_VERSION_IS_16; then
-    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 update: status of "$TEST_DIR/wc":
 ?       $TEST_DIR/wc/unversioned_file
 update: continue?
 Enter "y" or "n" (or just press <return> for "n"): D    $TEST_DIR/wc/added_file
 D    $TEST_DIR/wc/added_directory
-U    $TEST_DIR/wc/subroutine/hello_sub_dummy.h
 D    $TEST_DIR/wc/module/tree_conflict_file
-U    $TEST_DIR/wc/module/hello_constants_dummy.inc
-U    $TEST_DIR/wc/module/hello_constants.inc
-U    $TEST_DIR/wc/module/hello_constants.f90
 U    $TEST_DIR/wc/lib/python/info/poems.py
+U    $TEST_DIR/wc/module/hello_constants.f90
+U    $TEST_DIR/wc/module/hello_constants.inc
+U    $TEST_DIR/wc/module/hello_constants_dummy.inc
+U    $TEST_DIR/wc/subroutine/hello_sub_dummy.h
 Updated to revision 4.
 __OUT__
 else
-    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 update: status of "$TEST_DIR/wc":
 ?       $TEST_DIR/wc/unversioned_file
 update: continue?
 Enter "y" or "n" (or just press <return> for "n"): Updating '$TEST_DIR/wc':
-D    $TEST_DIR/wc/added_file
 D    $TEST_DIR/wc/added_directory
-U    $TEST_DIR/wc/subroutine/hello_sub_dummy.h
+D    $TEST_DIR/wc/added_file
 D    tree_conflict_file
-U    hello_constants_dummy.inc
-U    hello_constants.inc
-U    hello_constants.f90
 U    $TEST_DIR/wc/lib/python/info/poems.py
+U    $TEST_DIR/wc/subroutine/hello_sub_dummy.h
+U    hello_constants.f90
+U    hello_constants.inc
+U    hello_constants_dummy.inc
 Updated to revision 4.
 __OUT__
 fi
@@ -76,9 +77,28 @@ TEST_KEY=$TEST_KEY_BASE-normal
 run_pass "$TEST_KEY" fcm update <<__IN__
 y
 __IN__
+sed -n "/^  *\*/p" "$TEST_DIR/$TEST_KEY.out" | LANG=C sort -o \
+    "$TEST_DIR/$TEST_KEY.update-status.sorted.out"
 if $SVN_VERSION_IS_16; then
-    sort $TEST_DIR/"$TEST_KEY.out" -o $TEST_DIR/"$TEST_KEY.out"
-    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.update-status.sorted.out" \
+         "$TEST_KEY.update-status.sorted.out" <<__OUT__
+        *            added_directory
+        *            added_directory/hello_constants.f90
+        *            added_directory/hello_constants.inc
+        *            added_directory/hello_constants_dummy.inc
+        *            added_file
+        *            module/tree_conflict_file
+        *        4   .
+        *        4   lib/python/info/poems.py
+        *        4   module
+        *        4   module/hello_constants.f90
+        *        4   module/hello_constants.inc
+        *        4   module/hello_constants_dummy.inc
+        *        4   subroutine/hello_sub_dummy.h
+__OUT__
+else
+    file_cmp "$TEST_KEY.update-status.sorted.out" \
+         "$TEST_KEY.update-status.sorted.out" <<__OUT__
         *            $TEST_DIR/wc/added_directory
         *            $TEST_DIR/wc/added_directory/hello_constants.f90
         *            $TEST_DIR/wc/added_directory/hello_constants.inc
@@ -92,53 +112,44 @@ if $SVN_VERSION_IS_16; then
         *        4   $TEST_DIR/wc/module/hello_constants.inc
         *        4   $TEST_DIR/wc/module/hello_constants_dummy.inc
         *        4   $TEST_DIR/wc/subroutine/hello_sub_dummy.h
+__OUT__
+fi
+sed -i "/^  *\*/d" "$TEST_DIR/$TEST_KEY.out"
+merge_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
+if $SVN_VERSION_IS_16; then
+    file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
+update: status of "$TEST_DIR/wc":
+update: continue?
+Enter "y" or "n" (or just press <return> for "n"): U    $TEST_DIR/wc/subroutine/hello_sub_dummy.h
 A    $TEST_DIR/wc/added_directory
 A    $TEST_DIR/wc/added_directory/hello_constants.f90
 A    $TEST_DIR/wc/added_directory/hello_constants.inc
 A    $TEST_DIR/wc/added_directory/hello_constants_dummy.inc
 A    $TEST_DIR/wc/added_file
 A    $TEST_DIR/wc/module/tree_conflict_file
-Enter "y" or "n" (or just press <return> for "n"): U    $TEST_DIR/wc/subroutine/hello_sub_dummy.h
 U    $TEST_DIR/wc/lib/python/info/poems.py
 U    $TEST_DIR/wc/module/hello_constants.f90
 U    $TEST_DIR/wc/module/hello_constants.inc
 U    $TEST_DIR/wc/module/hello_constants_dummy.inc
 Updated to revision 9.
-update: continue?
-update: status of "$TEST_DIR/wc":
 __OUT__
 else
-    # The output is now not deterministic for svn update!!
-    sort $TEST_DIR/"$TEST_KEY.out" -o $TEST_DIR/"$TEST_KEY.out"
-    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-        *            $TEST_DIR/wc/added_directory
-        *            $TEST_DIR/wc/added_directory/hello_constants.f90
-        *            $TEST_DIR/wc/added_directory/hello_constants.inc
-        *            $TEST_DIR/wc/added_directory/hello_constants_dummy.inc
-        *            $TEST_DIR/wc/added_file
-        *            $TEST_DIR/wc/module/tree_conflict_file
-        *        4   $TEST_DIR/wc
-        *        4   $TEST_DIR/wc/lib/python/info/poems.py
-        *        4   $TEST_DIR/wc/module
-        *        4   $TEST_DIR/wc/module/hello_constants.f90
-        *        4   $TEST_DIR/wc/module/hello_constants.inc
-        *        4   $TEST_DIR/wc/module/hello_constants_dummy.inc
-        *        4   $TEST_DIR/wc/subroutine/hello_sub_dummy.h
+    file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
+update: status of "$TEST_DIR/wc":
+update: continue?
+Enter "y" or "n" (or just press <return> for "n"): Updating '$TEST_DIR/wc':
 A    $TEST_DIR/wc/added_directory
 A    $TEST_DIR/wc/added_directory/hello_constants.f90
 A    $TEST_DIR/wc/added_directory/hello_constants.inc
 A    $TEST_DIR/wc/added_directory/hello_constants_dummy.inc
 A    $TEST_DIR/wc/added_file
 A    tree_conflict_file
-Enter "y" or "n" (or just press <return> for "n"): Updating '$TEST_DIR/wc':
 U    $TEST_DIR/wc/lib/python/info/poems.py
 U    $TEST_DIR/wc/subroutine/hello_sub_dummy.h
 U    hello_constants.f90
 U    hello_constants.inc
 U    hello_constants_dummy.inc
 Updated to revision 9.
-update: continue?
-update: status of "$TEST_DIR/wc":
 __OUT__
 fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null

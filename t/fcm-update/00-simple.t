@@ -21,7 +21,7 @@
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
-tests 6
+tests 7
 #-------------------------------------------------------------------------------
 setup
 init_repos
@@ -35,35 +35,36 @@ TEST_KEY=$TEST_KEY_BASE-r-PREV
 run_pass "$TEST_KEY" fcm update -r PREV <<__IN__
 y
 __IN__
+merge_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
 if $SVN_VERSION_IS_16; then
-    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 update: status of ".":
 ?       unversioned_file
 update: continue?
 Enter "y" or "n" (or just press <return> for "n"): D    added_file
 D    added_directory
-U    subroutine/hello_sub_dummy.h
 D    module/tree_conflict_file
-U    module/hello_constants_dummy.inc
-U    module/hello_constants.inc
-U    module/hello_constants.f90
 U    lib/python/info/poems.py
+U    module/hello_constants.f90
+U    module/hello_constants.inc
+U    module/hello_constants_dummy.inc
+U    subroutine/hello_sub_dummy.h
 Updated to revision 4.
 __OUT__
 else
-    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+    file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 update: status of ".":
 ?       unversioned_file
 update: continue?
 Enter "y" or "n" (or just press <return> for "n"): Updating '.':
-D    added_file
 D    added_directory
-U    subroutine/hello_sub_dummy.h
+D    added_file
 D    module/tree_conflict_file
-U    module/hello_constants_dummy.inc
-U    module/hello_constants.inc
-U    module/hello_constants.f90
 U    lib/python/info/poems.py
+U    module/hello_constants.f90
+U    module/hello_constants.inc
+U    module/hello_constants_dummy.inc
+U    subroutine/hello_sub_dummy.h
 Updated to revision 4.
 __OUT__
 fi
@@ -75,68 +76,60 @@ TEST_KEY=$TEST_KEY_BASE-normal
 run_pass "$TEST_KEY" fcm update <<__IN__
 y
 __IN__
-if $SVN_VERSION_IS_16; then
-    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-update: status of ".":
-        *        4   subroutine/hello_sub_dummy.h
-        *            added_directory/hello_constants.f90
-        *            added_directory/hello_constants_dummy.inc
-        *            added_directory/hello_constants.inc
+sed -n "/^  *\*/p" "$TEST_DIR/$TEST_KEY.out" | LANG=C sort -o \
+    "$TEST_DIR/$TEST_KEY.update-status.sorted.out"
+file_cmp "$TEST_KEY.update-status.sorted.out" \
+         "$TEST_KEY.update-status.sorted.out" <<__OUT__
         *            added_directory
-        *        4   module/hello_constants.f90
-        *            module/tree_conflict_file
-        *        4   module/hello_constants_dummy.inc
-        *        4   module/hello_constants.inc
-        *        4   module
-        *        4   lib/python/info/poems.py
+        *            added_directory/hello_constants.f90
+        *            added_directory/hello_constants.inc
+        *            added_directory/hello_constants_dummy.inc
         *            added_file
+        *            module/tree_conflict_file
         *        4   .
+        *        4   lib/python/info/poems.py
+        *        4   module
+        *        4   module/hello_constants.f90
+        *        4   module/hello_constants.inc
+        *        4   module/hello_constants_dummy.inc
+        *        4   subroutine/hello_sub_dummy.h
+__OUT__
+sed -i "/^  *\*/d" "$TEST_DIR/$TEST_KEY.out"
+merge_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
+if $SVN_VERSION_IS_16; then
+    file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
+update: status of ".":
 update: continue?
 Enter "y" or "n" (or just press <return> for "n"): U    subroutine/hello_sub_dummy.h
-A    added_file
 A    added_directory
-A    added_directory/hello_constants_dummy.inc
-A    added_directory/hello_constants.inc
 A    added_directory/hello_constants.f90
+A    added_directory/hello_constants.inc
+A    added_directory/hello_constants_dummy.inc
+A    added_file
 A    module/tree_conflict_file
-U    module/hello_constants_dummy.inc
-U    module/hello_constants.inc
-U    module/hello_constants.f90
 U    lib/python/info/poems.py
+U    module/hello_constants.f90
+U    module/hello_constants.inc
+U    module/hello_constants_dummy.inc
 Updated to revision 9.
 __OUT__
 else
-    # The output is now not deterministic for svn update!!
-    sort $TEST_DIR/"$TEST_KEY.out" -o $TEST_DIR/"$TEST_KEY.out"
-    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-        *            added_directory
-        *            added_directory/hello_constants.f90
-        *            added_directory/hello_constants.inc
-        *            added_directory/hello_constants_dummy.inc
-        *            added_file
-        *            module/tree_conflict_file
-        *        4   .
-        *        4   lib/python/info/poems.py
-        *        4   module
-        *        4   module/hello_constants.f90
-        *        4   module/hello_constants.inc
-        *        4   module/hello_constants_dummy.inc
-        *        4   subroutine/hello_sub_dummy.h
+    file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
+update: status of ".":
+update: continue?
+Enter "y" or "n" (or just press <return> for "n"): Updating '.':
 A    added_directory
 A    added_directory/hello_constants.f90
 A    added_directory/hello_constants.inc
 A    added_directory/hello_constants_dummy.inc
 A    added_file
 A    module/tree_conflict_file
-Enter "y" or "n" (or just press <return> for "n"): Updating '.':
 U    lib/python/info/poems.py
 U    module/hello_constants.f90
 U    module/hello_constants.inc
 U    module/hello_constants_dummy.inc
 U    subroutine/hello_sub_dummy.h
 Updated to revision 9.
-update: continue?
-update: status of ".":
 __OUT__
 fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
