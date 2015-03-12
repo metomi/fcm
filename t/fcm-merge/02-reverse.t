@@ -20,8 +20,10 @@
 # Basic tests for "fcm merge --reverse".
 #-------------------------------------------------------------------------------
 . "$(dirname "$0")/test_header"
+#-------------------------------------------------------------------------------
+check_svn_version
 tests 13
-
+#-------------------------------------------------------------------------------
 svnadmin create 'foo'
 URL_FOO="file://${PWD}/foo"
 svn mkdir -q -m"season greetings" --no-auth-cache "${URL_FOO}/greet"

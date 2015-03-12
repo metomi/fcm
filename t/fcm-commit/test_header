@@ -32,8 +32,6 @@ function file_cmp() {
         pass $TEST_KEY
         return
     fi
-    ${FCM_TEST_DIFF_CMD:-diff -u} \
-        "${TEST_DIR}/${FILE_ACTUAL}" "${FILE_EXPECT}" >&2
     fail $TEST_KEY
 }
 

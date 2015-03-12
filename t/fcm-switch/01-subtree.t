@@ -21,6 +21,7 @@
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
+check_svn_version
 tests 9
 #-------------------------------------------------------------------------------
 setup
@@ -36,39 +37,22 @@ cd module
 run_pass "$TEST_KEY" fcm switch trunk <<__IN__
 y
 __IN__
-if $SVN_VERSION_IS_16; then
-    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+merge_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 switch: status of "$TEST_DIR/wc":
 ?       $TEST_DIR/wc/unversioned_file
 switch: continue?
 Enter "y" or "n" (or just press <return> for "n"): D    $TEST_DIR/wc/added_file
 D    $TEST_DIR/wc/added_directory
-U    $TEST_DIR/wc/subroutine/hello_sub_dummy.h
-D    $TEST_DIR/wc/module/tree_conflict_file
-U    $TEST_DIR/wc/module/hello_constants_dummy.inc
-U    $TEST_DIR/wc/module/hello_constants.inc
-U    $TEST_DIR/wc/module/hello_constants.f90
-U    $TEST_DIR/wc/lib/python/info/__init__.py
-U    $TEST_DIR/wc/lib/python/info/poems.py
-Updated to revision 9.
-__OUT__
-else
-    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-switch: status of "$TEST_DIR/wc":
-?       $TEST_DIR/wc/unversioned_file
-switch: continue?
-Enter "y" or "n" (or just press <return> for "n"): D    $TEST_DIR/wc/added_file
-D    $TEST_DIR/wc/added_directory
-U    $TEST_DIR/wc/subroutine/hello_sub_dummy.h
 D    tree_conflict_file
-U    hello_constants_dummy.inc
-U    hello_constants.inc
-U    hello_constants.f90
 U    $TEST_DIR/wc/lib/python/info/__init__.py
 U    $TEST_DIR/wc/lib/python/info/poems.py
+U    $TEST_DIR/wc/subroutine/hello_sub_dummy.h
+U    hello_constants.f90
+U    hello_constants.inc
+U    hello_constants_dummy.inc
 Updated to revision 9.
 __OUT__
-fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm switch merge1 branch
@@ -77,73 +61,41 @@ TEST_KEY=$TEST_KEY_BASE-branch-1
 run_pass "$TEST_KEY" fcm switch branches/dev/Share/merge1 <<__IN__
 y
 __IN__
-if $SVN_VERSION_IS_16; then
-    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-U    $TEST_DIR/wc/subroutine/hello_sub_dummy.h
-A    $TEST_DIR/wc/added_file
+merge_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 A    $TEST_DIR/wc/added_directory
-A    $TEST_DIR/wc/added_directory/hello_constants_dummy.inc
-A    $TEST_DIR/wc/added_directory/hello_constants.inc
 A    $TEST_DIR/wc/added_directory/hello_constants.f90
-A    $TEST_DIR/wc/module/tree_conflict_file
-U    $TEST_DIR/wc/module/hello_constants_dummy.inc
-U    $TEST_DIR/wc/module/hello_constants.inc
-U    $TEST_DIR/wc/module/hello_constants.f90
-U    $TEST_DIR/wc/lib/python/info/__init__.py
-U    $TEST_DIR/wc/lib/python/info/poems.py
-Updated to revision 9.
-__OUT__
-else
-    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-U    $TEST_DIR/wc/subroutine/hello_sub_dummy.h
+A    $TEST_DIR/wc/added_directory/hello_constants.inc
+A    $TEST_DIR/wc/added_directory/hello_constants_dummy.inc
 A    $TEST_DIR/wc/added_file
-A    $TEST_DIR/wc/added_directory
-A    $TEST_DIR/wc/added_directory/hello_constants_dummy.inc
-A    $TEST_DIR/wc/added_directory/hello_constants.inc
-A    $TEST_DIR/wc/added_directory/hello_constants.f90
 A    tree_conflict_file
-U    hello_constants_dummy.inc
-U    hello_constants.inc
-U    hello_constants.f90
 U    $TEST_DIR/wc/lib/python/info/__init__.py
 U    $TEST_DIR/wc/lib/python/info/poems.py
+U    $TEST_DIR/wc/subroutine/hello_sub_dummy.h
+U    hello_constants.f90
+U    hello_constants.inc
+U    hello_constants_dummy.inc
 Updated to revision 9.
 __OUT__
-fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm switch merge2 branch
 TEST_KEY=$TEST_KEY_BASE-branch-2
 run_pass "$TEST_KEY" fcm switch --non-interactive dev/Share/merge2
-if $SVN_VERSION_IS_16; then
-    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-D    $TEST_DIR/wc/added_file
-D    $TEST_DIR/wc/added_directory
+merge_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
  U   $TEST_DIR/wc/subroutine/hello_sub.h
-U    $TEST_DIR/wc/subroutine/hello_sub_dummy.h
-D    $TEST_DIR/wc/module/tree_conflict_file
-U    $TEST_DIR/wc/module/hello_constants_dummy.inc
-U    $TEST_DIR/wc/module/hello_constants.inc
-U    $TEST_DIR/wc/module/hello_constants.f90
-U    $TEST_DIR/wc/lib/python/info/poems.py
 A    $TEST_DIR/wc/renamed_added_file
-Updated to revision 9.
-__OUT__
-else
-    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-D    $TEST_DIR/wc/added_file
 D    $TEST_DIR/wc/added_directory
- U   $TEST_DIR/wc/subroutine/hello_sub.h
-U    $TEST_DIR/wc/subroutine/hello_sub_dummy.h
+D    $TEST_DIR/wc/added_file
 D    tree_conflict_file
-U    hello_constants_dummy.inc
-U    hello_constants.inc
-U    hello_constants.f90
 U    $TEST_DIR/wc/lib/python/info/poems.py
-A    $TEST_DIR/wc/renamed_added_file
+U    $TEST_DIR/wc/subroutine/hello_sub_dummy.h
+U    hello_constants.f90
+U    hello_constants.inc
+U    hello_constants_dummy.inc
 Updated to revision 9.
 __OUT__
-fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 teardown
 #-------------------------------------------------------------------------------
