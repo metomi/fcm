@@ -28,8 +28,7 @@ current working directory)
 
 =item --directory=PATH, -C PATH
 
-Specify the path to the destination. (default = $PWD or whatever is specified
-in the "dest" setting in the configuration file)
+Change directory to C<PATH> before doing anything. (default = $PWD)
 
 =item --ignore-lock
 
