@@ -21,6 +21,7 @@
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
+check_svn_version
 tests 7
 #-------------------------------------------------------------------------------
 setup
@@ -36,23 +37,7 @@ run_pass "$TEST_KEY" fcm update -r PREV <<__IN__
 y
 __IN__
 merge_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-if $SVN_VERSION_IS_16; then
-    file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
-update: status of ".":
-?       unversioned_file
-update: continue?
-Enter "y" or "n" (or just press <return> for "n"): D    added_file
-D    added_directory
-D    module/tree_conflict_file
-U    lib/python/info/poems.py
-U    module/hello_constants.f90
-U    module/hello_constants.inc
-U    module/hello_constants_dummy.inc
-U    subroutine/hello_sub_dummy.h
-Updated to revision 4.
-__OUT__
-else
-    file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 update: status of ".":
 ?       unversioned_file
 update: continue?
@@ -67,7 +52,6 @@ U    module/hello_constants_dummy.inc
 U    subroutine/hello_sub_dummy.h
 Updated to revision 4.
 __OUT__
-fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm update
@@ -96,25 +80,7 @@ file_cmp "$TEST_KEY.update-status.sorted.out" \
 __OUT__
 sed -i "/^  *\*/d" "$TEST_DIR/$TEST_KEY.out"
 merge_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-if $SVN_VERSION_IS_16; then
-    file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
-update: status of ".":
-update: continue?
-Enter "y" or "n" (or just press <return> for "n"): U    subroutine/hello_sub_dummy.h
-A    added_directory
-A    added_directory/hello_constants.f90
-A    added_directory/hello_constants.inc
-A    added_directory/hello_constants_dummy.inc
-A    added_file
-A    module/tree_conflict_file
-U    lib/python/info/poems.py
-U    module/hello_constants.f90
-U    module/hello_constants.inc
-U    module/hello_constants_dummy.inc
-Updated to revision 9.
-__OUT__
-else
-    file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 update: status of ".":
 update: continue?
 Enter "y" or "n" (or just press <return> for "n"): Updating '.':
@@ -131,7 +97,6 @@ U    module/hello_constants_dummy.inc
 U    subroutine/hello_sub_dummy.h
 Updated to revision 9.
 __OUT__
-fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 teardown
 #-------------------------------------------------------------------------------

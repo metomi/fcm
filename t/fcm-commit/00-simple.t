@@ -21,6 +21,7 @@
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
+check_svn_version
 tests 3
 #-------------------------------------------------------------------------------
 setup
@@ -46,49 +47,7 @@ run_pass "$TEST_KEY" fcm commit --svn-non-interactive <<__IN__
 y
 __IN__
 commit_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-if $SVN_VERSION_IS_16; then
-    file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
-[info] sed -i 1i\foo: starting commit message editor...
-Change summary:
---------------------------------------------------------------------------------
-[Root   : $REPOS_URL]
-[Project: ${TEST_PROJECT:-}]
-[Branch : branches/dev/Share/branch_test]
-[Sub-dir: ]
-
-A  +    added_directory
-A  +    added_file
-D       module
-D       module/hello_constants.f90
-D       module/hello_constants.inc
-D       module/hello_constants_dummy.inc
-M       lib/python/info/poems.py
-M  +    added_directory/hello_constants.f90
-M  +    added_directory/hello_constants.inc
-M  +    added_directory/hello_constants_dummy.inc
---------------------------------------------------------------------------------
-Commit message is as follows:
---------------------------------------------------------------------------------
-foo
---------------------------------------------------------------------------------
-
-*** WARNING: YOU ARE COMMITTING TO A Share BRANCH.
-*** Please ensure that you have the owner's permission.
-
-Would you like to commit this change?
-Enter "y" or "n" (or just press <return> for "n"): Adding         added_directory
-Adding         added_file
-Deleting       module
-Sending        added_directory/hello_constants.f90
-Sending        added_directory/hello_constants.inc
-Sending        added_directory/hello_constants_dummy.inc
-Sending        lib/python/info/poems.py
-Transmitting file data .....
-Committed revision 6.
-At revision 6.
-__OUT__
-else
-    file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 [info] sed -i 1i\foo: starting commit message editor...
 Change summary:
 --------------------------------------------------------------------------------
@@ -129,7 +88,6 @@ Committed revision 6.
 Updating '.':
 At revision 6.
 __OUT__
-fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 teardown
 #-------------------------------------------------------------------------------

@@ -21,6 +21,7 @@
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
+check_svn_version
 tests 12
 #-------------------------------------------------------------------------------
 setup
@@ -94,20 +95,16 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm switch trunk, without .svn/entries
 TEST_KEY=$TEST_KEY_BASE-trunk-2
-if $SVN_VERSION_IS_16; then
-    skip 3 "$TEST_KEY won't work under Subversion 1.6"
-else
-    rm -f .svn/entries
-    run_pass "$TEST_KEY" fcm switch trunk <<<'y'
-    merge_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-    file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<'__OUT__'
+rm -f .svn/entries
+run_pass "$TEST_KEY" fcm switch trunk <<<'y'
+merge_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<'__OUT__'
  U   subroutine/hello_sub.h
 D    renamed_added_file
 U    lib/python/info/__init__.py
 Updated to revision 9.
 __OUT__
-    file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
-fi
+file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 teardown
 exit

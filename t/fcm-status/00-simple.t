@@ -21,6 +21,7 @@
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
+check_svn_version
 tests 4
 #-------------------------------------------------------------------------------
 setup
@@ -44,26 +45,7 @@ svn delete -q --force lib/python/info/poems.py
 TEST_KEY=$TEST_KEY_BASE-status
 run_pass "$TEST_KEY" fcm status --config-dir=$TEST_DIR/.subversion
 status_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-if $SVN_VERSION_IS_16; then
-    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
- M      .
-?       unversioned_file
-!       subroutine/hello_sub.h
-M       subroutine/hello_sub_dummy.h
-      C added_file
-      >   local add, incoming add upon merge
-A  +    module/tree_conflict_file
-M       module/hello_constants_dummy.inc
-M       module/hello_constants.inc
-M       module/hello_constants.f90
-A  +    added_directory
-A  +    added_directory/hello_constants_dummy.inc
-A  +    added_directory/hello_constants.inc
-A  +    added_directory/hello_constants.f90
-D       lib/python/info/poems.py
-__OUT__
-else
-    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 A  +    added_directory
       C added_file
@@ -79,6 +61,5 @@ M       subroutine/hello_sub_dummy.h
 Summary of conflicts:
   Tree conflicts: 1
 __OUT__
-fi
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
