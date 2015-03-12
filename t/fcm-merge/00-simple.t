@@ -22,7 +22,7 @@
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
 check_svn_version
-tests 22
+tests 42
 #-------------------------------------------------------------------------------
 setup
 init_repos
@@ -110,7 +110,7 @@ Merge: /${PROJECT}branches/dev/Share/merge1@5
  c.f.: /${PROJECT}trunk@1
 Merge succeeded.
 --------------------------------------------------------------------------actual
---- Merging r$START_REV through r5 into '.':
+--- Merging r4 through r5 into '.':
 A    added_directory
 A    added_directory/hello_constants.f90
 A    added_directory/hello_constants.inc
@@ -122,7 +122,7 @@ U    module/hello_constants.f90
 U    module/hello_constants.inc
 U    module/hello_constants_dummy.inc
 U    subroutine/hello_sub_dummy.h
---- Recording mergeinfo for merge of r$START_REV through r5 into '.':
+--- Recording mergeinfo for merge of r4 through r5 into '.':
  U   .
 --------------------------------------------------------------------------actual
 __OUT__
