@@ -67,15 +67,16 @@ sub _find {
         sub {
             $found ||= 1;
             my $path = $File::Find::name;
-            my ($vol, $dir_name, $base) = File::Spec->splitpath($path);
-            for my $name (File::Spec->splitdir($dir_name), $base) {
-                if (index($name, q{.}) == 0) {
-                    return; # ignore Unix hidden/system files
-                }
-            }
             my $ns = File::Spec->abs2rel($path, $value);
             if ($ns eq q{.}) {
                 $ns = q{};
+            }
+            else {
+                for my $name (split(q{/}, $ns)) {
+                    if (index($name, q{.}) == 0) {
+                        return; # ignore Unix hidden/system files
+                    }
+                }
             }
             my $last_mod_time = (-l $path ? lstat($path) : stat($path))[9];
             $callback->(
