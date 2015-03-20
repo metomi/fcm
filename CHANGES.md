@@ -5,6 +5,26 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## Next Release (2015-Q1?)
+
+FCM release 24.
+
+### Noteworthy Changes
+
+[#183](https://github.com/metomi/fcm/pull/183):
+Use of Subversion 1.6 with FCM is no longer recommended.
+
+[#181](https://github.com/metomi/fcm/pull/181):
+fcm make: source file find: ignore hidden paths only if paths are under
+the source root directory, i.e. it is now OK for the source root directory to
+be a hidden path itself.
+
+[#178](https://github.com/metomi/fcm/pull/178):
+fcm make: `.fcm-make/log` symbolic links are now relative. This should make it
+easier to relocate a build.
+
+--------------------------------------------------------------------------------
+
 ## 2015.02.0 (2015-02-10)
 
 FCM release 23.
