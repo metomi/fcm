@@ -21,4 +21,7 @@ cd $(dirname $0)/..
 if [[ "$PWD" != "$OLDPWD" ]]; then
     echo "[INFO] cd $PWD"
 fi
-exec prove -j 9 -s -r "${@:-t}"
+if [[ -f '/proc/cpuinfo' ]]; then
+    NPROC="$(grep -ic 'processor' '/proc/cpuinfo')"
+fi
+exec prove -j "${NPROC:-9}" -s -r "${@:-t}"

@@ -739,7 +739,7 @@ sub _targets_manager_funcs {
                 _target_prep($state, $ctx);
                 $state->set_value($STATE->PENDING);
                 # Adds tasks that can be triggered by this task
-                for my $key (@{$target->get_triggers()}) {
+                for my $key (sort @{$target->get_triggers()}) {
                     if (    exists($state_hash_ref->{$key})
                         &&  !$state_hash_ref->{$key}->is_done()
                         &&  !grep {$_->get_id() eq $key} @{$stack_ref}
@@ -1104,7 +1104,11 @@ sub _targets_select {
         );
         my $target = $target_of{$key};
         DEP:
-        for (grep {$_->[0] ne $key} @{$target->get_deps()}) {
+        for (
+            grep {$_->[0] ne $key}
+            sort {$a->[0] cmp $b->[0]}
+            @{$target->get_deps()}
+        ) {
             my ($dep_key, $dep_type, $dep_remark) = @{$_};
             # Duplicated targets
             if (exists($targets_of{$dep_key})) {
@@ -1198,12 +1202,13 @@ sub _targets_select {
         }
     }
     # Walk the tree and report it
-    my @report_items = map {[$_]} @target_keys;
+    my @report_items = map {[$_]} sort @target_keys;
     my %reported;
     ITEM:
     while (my $item = pop(@report_items)) {
         my ($key, @stack) = @{$item};
-        my @deps = @{$state_of{$key}->get_deps()};
+        my @deps = sort {$a->[0]->get_key() cmp $b->[0]->get_key()}
+            @{$state_of{$key}->get_deps()};
         my @more_items = reverse(map {[$_->[0]->get_key(), @stack, $key]} @deps);
         my $n_more_items;
         if (exists($reported{$key})) {
@@ -1253,7 +1258,7 @@ sub _targets_select {
 sub _target_deps_are_done {
     my ($state, $state_hash_ref, $stack_ref) = @_;
     my @deps = map {[$_->[0]->get_key(), $_->[1]]} @{$state->get_deps()};
-    for my $k (grep {$state_hash_ref->{$_}->is_ready()} map {$_->[0]} @deps) {
+    for my $k (sort grep {$state_hash_ref->{$_}->is_ready()} map {$_->[0]} @deps) {
         if (!grep {$_->get_id() eq $k} @{$stack_ref}) {
             push(@{$stack_ref}, $state_hash_ref->{$k});
         }
@@ -1450,16 +1455,21 @@ sub _target_update_ok {
     my $state = $state_hash_ref->{$key};
     $state->set_value($STATE->DONE);
     # If this target is needed by other targets...
+    my @released_pending_states;
     while (my ($k, $s) = each(%{$state->get_needed_by()})) {
         my $pending_for_ref = $s->get_pending_for();
         delete($pending_for_ref->{$key});
         if ($s->is_pending() && !keys(%{$pending_for_ref})) {
             $s->set_value($STATE->READY);
             if (!grep {$_->get_id() eq $k} @{$stack_ref}) {
-                push(@{$stack_ref}, $s);
+                push(@released_pending_states, $s);
             }
         }
     }
+    push(
+        @{$stack_ref},
+        sort {$a->get_id() cmp $b->get_id()} @released_pending_states,
+    );
     if (defined($elapsed_time)) { # Done target update
         my $target0 = $ctx->get_target_of()->{$target->get_key()};
         $target0->set_info_of({}); # unset

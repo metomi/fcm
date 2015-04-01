@@ -47,8 +47,8 @@ foo                  <- foo
 hello.txt            <- hello.txt
 hi/hi-earth.txt      <- hi/hi-earth.txt
 hi/hi-mars.txt       <- hi/hi-mars.txt
-.etc                 <- 
 hi/.etc              <- hi
+.etc                 <- 
 __LOG__
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE-incr"

@@ -30,8 +30,8 @@ sed '/^\[info\] target /!d' .fcm-make/log >"$TEST_KEY.log"
 file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<'__LOG__'
 [info] target greet.exe
 [info] target  - greet.o
-[info] target  -  - hi.interface
 [info] target  -  - hello.interface
+[info] target  -  - hi.interface
 [info] target  - hello.o
 [info] target  - hi.o
 __LOG__
