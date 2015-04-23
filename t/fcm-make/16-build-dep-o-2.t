@@ -41,10 +41,10 @@ file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<'__LOG__'
 [info] source->target hello_sub.f90 -> (compile) o/ hello_sub.o
 [info] target hello.exe
 [info] target  - hello.o
+[info] target  - hello_mod.o
 [info] target  - hello_sub.o
 [info] target  -  - hello_mod.mod
 [info] target  -  -  - hello_mod.o
-[info] target  - hello_mod.o
 __LOG__
 #-------------------------------------------------------------------------------
 exit 0

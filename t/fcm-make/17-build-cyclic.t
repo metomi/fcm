@@ -34,6 +34,8 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" <<'__ERR__'
 [FAIL]     required by: baz.mod
 [FAIL]     required by: foo.o
 [FAIL]     required by: foo.mod
+[FAIL]     required by: meow.o
+[FAIL]     required by: meow.mod
 [FAIL]     required by: hello.o
 [FAIL]     required by: hello.exe
 

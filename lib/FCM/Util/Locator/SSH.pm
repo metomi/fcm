@@ -57,10 +57,10 @@ sub _can_work_with {
     if (!$value) {
         return;
     }
-    my ($auth) = split(':', $value, 2);
-    if (!$auth) {
+    if (index($value, ':') < 0) {
         return;
     }
+    my ($auth) = split(':', $value, 2);
     my $host = index($auth, '@') >= 0 ? (split('@', $auth, 2))[1] : $auth;
     $host ? gethostbyname($host) : undef;
 }

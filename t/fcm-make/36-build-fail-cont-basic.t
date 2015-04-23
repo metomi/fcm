@@ -43,9 +43,8 @@ sed -i 's/implicit none/implicit non/' src/greet_mod.f90  # introduce typo
 run_fail "$TEST_KEY" fcm make --new
 task_lines_from_log >"$TEST_KEY-log-tasks"
 file_cmp "$TEST_KEY-log-tasks" "$TEST_KEY-log-tasks" <<'__LOG__'
-[FAIL] compile   ???? ! greet_mod.o          <- greet_mod.f90
 [info] compile   ???? M world_mod.o          <- world_mod.f90
-[FAIL] compile   ---- ! hello.o              <- hello.f90
+[FAIL] compile   ???? ! greet_mod.o          <- greet_mod.f90
 [FAIL] compile   ---- ! hello2.o             <- hello2.f90
 [info] compile   ???? M hello_sub.o          <- hello_sub.f90
 [info] ext-iface ???? M hello_sub.interface  <- hello_sub.f90
@@ -58,8 +57,6 @@ fail_lines_from_log >"$TEST_KEY-log-fails"
 file_cmp "$TEST_KEY-log-fails" "$TEST_KEY-log-fails" <<'__LOG__'
 [FAIL] ! greet_mod.mod       : depends on failed target: greet_mod.o
 [FAIL] ! greet_mod.o         : update task failed
-[FAIL] ! hello               : depends on failed target: hello.o
-[FAIL] ! hello.o             : depends on failed target: greet_mod.mod
 [FAIL] ! hello2              : depends on failed target: hello2.o
 [FAIL] ! hello2.o            : depends on failed target: greet_mod.mod
 __LOG__
@@ -69,8 +66,8 @@ sed -i 's/implicit non/implicit none/' src/greet_mod.f90  # fix typo
 run_pass "$TEST_KEY" fcm make
 task_lines_from_log >"$TEST_KEY-log-tasks"
 file_cmp "$TEST_KEY-log-tasks" "$TEST_KEY-log-tasks" <<'__LOG__'
-[info] compile   ???? M greet_mod.o          <- greet_mod.f90
 [info] compile   ---- U world_mod.o          <- world_mod.f90
+[info] compile   ???? M greet_mod.o          <- greet_mod.f90
 [info] compile   ???? M hello.o              <- hello.f90
 [info] link      ???? M hello                <- hello.f90
 [info] compile   ???? M hello2.o             <- hello2.f90
@@ -91,8 +88,8 @@ sed -i 's/implicit none/implicit non/' src/hello_sub.f90  # introduce typo
 run_fail "$TEST_KEY" fcm make --new
 task_lines_from_log >"$TEST_KEY-log-tasks"
 file_cmp "$TEST_KEY-log-tasks" "$TEST_KEY-log-tasks" <<'__LOG__'
-[info] compile   ???? M greet_mod.o          <- greet_mod.f90
 [info] compile   ???? M world_mod.o          <- world_mod.f90
+[info] compile   ???? M greet_mod.o          <- greet_mod.f90
 [info] compile   ???? M hello.o              <- hello.f90
 [info] link      ???? M hello                <- hello.f90
 [info] compile   ???? M hello2.o             <- hello2.f90
@@ -116,8 +113,8 @@ sed -i 's/implicit non/implicit none/' src/hello_sub.f90  # fix typo
 run_pass "$TEST_KEY" fcm make
 task_lines_from_log >"$TEST_KEY-log-tasks"
 file_cmp "$TEST_KEY-log-tasks" "$TEST_KEY-log-tasks" <<'__LOG__'
-[info] compile   ---- U greet_mod.o          <- greet_mod.f90
 [info] compile   ---- U world_mod.o          <- world_mod.f90
+[info] compile   ---- U greet_mod.o          <- greet_mod.f90
 [info] compile   ---- U hello.o              <- hello.f90
 [info] link      ---- U hello                <- hello.f90
 [info] compile   ---- U hello2.o             <- hello2.f90
