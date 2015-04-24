@@ -133,11 +133,12 @@ sub _config_parse {
 # Sets up the destination.
 sub _dest_init {
     my ($attrib_ref, $m_ctx) = @_;
-    $attrib_ref->{shared_util_of}{dest}->dest_init($m_ctx);
+    my $DEST_UTIL = $attrib_ref->{shared_util_of}{dest};
+    $DEST_UTIL->dest_init($m_ctx);
 
     # Move temporary log file to destination
     my $now = strftime("%Y%m%dT%H%M%S", gmtime());
-    my $log = $attrib_ref->{shared_util_of}{dest}->path($m_ctx, 'sys-log');
+    my $log = $DEST_UTIL->path($m_ctx, 'sys-log');
     my $log_actual = sprintf("%s-%s", $log, $now);
     _symlink(basename($log_actual), $log);
     (       close($attrib_ref->{handle_log})
@@ -145,25 +146,20 @@ sub _dest_init {
         &&  open(my $handle_log, '>>', $log)
     ) || return $E->throw($E->DEST_CREATE, $log, $!);
     _symlink(
-        $FCM::System::Make::Share::Dest::PATH_OF{'sys-log'},
-        $attrib_ref->{shared_util_of}{dest}->path($m_ctx, 'sys-log-symlink'),
+        $DEST_UTIL->path({'name' => $m_ctx->get_name()}, 'sys-log'),
+        $DEST_UTIL->path($m_ctx, 'sys-log-symlink'),
     );
     my $log_ctx = $attrib_ref->{util}->util_of_report()->get_ctx($m_ctx);
     $log_ctx->set_handle($handle_log);
 
     # Saves as parsed config
-    my $cfg = $attrib_ref->{shared_util_of}{dest}->path(
-        $m_ctx, 'sys-config-as-parsed',
-    );
+    my $cfg = $DEST_UTIL->path($m_ctx, 'sys-config-as-parsed');
     (       close($attrib_ref->{handle_cfg})
         &&  copy($attrib_ref->{handle_cfg}->filename(), $cfg)
     ) || return $E->throw($E->DEST_CREATE, $cfg, $!);
     _symlink(
-        $FCM::System::Make::Share::Dest::PATH_OF{'sys-config-as-parsed'},
-        $attrib_ref->{shared_util_of}{dest}->path(
-            $m_ctx,
-            'sys-config-as-parsed-symlink',
-        ),
+        $DEST_UTIL->path({'name' => $m_ctx->get_name()}, 'sys-config-as-parsed'),
+        $DEST_UTIL->path($m_ctx, 'sys-config-as-parsed-symlink'),
     );
 }
 
@@ -181,7 +177,11 @@ sub _main {
     }
     # Starts the system
     my $m_ctx = FCM::Context::Make->new({option_of => $option_hash_ref});
-    my $T = sub {_timer_wrap($attrib_ref, @_)};
+    if ($m_ctx->get_option_of('name')) {
+        $m_ctx->set_name($m_ctx->get_option_of('name'));
+    }
+    my $T = sub {_timer_wrap($attrib_ref, $m_ctx, @_)};
+    my $DEST_UTIL = $attrib_ref->{shared_util_of}{dest};
     eval {$T->(
         sub {
             my %attrib = (
@@ -224,9 +224,7 @@ sub _main {
                 $ctx->set_status($m_ctx->ST_INIT);
                 if ($ctx->can('set_dest')) {
                     $ctx->set_dest(
-                        $attrib_ref->{shared_util_of}{dest}->path(
-                            $m_ctx, 'target', $ctx->get_id(),
-                        ),
+                        $DEST_UTIL->path($m_ctx, 'target', $ctx->get_id()),
                     );
                 }
                 eval {$T->(sub {$impl->main($m_ctx, $ctx)}, $step)};
@@ -251,17 +249,14 @@ sub _main {
         die("\n");
     }
     $m_ctx->set_status($m_ctx->ST_OK);
-    $attrib_ref->{shared_util_of}{dest}->save(
+    $DEST_UTIL->save(
         [$attrib_ref->{shared_util_of}{config}->unparse($m_ctx)],
         $m_ctx,
         'sys-config-on-success',
     );
     _symlink(
-        $FCM::System::Make::Share::Dest::PATH_OF{'sys-config-on-success'},
-        $attrib_ref->{shared_util_of}{dest}->path(
-            $m_ctx,
-            'sys-config-on-success-symlink',
-        ),
+        $DEST_UTIL->path({'name' => $m_ctx->get_name()}, 'sys-config-on-success'),
+        $DEST_UTIL->path($m_ctx, 'sys-config-on-success-symlink'),
     );
     _main_finally($attrib_ref, $m_ctx);
     return $m_ctx;
@@ -291,10 +286,15 @@ sub _symlink {
 
 # Wraps a piece of code with timer events.
 sub _timer_wrap {
-    my ($attrib_ref, $code_ref, @names) = @_;
+    my ($attrib_ref, $m_ctx, $code_ref, @names) = @_;
     my @event_args = (
         FCM::Context::Event->TIMER,
-        join(q{ }, $attrib_ref->{name}, @names),
+        join(
+            q{ },
+            $attrib_ref->{name},
+            ($m_ctx->get_name() ? $m_ctx->get_name() : ()),
+            @names,
+        ),
         time(),
     );
     $attrib_ref->{util}->event(@event_args);

@@ -1155,7 +1155,7 @@ browser = konqueror
         <dd>Specifies the path to the destination.
         (default=<samp>$PWD</samp>)</dd>
 
-        <dt><code>--new</code></dt>
+        <dt><code>--new</code>, <code>-N</code></dt>
 
         <dd>Specifies the new mode. In this mode, everything is re-exported.
         Otherwise, the system runs in incremental mode, in which the version
@@ -1363,7 +1363,14 @@ browser = konqueror
         <dd>Specifies the number of (child) processes that can be run
         simultaneously.</dd>
 
-        <dt><code>--new</code></dt>
+        <dt><code>--name=NAME</code>, <code>-n NAME</code></dt>
+
+        <dd>Specify a name for the make, so that the command will search for
+        <q>fcm-make<var>NAME</var>.cfg</q> instead of <q>fcm-make.cfg</q>, and
+        will write context files in <q>.fcm-make<var>NAME</var>/</q> and log
+        files as <q>fcm-make<var>NAME</var>.log</q>, etc.</dd>
+
+        <dt><code>--new</code>, <code>-N</code></dt>
 
         <dd>Removes items in the destination created by the previous make, and
         starts a new make.</dd>

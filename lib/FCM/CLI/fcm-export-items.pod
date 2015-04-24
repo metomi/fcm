@@ -29,7 +29,7 @@ Specify the path to the configuration file.
 
 Specify the path to the destination. (default=$PWD)
 
-=item --new
+=item --new, -N
 
 Specify the new mode. In this mode, everything is re-exported. Otherwise, the
 system runs in incremental mode, in which the version directories are only

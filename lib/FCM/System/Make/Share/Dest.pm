@@ -32,26 +32,26 @@ use File::Spec::Functions qw{catfile rel2abs};
 use IO::File;
 use IO::Uncompress::Gunzip qw{gunzip};
 use IO::Compress::Gzip qw{gzip};
-use Scalar::Util qw{blessed};
+use Scalar::Util qw{blessed reftype};
 use Storable qw{fd_retrieve nstore_fd};
 use Sys::Hostname qw{hostname};
 
 # The relative paths for locating files in a destination
 our %PATH_OF = (
-    'config'                        => 'fcm-make.cfg',
-    'config-orig'                   => 'fcm-make.cfg.orig',
-    'sys'                           => '.fcm-make',
-    'sys-cache'                     => '.fcm-make/cache',
-    'sys-config-as-parsed'          => '.fcm-make/config-as-parsed.cfg',
-    'sys-config-as-parsed-symlink'  => 'fcm-make-as-parsed.cfg',
-    'sys-config-on-success'         => '.fcm-make/config-on-success.cfg',
-    'sys-config-on-success-symlink' => 'fcm-make-on-success.cfg',
-    'sys-ctx-uncompressed'          => '.fcm-make/ctx',
-    'sys-ctx'                       => '.fcm-make/ctx.gz',
-    'sys-log'                       => '.fcm-make/log',
-    'sys-log-symlink'               => 'fcm-make.log',
-    'sys-lock'                      => 'fcm-make.lock',
-    'sys-lock-info'                 => 'fcm-make.lock/info.txt',
+    'config'                        => 'fcm-make%s.cfg',
+    'config-orig'                   => 'fcm-make%s.cfg.orig',
+    'sys'                           => '.fcm-make%s',
+    'sys-cache'                     => '.fcm-make%s/cache',
+    'sys-config-as-parsed'          => '.fcm-make%s/config-as-parsed.cfg',
+    'sys-config-as-parsed-symlink'  => 'fcm-make%s-as-parsed.cfg',
+    'sys-config-on-success'         => '.fcm-make%s/config-on-success.cfg',
+    'sys-config-on-success-symlink' => 'fcm-make%s-on-success.cfg',
+    'sys-ctx-uncompressed'          => '.fcm-make%s/ctx',
+    'sys-ctx'                       => '.fcm-make%s/ctx.gz',
+    'sys-log'                       => '.fcm-make%s/log',
+    'sys-log-symlink'               => 'fcm-make%s.log',
+    'sys-lock'                      => 'fcm-make%s.lock',
+    'sys-lock-info'                 => 'fcm-make%s.lock/info.txt',
     'target'                        => '',
 );
 
@@ -77,8 +77,23 @@ __PACKAGE__->class(
 
 # Loads a storable context from a path.
 sub _ctx_load {
-    my ($attrib_ref, $path, $expected_class) = @_;
-    my $ctx = eval {
+    my ($attrib_ref, $m_ctx, $from) = @_;
+    my $path;
+    if ($from) {
+        NAME:
+        for my $name ($m_ctx->get_name(), undef) {
+            $path = _path(
+                $attrib_ref, {'dest' => $from, 'name' => $name}, 'sys-ctx');
+
+            if (-f $path) {
+                last NAME;
+            }
+        }
+    }
+    else {
+        $path = _path($attrib_ref, $m_ctx, 'sys-ctx');
+    }
+    my $prev_ctx = eval {
         my $handle = IO::File->new_tmpfile();
         gunzip($path, $handle) || die($!);
         $handle->seek(0, 0);
@@ -87,10 +102,15 @@ sub _ctx_load {
     if (my $e = $@) {
         return $E->throw($E->CACHE_LOAD, $path, $e);
     }
-    if (!$ctx || !$ctx->isa($expected_class)) {
+    if (    !$prev_ctx
+        ||  !$prev_ctx->isa(blessed($m_ctx))
+        ||  (       defined($prev_ctx->get_name())
+                &&  $prev_ctx->get_name() ne $m_ctx->get_name()
+            )
+    ) {
         return $E->throw($E->CACHE_TYPE, $path);
     }
-    return $ctx;
+    return $prev_ctx;
 }
 
 # Finalises the destination of a make context.
@@ -175,12 +195,11 @@ sub _dest_init {
         }
     }
     # Loads context of previous make, if possible
-    my $prev_m_ctx = eval {
-        my $path = _path($attrib_ref, $m_ctx, 'sys-ctx');
-        -f $path ? _ctx_load($attrib_ref, $path, blessed($m_ctx)) : undef;
-    };
+    my $prev_m_ctx = eval {_ctx_load($attrib_ref, $m_ctx)};
     if (my $e = $@) {
-        if (!$E->caught($e) || $e->get_code() ne $E->CACHE_LOAD) {
+        if (    !$E->caught($e)
+            ||  !grep {$_ eq $e->get_code()} ($E->CACHE_LOAD, $E->CACHE_TYPE)
+        ) {
             die($e);
         }
         $@ = undef;
@@ -207,12 +226,15 @@ sub _dest_init {
 # Returns the path of a named item relative to the context destination.
 sub _path {
     my ($attrib_ref, $m_ctx, $key, @paths) = @_;
-    my $path
-        = blessed($m_ctx) && $m_ctx->can('get_dest') ? $m_ctx->get_dest()
-        : defined($m_ctx)                            ? $m_ctx
-        :                                              cwd()
-        ;
-    catfile($path, split(q{/}, $attrib_ref->{path_of}{$key}), @paths);
+    my %ctx = reftype($m_ctx) && reftype($m_ctx) eq 'HASH'
+        ? %{$m_ctx} : ('dest' => $m_ctx, 'name' => q{});
+    $ctx{'dest'} ||= q{};
+    $ctx{'name'} ||= q{};
+    catfile(
+        ($ctx{'dest'} ? $ctx{'dest'} : ()),
+        split(q{/}, sprintf($attrib_ref->{path_of}{$key}, $ctx{'name'})),
+        @paths,
+    );
 }
 
 # Returns an ARRAY reference containing the search paths of a named item
@@ -340,19 +362,20 @@ previous make of the system if necessary, and setting up the system directory.
 =item $instance->path($ctx,$key,@paths)
 
 Returns the path of a named item ($key) relative to $ctx, which can either be a
-blessed object with a $ctx->get_dest() method, a scalar path, or undef (in which
-case, cwd() is used). If @paths are specified, they are concatenated at the end
+HASH reference with {'dest' => $dest, 'name' => $name}, or a scalar path
+pointing to $dest, where $dest is the root of the path and $name is the name of
+the context. If @paths are specified, they are concatenated at the end
 of the path.
-
-=item $instance->path_of($key)
-
-Returns the value of the named item in a make destination.
 
 =item $instance->paths($ctx,$key,@paths)
 
 Returns an ARRAY reference containing the search paths of a named item ($key)
 relative to the destinations of $ctx and its inherited contexts. If @paths are
 specified, they are concatenated at the end of each returned path.
+
+=item $instance->path_of($key)
+
+Returns the template value of the named item in a make destination.
 
 =item $instance->save($item,$ctx,$key,@paths)
 

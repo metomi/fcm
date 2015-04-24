@@ -36,6 +36,7 @@ __PACKAGE__->class({
     dest_lock         => '$',
     error             => {},
     inherit_ctx_list  => '@',
+    name              => {isa => '$', default => q{}},
     option_of         => '%',
     prev_ctx          => __PACKAGE__,
     status            => {isa => '$', default => ST_UNKNOWN},
@@ -88,6 +89,12 @@ This should be set to the value of the exception, if this make ends in one.
 =item inherit_ctx_list
 
 An ARRAY of contexts inherited by this make.
+
+=item name
+
+The name of the context. This is useful if we need to have multiple (but
+non-overlapping) "fcm make" runs in the same destination. (Default is a null
+string.)
 
 =item option_of
 
