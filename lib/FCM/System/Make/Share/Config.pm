@@ -36,8 +36,8 @@ my $E = 'FCM::System::Exception';
 
 # Configuration parser label to action map
 my %CONFIG_PARSER_OF = (
-    'dest'       => sub {$_[1]->set_dest($_[2]->get_value())},
-    'name'       => sub {$_[1]->set_name($_[2]->get_value())},
+    'dest'       => \&_parse_dest,
+    'name'       => \&_parse_name,
     'step.class' => \&_parse_step_class,
     'steps'      => \&_parse_steps,
     'use'        => \&_parse_use,
@@ -203,6 +203,18 @@ sub _get_config_reader {
             include_paths => $config_file_path_locators_ref,
         },
     );
+}
+
+# Reads the "dest" declaration from a config entry.
+sub _parse_dest {
+    my ($attrib_ref, $m_ctx, $entry) = @_;
+    $m_ctx->set_dest($entry->get_value());
+}
+
+# Reads the "name" declaration from a config entry.
+sub _parse_name {
+    my ($attrib_ref, $m_ctx, $entry) = @_;
+    $m_ctx->set_name($entry->get_value());
 }
 
 # Reads the step.class declaration from a config entry.
