@@ -29,7 +29,7 @@ find_fcm_make_files() {
         | sort
 }
 
-tests 4
+tests 5
 
 #-------------------------------------------------------------------------------
 mkdir -p 'hello/src'
@@ -88,5 +88,11 @@ build.source=$HERE/src
 build.target{task}=link
 __CFG__
 run_fail "${TEST_KEY_BASE}-snub" fcm make -C "${PWD}/snub" -n '-no-friend'
+sed -i '3q' "${TEST_KEY_BASE}-snub.err"  # 3 lines only
+file_cmp "${TEST_KEY_BASE}-snub.err" "${TEST_KEY_BASE}-snub.err" <<__ERR__
+[FAIL] use = ${PWD}/hello: incorrect value in declaration
+[FAIL] config-file=${PWD}/snub/fcm-make-no-friend.cfg:1
+[FAIL] ${PWD}/hello/.fcm-make/ctx.gz: cannot retrieve cache
+__ERR__
 #-------------------------------------------------------------------------------
 exit
