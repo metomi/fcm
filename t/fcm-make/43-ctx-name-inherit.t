@@ -29,7 +29,7 @@ find_fcm_make_files() {
         | sort
 }
 
-tests 3
+tests 4
 
 #-------------------------------------------------------------------------------
 mkdir -p 'hello/src'
@@ -51,7 +51,7 @@ write(*, '(a,1x,a)') 'Hello', name
 end program hello
 __FORTRAN__
 
-fcm make -q -C "${PWD}/hello" -n '-friend'
+run_pass "${TEST_KEY_BASE}-hello" fcm make -C "${PWD}/hello" -n '-friend'
 #-------------------------------------------------------------------------------
 mkdir -p 'greet/src'
 cat >'greet/fcm-make-friend.cfg' <<'__CFG__'
