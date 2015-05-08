@@ -47,6 +47,7 @@ our %CONFIG_PARSER_OF = (
 
 # Default properties
 our %PROP_OF = (
+    'config-file.name'  => [q{}],
     'config-file.steps' => [q{}],
     'no-config-file'    => [q{}],
 );
@@ -167,6 +168,7 @@ sub _mirror_config_file {
     my ($attrib_ref, $m_ctx, $ctx, $sources_ref) = @_;
     my ($target) = _target_and_authority($ctx);
     my $mirror_m_ctx = FCM::Context::Make->new({dest => '$HERE'});
+    $mirror_m_ctx->set_name(_prop($attrib_ref, 'config-file.name', $ctx));
     my %no_inherit_from;
     if (@{$m_ctx->get_inherit_ctx_list()}) {
         # Inherited destinations
@@ -237,11 +239,22 @@ sub _mirror_config_file {
     # Saves the configuration file
     my @lines = map {$_ . "\n"}
         $attrib_ref->{shared_util_of}{config}->unparse($mirror_m_ctx);
-    my $path = $attrib_ref->{shared_util_of}{dest}->path($ctx, 'config');
+    my $DEST_UTIL = $attrib_ref->{shared_util_of}{dest};
+    my $path = $DEST_UTIL->path(
+        {   'dest' => $ctx->get_dest(),
+            'name' => _prop($attrib_ref, 'config-file.name', $ctx),
+        },
+        'config',
+    );
     $attrib_ref->{util}->file_save($path, \@lines);
     _mirror(
         $attrib_ref, $m_ctx, $ctx,
-        [$path], $attrib_ref->{shared_util_of}{dest}->path($target, 'config'),
+        [$path], $DEST_UTIL->path(
+            {   'dest' => $target,
+                'name' => _prop($attrib_ref, 'config-file.name', $ctx),
+            },
+            'config',
+        ),
     );
 }
 
@@ -288,13 +301,24 @@ sub _mirror_orig_config_file {
         ),
         map {$_ . "\n"} $attrib_ref->{shared_util_of}{config}->unparse($m_ctx),
     );
-    my $path = $attrib_ref->{shared_util_of}{dest}->path($ctx, 'config-orig');
+    my $DEST_UTIL = $attrib_ref->{shared_util_of}{dest};
+    my $path = $DEST_UTIL->path(
+        {   'dest' => $ctx->get_dest(),
+            'name' => _prop($attrib_ref, 'config-file.name', $ctx),
+        },
+        'config-orig',
+    );
     $attrib_ref->{util}->file_save($path, \@lines);
     my ($target) = _target_and_authority($ctx);
     _mirror(
         $attrib_ref, $m_ctx, $ctx,
         [$path],
-        $attrib_ref->{shared_util_of}{dest}->path($target, 'config-orig'),
+        $DEST_UTIL->path(
+            {   'dest' => $target,
+                'name' => _prop($attrib_ref, 'config-file.name', $ctx),
+            },
+            'config-orig',
+        ),
     );
 }
 

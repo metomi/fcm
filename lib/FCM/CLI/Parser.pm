@@ -66,7 +66,7 @@ our %OPTION_OF = map {
     [['jobs'               ,            ], ['j'], OPT_SCAL],
     [['list'               ,            ], ['l'], OPT_BOOL],
     [['name'               ,            ], ['n'], OPT_SCAL],
-    [['new'                ,            ], ['n'], OPT_BOOL],
+    [['new'                ,            ], ['N'], OPT_BOOL],
     [['non-interactive'    ,            ], [   ], OPT_BOOL],
     [['only'               ,            ], [   ], OPT_LIST],
     [['organisation'       ,            ], [   ], OPT_SCAL],
@@ -163,8 +163,8 @@ our %OPTIONS_FOR = (
     }],
     'mkpatch'       => [@OPTION_OF{qw{exclude organisation revision}}],
     'make'          => [@OPTION_OF{
-        qw{ directory ignore-lock jobs config-file config-file-path new quiet
-            verbose
+        qw{ directory ignore-lock jobs config-file config-file-path name new
+            quiet verbose
         }
     }],
     'project-create'=> [@OPTION_OF{

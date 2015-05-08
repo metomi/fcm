@@ -41,7 +41,13 @@ will fail. This option can be used to bypass this check.
 
 Specify the number of (child) processes that can be run simultaneously.
 
-=item --new
+=item --name=NAME, -n NAME
+
+Specify a name for the make, so that the command will search for
+fcm-makeC<NAME>.cfg instead of fcm-make.cfg, and will write context files in
+.fcm-makeC<NAME>/ and log files as fcm-makeC<NAME>.log, etc.
+
+=item --new, -N
 
 Remove items in the destination created by the previous make, and starts a new
 make.

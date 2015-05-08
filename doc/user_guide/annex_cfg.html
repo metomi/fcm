@@ -521,6 +521,23 @@ dest = $HERE
 </pre>
     </dd>
 
+    <dt id="make.name">name</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Specifies the NAME of the make, so that the
+      command will search for <q>fcm-make<var>NAME</var>.cfg</q> instead of
+      <q>fcm-make.cfg</q>, and will write context files in
+      <q>.fcm-make<var>NAME</var>/</q> and log files as
+      <q>fcm-make<var>NAME</var>.log</q>, etc.</p>
+
+      <p><dfn>value</dfn>: A file name friendly string.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+name = -friend
+</pre>
+    </dd>
+
     <dt id="make.steps">steps</dt>
 
     <dd>
@@ -761,8 +778,14 @@ extract.prop{diff3.flags} = -E -m
       <p><dfn>example</dfn>:</p>
       <pre>
 mirror.target = fred@server:/path/of/dest
+
 # Or if the current user ID is "fred"
+# Or if the user ID for "server" is configured under "~/.ssh/config"
 mirror.target = server:/path/of/dest
+
+# Or if mirroring to a path accessible only by user ID "bob"
+mirror.target = bob@localhost:/path/of/dest
+
 # Or if the current user ID is "fred" and local host is "server"
 mirror.target = /path/of/dest
 </pre>
@@ -788,6 +811,11 @@ mirror.prop{rsync} = cnysr
   <code>mirror.prop</code> declaration:</p>
 
   <dl>
+    <dt id="make.mirror.prop.config-file.name">config-file.name</dt>
+
+    <dd>The context name to be included in the generated configuration file in
+    the mirror destination.</dd>
+
     <dt id="make.mirror.prop.config-file.steps">config-file.steps</dt>
 
     <dd>The steps to be included in the generated configuration file in the

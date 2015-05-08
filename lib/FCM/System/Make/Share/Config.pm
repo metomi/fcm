@@ -37,9 +37,10 @@ my $E = 'FCM::System::Exception';
 # Configuration parser label to action map
 my %CONFIG_PARSER_OF = (
     'dest'       => \&_parse_dest,
-    'use'        => \&_parse_use,
+    'name'       => \&_parse_name,
     'step.class' => \&_parse_step_class,
     'steps'      => \&_parse_steps,
+    'use'        => \&_parse_use,
 );
 
 __PACKAGE__->class(
@@ -51,6 +52,7 @@ __PACKAGE__->class(
 # populate the context of the current make.
 sub _parse {
     my ($attrib_ref, $entry_callback_ref, $m_ctx, @args) = @_;
+    my $DEST_UTIL = $attrib_ref->{shared_util_of}{dest};
     my $dir = $m_ctx->get_option_of('directory')
         ? $m_ctx->get_option_of('directory') : cwd();
     my $dir_locator = FCM::Context::Locator->new($dir);
@@ -64,8 +66,8 @@ sub _parse {
     for my $config_file_name (@config_file_names) {
         my $is_specified_name = 1;
         if (!defined($config_file_name)) {
-            $config_file_name
-                = $attrib_ref->{shared_util_of}{dest}->path_of('config');
+            $config_file_name = $DEST_UTIL->path(
+                {'name' => $m_ctx->get_name()}, 'config');
             $is_specified_name = 0;
         }
         if (    $attrib_ref->{util}->uri_match($config_file_name)
@@ -98,8 +100,9 @@ sub _parse {
         }
     }
     if (!@config_reader_refs) {
-        my $config_file_name = $attrib_ref->{shared_util_of}{dest}->path(
-            $dir_locator->get_value(), 'config',
+        my $config_file_name = $DEST_UTIL->path(
+            {'dest' => $dir_locator->get_value(), 'name' => $m_ctx->get_name()},
+            'config',
         );
         if (-f $config_file_name) {
             push(@config_reader_refs, _get_config_reader(
@@ -202,10 +205,16 @@ sub _get_config_reader {
     );
 }
 
-# Reads the dest declaration.
+# Reads the "dest" declaration from a config entry.
 sub _parse_dest {
     my ($attrib_ref, $m_ctx, $entry) = @_;
     $m_ctx->set_dest($entry->get_value());
+}
+
+# Reads the "name" declaration from a config entry.
+sub _parse_name {
+    my ($attrib_ref, $m_ctx, $entry) = @_;
+    $m_ctx->set_name($entry->get_value());
 }
 
 # Reads the step.class declaration from a config entry.
@@ -246,16 +255,11 @@ sub _parse_use {
     my $inherit_ctx_list_ref = $m_ctx->get_inherit_ctx_list();
     for my $value ($entry->get_values()) {
         $value = $attrib_ref->{util}->file_tilde_expand($value);
-        my $i_m_ctx = eval {
-            $DEST->ctx_load(
-                $DEST->path($value, 'sys-ctx'),
-                blessed($m_ctx),
-            );
-        };
-        if (!defined($i_m_ctx) && (my $e = $@)) {
+        my $i_m_ctx = eval {$DEST->ctx_load($m_ctx, $value)};
+        if (my $e = $@) {
             return $E->throw($E->CONFIG_VALUE, $entry, $e);
         }
-        if ($i_m_ctx->get_status() != $i_m_ctx->ST_OK) {
+        if (!defined($i_m_ctx) || $i_m_ctx->get_status() != $i_m_ctx->ST_OK) {
             return $E->throw($E->CONFIG_INHERIT, $entry);
         }
         push(@{$m_ctx->get_inherit_ctx_list()}, $i_m_ctx);
@@ -306,8 +310,9 @@ sub _unparse {
                         : ()
                     ;
                 }
-            (   [\&_unparse_use     , 'use'  ],
-                [\&_unparse_steps   , 'steps'],
+            (   [sub {$m_ctx->get_name()}, 'name' ],
+                [\&_unparse_use          , 'use'  ],
+                [\&_unparse_steps        , 'steps'],
                 [sub {$m_ctx->get_dest()}, 'dest' ],
             ),
         ),
