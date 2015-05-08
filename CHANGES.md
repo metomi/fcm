@@ -5,6 +5,21 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## Next Release (2015-Q2?)
+
+FCM release 25.
+
+### Highlighted Changes
+
+[#188](https://github.com/metomi/fcm/pull/188):
+fcm make: allow multiple runs in same directory. A make can now be named, so
+multiple non-overlapping makes can work in the same directory. It is worth
+noting that once you have used this version of `fcm make` on a directory, older
+version of FCM will no longer work in incremental mode on the same directory.
+See also [metomi/rose#1604](https://github.com/metomi/rose/pull/1604).
+
+--------------------------------------------------------------------------------
+
 ## 2015.03.0 (2015-03-26)
 
 FCM release 24.
