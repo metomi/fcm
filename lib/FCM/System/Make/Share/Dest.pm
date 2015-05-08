@@ -71,7 +71,11 @@ my %ACTION_OF = (
 
 # Creates the class.
 __PACKAGE__->class(
-    {path_of => {isa => '%', default => {%PATH_OF}}, util => '&'},
+    {   path_of        => {isa => '%', default => {%PATH_OF}},
+        shared_util_of => '%',
+        subsystem_of   => '%',
+        util           => '&',
+    },
     {action_of => \%ACTION_OF},
 );
 
@@ -79,6 +83,7 @@ __PACKAGE__->class(
 sub _ctx_load {
     my ($attrib_ref, $m_ctx, $from) = @_;
     my $path;
+    my $dest;
     if ($from) {
         NAME:
         for my $name ($m_ctx->get_name(), undef) {
@@ -86,14 +91,16 @@ sub _ctx_load {
                 $attrib_ref, {'dest' => $from, 'name' => $name}, 'sys-ctx');
 
             if (-f $path) {
+                $dest = $from;
                 last NAME;
             }
         }
     }
     else {
         $path = _path($attrib_ref, $m_ctx, 'sys-ctx');
+        $dest = $m_ctx->get_dest();
     }
-    my $prev_ctx = eval {
+    my $old_m_ctx = eval {
         my $handle = IO::File->new_tmpfile();
         gunzip($path, $handle) || die($!);
         $handle->seek(0, 0);
@@ -102,15 +109,42 @@ sub _ctx_load {
     if (my $e = $@) {
         return $E->throw($E->CACHE_LOAD, $path, $e);
     }
-    if (    !$prev_ctx
-        ||  !$prev_ctx->isa(blessed($m_ctx))
-        ||  (       defined($prev_ctx->get_name())
-                &&  $prev_ctx->get_name() ne $m_ctx->get_name()
+    if (    !$old_m_ctx
+        ||  !$old_m_ctx->isa(blessed($m_ctx))
+        ||  (       defined($old_m_ctx->get_name())
+                &&  $old_m_ctx->get_name() ne $m_ctx->get_name()
             )
     ) {
         return $E->throw($E->CACHE_TYPE, $path);
     }
-    return $prev_ctx;
+    my $new_m_dest = rel2abs($dest);
+    if ($new_m_dest ne $old_m_ctx->get_dest()) {
+        my $old_m_dest = $old_m_ctx->get_dest();
+        $old_m_ctx->set_dest($new_m_dest);
+        $old_m_ctx->set_dest_lock(undef);
+        SUBSYSTEM:
+        while (my ($id, $old_ctx) = each(%{$old_m_ctx->get_ctx_of()})) {
+            my $id_of_class = $old_ctx->get_id_of_class();
+            if (exists($attrib_ref->{'subsystem_of'}{$id_of_class})) {
+                my $subsystem = $attrib_ref->{'subsystem_of'}{$id_of_class};
+                if (!$old_ctx->can('set_dest')) {
+                    next SUBSYSTEM;
+                }
+                my $old_dest = $old_ctx->get_dest();
+                $old_ctx->set_dest(_path(
+                    $attrib_ref,
+                    {'dest' => $new_m_dest, 'name' => $m_ctx->get_name()},
+                    'target',
+                    $old_ctx->get_id(),
+                ));
+                if ($subsystem->can('ctx_load_hook')) {
+                    $subsystem->ctx_load_hook(
+                        $old_m_ctx, $old_ctx, $old_m_dest, $old_dest);
+                }
+            }
+        }
+    }
+    return $old_m_ctx;
 }
 
 # Finalises the destination of a make context.
@@ -121,6 +155,8 @@ sub _dest_done {
     }
     my $dest = _path($attrib_ref, $m_ctx, 'sys-ctx-uncompressed');
     my $dest_parent = dirname($dest);
+    my $dest_lock = $m_ctx->get_dest_lock();
+    $m_ctx->set_dest_lock(undef);
     if (-d $dest_parent) {
         eval {
             my $handle = IO::File->new_tmpfile();
@@ -139,8 +175,8 @@ sub _dest_done {
     ) {
         _tidy($attrib_ref, $path);
     }
-    if ($m_ctx->get_dest_lock()) {
-        rmtree($m_ctx->get_dest_lock());
+    if ($dest_lock) {
+        rmtree($dest_lock);
     }
 }
 
