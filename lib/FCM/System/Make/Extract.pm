@@ -34,7 +34,7 @@ use File::Basename qw{dirname};
 use File::Compare qw{compare};
 use File::Copy qw{copy};
 use File::Path qw{mkpath rmtree};
-use File::Spec::Functions qw{catfile tmpdir};
+use File::Spec::Functions qw{abs2rel catfile tmpdir};
 use File::Temp;
 use List::Util qw{first};
 use Storable qw{dclone};
@@ -76,6 +76,7 @@ __PACKAGE__->class(
             config_unparse            => \&_config_unparse,
             config_unparse_class_prop => \&_config_unparse_class_prop,
             ctx                       => \&_ctx,
+            ctx_load_hook             => \&_ctx_load_hook,
             main                      => \&_main,
         },
     },
@@ -390,6 +391,56 @@ sub _config_unparse {
 sub _ctx {
     my ($attrib_ref, $id_of_class, $id) = @_;
     FCM::Context::Make::Extract->new({id => $id, id_of_class => $id_of_class});
+}
+
+# Hook when loading a previous ctx.
+sub _ctx_load_hook {
+    my ($attrib_ref, $old_m_ctx, $old_ctx, $old_m_dest, $old_dest) = @_;
+    my $path_mod_func = sub {
+        my ($get_func, $set_func) = @_;
+        my $path = $get_func->();
+        if (!defined($path)) {
+            return;
+        }
+        my $rel_path = abs2rel($path, $old_m_dest);
+        if (index($rel_path, '..') != 0) {
+            $set_func->(catfile($old_m_ctx->get_dest(), $rel_path));
+        }
+    };
+    while (my ($ns, $project) = each(%{$old_ctx->get_project_of()})) {
+        $path_mod_func->(
+            sub {$project->get_cache()},
+            sub {$project->set_cache(@_)},
+        );
+        for my $tree (@{$project->get_trees()}) {
+            $path_mod_func->(
+                sub {$tree->get_cache()},
+                sub {$tree->set_cache(@_)},
+            );
+            for my $source (@{$tree->get_sources()}) {
+                $path_mod_func->(
+                    sub {$source->get_cache()},
+                    sub {$source->set_cache(@_)},
+                );
+            }
+        }
+    }
+    while (my ($key, $target) = each(%{$old_ctx->get_target_of()})) {
+        $path_mod_func->(
+            sub {$target->get_path()},
+            sub {$target->set_path(@_)},
+        );
+        $path_mod_func->(
+            sub {$target->get_dests()->[0]},
+            sub {$target->get_dests()->[0] = $_[0]},
+        );
+        while (my ($ns, $source) = each(%{$target->get_source_of()})) {
+            $path_mod_func->(
+                sub {$source->get_cache()},
+                sub {$source->set_cache(@_)},
+            );
+        }
+    }
 }
 
 # The main function of this class.

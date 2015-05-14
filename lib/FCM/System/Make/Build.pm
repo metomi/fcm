@@ -97,6 +97,7 @@ __PACKAGE__->class(
             config_unparse            => \&_config_unparse,
             config_unparse_class_prop => \&_config_unparse_class_prop,
             ctx                       => \&_ctx,
+            ctx_load_hook             => \&_ctx_load_hook,
             main                      => \&_main,
         },
     },
@@ -302,6 +303,45 @@ sub _ctx {
         id_of_class      => $id_of_class,
         target_select_by => dclone($attrib_ref->{target_select_by}),
     });
+}
+
+# Hook when loading a previous ctx.
+sub _ctx_load_hook {
+    my ($attrib_ref, $old_m_ctx, $old_ctx, $old_m_dest, $old_dest) = @_;
+    my $path_mod_func = sub {
+        my ($get_func, $set_func) = @_;
+        my $path = $get_func->();
+        if (!defined($path)) {
+            return;
+        }
+        my $rel_path = abs2rel($path, $old_m_dest);
+        if (index($rel_path, '..') != 0) {
+            $set_func->(catfile($old_m_ctx->get_dest(), $rel_path));
+        }
+    };
+    if (@{$old_ctx->get_dests()}) {
+        $old_ctx->get_dests()->[0] = $old_ctx->get_dest();
+    }
+    while (my ($ns, $source) = each(%{$old_ctx->get_source_of()})) {
+        $path_mod_func->(
+            sub {$source->get_path()},
+            sub {$source->set_path(@_)},
+        );
+    }
+    while (my ($key, $target) = each(%{$old_ctx->get_target_of()})) {
+        $path_mod_func->(
+            sub {$target->get_path()},
+            sub {$target->set_path(@_)},
+        );
+        $path_mod_func->(
+            sub {$target->get_path_of_prev()},
+            sub {$target->set_path_of_prev(@_)},
+        );
+        $path_mod_func->(
+            sub {$target->get_path_of_source()},
+            sub {$target->set_path_of_source(@_)},
+        );
+    }
 }
 
 # The main function of the class.
