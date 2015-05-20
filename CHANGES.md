@@ -18,6 +18,11 @@ noting that once you have used this version of `fcm make` on a directory, older
 version of FCM will no longer work in incremental mode on the same directory.
 See also [metomi/rose#1604](https://github.com/metomi/rose/pull/1604).
 
+### Noteworthy Changes
+
+[#189](https://github.com/metomi/fcm/pull/189):
+fcm make: correctly support relocation of a make.
+
 --------------------------------------------------------------------------------
 
 ## 2015.03.0 (2015-03-26)
