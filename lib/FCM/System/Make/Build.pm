@@ -36,9 +36,9 @@ use FCM::System::Make::Build::FileType::H;
 use FCM::System::Make::Build::FileType::NS;
 use FCM::System::Make::Build::FileType::Script;
 use FCM::System::Make::Share::Subsystem;
-use File::Basename qw{basename dirname};
+use File::Basename qw{basename dirname fileparse};
 use File::Find qw{find};
-use File::Path qw{mkpath};
+use File::Path qw{mkpath rmtree};
 use File::Spec::Functions qw{abs2rel catfile rel2abs splitdir splitpath};
 use Storable qw{dclone};
 use Text::ParseWords qw{shellwords};
@@ -74,6 +74,7 @@ our %CONFIG_PARSER_OF = (
 # Default properties
 our %PROP_OF = (
     #                               [default       , ns-ok]
+    'archive-ok-target-category' => [q{include o}  , undef],
     'ignore-missing-dep-ns'      => [q{}           , undef],
     'no-step-source'             => [q{}           , undef],
     'no-inherit-source'          => [q{}           , undef],
@@ -656,6 +657,17 @@ sub _targets_update {
     }
     my $old_cwd = cwd();
     chdir($ctx->get_dest()) || die(sprintf("%s: %s\n", $ctx->get_dest(), $!));
+    # Extract any target category directories that are in .tar.gz
+    opendir(my $handle, '.');
+    while (my $name = readdir($handle)) {
+        if ((fileparse($name, '.tar.gz'))[2] eq '.tar.gz') {
+            my %value_of = %{$UTIL->shell_simple([qw{tar -x -z}, '-f', $name])};
+            if ($value_of{'rc'} == 0) {
+                unlink($name);
+            }
+        }
+    }
+    closedir($handle);
     # Determines the destination search path
     my $id = $ctx->get_id();
     @{$ctx->get_dests()} = (
@@ -688,6 +700,7 @@ sub _targets_update {
     # Back to original working directory
     chdir($old_cwd) || die(sprintf("%s: %s\n", $old_cwd, $!));
     if ($e) {
+        _finally($attrib_ref, $m_ctx, $ctx);
         die($e);
     }
     # Finally
@@ -719,8 +732,10 @@ sub _targets_update {
             FCM::Context::Event->MAKE_BUILD_TARGETS_FAIL,
             \@failed_targets
         );
+        _finally($attrib_ref, $m_ctx, $ctx);
         die("\n");
     }
+    _finally($attrib_ref, $m_ctx, $ctx);
 }
 
 # Updates a target.
@@ -1560,6 +1575,32 @@ sub _prev_hash_item_getter {
         }
     }
     sub {exists($p_item_of{$_[0]}) ? $p_item_of{$_[0]} : undef};
+}
+
+# Perform final actions.
+# Archive intermediate target directories if necessary.
+sub _finally {
+    my ($attrib_ref, $m_ctx, $ctx) = @_;
+    if (!$m_ctx->get_option_of('archive')) {
+        return;
+    }
+    my %can_archive = map {($_ => 1)} _props(
+        $attrib_ref, 'archive-ok-target-category', $ctx);
+    opendir(my $handle, $ctx->get_dest());
+    while (my $name = readdir($handle)) {
+        if ($can_archive{$name}) {
+            my @command = (
+                qw{tar -c -z}, '-C', $ctx->get_dest(),
+                '-f', catfile($ctx->get_dest(), $name . '.tar.gz'),
+                $name,
+            );
+            my %value_of = %{$UTIL->shell_simple(\@command)};
+            if ($value_of{'rc'} == 0) {
+                rmtree(catfile($ctx->get_dest(), $name));
+            }
+        }
+    }
+    closedir($handle);
 }
 
 # ------------------------------------------------------------------------------

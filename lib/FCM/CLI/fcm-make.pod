@@ -17,6 +17,16 @@ configuration file.
 
 =over 4
 
+=item --archive, -a
+
+Switch on archive mode. In archive mode, intermediate files will be put into
+TAR-GZIP archives on completion, e.g. extract system:
+C<.fcm-make/cache/extract/>, and build system: C<build/include/> and
+C<build/o/>.
+
+The archive mode is not suitable for a make that will be inherited or used by
+other makes.
+
 =item --config-file-path=PATH, -F PATH
 
 Specify paths for searching configuration files specified in relative paths.

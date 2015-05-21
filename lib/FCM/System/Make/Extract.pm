@@ -831,6 +831,20 @@ sub _extract_incremental {
 # Updates the project tree caches.
 sub _project_tree_caches_update {
     my ($attrib_ref, $m_ctx, $ctx) = @_;
+    # If previous cache in .tar.gz, extract it
+    my $cache_tar_gz = $attrib_ref->{shared_util_of}{dest}->path(
+        $m_ctx, 'sys-cache', $ctx->get_id() . '.tar.gz',
+    );
+    if (-f $cache_tar_gz) {
+        my @command = (
+            qw{tar -x -z}, '-C', dirname($cache_tar_gz), '-f', $cache_tar_gz,
+        );
+        my %value_of = %{$UTIL->shell_simple(\@command)};
+        if ($value_of{'rc'} == 0) {
+            unlink($cache_tar_gz);
+        }
+    }
+    # Start the parallel task runner to do project tree caches update
     my $timer = $UTIL->timer();
     my $n_jobs = $m_ctx->get_option_of('jobs');
     my $n_trees = scalar(
@@ -859,6 +873,7 @@ sub _project_tree_caches_update {
     my $e = $@;
     $runner->destroy();
     if ($e) {
+        _finally($attrib_ref, $m_ctx, $ctx);
         die($e);
     }
     $UTIL->event(
@@ -1000,34 +1015,41 @@ sub _symlink_handle {
 sub _targets_update {
     my ($attrib_ref, $m_ctx, $ctx) = @_;
     my %basket_of = (status => {}, status_of_source => {});
-    while (my ($ns, $target) = each(%{$ctx->get_target_of()})) {
-        if ($target->get_status() eq $target->ST_UNKNOWN) {
-            my %source_of = %{$target->get_source_of()};
-            my $handler
-                = keys(%source_of) ? \&_target_update
-                :                    \&_target_delete
-                ;
-            $handler->($attrib_ref, $m_ctx, $ctx, $target);
-            my $base = delete($source_of{0});
-            my @diffs = grep {!$_->is_unchanged()} values(%source_of);
-            $target->set_status_of_source(
-                  !keys(%{$target->get_source_of()}) ? $target->ST_UNKNOWN
-                : $base->is_missing()                ? $target->ST_ADDED
-                : (grep {$_->is_missing()} @diffs)   ? $target->ST_DELETED
-                : scalar(@diffs) > 1                 ? $target->ST_MERGED
-                : scalar(@diffs)                     ? $target->ST_MODIFIED
-                :                                      $target->ST_UNCHANGED
-            );
-            $UTIL->event(
-                FCM::Context::Event->MAKE_EXTRACT_TARGET, $target,
-            );
+    eval {
+        while (my ($ns, $target) = each(%{$ctx->get_target_of()})) {
+            if ($target->get_status() eq $target->ST_UNKNOWN) {
+                my %source_of = %{$target->get_source_of()};
+                my $handler
+                    = keys(%source_of) ? \&_target_update
+                    :                    \&_target_delete
+                    ;
+                $handler->($attrib_ref, $m_ctx, $ctx, $target);
+                my $base = delete($source_of{0});
+                my @diffs = grep {!$_->is_unchanged()} values(%source_of);
+                $target->set_status_of_source(
+                      !keys(%{$target->get_source_of()}) ? $target->ST_UNKNOWN
+                    : $base->is_missing()                ? $target->ST_ADDED
+                    : (grep {$_->is_missing()} @diffs)   ? $target->ST_DELETED
+                    : scalar(@diffs) > 1                 ? $target->ST_MERGED
+                    : scalar(@diffs)                     ? $target->ST_MODIFIED
+                    :                                      $target->ST_UNCHANGED
+                );
+                $UTIL->event(
+                    FCM::Context::Event->MAKE_EXTRACT_TARGET, $target,
+                );
+            }
+            $basket_of{status}{$target->get_status()}++;
+            $basket_of{status_of_source}{$target->get_status_of_source()}++;
         }
-        $basket_of{status}{$target->get_status()}++;
-        $basket_of{status_of_source}{$target->get_status_of_source()}++;
+    };
+    if (my $e = $@) {
+        _finally($attrib_ref, $m_ctx, $ctx);
+        die($e);
     }
     $UTIL->event(
         FCM::Context::Event->MAKE_EXTRACT_TARGET_SUMMARY, \%basket_of,
     );
+    _finally($attrib_ref, $m_ctx, $ctx);
 }
 
 # Updates a deleted target.
@@ -1176,6 +1198,28 @@ sub _target_update_source_merge {
         push(@keys_done, $key);
     }
     return $path_of_mine;
+}
+
+# Perform final actions.
+# Archive cache directory if necessary.
+sub _finally {
+    my ($attrib_ref, $m_ctx, $ctx) = @_;
+    if (!$m_ctx->get_option_of('archive')) {
+        return;
+    }
+    my $cache = $attrib_ref->{shared_util_of}{dest}->path(
+        $m_ctx, 'sys-cache', $ctx->get_id(),
+    );
+    if (-d $cache) {
+        my @command = (
+            qw{tar -c -z}, '-C', dirname($cache), '-f', $cache . '.tar.gz',
+            $ctx->get_id(),
+        );
+        my %value_of = %{$UTIL->shell_simple(\@command)};
+        if ($value_of{'rc'} == 0) {
+            rmtree($cache);
+        }
+    }
 }
 
 # In scalar context, returns true if the contents or permissions of 2 paths

@@ -158,15 +158,16 @@ our %OPTIONS_FOR = (
     $HELP_APP       => [@OPTION_OF{qw{quiet verbose}}],
     'keyword-print' => [@OPTION_OF{qw{verbose}}],
     'loc-layout'    => [@OPTION_OF{qw{verbose}}],
-    'merge'         => [@OPTION_OF{
-        qw{auto-log custom dry-run non-interactive quiet reverse revision verbose}
-    }],
-    'mkpatch'       => [@OPTION_OF{qw{exclude organisation revision}}],
     'make'          => [@OPTION_OF{
-        qw{ directory ignore-lock jobs config-file config-file-path name new
-            quiet verbose
+        qw{ archive directory ignore-lock jobs config-file config-file-path name
+            new quiet verbose
         }
     }],
+    'merge'         => [@OPTION_OF{
+        qw{ auto-log custom dry-run non-interactive quiet reverse revision
+            verbose}
+    }],
+    'mkpatch'       => [@OPTION_OF{qw{exclude organisation revision}}],
     'project-create'=> [@OPTION_OF{
         qw{non-interactive password svn-non-interactive}
     }],

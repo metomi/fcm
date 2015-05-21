@@ -1334,6 +1334,17 @@ browser = konqueror
 
     <dd>
       <dl>
+        <dt><code>--archive, -a</code></dt>
+
+        <dd>Switch on archive mode. In archive mode, intermediate files will be
+        put into TAR-GZIP archives on completion, e.g. extract system:
+        <samp>.fcm-make/cache/extract/</samp>, and build system:
+        <samp>build/include/</samp> and <samp>build/o/</samp>.
+
+          <p>The archive mode is not suitable for a make that will be inherited
+          or used by other makes.</p>
+        </dd>
+
         <dt><code>--config-file-path=PATH, -F PATH</code></dt>
 
         <dd>Specifies paths for searching configuration files specified in
