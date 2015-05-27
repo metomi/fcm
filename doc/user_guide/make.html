@@ -167,8 +167,12 @@ build/...
   <dl>
     <dt><samp>.fcm-make/cache/</samp></dt>
 
-    <dd>An area for caching non-local items.  E.g.  the extract system exports
-    source trees from the version control system into this cache.</dd>
+    <dd>An area for caching non-local items. E.g. the extract system exports
+    source trees from the version control system into this cache. If <code>fcm
+    make</code> is invoked with the <code>--archive</code> option, contents in
+    this directory will be compressed into TAR-GZIP files, e.g.
+    <samp>.fcm-make/cache/extract/</samp> will become
+    <samp>.fcm-make/cache/extract.tar.gz</samp>.</dd>
 
     <dt><samp>fcm-make-as-parsed.cfg -&gt;
     .fcm-make/config-as-parsed.cfg</samp></dt>
@@ -939,6 +943,14 @@ build/o/...
 
   <p>Sub-directories are only created as necessary, so you may not find all of
   the above in your destination tree.</p>
+
+  <p>If <code>fcm make</code> is invoked with the <code>--archive</code> option,
+  sub-directories in categories containing intermediate build files (or any
+  category specified in the <a href=
+  "#make.build.prop.archive-ok-target-category">archive-ok-target-category</a>
+  property) will be put into TAR-GZIP files. E.g. with the default setting,
+  <samp>include/</samp> and <samp>o/</samp> will become
+  <samp>include.tar.gz</samp> and <samp>o.tar.gz</samp> respectively.</p>
 
   <p>To use a different compiler and/or compiler options for Fortran/C/C++, you
   use the <a href="annex_cfg.html#make.build.prop">build.prop</a> declaration to

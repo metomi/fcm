@@ -972,7 +972,21 @@ build.prop{fc.libs}[myprog.exe] = netcdf grib
 
     <dt id="make.build.prop.ar.flags">ar.flags</dt>
 
+    <dd>If a list of values is specified, the system will not inherit sources
+    with the name-spaces matching the specified values. If the value is a
+    <samp>*</samp>, the system will not inherit any sources.</dd>
     <dd>The options used by the archive command. (default=<samp>rs</samp>)</dd>
+
+    <dt id=
+    "make.build.prop.archive-ok-target-category">archive-ok-target-category
+    *</dt>
+
+    <dd>If <code>fcm make</code> is invoked with the <code>--archive</code>
+    option, sub-directories in categories containing intermediate build files
+    will be put into TAR-GZIP files. E.g. with the default setting,
+    <samp>include/</samp> and <samp>o/</samp> will become
+    <samp>include.tar.gz</samp> and <samp>o.tar.gz</samp> respectively.
+    (default=<samp>include o</samp>)</dd>
 
     <dt id="make.build.prop.cc">cc</dt>
 
