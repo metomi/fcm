@@ -5,7 +5,7 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
-## Next Release (2015-Q2?)
+## 2015.05.0 (2015-05-28)
 
 FCM release 25.
 
@@ -19,6 +19,16 @@ version of FCM will no longer work in incremental mode on the same directory.
 See also [metomi/rose#1604](https://github.com/metomi/rose/pull/1604).
 
 ### Noteworthy Changes
+
+[#190](https://github.com/metomi/fcm/pull/190):
+fcm make: new `--archive` option. If archive mode is specified, TAR-GZIP these
+items by default:
+* `.fcm-make/cache/extract/`
+* `build/include/`
+* `build/o/`
+
+where `extract` and `build` are names of extract and build steps.
+Users can configure what to TAR-GZIP under `build/`.
 
 [#189](https://github.com/metomi/fcm/pull/189):
 fcm make: correctly support relocation of a make.
