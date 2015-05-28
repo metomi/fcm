@@ -102,7 +102,10 @@ our %HOOK_BEFORE_FOR = (
     'delete' => _get_code_to_match($OPTION_OF{check}),
     'diff'   => sub {
         _get_code_to_replace(
-            $OPTION_OF{graphical}, [qw{--diff-cmd fcm_graphic_diff}]
+            $OPTION_OF{graphical}, [qw{
+                --config-option config:working-copy:exclusive-locking-clients=
+                --diff-cmd fcm_graphic_diff
+            }]
         )->(@_);
         _get_code_to_replace($OPTION_OF{summarize}, ['--summarize'])->(@_);
         _get_code_to_match($OPTION_OF{branch})->(@_);

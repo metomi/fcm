@@ -286,7 +286,10 @@ sub cm_branch_diff {
     local(%ENV) = %ENV;
     $ENV{FCM_GRAPHIC_DIFF} ||= $UTIL->external_cfg_get('graphic-diff');
     my @diff_cmd
-        = $option_ref->{graphical}  ? (qw{--diff-cmd fcm_graphic_diff})
+        = $option_ref->{graphical}  ? (qw{
+            --config-option config:working-copy:exclusive-locking-clients=
+            --diff-cmd fcm_graphic_diff
+        })
         : $option_ref->{'diff-cmd'} ? ('--diff-cmd', $option_ref->{'diff-cmd'})
         :                             ()
         ;
