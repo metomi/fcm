@@ -379,11 +379,12 @@ sub _kw_ctx_load_loc {
     my $value = $c_entry->get_value();
     my $M     = $c_entry->get_modifier_of();
     my $type  = (exists($M->{type}) ? $M->{type} : undef);
-    my $entry
-        = $attrib_ref->{kw_ctx}->add_entry($key, $value, {type => $type});
     if (exists($M->{primary}) && $M->{primary}) {
         my $locator = FCM::Context::Locator->new($value, {type => $type});
-        my $util_of_type = _util_of_type($attrib_ref, $locator);
+        _as_normalised($attrib_ref, $locator);
+        my $entry = $attrib_ref->{kw_ctx}->add_entry(
+            $key, $locator->get_value(), {type => $locator->get_type()},
+        );
         for (@KEYWORD_IMPLIED_SUFFICES) {
             my ($value_suffix, $key_suffix_ref) = @{$_};
             my $locator = $ACTION_OF{cat}->($attrib_ref, $locator, $value_suffix);
@@ -395,6 +396,9 @@ sub _kw_ctx_load_loc {
                 $attrib_ref->{kw_ctx}->add_entry($implied_entry);
             }
         }
+    }
+    else {
+        $attrib_ref->{kw_ctx}->add_entry($key, $value, {type => $type});
     }
 }
 
