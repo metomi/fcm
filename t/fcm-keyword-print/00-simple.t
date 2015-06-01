@@ -25,8 +25,8 @@ URL="file://$PWD/plants"
 svn mkdir --parents -q -m 'test' $URL/{daisy,ivy,holly}/trunk
 mkdir -p conf
 cat >conf/keyword.cfg <<__CFG__
-location{primary}[daisy]=$URL/daisy
-location{primary}[ivy]=$URL/ivy
+location{primary}[daisy]=$URL/daisy/
+location{primary}[ivy]=$URL/ivy//
 location{primary}[holly]=$URL/holly
 __CFG__
 export FCM_CONF_PATH=$PWD/conf
