@@ -5,6 +5,23 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## Next Release (2015-Q2?)
+
+FCM release 26.
+
+### Noteworthy Changes
+
+[#192](https://github.com/metomi/fcm/pull/192):
+Primary location keyword: trailing slashes in values of primary location
+keywords will now removed automatically.
+
+[#191](https://github.com/metomi/fcm/pull/191):
+fcm (branch-)diff --graphical: will now use the option
+`--config-option config:working-copy:exclusive-locking-clients=` to prevent the
+client from being locked.
+
+--------------------------------------------------------------------------------
+
 ## 2015.05.0 (2015-05-28)
 
 FCM release 25.
