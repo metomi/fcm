@@ -180,9 +180,17 @@ echo '20' >"$REPOS_PATH/hooks/pre-commit-size-threshold.conf"
 perl -e 'map {print(rand())} 1..2097152' >file3 # a large file
 run_pass "$TEST_KEY" \
     svn import --no-auth-cache -q -m'test' file3 "$REPOS_URL/file3"
+TXN="$(<'txn')"
 # Tests
-run_fail "$TEST_KEY.pre-commit.log" test -s "$REPOS_PATH/log/pre-commit.log"
-run_fail "$TEST_KEY.mail.out" test -e mail.out
+date2datefmt "$REPOS_PATH/log/pre-commit.log" \
+    | sed 's/\(size \).*\(MB exceeds\)/\1??\2/' \
+    >"$TEST_KEY.pre-commit.log.expected"
+file_cmp "${TEST_KEY}.pre-commit.log" "${TEST_KEY}.pre-commit.log.expected" <<__LOG__
+YYYY-mm-ddTHH:MM:SSZ+ ${TXN} by ${USER}
+A   file3
+foo@${TXN}: changeset size ??MB exceeds 1MB.
+__LOG__
+run_fail "$TEST_KEY.mail.out" test -e 'mail.out'
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE-custom-1" # block by custom script
 test_tidy

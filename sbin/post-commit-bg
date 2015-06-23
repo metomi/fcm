@@ -100,14 +100,22 @@ main() {
     trac_hook "$REPOS" "$REV" added || RET_CODE=$?
 
     # Check size - send warning email if threshold exceeded
-    local REV_FILE=$REPOS/db/revs/$((REV / 1000))/$REV
-    local REV_FILE_SIZE_THRESHOLD=1048576 # 1MB
-    local REV_FILE_SIZE=$(du -b -s $REV_FILE | cut -f 1)
-    if (($REV_FILE_SIZE > $REV_FILE_SIZE_THRESHOLD)); then
-        echo "REV_FILE_SIZE=$REV_FILE_SIZE # EXCEED $REV_FILE_SIZE_THRESHOLD"
+    local MB=1048576
+    local THRESHOLD=10
+    local SIZE_THRESHOLD_FILE="${REPOS}/hooks/pre-commit-size-threshold.conf"
+    if [[ -f "${SIZE_THRESHOLD_FILE}" && -r "${SIZE_THRESHOLD_FILE}" ]]; then
+        THRESHOLD=$(<"${SIZE_THRESHOLD_FILE}")
+    fi
+    local REV_FILE="${REPOS}/db/revs/$((${REV} / 1000))/${REV}"
+    local REV_FILE_SIZE=$(du -b -s "${REV_FILE}" | cut -f 1)
+    if ((${REV_FILE_SIZE} > ${THRESHOLD} * ${MB})); then
+        echo "REV_FILE_SIZE=${REV_FILE_SIZE} # >${THRESHOLD}MB"
+        RET_CODE=1
+    elif ((${REV_FILE_SIZE} > ${MB})); then
+        echo "REV_FILE_SIZE=${REV_FILE_SIZE} # >1MB <${THRESHOLD}MB"
         RET_CODE=1
     else
-        echo "REV_FILE_SIZE=$REV_FILE_SIZE # within $REV_FILE_SIZE_THRESHOLD"
+        echo "REV_FILE_SIZE=${REV_FILE_SIZE} # <1MB"
     fi
 
     # Install commit.conf and svnperms.conf, if necessary

@@ -48,13 +48,16 @@ export PATH=${PATH:-'/usr/local/bin:/bin:/usr/bin'}:$(dirname $0)
 THIS=$(basename $0)
 USER=${USER:-$(whoami)}
 NAME=$(basename "$REPOS")
-LOG_TXN="$REPOS/$THIS-$TXN.log"
+LOG_TXN="$REPOS/log/$THIS-$TXN.log"
 
-main() {
+begin() {
     local NOW=$(date -u +%FT%H:%M:%SZ)
     local AUTHOR=$(svnlook author -t "$TXN" "$REPOS")
     echo "$NOW+ $TXN by $AUTHOR"
     svnlook changed -t "$TXN" "$REPOS"
+}
+
+main() {
     local ADMIN_EMAIL=${FCM_SVN_HOOK_ADMIN_EMAIL:-Admin}
 
     # Check size.
@@ -71,6 +74,10 @@ main() {
         echo "$NAME@$TXN: changeset size ${SIZE}B exceeds ${THRESHOLD}MB." >&2
         echo "Email $ADMIN_EMAIL if you need to bypass this restriction." >&2
         return 1
+    elif ((SIZE > MB)); then
+        # Log any changesets bigger than 1MB
+        SIZE=$(du -h "$TXN_FILE" | cut -f 1)
+        echo "$NAME@$TXN: changeset size ${SIZE}B exceeds 1MB." >&2
     fi
 
     # Check permission.
@@ -97,7 +104,9 @@ main() {
 }
 
 RET_CODE=0
-if ! main 1>"$LOG_TXN" 2>&1; then
+begin 1>"${LOG_TXN}" 2>&1
+LOG_TXN_SIZE="$(stat -c '%s' "${LOG_TXN}")"
+if ! main 1>>"${LOG_TXN}" 2>&1; then
     if [[ -n ${FCM_SVN_HOOK_ADMIN_EMAIL:-} ]]; then
         mail -s "[$THIS] $REPOS@$TXN" "$FCM_SVN_HOOK_ADMIN_EMAIL" <"$LOG_TXN" \
             || true
@@ -105,6 +114,8 @@ if ! main 1>"$LOG_TXN" 2>&1; then
     cat "$LOG_TXN"
     cat "$LOG_TXN" >&2
     RET_CODE=1
+elif [[ "${LOG_TXN_SIZE}" != "$(stat -c '%s' "${LOG_TXN}")" ]]; then
+    cat "$LOG_TXN"
 fi
 rm -f "$LOG_TXN"
 exit $RET_CODE
