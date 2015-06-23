@@ -1742,16 +1742,20 @@ build.prop{fc.flags}[src/food/sausage.f90] = -O4
   you to select targets according to their categories, source name-spaces,
   tasks and keys. The logic is demonstrated by the following example:</p>
   <pre>
-# Selects targets matching these keys
+# Select targets matching these keys
 build.target = egg.bin ham.o bacon.sh
-# OR (
-#     those doing these tasks
+
+# Select all targets doing tasks "install" or "link"
 build.target{task} = install link
-#     AND in these categories
+
+# Select targets in name-space "foo" or "bar" doing tasks "link"
+build.target{task}[foo bar] = link
+
+# Select all targets in the "bin" category
 build.target{category} = bin
-#     AND in these name-spaces
-build.target{ns} = foo bar/baz
-# )
+
+# Select targets in name-space "foo" in the "etc" category
+build.target{category}[foo] = etc
 </pre>
 
   <p>There are times when an automatic target name is not what you want. In
@@ -2193,8 +2197,10 @@ steps = extract preprocess build
 
 # ... some extract configuration
 
+# Switch off preprocessing for all
+preprocess.target{task} =
 # Only preprocess source files in these name-spaces
-preprocess.target{ns} = foo/bar egg/fried.F90
+preprocess.target{task}[foo/bar egg/fried.F90] = process
 # Specifies the macro definitions for the Fortran preprocessor
 preprocess.prop{fpp.defs} = THING=stuff HIGH=tall
 # Specifies the macro definitions for the C preprocessor
@@ -2268,7 +2274,6 @@ preprocess.prop{cpp.defs} = LOWER=lower UNDER LINUX
 preprocess.target =
 preprocess.target{task} = process
 preprocess.target{category} =
-preprocess.target{ns} =
 </pre>
 
   <p>Here is a list of what targets are available for each type of file:</p>

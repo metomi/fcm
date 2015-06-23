@@ -60,7 +60,11 @@ our @FILE_TYPE_UTILS = (
 );
 
 # Default target selection
-our %TARGET_SELECT_BY = (task => {});
+our %TARGET_SELECT_BY = (
+    'category' => {},
+    'key'      => {},
+    'task'     => {},
+);
 
 # Configuration parser label to action map
 our %CONFIG_PARSER_OF = (
@@ -181,8 +185,16 @@ sub _config_parse_inherit_hook {
     while (my ($key, $value) = each(%{$i_ctx->get_target_key_of()})) {
         $ctx->get_target_key_of()->{$key} = $value;
     }
-    while (my ($key, $value) = each(%{$i_ctx->get_target_select_by()})) {
-        $ctx->get_target_select_by()->{$key} = dclone($value);
+    while (my ($key, $item_ref) = each(%{$i_ctx->get_target_select_by()})) {
+        while (my ($key2, $attr_set) = each(%{$item_ref})) {
+            if (ref($attr_set)) {
+                $ctx->get_target_select_by()->{$key}{$key2} = {%{$attr_set}};
+            }
+            else {
+                # Backward compat, $key2 is an $attr
+                $ctx->get_target_select_by()->{$key}{q{}}{$key2} = 1;
+            }
+        }
     }
     _config_parse_inherit_hook_prop($attrib_ref, $ctx, $i_ctx);
 }
@@ -211,15 +223,24 @@ sub _config_parse_source {
 sub _config_parse_target {
     my ($attrib_ref, $ctx, $entry) = @_;
     my %modifier_of = %{$entry->get_modifier_of()};
-    if (!keys(%modifier_of)) {
+    if (!(%modifier_of)) {
         %modifier_of = (key => 1);
     }
+    my @ns_list = map {$_ eq q{/} ? q{} : $_} @{$entry->get_ns_list()};
+    if (exists($modifier_of{'key'}) && grep {$_} @ns_list) {
+        return $E->throw($E->CONFIG_NS, $entry);
+    }
+    if (!@ns_list) {
+        @ns_list = (q{});
+    }
     while (my $name = each(%modifier_of)) {
-        if (!grep {$_ eq $name} qw{category key ns task}) {
+        if (!grep {$_ eq $name} qw{category key task}) {
             return $E->throw($E->CONFIG_MODIFIER, $entry);
         }
-        $ctx->get_target_select_by()->{$name}
-            = {map {$_ eq q{/} ? (q{} => 1) : ($_ => 1)} $entry->get_values()};
+        my %attr_set = map {($_ => 1)} $entry->get_values();
+        for my $ns (@ns_list) {
+            $ctx->get_target_select_by()->{$name}{$ns} = \%attr_set;
+        }
     }
 }
 
@@ -282,13 +303,20 @@ sub _config_unparse {
             : ()
         ),
         (   map {
-                FCM::Context::ConfigEntry->new({
-                    label       => $LABEL_OF{'target'},
-                    modifier_of => {$_ => 1},
-                    value       => _config_unparse_join(
-                        keys(%{$ctx->get_target_select_by()->{$_}}),
-                    ),
-                });
+                my $modifier = $_;
+                map {
+                    my $ns = $_;
+                    my @values = sort(keys(
+                        %{$ctx->get_target_select_by()->{$modifier}{$ns}}
+                    ));
+                    FCM::Context::ConfigEntry->new({
+                        label       => $LABEL_OF{'target'},
+                        modifier_of => {$modifier => 1},
+                        ns_list     => [$ns],
+                        value       => _config_unparse_join(@values),
+                    });
+                }
+                sort keys(%{$ctx->get_target_select_by()->{$modifier}});
             }
             sort keys(%{$ctx->get_target_select_by()})
         ),
@@ -1035,18 +1063,23 @@ sub _targets_select {
     my %target_set;
     my %has_ns_in; # available sets of name-spaces
     for my $target (@{$targets_ref}) {
-        if (    exists($select_by{key}{$target->get_key()})
-            ||      (       !exists($select_by{category})
-                        ||  exists($select_by{category}{$target->get_category()})
-                    )
-                &&  (       !exists($select_by{task})
-                        ||  exists($select_by{task}{$target->get_task()})
-                    )
-                &&  (       !exists($select_by{ns})
-                        ||  $UTIL->ns_in_set($target->get_ns(), $select_by{ns})
-                    )
+        ATTR_NAME:
+        for (
+            #$attr_name, $attr_func
+            ['key'     , sub {$_[0]->get_key()}],
+            ['category', sub {$_[0]->get_category()}],
+            ['task'    , sub {$_[0]->get_task()}],
         ) {
-            $target_set{$target->get_key()} = 1;
+            my ($attr_name, $attr_func) = @{$_};
+            for my $ns (sort keys(%{$select_by{$attr_name}})) {
+                my %attr_set = %{$select_by{$attr_name}->{$ns}};
+                if (    exists($attr_set{$attr_func->($target)})
+                    &&  (!$ns || $UTIL->ns_in_set($target->get_ns(), {$ns => 1}))
+                ) {
+                    $target_set{$target->get_key()} = 1;
+                    last ATTR_NAME;
+                }
+            }
         }
         if (exists($target_of{$target->get_key()})) {
             if (!exists($targets_of{$target->get_key()})) {
@@ -1250,8 +1283,8 @@ sub _targets_select {
     if (keys(%missing_deps_in)) {
         return $E->throw($E->BUILD_TARGET_DEP, \%missing_deps_in);
     }
-    if (exists($select_by{key})) {
-        my @bad_keys = grep {!exists($state_of{$_})} keys(%{$select_by{key}});
+    if (exists($select_by{key}{q{}})) {
+        my @bad_keys = grep {!exists($state_of{$_})} keys(%{$select_by{key}{q{}}});
         if (@bad_keys) {
             return $E->throw($E->BUILD_TARGET_BAD, \@bad_keys);
         }

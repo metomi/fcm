@@ -27,7 +27,11 @@ use FCM::System::Make::Build::FileType::FPP;
 use FCM::System::Make::Build::FileType::H  ;
 
 # Default target selection
-our %TARGET_SELECT_BY = (task => {'process' => 1});
+our %TARGET_SELECT_BY = (
+    'category' => {},
+    'key'      => {},
+    'task'     => {q{} => {'process' => 1}},
+);
 
 # Classes for working with typed source files
 our @FILE_TYPE_UTILS = (

@@ -897,20 +897,24 @@ build.ns-incl = foo bar/baz # include items in these name-spaces
 
     <dd>
       <p><dfn>description</dfn>: Selects targets to build according to their
-      keys, categories, name-spaces and tasks.</p>
+      keys, categories and tasks.</p>
 
       <p><dfn>modifier</dfn>: <samp>key</samp> (default if no modifier
-      specified), <samp>category</samp>, <samp>ns</samp> (i.e. name-space) or
-      <samp>task</samp></p>
+      specified), <samp>category</samp> or <samp>task</samp></p>
+
+      <p><dfn>namespace</dfn>: Not allowed if modifier is <samp>key</samp>.
+      Optional if modifier is <samp>category</samp> or <samp>task</samp>. If
+      specified, setting only applies to given name-spaces. Otherwise, setting
+      applies to all name-spaces.</p>
 
       <p><dfn>value</dfn>: A list of space-delimited items (according to the
       modifier).</p>
 
       <p><dfn>example</dfn>:</p>
       <pre>
-build.target{category} = bin lib
-build.target{ns} = egg/fried ham
-build.target{task} = archive install link
+build.target{category}[etc/namelists etc/configs] = etc
+build.target{category}[src/hello src/greet src/world] = bin lib
+build.target{task}[src/public] = archive install
 build.target = egg.sh mince.py
 </pre>
     </dd>
