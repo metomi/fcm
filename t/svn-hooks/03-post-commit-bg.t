@@ -29,15 +29,16 @@ test_tidy() {
         "$REPOS_PATH/hooks/post-commit-background-custom" \
         "$REPOS_PATH/hooks/commit.conf" \
         "$REPOS_PATH/log/post-commit.log" \
-        file1 \
-        file2 \
-        file3 \
-        file4 \
-        svnperms.conf \
-        mail.out
+        'file1' \
+        'file2' \
+        'file3' \
+        'file4' \
+        'file5' \
+        'svnperms.conf' \
+        'mail.out'
 }
 #-------------------------------------------------------------------------------
-tests 38
+tests 40
 #-------------------------------------------------------------------------------
 cp -p "$FCM_HOME/etc/svn-hooks/post-commit" "$REPOS_PATH/hooks/"
 sed -i "/set -eu/a\
@@ -58,7 +59,7 @@ svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
     | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
 mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
-REV_FILE_SIZE=??? # within 1048576
+REV_FILE_SIZE=??? # <1MB
 RET_CODE=0
 __LOG__
 if [[ -n ${TRAC_ENV_PATH:-} ]] && ! $TRAC_RESYNC; then
@@ -95,7 +96,7 @@ svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
     | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
 mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
-REV_FILE_SIZE=??? # within 1048576
+REV_FILE_SIZE=??? # <1MB
 svnlook cat $REPOS_PATH ${NAME} >$REPOS_PATH/hooks/${NAME}
 RET_CODE=0
 __LOG__
@@ -123,7 +124,7 @@ svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
     | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
 mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
-REV_FILE_SIZE=??? # within 1048576
+REV_FILE_SIZE=??? # <1MB
 svnlook cat $REPOS_PATH ${NAME} >$REPOS_PATH/hooks/${NAME}
 RET_CODE=0
 __LOG__
@@ -145,7 +146,7 @@ svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
     | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
 mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
-REV_FILE_SIZE=??? # within 1048576
+REV_FILE_SIZE=??? # <1MB
 rm -f $REPOS_PATH/hooks/${NAME}
 RET_CODE=0
 __LOG__
@@ -167,7 +168,7 @@ svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
     | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
 mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
-REV_FILE_SIZE=??? # EXCEED 1048576
+REV_FILE_SIZE=??? # >1MB <10MB
 RET_CODE=1
 __LOG__
 date2datefmt mail.out \
@@ -180,19 +181,51 @@ svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
     | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
 mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
-REV_FILE_SIZE=??? # EXCEED 1048576
+REV_FILE_SIZE=??? # >1MB <10MB
+RET_CODE=1
+__LOG__
+#-------------------------------------------------------------------------------
+TEST_KEY="$TEST_KEY_BASE-size-2"
+test_tidy
+perl -e 'map {print(rand())} 1..2097152' >'file3' # compress should be >10MB
+svn import --no-auth-cache -q -m"${TEST_KEY}" 'file3' "${REPOS_URL}/file3"
+REV="$(<'rev')"
+poll 10 grep -q '^RET_CODE=' "${REPOS_PATH}/log/post-commit.log"
+date2datefmt "${REPOS_PATH}/log/post-commit.log" \
+    | sed '/^trac-admin/d; s/^\(REV_FILE_SIZE=\).*\( #\)/\1???\2/' \
+    >"${TEST_KEY}.log"
+file_cmp "${TEST_KEY}.log" "${TEST_KEY}.log" <<__LOG__
+YYYY-mm-ddTHH:MM:SSZ+ ${REV} by ${USER}
+svnadmin dump -r${REV} --incremental --deltas ${REPOS_PATH} | gzip \\
+    | (dd 'conv=fsync' "of=${PWD}/svn-dumps/foo-${REV}-tmp.gz" 2>/dev/null)
+* Dumped revision ${REV}.
+mv "${PWD}/svn-dumps/foo-${REV}-tmp.gz" "${PWD}/svn-dumps/foo-${REV}.gz"
+REV_FILE_SIZE=??? # >10MB
+RET_CODE=1
+__LOG__
+date2datefmt mail.out \
+    | sed '/^trac-admin/d; s/^\(REV_FILE_SIZE=\).*\( #\)/\1???\2/' \
+    >"${TEST_KEY}.mail.out"
+file_cmp "${TEST_KEY}.mail.out" "${TEST_KEY}.mail.out" <<__LOG__
+-s [post-commit-bg] ${REPOS_PATH}@${REV} fcm.admin.team
+YYYY-mm-ddTHH:MM:SSZ+ ${REV} by ${USER}
+svnadmin dump -r${REV} --incremental --deltas ${REPOS_PATH} | gzip \\
+    | (dd 'conv=fsync' "of=${PWD}/svn-dumps/foo-${REV}-tmp.gz" 2>/dev/null)
+* Dumped revision ${REV}.
+mv "${PWD}/svn-dumps/foo-${REV}-tmp.gz" "${PWD}/svn-dumps/foo-${REV}.gz"
+REV_FILE_SIZE=??? # >10MB
 RET_CODE=1
 __LOG__
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE-custom-1" # good custom
 test_tidy
-touch file3
+touch file4
 cat >"$REPOS_PATH/hooks/post-commit-bg-custom" <<'__BASH__'
 #!/bin/bash
 echo "$@"
 __BASH__
 chmod +x "$REPOS_PATH/hooks/post-commit-bg-custom"
-svn import --no-auth-cache -q -m"$TEST_KEY" file3 "$REPOS_URL/file3"
+svn import --no-auth-cache -q -m"$TEST_KEY" file4 "$REPOS_URL/file4"
 REV=$(<rev)
 TXN=$(<txn)
 poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
@@ -205,7 +238,7 @@ svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
     | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
 mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
-REV_FILE_SIZE=??? # within 1048576
+REV_FILE_SIZE=??? # <1MB
 $REPOS_PATH/hooks/post-commit-bg-custom $REPOS_PATH $REV $TXN
 $REPOS_PATH $REV $TXN
 RET_CODE=0
@@ -220,8 +253,8 @@ echo 'I have gone to the dark side.' >&2
 false
 __BASH__
 chmod +x "$REPOS_PATH/hooks/post-commit-background-custom"
-touch file4
-svn import --no-auth-cache -q -m"$TEST_KEY" file4 "$REPOS_URL/file4"
+touch file5
+svn import --no-auth-cache -q -m"$TEST_KEY" file5 "$REPOS_URL/file5"
 REV=$(<rev)
 TXN=$(<txn)
 poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
@@ -234,7 +267,7 @@ svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
     | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
 mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
-REV_FILE_SIZE=??? # within 1048576
+REV_FILE_SIZE=??? # <1MB
 $REPOS_PATH/hooks/post-commit-background-custom $REPOS_PATH $REV $TXN
 I have gone to the dark side.
 RET_CODE=1
