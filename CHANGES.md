@@ -5,11 +5,23 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
-## Next Release (2015-Q2?)
+## Next Release (2015-Q3?)
 
 FCM release 26.
 
 ### Noteworthy Changes
+
+[#197](https://github.com/metomi/fcm/pull/197):
+fcm make: build: fix target select modifier.
+* The `category` modifier should now work.
+* The `ns` modifier never worked, and is removed.
+  Instead `task` and `category` selection can now be filtered by name-space.
+
+[#196](https://github.com/metomi/fcm/pull/196):
+pre/post commit: improve changeset size diagnostic
+* pre-commit: log (but don't email) >1MB transactions
+* post-commit: report pre-commit size threshold (normally 10MB) for any >1MB
+  changesets
 
 [#192](https://github.com/metomi/fcm/pull/192):
 Primary location keyword: trailing slashes in values of primary location
