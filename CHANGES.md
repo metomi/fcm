@@ -5,7 +5,7 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
-## Next Release (2015-Q3?)
+## 2015.07.0 (2015-07-09)
 
 FCM release 26.
 
