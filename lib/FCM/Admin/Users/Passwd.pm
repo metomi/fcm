@@ -69,7 +69,7 @@ sub _get_users_info {
         });
     }
     endpwent();
-    return (wantarray() ? %user_of : \%user_of);
+    return \%user_of;
 }
 
 # Gets a HASH of users matching @only_users using the POSIX password DB.
