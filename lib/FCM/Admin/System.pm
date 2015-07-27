@@ -195,7 +195,7 @@ sub add_trac_environment {
     );
     $RUN->(
         "adding names and emails of users",
-        sub {manage_users_in_trac_db_of($project, {get_users()})},
+        sub {manage_users_in_trac_db_of($project, get_users())},
     );
     $RUN->(
         "updating configuration file",
@@ -549,12 +549,16 @@ sub get_projects_from_trac_live {
 # these IDs.
 sub get_users {
     my @only_users = @_;
+    my $name = $CONFIG->get_user_info_tool();
     if (!defined($USER_INFO_TOOL)) {
-        my $name = $CONFIG->get_user_info_tool();
         my $class = $UTIL->class_load($USER_INFO_TOOL_OF{$name});
         $USER_INFO_TOOL = $class->new({util => $UTIL});
     }
-    return $USER_INFO_TOOL->get_users_info(@only_users);
+    my $user_hash_ref = $USER_INFO_TOOL->get_users_info(@only_users);
+    if (!%{$user_hash_ref}) {
+        die("No user found via $name.\n");
+    }
+    return $user_hash_ref;
 }
 
 # ------------------------------------------------------------------------------

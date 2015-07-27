@@ -58,7 +58,7 @@ sub _get_users_info {
             });
         }
     }
-    return (wantarray() ? %user_of : \%user_of);
+    return \%user_of;
 }
 
 # Return a list of bad users.
