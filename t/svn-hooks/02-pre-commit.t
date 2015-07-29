@@ -43,7 +43,7 @@ test_tidy() {
         'work'
 }
 #-------------------------------------------------------------------------------
-tests 82
+tests 86
 #-------------------------------------------------------------------------------
 export FCM_CONF_DIR=
 cp -p "$FCM_HOME/etc/svn-hooks/pre-commit" "$REPOS_PATH/hooks/"
@@ -410,6 +410,60 @@ echo 'Greeting Earthlings' >'README'
 run_pass "${TEST_KEY}" svn import --no-auth-cache -q -m 'greet: new project' \
     'README' "${REPOS_URL}/greet/trunk/README"
 run_fail "${TEST_KEY}.pre-commit.log" test -s "${REPOS_PATH}/log/pre-commit.log"
+
+# Create, bad 2, branch create on non-existing project with non-owner user
+test_tidy
+TEST_KEY="${TEST_KEY_BASE}-branch-create-no-project"
+cat >"${REPOS_PATH}/hooks/commit.cfg" <<__CONF__
+owner=nosuchuser
+permission-modes=repository project branch
+__CONF__
+echo 'Greeting Earthlings' >'README'
+run_fail "${TEST_KEY}" svn import --no-auth-cache -q -m 'hail bad branch' \
+    'README' "${REPOS_URL}/hail/branches/dev/${USER}/whatever/README"
+TXN=$(<'txn')
+date2datefmt "${REPOS_PATH}/log/pre-commit.log" >"${TEST_KEY}.pre-commit.log"
+file_cmp "${TEST_KEY}.pre-commit.log" "${TEST_KEY}.pre-commit.log" <<__LOG__
+YYYY-mm-ddTHH:MM:SSZ+ ${TXN} by ${USER}
+A   hail/
+A   hail/branches/
+A   hail/branches/dev/
+A   hail/branches/dev/${USER}/
+A   hail/branches/dev/${USER}/whatever/
+A   hail/branches/dev/${USER}/whatever/README
+PERMISSION DENIED: A   hail/
+PERMISSION DENIED: A   hail/branches/
+PERMISSION DENIED: A   hail/branches/dev/
+PERMISSION DENIED: A   hail/branches/dev/frsn/
+PERMISSION DENIED: A   hail/branches/dev/frsn/whatever/
+PERMISSION DENIED: A   hail/branches/dev/frsn/whatever/README
+__LOG__
+
+# Create, bad 3, branch create on root with non-owner user
+test_tidy
+TEST_KEY="${TEST_KEY_BASE}-bad-branch-create-on-root"
+cat >"${REPOS_PATH}/hooks/commit.cfg" <<__CONF__
+owner=nosuchuser
+permission-modes=repository project branch
+__CONF__
+echo 'Greeting Earthlings' >'README'
+run_fail "${TEST_KEY}" svn import --no-auth-cache -q -m 'whatever branch' \
+    'README' "${REPOS_URL}/branches/dev/${USER}/whatever/README"
+TXN=$(<'txn')
+date2datefmt "${REPOS_PATH}/log/pre-commit.log" >"${TEST_KEY}.pre-commit.log"
+file_cmp "${TEST_KEY}.pre-commit.log" "${TEST_KEY}.pre-commit.log" <<__LOG__
+YYYY-mm-ddTHH:MM:SSZ+ ${TXN} by ${USER}
+A   branches/
+A   branches/dev/
+A   branches/dev/${USER}/
+A   branches/dev/${USER}/whatever/
+A   branches/dev/${USER}/whatever/README
+PERMISSION DENIED: A   branches/
+PERMISSION DENIED: A   branches/dev/
+PERMISSION DENIED: A   branches/dev/${USER}/
+PERMISSION DENIED: A   branches/dev/${USER}/whatever/
+PERMISSION DENIED: A   branches/dev/${USER}/whatever/README
+__LOG__
 
 # Modify, bad
 test_tidy

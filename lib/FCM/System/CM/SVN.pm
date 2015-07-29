@@ -236,7 +236,15 @@ sub _get_layout_common {
             }
             push(@head, $name);
         }
-        if (!defined($project)) {
+        if (defined($project) && $layout_config{'dir-trunk'}) {
+            # Check that trunk exists for $project
+            my $target = $project . '/' . $layout_config{'dir-trunk'};
+            if (!_verify_path($attrib_ref, $root, $rev, $target, $is_local)) {
+                $project = undef;
+                @names = ();
+            }
+        }
+        elsif (!defined($project)) {
             # $path does not contain the specific sub-directories that
             # contain the trunk, branches and tags, but $path itself may be
             # the project

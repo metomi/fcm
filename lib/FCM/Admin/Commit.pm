@@ -161,6 +161,7 @@ sub pre_commit_perm {
         # Branch owner perm mode
         if (    $commit_conf->get_permission_modes()->{'branch'}
             &&  $layout->is_branch()
+            &&  defined($project)
             &&  defined($branch)
         ) {
             my $branch_path = join(q{/}, grep {$_} ($project, $branch));
@@ -222,7 +223,10 @@ sub pre_commit_perm {
                 # "$line_of_unknown_path{$path}" may be deleted if it is a part
                 # of a valid branch creation, project creation, etc. by an
                 # author who is not a repository owner.
-                if ($status eq 'A' && !$project) {
+                if ($status eq 'A' && !defined($project)) {
+                    push(@bads, [$line]);
+                }
+                elsif ($status eq 'A' && !$project) {
                     $line_of_unknown_path{$path} = $line;
                 }
                 # Permission denied for everything else.
