@@ -217,11 +217,11 @@ sub pre_commit_perm {
         # Repository owner can do anything
         if ($commit_conf->get_permission_modes()->{'repository'}) {
             if (!_perm_ok($commit_conf, $author)) {
-                # An author who is not a project owner can add paths under the
+                # An author who is not a repository owner can add paths under a
                 # project as part of a branch creation, project creation, etc.
                 # "$line_of_unknown_path{$path}" may be deleted if it is a part
                 # of a valid branch creation, project creation, etc. by an
-                # author who is not a project owner.
+                # author who is not a repository owner.
                 if ($status eq 'A' && !$project) {
                     $line_of_unknown_path{$path} = $line;
                 }
