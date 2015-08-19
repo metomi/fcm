@@ -5,6 +5,12 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## 2015.08.0 (2015-08-19)
+
+FCM release 27. Minor update to admin utilities, nothing noteworthy for users.
+
+--------------------------------------------------------------------------------
+
 ## 2015.07.0 (2015-07-09)
 
 FCM release 26.
