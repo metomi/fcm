@@ -43,6 +43,7 @@ use FCM::Admin::Util qw{
 };
 use Fcntl qw{:mode}; # for S_IRGRP, S_IWGRP, S_IROTH, etc
 use File::Basename qw{basename dirname};
+use File::Compare qw{compare};
 use File::Find qw{find};
 use File::Spec::Functions qw{catfile rel2abs};
 use File::Temp qw{tempdir tempfile};
@@ -624,23 +625,6 @@ sub housekeep_svn_hook_logs {
 # Installs hook scripts to a SVN project.
 sub install_svn_hook {
     my ($project, $clean_mode) = @_;
-    my %path_of;
-    for (
-        [$CONFIG->get_fcm_site_home(), 'svn-hooks', $project->get_name()],
-        [$CONFIG->get_fcm_home(), 'etc', 'svn-hooks'],
-    ) {
-        my $hook_source_dir = catfile(@{$_});
-        _get_files_from(
-            $hook_source_dir,
-            sub {
-                my ($base_name, $path) = @_;
-                if (index($base_name, q{.}) == 0 || -d $path) {
-                    return;
-                }
-                $path_of{$base_name} = $path;
-            },
-        );
-    }
     # Write hook environment configuration
     my $project_path = $project->get_svn_live_path();
     my $conf_dest = catfile($project_path, qw{conf hooks-env});
@@ -659,9 +643,22 @@ sub install_svn_hook {
             ['TZ', 'UTC'],
         )
     );
+    my %can_clean;
+    my %norm_path_of = ();
+    _get_files_from(
+        catfile($CONFIG->get_fcm_home(), 'etc', 'svn-hooks'),
+        sub {
+            my ($base_name, $path) = @_;
+            if (index($base_name, q{.}) == 0 || -d $path) {
+                return;
+            }
+            $norm_path_of{$base_name} = $path;
+            $can_clean{$base_name} = $path;
+        },
+    );
     # Install hook scripts and associated files
-    for my $key (sort keys(%path_of)) {
-        my $hook_source = $path_of{$key};
+    for my $key (sort keys(%norm_path_of)) {
+        my $hook_source = $norm_path_of{$key};
         my $hook_dest = catfile($project->get_svn_live_hook_path(), $key);
         run_copy($hook_source, $hook_dest);
     }
@@ -680,14 +677,34 @@ sub install_svn_hook {
                     chmod((stat($dest))[2] | S_IRGRP | S_IROTH, $dest);
                 },
             );
-            $path_of{$name} = "^/$name";
+            $can_clean{$name} = "^/$name";
+        }
+    }
+    my %more_path_of = ();
+    _get_files_from(
+        catfile($CONFIG->get_fcm_site_home(), 'svn-hooks', $project->get_name()),
+        sub {
+            my ($base_name, $path) = @_;
+            if (index($base_name, q{.}) == 0 || -d $path) {
+                return;
+            }
+            $more_path_of{$base_name} = $path;
+            $can_clean{$base_name} = $path;
+        },
+    );
+    # Install hook scripts and associated files
+    for my $key (sort keys(%more_path_of)) {
+        my $hook_source = $more_path_of{$key};
+        my $hook_dest = catfile($project->get_svn_live_hook_path(), $key);
+        if (!-e $hook_dest || compare($hook_source, $hook_dest)) {
+            run_copy($hook_source, $hook_dest);
         }
     }
     # Clean hook destination, if necessary
     if ($clean_mode) {
         my $hook_path = $project->get_svn_live_hook_path();
         for my $path (sort glob(catfile($hook_path, q{*}))) {
-            if (!exists($path_of{basename($path)})) {
+            if (!exists($can_clean{basename($path)})) {
                 run_rmtree($path);
             }
         }
@@ -984,15 +1001,21 @@ sub _chgrp_and_chmod {
     find(
         sub {
             my $file = $File::Find::name;
-            $RUNNER->run(
-                "changing group ownership for $file",
-                sub {return chown(-1, $gid, $file)},
-            );
+            my $old_gid = (stat($file))[5];
+            if ($old_gid != $gid) {
+                $RUNNER->run(
+                    "changing group ownership for $file",
+                    sub {return chown(-1, $gid, $file)},
+                );
+            }
+            my $old_mode = (stat($file))[2];
             my $mode = (stat($file))[2] | S_IRGRP | S_IWGRP;
-            $RUNNER->run(
-                "adding group write permission for $file",
-                sub {return chmod($mode, $file)},
-            );
+            if ($old_mode != $mode) {
+                $RUNNER->run(
+                    "adding group write permission for $file",
+                    sub {return chmod($mode, $file)},
+                );
+            }
         },
         $path,
     );
