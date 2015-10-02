@@ -24,7 +24,7 @@ working copy) must be URL under a standard FCM project.
 
 =over 4
 
-=item --branch-of-branch
+=item --branch-of-branch, --bob
 
 If this option is specified and the SOURCE is a branch, it will create a new
 branch from the SOURCE branch. Otherwise, the branch is created from the trunk.

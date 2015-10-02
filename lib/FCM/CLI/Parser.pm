@@ -43,7 +43,7 @@ our %OPTION_OF = map {
     [['archive'            ,            ], ['a'], OPT_BOOL],
     [['auto-log'           ,            ], [   ], OPT_BOOL],
     [['branch'             ,            ], ['b'], OPT_BOOL],
-    [['branch-of-branch'   ,            ], [   ], OPT_BOOL],
+    [['branch-of-branch'   , 'bob'      ], [   ], OPT_BOOL],
     [['browser'            ,            ], ['b'], OPT_SCAL],
     [['check'              ,            ], ['c'], OPT_BOOL],
     [['clean'              ,            ], [   ], OPT_BOOL],
