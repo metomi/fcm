@@ -1874,7 +1874,7 @@ build.prop{file-ext.bin} = .bin
   A target is considered out of date if:</p>
 
   <ul>
-    <li>the source file's MD5 checksum is changed.</li>
+    <li>the source file's checksum is changed.</li>
 
     <li>a required property is modified.</li>
 
@@ -1892,10 +1892,10 @@ build.prop{file-ext.bin} = .bin
     <li>a dependency is passing on a <q>modified</q> status for a dependency
     type, which cannot be passed on by the target.</li>
 
-    <li>the target does not exist or its MD5 checksum is changed.</li>
+    <li>the target does not exist or its checksum is changed.</li>
   </ul>
 
-  <p>If, after an update, the target's MD5 checksum is the same as before, the
+  <p>If, after an update, the target's checksum is the same as before, the
   target will be considered unchanged and up to date. In an incremental build,
   the use of checksum ensures that any targets manually modified by the user
   after the previous build is rebuilt accordingly. It also prevents unnecessary
@@ -1912,6 +1912,18 @@ build.prop{file-ext.bin} = .bin
   targets depending on <samp>my_mod.mod</samp>, and it will only need to
   re-link the executable. This allows incremental builds to be more
   efficient.</p>
+
+  <div class="well">
+    <p><strong><i class="icon-pencil"></i> Note - checksum algorithm</strong></p>
+
+    <p>By default, the MD5 algorithm is used to calculate the checksum. This is
+    normally good enough to detect whether a file is modified or not. If this is
+    insufficient for whatever reasons, you can tell the build system to use one
+    of the SHA algorithms supported by the Perl module <a href=
+    "http://perldoc.perl.org/Digest/SHA.html">Digest::SHA</a>, by setting the
+    value of <a href=
+    "annex_cfg.html#make.build.prop.checksum-method">build.prop{checksum-method}</a>.</p>
+  </div>
 
   <h3 id="build.inherit">Build Inheritance</h3>
 

@@ -24,6 +24,7 @@ package FCM::Util;
 use base qw{FCM::Class::CODE};
 
 use Digest::MD5;
+use Digest::SHA;
 use FCM::Context::Event;
 use FCM::Context::Locator;
 use FCM::Util::ConfigReader;
@@ -51,6 +52,7 @@ our %ACTION_OF = (
     config_reader        => _util_of_func('config_reader', 'main'),
     external_cfg_get     => \&_external_cfg_get,
     event                => \&_event,
+    file_checksum        => \&_file_checksum,
     file_ext             => \&_file_ext,
     file_head            => \&_file_head,
     file_load            => \&_file_load,
@@ -244,6 +246,20 @@ sub _event {
     }
 }
 
+# Returns the checksum of the content in a file system path.
+sub _file_checksum {
+    my ($attrib_ref, $path, $algorithm) = @_;
+    my $handle = _file_load_handle($attrib_ref, $path);
+    binmode($handle);
+    $algorithm ||= 'md5';
+    my $digest = $algorithm eq 'md5'
+        ? Digest::MD5->new() : Digest::SHA->new($algorithm);
+    $digest->addfile($handle);
+    my $checksum = $digest->hexdigest();
+    close($handle);
+    return $checksum;
+}
+
 # Returns the file extension of a file system path.
 sub _file_ext {
     my ($attrib_ref, $path) = @_;
@@ -287,13 +303,7 @@ sub _file_load_handle {
 # Returns the MD5 checksum of the content in a file system path.
 sub _file_md5 {
     my ($attrib_ref, $path) = @_;
-    my $handle = _file_load_handle($attrib_ref, $path);
-    binmode($handle);
-    my $digest = Digest::MD5->new();
-    $digest->addfile($handle);
-    my $checksum = $digest->hexdigest();
-    close($handle);
-    return $checksum;
+    _file_checksum($attrib_ref, $path, 'md5');
 }
 
 # Saves content to a file system path.
@@ -669,6 +679,12 @@ L<FCM::Context::Event|FCM::Context::Event> or a valid event code. If the former
 is true, @args is not used, otherwise, @args should be the event arguments for
 the specified event code.
 
+=item $u->file_checksum($path, $algorithm)
+
+Returns the checksum of $path. If $algorithm is not specified, the default
+algorithm to use is MD5. Otherwise, any algorithm supported by Perl's
+Digest::SHA module can be used.
+
 =item $u->file_ext($path)
 
 Returns file extension of $path. E.g.:
@@ -695,7 +711,7 @@ Returns a file handle for loading contents from $path.
 
 =item $u->file_md5($path)
 
-Returns the MD5 checksum of $path.
+Deprecated. Equivalent to $u->file_checksum($path, 'md5').
 
 =item $u->file_save($path, $content)
 

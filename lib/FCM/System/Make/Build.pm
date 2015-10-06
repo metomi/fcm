@@ -79,6 +79,7 @@ our %CONFIG_PARSER_OF = (
 our %PROP_OF = (
     #                               [default       , ns-ok]
     'archive-ok-target-category' => [q{include o}  , undef],
+    'checksum-method'            => [q{}           , undef],
     'ignore-missing-dep-ns'      => [q{}           , undef],
     'no-step-source'             => [q{}           , undef],
     'no-inherit-source'          => [q{}           , undef],
@@ -554,13 +555,16 @@ sub _sources_type {
 sub _sources_analyse {
     my ($attrib_ref, $m_ctx, $ctx) = @_;
     my $timer = $UTIL->timer();
+    my $checksum_method = _prop($attrib_ref, 'checksum-method', $ctx);
     my %FILE_TYPE_UTIL_OF = %{$attrib_ref->{file_type_util_of}};
     # Checksum
     while (my ($ns, $source) = each(%{$ctx->get_source_of()})) {
         if (    exists($FILE_TYPE_UTIL_OF{$source->get_type()})
             &&  !defined($source->get_checksum())
         ) {
-            $source->set_checksum($UTIL->file_md5($source->get_path()));
+            $source->set_checksum(
+                $UTIL->file_checksum($source->get_path(), $checksum_method),
+            );
         }
     }
     # Source information
@@ -705,11 +709,12 @@ sub _targets_update {
         ,
     );
     # Performs targets update
+    my $checksum_method = _prop($attrib_ref, 'checksum-method', $ctx);
     my %stat_of = ();
     eval {
         my $n_jobs = $m_ctx->get_option_of('jobs');
         my $runner = $UTIL->task_runner(
-            sub {_target_update($attrib_ref, @_)},
+            sub {_target_update($attrib_ref, $checksum_method, @_)},
             $n_jobs,
         );
         eval {
@@ -768,7 +773,7 @@ sub _targets_update {
 
 # Updates a target.
 sub _target_update {
-    my ($attrib_ref, $target) = @_;
+    my ($attrib_ref, $checksum_method, $target) = @_;
     my $file_type_util = $attrib_ref->{file_type_util_of}{$target->get_type()};
     eval {$file_type_util->task_of()->{$target->get_task()}->main($target)};
     if ($@) {
@@ -781,7 +786,7 @@ sub _target_update {
         return $E->throw($E->BUILD_TARGET, $target);
     }
     $target->set_status($target->ST_MODIFIED);
-    my $checksum = $UTIL->file_md5($target->get_path());
+    my $checksum = $UTIL->file_checksum($target->get_path(), $checksum_method);
     if ($target->get_checksum() && $checksum eq $target->get_checksum()) {
         $target->set_status($target->ST_UNCHANGED);
         if ($target->get_path_of_prev()) {
@@ -804,6 +809,7 @@ sub _targets_manager_funcs {
     my ($stack_ref, $state_hash_ref)
         = _targets_select($attrib_ref, $m_ctx, $ctx, \@targets);
 
+    my $checksum_method = _prop($attrib_ref, 'checksum-method', $ctx);
     my $get_action_ref = sub {
         STATE:
         while (my $state = pop(@{$stack_ref})) {
@@ -818,7 +824,7 @@ sub _targets_manager_funcs {
                     $stat_hash_ref, $ctx, $target, $state_hash_ref, $stack_ref,
                 );
             }
-            elsif (_target_check_ood($state, $state_hash_ref)) {
+            elsif (_target_check_ood($state, $state_hash_ref, $checksum_method)) {
                 _target_prep($state, $ctx);
                 $state->set_value($STATE->PENDING);
                 # Adds tasks that can be triggered by this task
@@ -1388,7 +1394,7 @@ sub _target_check_failed_dep {
 
 # Returns true if $target is out of date.
 sub _target_check_ood {
-    my ($state, $state_hash_ref) = @_;
+    my ($state, $state_hash_ref, $checksum_method) = @_;
     my $target = $state->get_target();
     # Dependencies
     my $rc;
@@ -1423,7 +1429,7 @@ sub _target_check_ood {
     my $prop_of_prev_hash_ref = $target->get_prop_of_prev_of();
     (       !$path_of_prev
         ||  !-e $path_of_prev
-        ||  $UTIL->file_md5($path_of_prev) ne $checksum
+        ||  $UTIL->file_checksum($path_of_prev, $checksum_method) ne $checksum
         ||  $UTIL->hash_cmp($prop_hash_ref, $prop_of_prev_hash_ref)
     );
 }
