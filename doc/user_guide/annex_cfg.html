@@ -1058,6 +1058,13 @@ build.prop{fc.libs}[myprog.exe] = netcdf grib
     <dd>The C linker will add each directory in this setting as a library
     search path.</dd>
 
+    <dt id="make.build.prop.checksum-method">checksum-method</dt>
+
+    <dd>The checksum method to use to determine if the content of a file is
+    changed or not. Either MD5 or one of the SHA algorithms supported by the
+    Perl module <a href="http://perldoc.perl.org/Digest/SHA.html">Digest::SHA</a>
+    can be used. (default=<samp>md5</samp>)</dd>
+
     <dt id="make.build.prop.cxx">cxx</dt>
 
     <dd>The C++ compiler and linker. (default=<samp>g++</samp>)</dd>

@@ -237,7 +237,7 @@ following attributes:
 
 =item checksum
 
-The MD5 checksum of the source file.
+The checksum of the source file.
 
 =item deps
 
@@ -289,7 +289,7 @@ The target category, e.g. bin, etc, include, lib, o, src
 
 =item checksum
 
-The MD5 checksum of the target.
+The checksum of the target.
 
 =item deps
 
