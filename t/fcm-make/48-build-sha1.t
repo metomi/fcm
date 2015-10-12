@@ -42,7 +42,6 @@ tests 8
 cp -r "${TEST_SOURCE_DIR}/${TEST_KEY_BASE}/"* .
 #-------------------------------------------------------------------------------
 TEST_KEY="${TEST_KEY_BASE}"
-sha1sum 'src/hello.f90' >'hello.f90.sha1sum'
 run_pass "${TEST_KEY}" fcm make
 run_pass "${TEST_KEY}-sha1sum-check" sha1sum -c - <<<"$(get-hello-checksum)"
 HELLO_O_MTIME="$(stat -c '%Y' 'build/o/hello.o')"
@@ -56,7 +55,6 @@ run_pass "${TEST_KEY}-mtime-of-hello.o" \
 #-------------------------------------------------------------------------------
 TEST_KEY="${TEST_KEY_BASE}-incr-2"
 sed -i 's/Hello/Greet/' 'src/hello.f90'
-sha1sum 'src/hello.f90' >'hello.f90.sha1sum'
 sleep 1  # In case computer is very fast, when everything can happen within 1s.
 run_pass "${TEST_KEY}" fcm make
 run_pass "${TEST_KEY}-sha1sum-check" sha1sum -c - <<<"$(get-hello-checksum)"
