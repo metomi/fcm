@@ -5,6 +5,22 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## 2015.10.0 (2015-10-15)
+
+FCM release 29. Minor update.
+
+### Noteworthy Changes
+
+[#205](https://github.com/metomi/fcm/pull/205):
+fcm make: build: new setting `build.prop{checksum-method}=md5|sha1|...` allows
+users to choose MD5 or one of SHA algorithms in Perls' `Digest::SHA` to
+calculate the checksums of source and target files.
+
+[#204](https://github.com/metomi/fcm/pull/204):
+fcm branch-create: allow `--bob` as a synonym of `--branch-of-branch`.
+
+--------------------------------------------------------------------------------
+
 ## 2015.09.0 (2015-09-28)
 
 FCM release 28. Minor update to admin utilities, nothing noteworthy for users.
