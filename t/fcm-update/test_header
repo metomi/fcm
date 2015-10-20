@@ -28,7 +28,7 @@ function file_cmp() {
     local TEST_KEY=$1
     local FILE_ACTUAL=$2
     local FILE_EXPECT=${3:--}
-    if cmp $TEST_DIR/$FILE_ACTUAL $FILE_EXPECT; then
+    if diff -u $TEST_DIR/$FILE_ACTUAL $FILE_EXPECT >&2; then
         pass $TEST_KEY
         return
     fi

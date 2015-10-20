@@ -41,7 +41,8 @@ file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 update: status of ".":
 ?       unversioned_file
 update: continue?
-Enter "y" or "n" (or just press <return> for "n"): Updating '.':
+Enter "y" or "n" (or just press <return> for "n"): 
+Updating '.':
 D    added_directory
 D    added_file
 D    module/tree_conflict_file
@@ -83,7 +84,8 @@ merge_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
 file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 update: status of ".":
 update: continue?
-Enter "y" or "n" (or just press <return> for "n"): Updating '.':
+Enter "y" or "n" (or just press <return> for "n"): 
+Updating '.':
 A    added_directory
 A    added_directory/hello_constants.f90
 A    added_directory/hello_constants.inc

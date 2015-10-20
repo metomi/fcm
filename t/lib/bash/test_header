@@ -232,6 +232,14 @@ function merge_sort() {
 text = sys.stdin.read()
 status_lines = []
 for line in text.splitlines():
+    if line.startswith("Enter \"y\"") and ": " in line:
+        head, tail = line.split(": ", 1)
+        if status_lines:
+            print "\n".join(sorted(status_lines))
+            status_lines = []
+        print head + ": "
+        if tail:
+            line = tail
     if re.search("^.{4} [\w./].*$", line):
         status_lines.append(line)
     elif status_lines:

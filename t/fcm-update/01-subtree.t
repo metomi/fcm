@@ -42,7 +42,8 @@ file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 update: status of "$TEST_DIR/wc":
 ?       $TEST_DIR/wc/unversioned_file
 update: continue?
-Enter "y" or "n" (or just press <return> for "n"): Updating '$TEST_DIR/wc':
+Enter "y" or "n" (or just press <return> for "n"): 
+Updating '$TEST_DIR/wc':
 D    $TEST_DIR/wc/added_directory
 D    $TEST_DIR/wc/added_file
 D    tree_conflict_file
@@ -84,7 +85,8 @@ merge_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
 file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 update: status of "$TEST_DIR/wc":
 update: continue?
-Enter "y" or "n" (or just press <return> for "n"): Updating '$TEST_DIR/wc':
+Enter "y" or "n" (or just press <return> for "n"): 
+Updating '$TEST_DIR/wc':
 A    $TEST_DIR/wc/added_directory
 A    $TEST_DIR/wc/added_directory/hello_constants.f90
 A    $TEST_DIR/wc/added_directory/hello_constants.inc
