@@ -33,7 +33,7 @@ use File::Basename qw{basename};
 my $RE_FILE = qr{[\w\-+.]+}imsx;
 
 # RE: main program
-my $RE_MAIN = qr{int\s*main\b}msx;
+my $RE_MAIN = qr{\A\s*(?:int|void)?\s*main\b\s*\(?}msx;
 
 my %SOURCE_ANALYSE_DEP_OF = (
     include => sub { $_[0] =~ qr{\A\#\s*include\s+"($RE_FILE)"}msx },
