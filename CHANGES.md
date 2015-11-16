@@ -5,6 +5,22 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## Next Release (2015-Q4?)
+
+FCM release 30. Minor update.
+
+### Noteworthy Changes
+
+[#208](https://github.com/metomi/fcm/pull/208):
+fcm make: build: now recognises more patterns as indicators of the existence of
+a main program in a C source file.
+
+[#207](https://github.com/metomi/rose/pull/207):
+fcm test-battery: now runs correctly in the absence of site/user configuration
+on recent Ubuntu distros.
+
+--------------------------------------------------------------------------------
+
 ## 2015.10.0 (2015-10-15)
 
 FCM release 29. Minor update.
