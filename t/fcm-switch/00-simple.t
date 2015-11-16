@@ -39,8 +39,9 @@ file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 switch: status of "$TEST_DIR/wc":
 ?       unversioned_file
 switch: continue?
-Enter "y" or "n" (or just press <return> for "n"): D    added_file
+Enter "y" or "n" (or just press <return> for "n"): 
 D    added_directory
+D    added_file
 D    module/tree_conflict_file
 U    lib/python/info/__init__.py
 U    lib/python/info/poems.py

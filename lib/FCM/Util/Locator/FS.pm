@@ -49,14 +49,14 @@ sub _cat {
     my ($attrib_ref, $value, @paths) = @_;
     _parse(
         $attrib_ref,
-        File::Spec->catfile(_parse($attrib_ref, $value), @paths),
+        File::Spec->catfile(scalar(_parse($attrib_ref, $value)), @paths),
     );
 }
 
 # Returns the directory name of $value.
 sub _dir {
     my ($attrib_ref, $value) = @_;
-    dirname(_parse($attrib_ref, $value));
+    dirname(scalar(_parse($attrib_ref, $value)));
 }
 
 # Searches directory tree.

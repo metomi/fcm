@@ -89,7 +89,7 @@ main() {
         if [[ -n ${FCM_SVN_HOOK_NOTIFICATION_FROM:-} ]]; then
             FROM="-r${FCM_SVN_HOOK_NOTIFICATION_FROM:-}"
         fi
-        ADDRS=$(fcm-user-to-email "$REV_AUTHOR" "$PROP_AUTHOR")
+        ADDRS=$(fcm-user-to-email "$REV_AUTHOR" "$PROP_AUTHOR" 2>'/dev/null')
         mail "$FROM" "$SUBJECT" "$ADDRS" <"$DIFF_FILE" || true
     fi
     rm -f "$OLD_FILE" "$DIFF_FILE"

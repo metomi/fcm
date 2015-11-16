@@ -963,7 +963,7 @@ sub _report_merges {
 
   if ($self->config->verbose) {
     # Verbose mode, print the log of each revision
-    for my $key (keys %avail) {
+    for my $key (sort keys %avail) {
       next unless @{ $avail{$key} };
 
       $return .= $indent . $key . "\n";
@@ -977,7 +977,7 @@ sub _report_merges {
 
   } else {
     # Normal mode, print only the revisions
-    for my $key (keys %avail) {
+    for my $key (sort keys %avail) {
       next unless @{ $avail{$key} };
 
       $return .= $indent . $key . ' ' . join (' ', @{ $avail{$key} }) . "\n";

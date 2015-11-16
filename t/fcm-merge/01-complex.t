@@ -1233,7 +1233,8 @@ U    module/hello_constants_dummy.inc
 U    subroutine/hello_sub_dummy.h
 -------------------------------------------------------------------------dry-run
 Would you like to go ahead with the merge?
-Enter "y" or "n" (or just press <return> for "n"): Merge succeeded.
+Enter "y" or "n" (or just press <return> for "n"): 
+Merge succeeded.
 --------------------------------------------------------------------------actual
 --- Merging r4 through r13 into '.':
  U   .
