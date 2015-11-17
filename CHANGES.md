@@ -5,7 +5,7 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
-## Next Release (2015-Q4?)
+## 2015.11.0 (2015-11-17)
 
 FCM release 30. Minor update.
 
