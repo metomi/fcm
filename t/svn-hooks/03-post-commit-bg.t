@@ -38,7 +38,7 @@ test_tidy() {
         'mail.out'
 }
 #-------------------------------------------------------------------------------
-tests 40
+tests 44
 #-------------------------------------------------------------------------------
 cp -p "$FCM_HOME/etc/svn-hooks/post-commit" "$REPOS_PATH/hooks/"
 sed -i "/set -eu/a\
@@ -76,6 +76,43 @@ run_fail "$TEST_KEY.mail.out" test -e mail.out
 #-------------------------------------------------------------------------------
 # Install and remove commit.conf, svnperms.conf
 for NAME in 'commit.conf' 'svnperms.conf'; do
+    TEST_KEY="$TEST_KEY_BASE-no-add-${NAME}"
+    test_tidy
+    # (Use "svnperms.conf" syntax. Doesn't matter for the purpose of this test.)
+    cat >"${NAME}" <<'__CONF__'
+[foo]
+.*=*(add,remove,update)
+__CONF__
+    mkdir -p "svn-hooks/foo"
+    cat >"svn-hooks/foo/${NAME}" <<'__CONF__'
+# This is the site override
+[foo]
+.*=*(add,remove,update)
+__CONF__
+    cp -p "svn-hooks/foo/${NAME}" "$REPOS_PATH/hooks/${NAME}"
+    svn import --no-auth-cache -q -m"${TEST_KEY}" "${NAME}" \
+        "${REPOS_URL}/${NAME}"
+    REV="$(<'rev')"
+    poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
+    date2datefmt "$REPOS_PATH/log/post-commit.log" \
+        | sed '/^trac-admin/d; s/^\(REV_FILE_SIZE=\).*\( #\)/\1???\2/' \
+        >"$TEST_KEY.log"
+    file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<__LOG__
+YYYY-mm-ddTHH:MM:SSZ+ $REV by $USER
+svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
+    | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
+* Dumped revision $REV.
+mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
+REV_FILE_SIZE=??? # <1MB
+RET_CODE=0
+__LOG__
+    file_cmp "${TEST_KEY}.conf" \
+        "svn-hooks/foo/${NAME}" "$REPOS_PATH/hooks/${NAME}"
+    rm -fr 'svn-hooks'
+
+    test_tidy
+    svn delete --no-auth-cache -q -m"Delete ${TEST_KEY}" "${REPOS_URL}/${NAME}"
+
     TEST_KEY="$TEST_KEY_BASE-add-${NAME}"
     test_tidy
     # (Use "svnperms.conf" syntax. Doesn't matter for the purpose of this test.)
