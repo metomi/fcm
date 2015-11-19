@@ -634,6 +634,7 @@ sub install_svn_hook {
         map {sprintf("%s=%s\n", @{$_});}
         grep {$_->[1];} (
             ['FCM_HOME', $CONFIG->get_fcm_home()],
+            ['FCM_SITE_HOME', $CONFIG->get_fcm_site_home()],
             ['FCM_SVN_HOOK_ADMIN_EMAIL', $CONFIG->get_admin_email()],
             ['FCM_SVN_HOOK_COMMIT_DUMP_DIR', $CONFIG->get_svn_dump_dir()],
             ['FCM_SVN_HOOK_NOTIFICATION_FROM', $CONFIG->get_notification_from()],
@@ -643,8 +644,11 @@ sub install_svn_hook {
             ['TZ', 'UTC'],
         )
     );
-    my %can_clean;
-    my %norm_path_of = ();
+    my %path_of = ();
+    # Search for hook scripts:
+    # * default sets
+    # * selected items from top of repository, e.g. svnperms.conf
+    # * site overrides
     _get_files_from(
         catfile($CONFIG->get_fcm_home(), 'etc', 'svn-hooks'),
         sub {
@@ -652,51 +656,44 @@ sub install_svn_hook {
             if (index($base_name, q{.}) == 0 || -d $path) {
                 return;
             }
-            $norm_path_of{$base_name} = $path;
-            $can_clean{$base_name} = $path;
+            $path_of{$base_name} = $path;
         },
     );
-    # Install hook scripts and associated files
-    for my $key (sort keys(%norm_path_of)) {
-        my $hook_source = $norm_path_of{$key};
-        my $hook_dest = catfile($project->get_svn_live_hook_path(), $key);
-        run_copy($hook_source, $hook_dest);
-    }
-    # Install hook configurations from repository root, e.g. svnperms.conf
     for my $line (qx{svnlook tree -N $project_path}) {
         chomp($line);
-        my ($name) = $line =~ qr{\A\s*(.*)\z}msx;
-        if (grep {$_ eq $name} @SVN_REPOS_ROOT_HOOK_ITEMS) {
-            my $dest = catfile($project->get_svn_live_hook_path(), $name);
-            $RUNNER->run(
-                "install $dest <- ^/$name",
-                sub {
-                    my $source = "file://$project_path/$name";
-                    !system(qw{svn export -q --force}, $source, $dest)
-                        || die("\n");
-                    chmod((stat($dest))[2] | S_IRGRP | S_IROTH, $dest);
-                },
-            );
-            $can_clean{$name} = "^/$name";
+        my ($base_name) = $line =~ qr{\A\s*(.*)\z}msx;
+        if (grep {$_ eq $base_name} @SVN_REPOS_ROOT_HOOK_ITEMS) {
+            $path_of{$base_name} = "^/$base_name";
         }
     }
-    my %more_path_of = ();
     _get_files_from(
-        catfile($CONFIG->get_fcm_site_home(), 'svn-hooks', $project->get_name()),
+        catfile(
+            $CONFIG->get_fcm_site_home(), 'svn-hooks', $project->get_name(),
+        ),
         sub {
             my ($base_name, $path) = @_;
             if (index($base_name, q{.}) == 0 || -d $path) {
                 return;
             }
-            $more_path_of{$base_name} = $path;
-            $can_clean{$base_name} = $path;
+            $path_of{$base_name} = $path;
         },
     );
     # Install hook scripts and associated files
-    for my $key (sort keys(%more_path_of)) {
-        my $hook_source = $more_path_of{$key};
-        my $hook_dest = catfile($project->get_svn_live_hook_path(), $key);
-        if (!-e $hook_dest || compare($hook_source, $hook_dest)) {
+    for my $base_name (sort keys(%path_of)) {
+        my $hook_source = $path_of{$base_name};
+        my $hook_dest = catfile($project->get_svn_live_hook_path(), $base_name);
+        if (index($hook_source, '^/') == 0) {
+            $RUNNER->run(
+                "install $hook_dest <- $hook_source",
+                sub {
+                    my $source = "file://$project_path/$base_name";
+                    !system(qw{svn export -q --force}, $source, $hook_dest)
+                        || die("\n");
+                    chmod((stat($hook_dest))[2] | S_IRGRP | S_IROTH, $hook_dest);
+                },
+            );
+        }
+        else {
             run_copy($hook_source, $hook_dest);
         }
     }
@@ -704,7 +701,7 @@ sub install_svn_hook {
     if ($clean_mode) {
         my $hook_path = $project->get_svn_live_hook_path();
         for my $path (sort glob(catfile($hook_path, q{*}))) {
-            if (!exists($can_clean{basename($path)})) {
+            if (!exists($path_of{basename($path)})) {
                 run_rmtree($path);
             }
         }
