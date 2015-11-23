@@ -1,25 +1,56 @@
 =head1 NAME
 
-fcm test-battery (self-tests)
+fcm test-battery
 
 =head1 SYNOPSIS
 
-Invokes the FCM self-tests.
+Run FCM self tests.
 
-    fcm test-battery [PROVE_ARGS]
-
-=over 4
-
-=item 1. If an environment TEST_REMOTE_HOST is set, run CM tests using an
- auto-generated Subversion server on $TEST_REMOTE_HOST.
-
-=item 2. If an environment variable TEST_PROJECT is set, run CM tests using a
- project sub-hierarchy in the test repositories.
+    fcm test-battery [...]
 
 =head1 ARGUMENTS
 
-PROVE_ARGS specifies override arguments for the 'prove' command. This is run
-from within the t/ subdirectory at the top of FCM's source tree.
-If not specified, the prove command will be run as 'prove -j 9 -r -s -f'.
+Change directory to the FCM source tree, and runs this shell commmand:
+
+    exec prove -j "${NPROC:-9}" -s -r "${@:-t}"
+
+where NPROC is the number of processors on your computer. You can override the
+L<prove|prove> command line by specifying extra arguments. E.g. If you do not
+want to run the full test suite, you can specify the names of individual test
+files or their containing directories as extra arguments. For example:
+
+Run the full test suite with the default options.
+
+    fcm test-battery
+
+Run the full test suite with 12 processes.
+
+    fcm test-battery -j 12
+
+Run only tests under C<t/fcm-make/> with 12 processes.
+
+    fcm test-battery -j 12 t/fcm-make
+
+Run only C<t/fcm-make/10-log.t> in verbose mode.
+
+    fcm test-battery -v t/fcm-make/10-log.t
+
+=head1 OPTIONS
+
+Environment variables:
+
+=over 4
+
+=item TEST_PROJECT
+
+If this is set, run CM tests using a project sub-hierarchy in the test
+repositories.
+
+=item TEST_REMOTE_HOST
+
+If this is set, run CM tests using an auto-generated Subversion server on the
+host specified.
+
+=back
 
 =cut

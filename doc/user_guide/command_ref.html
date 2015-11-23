@@ -1812,6 +1812,70 @@ browser = konqueror
     </dd>
   </dl>
 
+  <h2 id="fcm-test-battery">fcm test-battery</h2>
+
+  <dl>
+    <dt>Usage</dt>
+
+    <dd><code>fcm test-battery [...]</code></dd>
+
+    <dt>Description</dt>
+
+    <dd>
+      <p>Change directory to the FCM source tree, and runs this shell
+      commmand:</p>
+
+      <pre>
+exec prove -j "${NPROC:-9}" -s -r "${@:-t}"
+</pre>
+
+      <p>where <var>NPROC</var> is the number of processors on your computer.
+      You can override the <a
+      href="http://perldoc.perl.org/prove.html">prove</a> command line by
+      specifying extra arguments. E.g. If you do not want to run the full test
+      suite, you can specify the names of individual test files or their
+      containing directories as extra arguments. For example:</p>
+
+      <p>Run the full test suite with the default options.</p>
+
+      <pre>
+fcm test-battery
+</pre>
+
+      <p>Run the full test suite with 12 processes.</p>
+
+      <pre>
+fcm test-battery -j 12
+</pre>
+
+      <p>Run only tests under <code>t/fcm-make/</code> with 12 processes.</p>
+
+      <pre>
+fcm test-battery -j 12 t/fcm-make
+</pre>
+
+      <p>Run only <code>t/fcm-make/10-log.t</code> in verbose mode.</p>
+
+      <pre>
+fcm test-battery -v t/fcm-make/10-log.t
+</pre>
+    </dd>
+
+    <dt>Environment Variables</dt>
+
+    <dd>
+      <dt>TEST_PROJECT</dt>
+
+      <dd>If this is set, run CM tests using a project sub-hierarchy in the test
+      repositories.</dd>
+
+      <dt>TEST_REMOTE_HOST</dt>
+
+      <dd>If this is set, run CM tests using an auto-generated Subversion server
+      on the host specified.</dd>
+    </dd>
+  </dl>
+
   <h2 id="fcm-update">fcm update</h2>
 
   <dl>
