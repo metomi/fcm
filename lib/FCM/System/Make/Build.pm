@@ -888,7 +888,6 @@ sub _targets_from_sources {
         }
     }
     # Determine the targets for each source
-    #my %target_ns_list_of;
     SOURCE:
     while (my ($ns, $source) = each(%{$ctx->get_source_of()})) {
         my $type = $source->get_type();
@@ -972,33 +971,67 @@ sub _targets_from_sources {
             }
         }
     }
-    # Adds categorised name-space dependencies.
-    TARGET:
+
+    my %CTX_PROP_OF = %{$ctx->get_prop_of()};
     for my $target (@{$targets_ref}) {
-        if (!exists($target->get_info_of()->{'deps'})) {
-            next TARGET;
-        }
-        CATEGORY:
-        while (my ($cat, $deps_in_ns_ref) = each(%deps_in_ns_in_cat_of)) {
-            if (!exists($target->get_info_of()->{'deps'}{$cat})) {
-                next CATEGORY;
-            }
-            my $name = 'ns-dep.' . $cat;
-            my @ns_list = map {$_ eq q{/} ? q{} : $_}
-                _props($attrib_ref, $name, $ctx, $target->get_ns());
-            for my $ns (@ns_list) {
-                if (exists($deps_in_ns_ref->{$ns})) {
-                    push(
-                        @{$target->get_deps()},
-                        (   map  {[$_, $cat]}
-                            grep {$_ ne $target->get_key()}
-                            @{$deps_in_ns_ref->{$ns}}
-                        ),
-                    );
+        my $key = $target->get_key();
+        # Adds categorised name-space dependencies.
+        if (exists($target->get_info_of()->{'deps'})) {
+            CATEGORY:
+            while (my ($cat, $deps_in_ns_ref) = each(%deps_in_ns_in_cat_of)) {
+                if (!exists($target->get_info_of()->{'deps'}{$cat})) {
+                    next CATEGORY;
                 }
-                else {
-                    # This will be reported later as missing dependency
-                    push(@{$target->get_deps()}, [$ns, $cat, 'ns-dep']);
+                my $cfg_key = 'ns-dep.' . $cat;
+                my @ns_list = map {$_ eq q{/} ? q{} : $_}
+                    _props($attrib_ref, $cfg_key, $ctx, $target->get_ns());
+                for my $ns (@ns_list) {
+                    if (exists($deps_in_ns_ref->{$ns})) {
+                        push(
+                            @{$target->get_deps()},
+                            (   map  {[$_, $cat]}
+                                grep {$_ ne $key}
+                                @{$deps_in_ns_ref->{$ns}}
+                            ),
+                        );
+                    }
+                    else {
+                        # This will be reported later as missing dependency
+                        push(@{$target->get_deps()}, [$ns, $cat, 'ns-dep']);
+                    }
+                }
+            }
+        }
+        # Remove target dependencies, if necessary
+        my @deps;
+        DEP:
+        for my $dep (@{$target->get_deps()}) {
+            my ($dep_key, $dep_type) = @{$dep};
+            my $cfg_key = 'no-dep.' . $dep_type;
+            if (    !exists($CTX_PROP_OF{$cfg_key})
+                ||  !exists($CTX_PROP_OF{$cfg_key}->get_ctx_of()->{$key})
+            ) {
+                push(@deps, $dep);
+                next DEP;
+            }
+            my @no_dep_keys = shellwords(
+                $CTX_PROP_OF{$cfg_key}->get_ctx_of()->{$key}->get_value());
+            if (!grep {$_ eq $dep_key} @no_dep_keys) {
+                push(@deps, $dep);
+                next DEP;
+            }
+        }
+        $target->set_deps(\@deps);
+        # Add target dependencies, if necessary
+        for my $dep_type (keys(%{$target->get_dep_policy_of()})) {
+            my $cfg_key = 'dep.' . $dep_type;
+            if (    exists($CTX_PROP_OF{$cfg_key})
+                &&  exists($CTX_PROP_OF{$cfg_key}->get_ctx_of()->{$key})
+            ) {
+                my @dep_keys = shellwords(
+                    $CTX_PROP_OF{$cfg_key}->get_ctx_of()->{$key}->get_value());
+                for my $dep_key (@dep_keys) {
+                    push(@{$target->get_deps()}, [$dep_key, $dep_type]);
                 }
             }
         }
@@ -1015,11 +1048,11 @@ sub _targets_props_assign {
         = map {$_ => 1} _props($attrib_ref, 'no-inherit-target-category', $ctx);
     my %CTX_PROP_OF = %{$ctx->get_prop_of()};
     for my $target (@{$targets_ref}) {
+        my $key = $target->get_key();
         # Properties
         my $FILE_TYPE_UTIL
             = $attrib_ref->{file_type_util_of}->{$target->get_type()};
         my $task = $FILE_TYPE_UTIL->task_of()->{$target->get_task()};
-        my $key = $target->get_key();
         if ($task->can('prop_of')) {
             my %prop_of = %{$task->prop_of($target)};
             while (my $name = each(%prop_of)) {
