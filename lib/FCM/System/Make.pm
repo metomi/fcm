@@ -196,9 +196,9 @@ sub _main {
                     verbosity => $attrib_ref->{util}->util_of_report()->HIGH,
                 },
             );
+            my $version = $attrib_ref->{util}->version();
             $attrib_ref->{util}->event(
-                FCM::Context::Event->FCM_VERSION,
-                $attrib_ref->{util}->version(),
+                FCM::Context::Event->FCM_VERSION, "FCM $version",
             );
             for my $step (@INIT_STEPS) {
                 $T->(sub {$ACTION_OF{$step}->(\%attrib, $m_ctx, @args)}, $step);

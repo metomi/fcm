@@ -38,7 +38,6 @@ our %ACTION_OF = (
     config_parse => \&_config_parse,
     export_items => \&_export_items,
     keyword_find => \&_keyword_find,
-    version      => \&_version,
 );
 # Alias to exception class
 my $E = 'FCM::System::Exception';
@@ -309,14 +308,6 @@ sub _keyword_find {
     return;
 }
 
-# Emit an FCM::Context::Event->OUT event to print FCM's version.
-sub _version {
-    my ($attrib_ref, $option_ref, @args) = @_;
-    my $UTIL = $attrib_ref->{util};
-    $UTIL->event(FCM::Context::Event->OUT, $UTIL->version(@_) . "\n");
-    return;
-}
-
 # ------------------------------------------------------------------------------
 1;
 __END__
@@ -337,9 +328,9 @@ The rest of the FCM system.
 
 =head1 METHODS
 
-Implements the browse(), config_parse(), export_items(), keyword_find() and
-version() methods for L<FCM::System|FCM::System>. See L<FCM::System|FCM::System>
-for a description of the calling interfaces of these functions.
+Implements the browse(), config_parse(), export_items() and keyword_find()
+methods for L<FCM::System|FCM::System>. See L<FCM::System|FCM::System> for a
+description of the calling interfaces of these functions.
 
 =head1 DIAGNOSTICS
 

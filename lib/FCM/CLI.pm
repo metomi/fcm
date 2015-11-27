@@ -70,7 +70,7 @@ our %ACTION_OF = (
     ),
     'test-battery'  => \&_test_battery,
     'update'        => _sys_func(sub {$S->cm_update(@_)}),
-    'version'       => _sys_func(sub {$S->version(@_)}),
+    'version'       => \&_version,
     # Commands passed directly to "svn"
     map {($_ => _sys_func())} qw{
         blame
@@ -195,10 +195,7 @@ sub _help {
             :        $0
             ;
         if ($pod eq $0) {
-            # Read fcm-version.js file
-            my $version = $attrib_ref->{system}->util()->version();
-            my $bin = rel2abs($0);
-            $EVENT->(FCM::Context::Event->OUT, "$version ($bin)\n");
+            _version($attrib_ref, $app, $option_ref, @args);
         }
         my $has_pod = -f $pod;
         if ($has_pod) {
@@ -244,6 +241,13 @@ sub _sys_func {
         local($S) = $attrib_ref->{system};
         defined($code_ref) ? $code_ref->(@args) : $S->svn($app, @args);
     };
+}
+
+# Implements "fcm version".
+sub _version {
+    my ($attrib_ref, $app, $option_ref, @args) = @_;
+    my $version = $attrib_ref->{system}->util()->version();
+    $EVENT->(FCM::Context::Event->OUT, "FCM $version\n");
 }
 
 # ------------------------------------------------------------------------------

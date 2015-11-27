@@ -50,6 +50,7 @@ use constant {
     CONFIG_NS_VALUE  => 'CONFIG_NS_VALUE',
     CONFIG_UNKNOWN   => 'CONFIG_UNKNOWN',
     CONFIG_VALUE     => 'CONFIG_VALUE',
+    CONFIG_VERSION   => 'CONFIG_VERSION',
     COPY             => 'COPY',
     DEST_CLEAN       => 'DEST_CLEAN',
     DEST_CREATE      => 'DEST_CREATE',
@@ -261,6 +262,12 @@ In a make configuration file, the value of a declaration is incorrect. Expects
 $e->get_ctx() to return a L<FCM::Context::ConfigEntry|FCM::Context::ConfigEntry>
 object and $e->get_exception() to return (if any) the original exception that
 triggers this failure.
+
+=item FCM::System::Exception->CONFIG_VERSION
+
+A make configuration file requires certain version of FCM. Expects
+$e->get_ctx() to return a L<FCM::Context::ConfigEntry|FCM::Context::ConfigEntry>
+object, and the current FCM version.
 
 =item FCM::System::Exception->COPY
 
