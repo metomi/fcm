@@ -44,6 +44,8 @@
 #   6. E-mails the host user account on error.
 #
 # ENVIRONMENT VARIABLES
+#   FCM_SITE_HOME
+#     The root location of site configuration.
 #   FCM_SVN_HOOK_COMMIT_DUMP_DIR
 #     The path to dump commit deltas. Generate a commit delta if specified.
 #   FCM_SVN_HOOK_TRAC_ROOT_DIR
@@ -119,17 +121,27 @@ main() {
     fi
 
     # Install commit.conf and svnperms.conf, if necessary
+    local NAME=$(basename "${REPOS}")
+    if [[ -n "${FCM_SVN_HOOK_REPOS_SUFFIX:-}" ]]; then
+        NAME="${NAME%${FCM_SVN_HOOK_REPOS_SUFFIX}}"
+    fi
     local CHANGED=$(svnlook changed -r "${REV}" "${REPOS}")
-    local NAME=
-    for NAME in 'commit.conf' 'svnperms.conf'; do
-        if grep -q "^....${NAME}\$" <<<"${CHANGED}"; then
+    local FILE=
+    for FILE in 'commit.conf' 'svnperms.conf'; do
+        # Ignore if there is a site override
+        if [[ -n "${FCM_SITE_HOME:-}" \
+            && -e "${FCM_SITE_HOME:-}/svn-hooks/${NAME}/${FILE}" ]]
+        then
+            continue
+        fi
+        if grep -q "^....${FILE}\$" <<<"${CHANGED}"; then
             # Don't specify revision, so always look at latest.
-            if svnlook filesize "${REPOS}" "${NAME}" >/dev/null 2>&1; then
-                echo "svnlook cat ${REPOS} ${NAME} >${REPOS}/hooks/${NAME}"
-                svnlook cat "${REPOS}" "${NAME}" >"${REPOS}/hooks/${NAME}"
+            if svnlook filesize "${REPOS}" "${FILE}" >/dev/null 2>&1; then
+                echo "svnlook cat ${REPOS} ${FILE} >${REPOS}/hooks/${FILE}"
+                svnlook cat "${REPOS}" "${FILE}" >"${REPOS}/hooks/${FILE}"
             else
-                echo "rm -f ${REPOS}/hooks/${NAME}"
-                rm -f "${REPOS}/hooks/${NAME}"
+                echo "rm -f ${REPOS}/hooks/${FILE}"
+                rm -f "${REPOS}/hooks/${FILE}"
             fi
         fi
     done

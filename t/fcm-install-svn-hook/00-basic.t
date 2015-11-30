@@ -25,13 +25,14 @@
 if ! which svnadmin 1>/dev/null 2>/dev/null; then
     skip_all 'svnadmin not available'
 fi
-tests 149
+tests 173
 #-------------------------------------------------------------------------------
 FCM_REAL_HOME=$(readlink -f "$FCM_HOME")
 TODAY=$(date -u +%Y%m%d)
 mkdir -p conf/
 export FCM_CONF_PATH="$PWD/conf"
 cat >conf/admin.cfg <<__CONF__
+fcm_site_home=$PWD
 svn_group=
 svn_live_dir=$PWD/svn-repos
 svn_project_suffix=
@@ -39,6 +40,7 @@ __CONF__
 cat >hooks-env <<__CONF__
 [default]
 FCM_HOME=$FCM_REAL_HOME
+FCM_SITE_HOME=$PWD
 FCM_SVN_HOOK_ADMIN_EMAIL=$USER
 FCM_SVN_HOOK_COMMIT_DUMP_DIR=/var/svn/dumps
 FCM_SVN_HOOK_TRAC_ROOT_DIR=/srv/trac
@@ -128,7 +130,7 @@ TEST_KEY="$TEST_KEY_BASE-svnperms.conf"
 mkdir -p 'svn-import'
 echo '[foo]' >'svn-import/svnperms.conf'
 NAME='svnperms-conf' run_tests
-file_cmp "$TEST_KEY-ls-svnperms.conf" \
+file_cmp "$TEST_KEY-cmp" \
     'svn-repos/foo/hooks/svnperms.conf' 'svn-import/svnperms.conf'
 
 # New install, single repository, with commit.conf
@@ -138,7 +140,23 @@ TEST_KEY="$TEST_KEY_BASE-commit.conf"
     echo 'verify-branch-owner'
 } >'svn-import/commit.conf'
 NAME='commit-conf' run_tests
-file_cmp "$TEST_KEY-ls-svnperms.conf" \
+file_cmp "$TEST_KEY-cmp" \
     'svn-repos/foo/hooks/commit.conf' 'svn-import/commit.conf'
+
+# New install, single repository, with commit.conf and site override
+TEST_KEY="$TEST_KEY_BASE-commit.conf-site-override"
+{
+    echo 'notify-branch-owner'
+    echo 'verify-branch-owner'
+} >'svn-import/commit.conf'
+mkdir -p 'svn-hooks/foo'
+{
+    echo '# This is the override'
+    echo '# It is actually empty'
+} >'svn-hooks/foo/commit.conf'
+NAME='commit-conf-site-override' run_tests
+file_cmp "$TEST_KEY-cmp" \
+    'svn-repos/foo/hooks/commit.conf' 'svn-hooks/foo/commit.conf'
+rm -fr 'svn-hooks'
 #-------------------------------------------------------------------------------
 exit
