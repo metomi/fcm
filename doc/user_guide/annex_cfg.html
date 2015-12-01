@@ -1138,7 +1138,9 @@ build.prop{fc.libs}[myprog.exe] = netcdf grib
 
     <dt id="make.build.prop.dep.f.module">dep.f.module</dt>
 
-    <dd>Specifies a list of manual Fortran module dependencies.</dd>
+    <dd>Specifies a list of manual Fortran module dependencies. Note: This
+    modifier does not work if the name-space is specified using a target
+    name.</dd>
 
     <dt id="make.build.prop.dep.include">dep.include</dt>
 
@@ -1317,7 +1319,8 @@ build.prop{fc.libs}[myprog.exe] = netcdf grib
 
     <dd>Switches off a list of automatic Fortran module dependencies. If the
     value is a <samp>*</samp>, switches off all automatic Fortran module
-    dependencies.</dd>
+    dependencies. Note: This modifier does not work if the name-space is
+    specified using a target name.</dd>
 
     <dt id="make.build.prop.no-dep.include">no-dep.include</dt>
 
