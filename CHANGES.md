@@ -5,6 +5,22 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## Next Release (2016-Q1?)
+
+FCM release 31.
+
+### Noteworthy Changes
+
+[#214](https://github.com/metomi/fcm/pull/214):
+fcm make: `build.prop` declarations: modifiers such as `dep.include`, `dep.o`,
+`no-dep.include` and `no-dep.o` are now supported with namespaces that are
+target names.
+
+[#210](https://github.com/metomi/fcm/pull/210):
+post-commit-bg: fix install commit conf site override logic
+
+--------------------------------------------------------------------------------
+
 ## 2015.11.0 (2015-11-17)
 
 FCM release 30. Minor update.
