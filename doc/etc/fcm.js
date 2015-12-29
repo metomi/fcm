@@ -26,17 +26,17 @@ $(function() {
 
     // Toggle a collapse/expand image.
     function collapse_expand_icon_toggle(anchor) {
-        var icon = $("i", anchor);
+        var icon = $("span", anchor);
         if (icon.attr("title") == TITLE_EXPAND) {
             icon.attr("title", TITLE_COLLAPSE);
-            icon.removeClass("icon-chevron-right");
-            icon.addClass("icon-chevron-down");
+            icon.removeClass("glyphicon-triangle-right");
+            icon.addClass("glyphicon-triangle-bottom");
             anchor.siblings().filter("ul").show();
         }
         else { // if (icon.attr("title") == "collapse")
             icon.attr("title", TITLE_EXPAND);
-            icon.removeClass("icon-chevron-down");
-            icon.addClass("icon-chevron-right");
+            icon.removeClass("glyphicon-triangle-bottom");
+            icon.addClass("glyphicon-triangle-right");
             anchor.siblings().filter("ul").hide();
         }
     }
@@ -52,10 +52,13 @@ $(function() {
             }
             var li_ul = $("> ul", li);
             li_ul.hide();
-            var icon = $("<i/>", {"title": TITLE_EXPAND});
-            icon.addClass("icon-chevron-right");
+            var icon = $("<span/>", {"title": TITLE_EXPAND, "aria-hidden": "true"});
+            icon.addClass("glyphicon");
+            icon.addClass("glyphicon-triangle-right");
+            icon.css("cursor", "pointer");
             icon.css("opacity", 0.5);
             var anchor = $("<a/>").append(icon);
+            li.prepend(" ");
             li.prepend(anchor);
             if (is_main) {
                 anchor.click(function() {
@@ -115,7 +118,7 @@ $(function() {
             }
             while (stack.length < CONTENT_INDEX_OF[tag_name]) {
                 var node = stack.length == 0 ? root : $("> :last-child", stack[0]);
-                stack.unshift($("<ul/>").appendTo(node).addClass("unstyled"));
+                stack.unshift($("<ul/>").appendTo(node).addClass("list-unstyled"));
             }
             var href = "#" + this.id;
             if (d_href) {

@@ -6,8 +6,8 @@ found in the licences/ directory.
 Non-FCM works included in this distribution are listed below:
 
 doc/etc/bootstrap/:
-* Unmodified external software library copyright 2013 Twitter Inc
-  released under the Apache 2.0 license.
+* Unmodified external software library copyright 2011-2015 Twitter, Inc
+  released under the MIT license.
   See [Bootstrap](http://getbootstrap.com/).
 
 svn-hooks/svnperms.py:
