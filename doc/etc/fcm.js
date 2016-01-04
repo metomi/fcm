@@ -1,5 +1,5 @@
 /**********************************************************************
- * (C) British Crown Copyright 2006-15 Met Office.
+ * (C) British Crown Copyright 2006-16 Met Office.
  *
  * This file is part of FCM.
  *
