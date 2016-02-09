@@ -5,6 +5,19 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## Next Release (2016-Q1?)
+
+FCM release 31. Minor bug fix and update.
+
+### Noteworthy Changes
+
+[#219](https://github.com/metomi/fcm/pull/219):
+fcm make: extract: fix target status on conflict. On conflict, the target
+status was recorded incorrectly as unchanged. This caused incremental extracts
+to succeed in error. This change fixes the problem.
+
+--------------------------------------------------------------------------------
+
 ## 2015.12.0 (2015-12-09)
 
 FCM release 31. Minor update.
