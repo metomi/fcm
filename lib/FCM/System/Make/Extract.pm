@@ -1080,7 +1080,6 @@ sub _target_update {
     ) {
         return _target_delete($attrib_ref, $m_ctx, $ctx, $target);
     }
-    $target->set_status($target->ST_UNCHANGED);
     my $path = _target_update_source($attrib_ref, $m_ctx, $ctx, $target);
     # Note: $path may be a File::Temp object.
     my ($is_diff, $is_diff_in_perms, $is_in_prev, $rc) = (1, 1, undef, 1);
@@ -1095,6 +1094,7 @@ sub _target_update {
     }
     if (!$is_diff && !$is_diff_in_perms) {
         $target->set_path($target->get_dests()->[$is_in_prev]);
+        $target->set_status($target->ST_UNCHANGED);
         return; # up to date
     }
     my $dest = $target->get_dests()->[0];
