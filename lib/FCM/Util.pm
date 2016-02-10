@@ -491,32 +491,41 @@ sub _util_of_func {
 }
 
 # Returns the FCM version string.
-sub _version {
-    my ($attrib_ref) = @_;
-    # Try "git describe"
-    my $value_hash_ref = eval {
-        $ACTION_OF{shell_simple}->(
-            $attrib_ref,
-            ['git', "--git-dir=$FindBin::Bin/../.git", 'describe'],
-        );
-    };
-    if (my $e = $@) {
-        if (!$E->caught($e)) {
-            die($e);
+{   my $FCM_VERSION;
+    sub _version {
+        my ($attrib_ref) = @_;
+        if (!defined($FCM_VERSION)) {
+            my $fcm_home = dirname($FindBin::Bin);
+            # Try "git describe"
+            my $value_hash_ref = eval {
+                $ACTION_OF{shell_simple}->(
+                    $attrib_ref,
+                    ['git', "--git-dir=$FindBin::Bin/../.git", 'describe'],
+                );
+            };
+            if (my $e = $@) {
+                if (!$E->caught($e)) {
+                    die($e);
+                }
+                $@ = undef;
+            }
+            my $version;
+            if ($value_hash_ref->{o} && !$value_hash_ref->{rc}) {
+                chomp($value_hash_ref->{o});
+                $version = $value_hash_ref->{o};
+            }
+            else {
+                # Read fcm-version.js file
+                my $path = catfile($fcm_home, qw{doc etc fcm-version.js});
+                open(my($handle), '<', $path) || die("$path: $!");
+                my $content = do {local($/); readline($handle)};
+                close($handle);
+                ($version) = $content =~ qr{\AFCM\.VERSION="(.*)";}msx;
+            }
+            $FCM_VERSION = sprintf("%s (%s)", $version, $fcm_home);
         }
-        $@ = undef;
+        return $FCM_VERSION;
     }
-    if ($value_hash_ref->{o} && !$value_hash_ref->{rc}) {
-        chomp($value_hash_ref->{o});
-        return "FCM " . $value_hash_ref->{o};
-    }
-    # Read fcm-version.js file
-    my $path = catfile($FindBin::Bin, qw{.. doc etc fcm-version.js});
-    open(my($handle), '<', $path) || die("$path: $!");
-    my $content = do {local($/); readline($handle)};
-    close($handle);
-    my ($version) = $content =~ qr{\AFCM\.VERSION="(.*)";}msx;
-    return "FCM " . $version;
 }
 
 # ------------------------------------------------------------------------------
@@ -1021,7 +1030,9 @@ is used to handle the $u->report() method.
 
 =item $u->version()
 
-Returns the FCM version string.
+Returns the FCM version string in the form C<VERSION (BIN)> where VERSION is the
+version string returned by "git describe" or the version file and BIN is
+absolute path of the "fcm" command.
 
 =back
 

@@ -29,6 +29,7 @@ use FCM::Context::Locator;
 use FCM::System::Exception;
 use File::Spec::Functions qw{file_name_is_absolute};
 use File::Temp;
+use Text::ParseWords qw{shellwords};
 use Scalar::Util qw{blessed};
 
 # Alias to class name
@@ -36,11 +37,12 @@ my $E = 'FCM::System::Exception';
 
 # Configuration parser label to action map
 my %CONFIG_PARSER_OF = (
-    'dest'       => \&_parse_dest,
-    'name'       => \&_parse_name,
-    'step.class' => \&_parse_step_class,
-    'steps'      => \&_parse_steps,
-    'use'        => \&_parse_use,
+    'dest'            => \&_parse_dest,
+    'name'            => \&_parse_name,
+    'require-version' => \&_parse_require_version,
+    'step.class'      => \&_parse_step_class,
+    'steps'           => \&_parse_steps,
+    'use'             => \&_parse_use,
 );
 
 __PACKAGE__->class(
@@ -215,6 +217,18 @@ sub _parse_dest {
 sub _parse_name {
     my ($attrib_ref, $m_ctx, $entry) = @_;
     $m_ctx->set_name($entry->get_value());
+}
+
+# Parse "require-version" declaration from a config entry.
+sub _parse_require_version {
+    my ($attrib_ref, $m_ctx, $entry) = @_;
+    my ($version) = shellwords($attrib_ref->{util}->version());
+    my ($min_version, $max_version) = shellwords($entry->get_value());
+    if (    $min_version gt $version
+        ||  defined($max_version) && $version gt $max_version
+    ) {
+        return $E->throw($E->CONFIG_VERSION, $entry, $version);
+    }
 }
 
 # Reads the step.class declaration from a config entry.
