@@ -542,6 +542,26 @@ name = -friend
 </pre>
     </dd>
 
+    <dt id="make.require-version">require-version</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: Specifies the minimum FCM version and
+      optionally the maximum FCM version that can be used on the current
+      configuration. If specified, FCM make fails immediately if its version
+      does not meet the criteria.</p>
+
+      <p><dfn>value</dfn>: The minimum version required, and optionally the
+      maximum version required.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+# Requires minimum FCM release at 2016.02.0
+require-version = 2016.02.0
+# Requires minimum FCM release at 2016.02.0, and maximum at 2038.01.0
+require-version = 2016.02.0 2038.01.0
+</pre>
+    </dd>
+
     <dt id="make.steps">steps</dt>
 
     <dd>
