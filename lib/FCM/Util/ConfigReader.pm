@@ -310,7 +310,6 @@ sub _parse_fcm2_var {
                 $E->CONFIG_VAR_UNDEF, $state_ref->{ctx}, "undef($symbol)",
             );
         }
-        $substitute ||= q{};
         $lead .= $pre . substr($esc, 0, length($esc) / 2) . $substitute;
     }
     return $lead;
