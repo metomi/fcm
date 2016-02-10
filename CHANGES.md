@@ -16,6 +16,14 @@ fcm make: extract: fix target status on conflict. On conflict, the target
 status was recorded incorrectly as unchanged. This caused incremental extracts
 to succeed in error. This change fixes the problem.
 
+[#215](https://github.com/metomi/fcm/pull/215):
+Improvements to version related functionality:
+* fcm version: now displays FCM_HOME location.
+* fcm make: new `require-version=MIN-VERSION [MAX-VERSION]` declaration.
+  If this declaration is specified and the current version is below
+  `MIN-VERSION` or if a `MAX-VERSION` is specified and the current version is
+  above it, the command will fail immediately.
+
 --------------------------------------------------------------------------------
 
 ## 2015.12.0 (2015-12-09)
