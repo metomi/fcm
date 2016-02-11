@@ -13,7 +13,7 @@ FCM release 31. Minor bug fix and update.
 
 [#222](https://github.com/metomi/fcm/pull/222):
 Configuration file: fix variable substitution of value 0. A (environment)
-variable value of `0` was previously lost on substituion. This fixes the
+variable value of `0` was previously lost on substitution. This fixes the
 problem.
 
 [#219](https://github.com/metomi/fcm/pull/219):
