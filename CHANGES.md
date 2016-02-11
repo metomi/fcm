@@ -5,11 +5,16 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
-## Next Release (2016-Q1?)
+## 2016.02.0 (2016-02-11)
 
 FCM release 31. Minor bug fix and update.
 
 ### Noteworthy Changes
+
+[#222](https://github.com/metomi/fcm/pull/222):
+Configuration file: fix variable substitution of value 0. A (environment)
+variable value of `0` was previously lost on substituion. This fixes the
+problem.
 
 [#219](https://github.com/metomi/fcm/pull/219):
 fcm make: extract: fix target status on conflict. On conflict, the target
