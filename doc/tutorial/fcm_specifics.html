@@ -1,0 +1,1616 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+   <head>
+      <head>
+         <meta charset="utf-8" />
+         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+         <meta name="viewport" content="width=device-width, initial-scale=1" />
+         <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+         <meta name="description" content="FCM Tutorial" />
+         <meta name="author" content="FCM team" />
+         <link rel="icon" href="fcm_logo.png" />
+         <title>FCM specifics</title>
+         <!-- Bootstrap core CSS -->
+         <link href="../etc/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+         <!-- Bootstrap theme -->
+         <link href="../etc/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet" />
+         <!-- Custom styles for this template -->
+         <link href="general_theme.css" rel="stylesheet" />
+   </head>
+   <body>
+      <!-- Fixed navbar -->
+      <nav class="navbar navbar-inverse navbar-fixed-top">
+         <div class="container">
+            <div class="navbar-header">
+               <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+               <span class="sr-only">Toggle navigation</span>
+               <span class="icon-bar"></span>
+               <span class="icon-bar"></span>
+               <span class="icon-bar"></span>
+               </button>
+               <a class="navbar-brand" href="#">FCM Specifics</a>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+               <ul class="nav navbar-nav">
+                  <!-- Add link to Homepage to training when created -->
+                  <li class="active"><a href="#">Home</a></li>
+                  <li class="dropdown">
+                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Specifics material <span class="caret"></span></a>
+                     <ul class="dropdown-menu">
+                        <li class="dropdown-header">Repository setup</li>
+                        <li><a href="#trepo">Tutorial Repositories</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li class="dropdown-header">Specifics Tutorials</li>
+                        <li><a href="#merge">More on merge</a></li>
+                        <li><a href="#prop">propset/del/edit</a></li>
+                        <li><a href="#trac">Trac, browse, branch-diff -t, tickets</a></li>
+                        <li><a href="#cf">Text conflicts, conflicts, resolve, tree conflicts</a></li>
+                        <li><a href="#make">fcm make, cherry pick</a></li>
+                     </ul>
+                  <li class="dropdown">
+                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Other material <span class="caret"></span></a>
+                     <ul class="dropdown-menu">
+                        <li class="dropdown-header">Quizzes</li>
+                        <li><a href="fundamentals_quiz.html">Fundamentals Quiz</a></li>
+                        <li><a href="essentials_quiz.html">Essentials Quiz</a></li>
+                        <li><a href="specifics_quiz.html">Specifics Quiz</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li class="dropdown-header">Tutorials and practical's</li>
+                        <li><a href="fcm_fundamentals.html">Fundamentals</a></li>
+                        <li><a href="fcm_essentials.html">Essentials</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li class="dropdown-header">Help/info</li>
+                        <li><a href="fcm_glossary.html">Glossary List</a></li>
+                        <li><a href="fcm_links.html">Links</a></li>
+                        <li><a href="fcm_mqrg.html">My Quick Reference Guide</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </div>
+            <!--/.nav-collapse -->
+         </div>
+      </nav>
+      <div class="container theme-showcase" role="main">
+         <div class="jumbotron">
+            <h1>Specifics of FCM</h1>
+            <p>This aims to explain and provide tutorial examples for the following topics:
+            <ol>
+               Repository setup
+               <ul>
+                  <li><a href="#trepo">Setting-up the tutorial repositories</a></li>
+               </ul>
+               Specifics
+               <ul>
+                  <li><a href="#merge">More on merge</a></li>
+                  <li><a href="#prop">propset/del/edit</a></li>
+                  <li><a href="#trac">Trac, browse, branch-diff -t, tickets</a></li>
+                  <li><a href="#cf">Text conflicts, conflicts, resolve, tree conflicts</a></li>
+                  <li><a href="#make">fcm make, cherry pick</a></li>
+               </ul>
+            </ol>
+            </p>
+         </div>
+         <div class="well">
+            <p>Now lets do the Specificss Quiz if you have not already done it at the end of  
+               the Essentials section to see how much you already know and what we will need 
+               to focus on in this section.
+            </p>
+         </div>
+         <div class="container">
+            <p><a class="btn btn-lg btn-success" href="specifics_quiz.html" role="button">Specifics Quiz</a></p>
+         </div>
+         <h1>Repository setup</h1>
+         <div class="page-header">
+            <h2><a id="trepo">Setting-up the tutorial repositories</a></h2>
+         </div>
+         <div class="well">
+            <p>Please run the following <a href="./repos/tutorial_repo_setup">tutorial repositories script</a> 
+               if you have not already done so by running the script it will set-up the 
+               repositories that you will need for all of the tutorials.
+               <strong> WARNING: This script adds and creates if required keywords the 
+               file ~/.metomi/fcm/keywords.cfg if the file already exists it copies the 
+               orginal to ~/.metomi/fcm/keywords_orig1.cfg.
+               If you rerun the script it will do the same but re-number older versions of the
+               configuation file keeping all version.
+               Please monitor the number of these that you have and tidy up the folder 
+               periodically keeping only the desired versions.</strong>
+            </p>
+            <p>
+               <strong>If at any stage the repository gets corrupted then we can start again:</strong>
+            </p>
+            <pre>
+cd
+# Warning this tearsdown the whole repository to start from scratch.
+rm -rf ~/fcm_tutorial
+rm -rf ~/my_fcm_tutorial
+# The tutorial repositories script
+tutorial_repo_setup
+</pre>
+            <p>
+               All of the tutorial sections are separate and do not depend on each other
+               therefore it is safe to teardown the repositories.
+               The only issue may be that the revision numbers do not match, but that is not
+               important for the tutorials.
+            </p>
+         </div>
+         <h1>Specifics Tutorials I</h1>
+         <div class="page-header">
+            <h2><a id="merge">More on merge</a></h2>
+         </div>
+         <div class="well">
+            <h4><code>fcm merge --custom (--revision)</code></h4>
+            <p>If <code>--custom</code> is specified as an option to <code>fcm merge</code>, 
+               then the command can be used in one of two forms:
+            </p>
+            <ol>
+               <p>
+               <li><code>fcm merge --custom --revision N:M SOURCE</code> This is a custom
+                  merge, it performs a custom merge from the specified changeset(s) of SOURCE
+                  into the working copy.
+                  The SOURCE must be a valid URL[@REV] of a branch.
+                  If a single revision is specified, the merge delta is (N - 1):N of the SOURCE.
+                  Otherwise, the merge delta is N:M of SOURCE, where M &lt; N.
+               </li>
+               </p>
+               <p>
+                  How can we find out what version of the trunk the branch 
+                  <samp>branch_merge_custom</samp> was created from?
+               </p>
+               <p>How can we compare and find out what changes have been made to the the branch 
+                  <samp>branch_merge_custom2</samp> which was created from the now HEAD of the 
+                  trunk, which has been updated since the branch was created from the trunk?
+               </p>
+               <div class="panel-group" id="accordion">
+                  <div class="panel panel-default">
+                     <div class="panel-heading">
+                        <h4 class="panel-title">
+                           <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+                           <span class="glyphicon"></span>
+                           Answers
+                           </a>
+                        </h4>
+                     </div>
+                     <div id="collapseOne" class="panel-collapse collapse">
+                        <div class="panel-body">
+                           <div class="row">
+                              <ol>
+                                 <pre>
+<span class="inputs">
+cd ~/my_fcm_tutorial/specifics/branch_merge_custom
+fcm info
+<span class="outputs">
+Path: .
+Working Copy Root Path: /net/$HOME/my_fcm_tutorial/specifics/branch_merge_custom
+URL: file:///$HOME/fcm_tutorial/repository/specifics/branches/dev/$LOGNAME/r36_branch_merge_custom
+Relative URL: ^/specifics/branches/dev/$LOGNAME/r36_branch_merge_custom
+Repository Root: file:///$HOME/fcm_tutorial/repository
+Repository UUID: 0ab956ee-d466-4a5f-b005-2573ac924882
+Revision: 37
+Node Kind: directory
+Schedule: normal
+Last Changed Author: $LOGNAME
+Last Changed Rev: 37
+Last Changed Date: 2016-02-02 16:33:58 +0000 (Tue, 02 Feb 2016)
+</span>
+fcm log -v
+<span class="outputs">
+------------------------------------------------------------------------
+r37 | $LOGNAME | 2016-02-02 16:42:29 +0000 (Tue, 02 Feb 2016) | 1 line
+Changed paths:
+   A /specifics/branches/dev
+   A /specifics/branches/dev/$LOGNAME
+   A /specifics/branches/dev/$LOGNAME/r36_branch_merge_custom (from /specifics/trunk:36)
+
+Made a branch Created file:///$HOME/fcm_tutorial/repository/specifics/branches/dev/$LOGNAME/r36_branch_merge_custom from /trunk@31.
+------------------------------------------------------------------------
+r36 | $LOGNAME | 2016-02-02 16:42:29 +0000 (Tue, 02 Feb 2016) | 1 line
+Changed paths:
+   A /specifics/etc/readme.txt
+   A /specifics/tree_conflict.txt
+
+These changes to the trunk are for setting up a trunk repository so that it has all the files and directories that are needed for the Specifics tutorial section.
+------------------------------------------------------------------------
+r35 | $LOGNAME | 2016-02-02 16:42:28 +0000 (Tue, 02 Feb 2016) | 1 line
+Changed paths:
+   A /specifics/etc
+
+Adding the pin/ directory.
+------------------------------------------------------------------------
+r34 | $LOGNAME | 2016-02-02 16:42:27 +0000 (Tue, 02 Feb 2016) | 1 line
+Changed paths:
+   A /specifics/lib/readme_only.py
+
+Change made to correct the properties on readme_only.py using propdel svn:executable
+------------------------------------------------------------------------
+r33 | $LOGNAME | 2016-02-02 16:42:27 +0000 (Tue, 02 Feb 2016) | 1 line
+Changed paths:
+   A /specifics/ever_growing_file.dat
+
+Change made to provide a .dat file that we would want to ignore using propset svn:ignore
+------------------------------------------------------------------------
+r32 | $LOGNAME | 2016-02-02 16:42:27 +0000 (Tue, 02 Feb 2016) | 1 line
+Changed paths:
+   A /specifics/lib
+   A /specifics/lib/my_hello_script.py
+
+Change made to correct the properties on my_hello_script.py using propset svn:executable ON
+------------------------------------------------------------------------
+r30 | $LOGNAME | 2016-02-02 16:42:25 +0000 (Tue, 02 Feb 2016) | 1 line
+Changed paths:
+   A /specifics
+
+New folder specifics
+------------------------------------------------------------------------
+</span>
+cd ~/my_fcm_tutorial/specifics
+fcm sw fcm fcm:fcm_sp/branches/dev/${LOGNAME}/r36_branch_merge_custom2
+fcm info
+<span class="outputs">
+Path: .
+Working Copy Root Path: /net/$HOME/my_fcm_tutorial/specifics/r36_branch_merge_custom2
+URL: file:///$HOME/fcm_tutorial/repository/specifics/r36_branch_merge_custom2
+Relative URL: ^/specifics/r_36branch_merge_custom2
+Repository Root: file:///$HOME/fcm_tutorial/repository
+Repository UUID: 0ab956ee-d466-4a5f-b005-2573ac924882
+Revision: 55
+Node Kind: directory
+Schedule: normal
+Last Changed Author: $LOGNAME
+Last Changed Rev: 55
+Last Changed Date: 2016-02-02 16:42:34 +0000 (Tue, 02 Feb 2016)
+</span>
+fcm log -v
+<span class="outputs">
+------------------------------------------------------------------------
+r55 | $LOGNAME | 2016-02-06 16:45:45 +0000 (Sat, 06 Feb 2016) | 1 line
+Changed paths:
+   A /specifics/branches/dev/$LOGNAME/r36_branch_merge_custom2 (from /specifics/trunk:54)
+
+Made a branch Created file:///$HOME/fcm_tutorial/repository/specifics/branches/dev/$LOGNAME/r36_branch_merge_custom2 from /trunk@31.
+------------------------------------------------------------------------
+r54 | $LOGNAME | 2016-02-06 16:45:45 +0000 (Sat, 06 Feb 2016) | 1 line
+Changed paths:
+   M /specifics/etc/amazing_rock.txt
+
+Adding more to the list of amazing rock bands.
+------------------------------------------------------------------------
+r53 | $LOGNAME | 2016-02-06 16:45:44 +0000 (Sat, 06 Feb 2016) | 1 line
+Changed paths:
+   M /specifics/etc/90s_pop.txt
+
+Adding a honest comment to the file etc/90s_pop.txt.
+------------------------------------------------------------------------
+r52 | $LOGNAME | 2016-02-06 16:45:44 +0000 (Sat, 06 Feb 2016) | 1 line
+Changed paths:
+   A /specifics/etc/90s_pop.txt
+
+Adding a list of my fav 90's pop bands.
+------------------------------------------------------------------------
+r51 | $LOGNAME | 2016-02-06 16:45:44 +0000 (Sat, 06 Feb 2016) | 1 line
+Changed paths:
+   M /specifics/etc/amazing_rock.txt
+
+This list is endless but it needed some amazing oldies.
+------------------------------------------------------------------------
+r50 | $LOGNAME | 2016-02-06 16:45:44 +0000 (Sat, 06 Feb 2016) | 1 line
+Changed paths:
+   A /specifics/etc/amazing_rock.txt
+
+Adding a list of the rock bands that I enjoy.
+------------------------------------------------------------------------
+r49 | $LOGNAME | 2016-02-06 16:45:44 +0000 (Sat, 06 Feb 2016) | 1 line
+Changed paths:
+   A /specifics/etc
+
+Adding the etc/ directory.
+------------------------------------------------------------------------
+r36 | $LOGNAME | 2016-02-06 16:45:41 +0000 (Sat, 06 Feb 2016) | 1 line
+Changed paths:
+   A /specifics/etc/readme.txt
+   A /specifics/tree_conflict.txt
+
+These changes to the trunk are for setting up a trunk repository so that it has all the files and directories that are needed for the Specifics tutorial section.
+------------------------------------------------------------------------
+r35 | $LOGNAME | 2016-02-06 16:45:40 +0000 (Sat, 06 Feb 2016) | 1 line
+Changed paths:
+   A /specifics/etc
+
+Adding the pin/ directory.
+------------------------------------------------------------------------
+r34 | $LOGNAME | 2016-02-06 16:45:39 +0000 (Sat, 06 Feb 2016) | 1 line
+Changed paths:
+   A /specifics/lib/readme_only.py
+
+Change made to correct the properties on readme_only.py using propdel svn:executable
+------------------------------------------------------------------------
+r33 | $LOGNAME | 2016-02-06 16:45:39 +0000 (Sat, 06 Feb 2016) | 1 line
+Changed paths:
+   A /specifics/ever_growing_file.dat
+
+Change made to provide a .dat file that we would want to ignore using propset svn:ignore
+------------------------------------------------------------------------
+r32 | $LOGNAME | 2016-02-06 16:45:39 +0000 (Sat, 06 Feb 2016) | 1 line
+Changed paths:
+   A /specifics/lib
+   A /specifics/lib/my_hello_script.py
+
+Change made to correct the properties on my_hello_script.py using propset svn:executable ON
+------------------------------------------------------------------------
+r30 | $LOGNAME | 2016-02-06 16:45:38 +0000 (Sat, 06 Feb 2016) | 1 line
+Changed paths:
+   A /specifics
+
+New folder specifics
+------------------------------------------------------------------------
+</span>
+</span>
+</pre>
+                              </ol>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <p>Here we want to only merge in the adding of the etc/ directory and "Rock" 
+                  commits 1 and 2.
+               </p>
+               <p>How do you think we can merge just these changes using the command above?</p>
+               <div class="panel-group" id="accordion">
+                  <div class="panel panel-default">
+                     <div class="panel-heading">
+                        <h4 class="panel-title">
+                           <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+                           <span class="glyphicon"></span>
+                           Answers
+                           </a>
+                        </h4>
+                     </div>
+                     <div id="collapseTwo" class="panel-collapse collapse">
+                        <div class="panel-body">
+                           <div class="row">
+                              <ol>
+                                 <pre>
+<span class="inputs">
+cd ~/my_fcm_tutorial/specifics
+fcm sw fcm:fcm_sp/branches/dev/${LOGNAME}/r36_branch_merge_custom
+fcm merge --custom --revision 48:52 fcm:fcm_sp_br/dev/$LOGNAME/r36_branch_merge_custom2
+<span class="outputs">
+-------------------------------------------------------------------------dry-run
+--- Merging r48 through r52 into '.':
+A    etc
+A    etc/amazing_rock.txt
+-------------------------------------------------------------------------dry-run
+Would you like to go ahead with the merge?
+Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+Merge succeeded.
+--------------------------------------------------------------------------actual
+--- Merging r48 through r52 into '.':
+A    etc
+A    etc/amazing_rock.txt
+--- Recording mergeinfo for merge of r48 through r52 into '.':
+ U   .
+--------------------------------------------------------------------------actual
+</span>
+</span>
+</pre>
+                              </ol>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <p>
+               <li><code>fcm merge --custom URL1@REV1 URL2@REV2</code> This is custom merge 
+                  using the delta between the two specified branch URLs.
+                  For each URL, if a revision is not specified, the command will use the URL with
+                  the last changed revision.
+               </li>
+               </p>
+               <p>
+                  We want to only merge in the Rock commit 3.
+               </p>
+               <p>How do you think we can do this using the command above?</p>
+               <div class="panel-group" id="accordion">
+                  <div class="panel panel-default">
+                     <div class="panel-heading">
+                        <h4 class="panel-title">
+                           <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
+                           <span class="glyphicon"></span>
+                           Answers
+                           </a>
+                        </h4>
+                     </div>
+                     <div id="collapseThree" class="panel-collapse collapse">
+                        <div class="panel-body">
+                           <div class="row">
+                              <ol>
+                                 <pre>
+<span class="inputs">
+fcm merge --custom fcm:fcm_sp_br/dev/$LOGNAME/r36_branch_merge_custom2@53 fcm:fcm_sp_br/dev/$LOGNAME/r36_branch_merge_custom2@54
+<span class="outputs">
+merge: status of ".":
+ M      .
+A  +    etc
+merge: continue?
+Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+-------------------------------------------------------------------------dry-run
+--- Merging r54 into '.':
+U    etc/amazing_rock.txt
+-------------------------------------------------------------------------dry-run
+Would you like to go ahead with the merge?
+Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+Merge succeeded.
+--------------------------------------------------------------------------actual
+--- Merging r54 into '.':
+U    etc/amazing_rock.txt
+--- Recording mergeinfo for merge of r562 into '.':
+ G   .
+--------------------------------------------------------------------------actual
+</span>
+</span>
+</pre>
+                              </ol>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </ol>
+         </div>
+         <div class="page-header">
+            <h2><a id="prop">propset/del/edit</a></h2>
+         </div>
+         <div class="well">
+            <h4>fcm propset svn:execuatable</h4>
+            <p>We have added a file without changing the permissions on that file before
+               committing it back to the repository.
+            </p>
+            <p>The next time that this file is checked out it will not have the permissions 
+               that we require.
+            </p>
+            <p>We can change the permissions to executable by using:
+            </p>
+            <p><code>fcm propset|pset|ps svn:execuatable ON &lt;FILENAME&gt;</code>
+            </p>
+            <p>Next time that we commit changes to the repository it will change the file 
+               permissions on that file.
+            </p>
+            <pre>
+cd ~/my_fcm_tutorial/specifics
+fcm sw fcm:fcm_sp/branches/dev/${LOGNAME}/r36_branch_propset_exe
+cd lib
+ls -ltr
+<span class="outputs">
+total 4
+-rw-r--r-- 1 $LOGNAME users 41 Feb  2 16:42 my_hello_script.py
+-rwxr-xr-x 1 $LOGNAME users 72 Feb  2 16:42 readme_only.py
+</span>
+# Note "my_script.py" does not have executable on it.
+# We need to change this so when it is checkout again the permission are 
+# correct.
+fcm ps svn:executable ON my_hello_script.py
+ls -ltr
+<span class="outputs">
+total 4
+-rwxr-xr-x 1 $LOGNAME users 41 Feb  2 16:42 my_hello_script.py
+-rwxr-xr-x 1 $LOGNAME users 72 Feb  2 16:42 readme_only.py
+</span>
+# Make another change to the repository, add another python script but set the
+# permissions correct before we commit it to the repository.
+cat &gt; my_goodbye_script.py &lt;&lt; EOF
+/usr/bin/env python
+print 'Goodbye for now'
+EOF
+chmod 755 my_goodbye_script.py
+# Check the status of the branch
+fcm st
+<span class="outputs">
+?       my_goodbye_script.py
+ M      my_hello_script.py
+</span>
+</pre>
+            <p>What do the returned statuses mean and what action if any do you need to take?</p>
+            <div class="panel-group" id="accordion">
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseFour">
+                        <span class="glyphicon"></span>
+                        Answers
+                        </a>
+                     </h4>
+                  </div>
+                  <div id="collapseFour" class="panel-collapse collapse">
+                     <div class="panel-body">
+                        <div class="row">
+                           <ol>
+                              <span class="inputs">
+                                 <p>'?' means it is not under version control so we must add it.
+                                 </p>
+                                 <p><span class="enter">fcm add my_goodbye_script.py</span>
+                                 </p>
+                                 <p>' M' means the properties are modified and no action is needed by us.
+                                 </p>
+                              </span>
+                           </ol>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <pre>
+fcm ci
+<span class="outputs">
+[info] vi: starting commit message editor...
+Change summary:
+--------------------------------------------------------------------------------
+[Root   : file:///$HOME/fcm_tutorial/repository]
+[Project: specifics]
+[Branch : branches/dev/$LOGNAME/r36_branch_propset_exe]
+[Sub-dir: ]
+
+A       lib/my_goodbye_script.py
+ M      lib/my_hello_script.py
+--------------------------------------------------------------------------------
+Commit message is as follows:
+--------------------------------------------------------------------------------
+Changed the properties of lib/my_hello_script.py and added a new script.
+--------------------------------------------------------------------------------
+Would you like to commit this change?
+Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+Adding         lib/my_goodbye_script.py
+Sending        lib/my_hello_script.py
+Transmitting file data .
+Committed revision 56.
+Updating '.':
+At revision 56.
+</span>
+</pre>
+            <p>Now we have changed the executable properties on the 
+               <samp>my_hello_script.py</samp> script.
+            </p>
+            <p>If we checked in/committed the branch it would have the correct properties.
+               Note that as the trunk has the wrong properties for 
+               <samp>my_hello_script.py</samp> then all of the other branches created from it
+               will have the wrong properties.
+            </p>
+            <p>We should merge our change into the trunk to correct this.
+               Do this now.
+            </p>
+         </div>
+         <div class="well">
+            <h4>fcm propset svn:ignore</h4>
+            <p>We want to ignore a file in the repository that we are working on as the file
+               is needed but is not to be associated with the repository as it is very big 
+               or we keep updating it.
+            </p>
+            <p><code>fcm propset|ps svn:ignore &lt;FILENAME&gt; .</code>
+            </p>
+            <pre>
+cd ~/my_fcm_tutorial/specifics
+fcm sw fcm:fcm_sp/branches/dev/r36_branch_propset_ign
+# export SVN_EDITOR='gvim -f'
+fcm st
+fcm ps svn:ignore "ever_growing_file.dat" .
+fcm st
+<span class="outputs">
+ M      .
+</span>
+# Note the dot at the end of the line. It tells SVN that the property is being set on the current directory.
+</pre>
+            <p>FCM will now ignore the file <samp>ever_growing_file.dat</samp>.
+            </p>
+            <p>We can check this using:</p>
+            <pre>
+fcm propget svn:ignore .
+<span class="outputs">
+ever_growing_file.dat
+
+</span>
+</pre>
+            <p>This show us the list of the files at are being ignored in the current directory.</p>
+         </div>
+         <div class="well">
+            <h4>fcm propdel svn:execuatable</h4>
+            <p>We can remove the executable permissions on a file by:
+            </p>
+            <p><code>fcm propdel|pdel|pd svn:executable &lt;FILENAME&gt;</code>
+            </p>
+            <p>Next time that we commit changes to the repository it will change the file
+               permissions on that file.
+            </p>
+            <pre>
+cd ~/my_fcm_tutorial/specifics
+fcm sw fcm:fcm_sp/branches/dev/${LOGNAME}/r36_branch_propdel/lib
+ls -ltr
+<span class="outputs">
+total 4
+-rw-r--r-- 1 $LOGNAME users 41 Feb  2 16:42 my_hello_script.py
+-rwxr-xr-x 1 $LOGNAME users 72 Feb  2 16:42 readme_only.py
+</span>
+# Note "readme_only.py" has executable on it and it should be read only.
+# We need to change this so when it is checkout again the permission are
+# correct.
+fcm pd svn:executable readme_only.py
+<span class="outputs">
+property 'svn:executable' deleted from 'readme_only.py'.
+</span>
+ls -ltr
+<span class="outputs">
+total 4
+-rw-r--r-- 1 $LOGNAME users 41 Feb  2 16:42 my_hello_script.py
+-rw-r--r-- 1 $LOGNAME users 72 Feb  2 16:42 readme_only.py
+</span>
+# Make another change to the repository, add another python script but set the
+# permissions correct before we commit it to the repository.
+cat &gt; readme2.py &lt;&lt; EOF
+/usr/bin/env python
+print 'Another readme script.'
+EOF
+</pre>
+            <p>What do we need to do before we commit back to the repository?</p>
+            <div class="panel-group" id="accordion">
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseFive">
+                        <span class="glyphicon"></span>
+                        Answers
+                        </a>
+                     </h4>
+                  </div>
+                  <div id="collapseFive" class="panel-collapse collapse">
+                     <div class="panel-body">
+                        <div class="row">
+                           <ol>
+                              <pre>
+<span class="inputs">
+fcm st
+<span class="outputs">
+?       readme2.py
+ M      readme_only.py
+</span>
+# What does the ' M' for readme_only.py mean? See above in <samp>fcm propset svn:execuatable</samp>
+fcm add readme2.py
+fcm ci
+<span class="outputs">
+/net/$HOME/my_fcm_tutorial/specifics/branch_propde: working directory changed to top of working copy.
+[info] gvim -f: starting commit message editor...
+Change summary:
+--------------------------------------------------------------------------------
+[Root   : file:///$HOME/fcm_tutorial/repository]
+[Project: specifics]
+[Branch : branches/dev/$LOGNAME/r36_branch_propde]
+[Sub-dir: ]
+
+A       lib/readme2.py
+ M      lib/readme_only.py
+--------------------------------------------------------------------------------
+Commit message is as follows:
+--------------------------------------------------------------------------------
+Changed the properties of lib/readme_only.py and lib/added readm2.py.
+--------------------------------------------------------------------------------
+Would you like to commit this change?
+Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+Adding         lib/readme2.py
+Sending        lib/readme_only.py
+Transmitting file data .
+Committed revision 56.
+Updating '.':
+At revision 56.
+
+                                
+                                    
+                           </ol>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            </span>
+            </span>
+            </pre>
+            <p>Now we have changed the executable properties on the
+               <samp>readme_only.py</samp> script.
+            </p>
+            <p>If we checked in/committed the branch it would have the correct properties.
+               Note that as the trunk has the wrong properties for
+               <samp>readme_only.py</samp> then all of the other branches created from it
+               will have the wrong properties.
+            </p>
+            <p>We should merge our change into the trunk to correct this.</p>
+         </div>
+         <div class="well">
+            <h4>propedit svn:log</h4>
+            <p>We want to change a log entry as we made a mistake in it.
+            </p>
+            <p>The general view is not to worry too much and to add a correction comment in 
+               the next commit message.
+            </p>
+            <p>However, we can change it using/with:
+            </p>
+            <p><code>fcm propedit|pedit|pe svn:log --revprop -r &lt;REVISION&gt; fcm:&lt;KEYWORD&gt;</code>
+            </p>
+            <p><code>fcm pe svn:log --revprop -r &lt;REVISION&gt; &lt;URL&gt;</code>
+               or
+            </p>
+            <p><code>fcm pe svn:log --revprop -r &lt;REVISION&gt; &lt;BRANCH_URL&gt;</code>
+            </p>
+            <pre>
+cd ~/my_fcm_tutorial/specifics
+fcm sw fcm:fcm_sp/branches/dev/${LOGNAME}/r36_branch_propedit
+</pre>
+            <p>One of the log commits has a typo.
+               How can we find the typo?
+            </p>
+            <div class="panel-group" id="accordion">
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseSix">
+                        <span class="glyphicon"></span>
+                        Answers
+                        </a>
+                     </h4>
+                  </div>
+                  <div id="collapseSix" class="panel-collapse collapse">
+                     <div class="panel-body">
+                        <div class="row">
+                           <ol>
+                              <span class="inputs">
+                                 fcm log
+                                 <pre>
+<span class="outputs">
+------------------------------------------------------------------------
+r41 | $LOGNAME | 2016-02-02 16:42:30 +0000 (Tue, 02 Feb 2016) | 1 line
+
+Made a branch Created file:///$HOME/fcm_tutorial/repository/specifics/branches/dev/$LOGNAME/r36_branch_propedit from /trunk@31.
+------------------------------------------------------------------------
+r36 | $LOGNAME | 2016-02-02 16:42:29 +0000 (Tue, 02 Feb 2016) | 1 line
+
+These changes to the trunk are for setting up a trunk repository so that it has all the files and directories that are needed for the Specifics tutorial section.
+------------------------------------------------------------------------
+r35 | $LOGNAME | 2016-02-02 16:42:28 +0000 (Tue, 02 Feb 2016) | 1 line
+
+Adding the etd/ directory.
+------------------------------------------------------------------------
+r34 |i $LOGNAME | 2016-02-02 16:42:27 +0000 (Tue, 02 Feb 2016) | 1 line
+
+Change made to correct the properties on readme_only.py using propdel svn:executable
+------------------------------------------------------------------------
+r33 | $LOGNAME | 2016-02-02 16:42:27 +0000 (Tue, 02 Feb 2016) | 1 line
+
+Change made to provide a .dat file that we would want to ignore using propset svn:ignore
+------------------------------------------------------------------------
+r32 | $LOGNAME | 2016-02-02 16:42:27 +0000 (Tue, 02 Feb 2016) | 1 line
+
+Change made to correct the properties on my_hello_script.py using propset svn:executable ON
+------------------------------------------------------------------------
+r30 | $LOGNAME | 2016-02-02 16:42:25 +0000 (Tue, 02 Feb 2016) | 1 line
+
+New folder specifics/trunk
+------------------------------------------------------------------------
+</span>
+</pre>
+                                 r35, "etd/" should be "/etc"
+                              </span>
+                           </ol>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <p>Now we can correct it.
+            </p>
+            <pre>
+export SVN_EDITOR="gvim"
+fcm pe svn:log --revprop -r 35 fcm:fcm_sp_br/dev/${LOGNAME}/r36_branch_propedit
+<span class="outputs">
+Set new value for property 'svn:log' on revision 35
+</span>
+</pre>
+            <p>This will correct the log message in the commit.</p>
+         </div>
+         <div class="page-header">
+            <h2><a id="trac">Trac, browse, branch-diff -t, tickets</a></h2>
+         </div>
+         <div class="well">
+            <h4>General about Trac and Tickets</h4>
+            <p>Here we will cover the minimum information that is needed to understand Trac 
+               and Tickets.
+            </p>
+         </div>
+         <div class="well">
+            <h4>Trac</h4>
+            <p>Trac is a wiki system which we can use for organizing knowledge and 
+               information in a very flexible way that FCM has be designed to interact with.
+               A brief summary on Trac:
+            </p>
+            <ul>
+            <p>
+            <li>It is a flexible issue tracker.</li>
+            </p>
+            <p>
+            <li>It provides a roadmap feature for managing project release, including a 
+               record of all changes included in the release.
+            </li>
+            </p>
+            <p>
+            <li>It has a built-in wiki.</li>
+            </p>
+            <p>
+            <li>It lets us use a browser for viewing the Subversion repositories, where we can 
+               browse the project tree and files, examine revision logs and examine the 
+               changesets.
+            </li>
+            </p>
+            <p>
+            <li>It provides a timeline view with summaries of changes to: tickets, wiki 
+               pages and subversion repositories.
+            </li>
+            </p>
+            <p>
+            <li>It provides a flexible ticket workflow, this supports the review process
+               and can be adapted to meet the requirements of larger systems.
+            </li>
+            </p>
+            <a href="http://www-nwp/~fcm/fcm-doc/fcm/user_guide/system_admin.html#trac">Trac in detail</a>
+         </div>
+         <div class="well">
+            <h4>fcm browse</h4>
+            <p>If setup correctly on your site we can invoke the web-browser to launch the
+               corresponding URL of the web-based
+               repository browser (currently Trac browser).
+               <code>fcm browse|trac|www &lt;URL&gt;</code>
+            </p>
+         </div>
+         <div class="well">
+            <h4>branch-diff -t</h4>
+            <p>We can launch Trac with the default web browser to report the diff of a branch
+               using:
+               <code>fcm branch-diff --trac|-t &lt;URL|local/working copy&gt;</code>
+            </p>
+         </div>
+         <div class="well">
+            <h4>Tickets</h4>
+            <p>Tickets allow people to follow an issue, or a list of tickets matching the 
+               chosen criterion.
+               <a href="../user_guide/getting_started.html#tutorial_create-ticket">Creating a ticket</a>
+            </p>
+         </div>
+         <div class="page-header">
+            <h2><a id="cf">Text conflicts, conflicts, resolve, tree conflicts</a></h2>
+         </div>
+         <div class="well">
+            <h4>Text conflicts</h4>
+            <p>In Essentials tutorial III <a href="fcm_essentials.html#st2">text conflicts</a> we
+               created a text conflict and resolved it.
+            </p>
+            <p>The text conflict was created by?</p>
+            <div class="panel-group" id="accordion">
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseSeven">
+                        <span class="glyphicon"></span>
+                        Answers
+                        </a>
+                     </h4>
+                  </div>
+                  <div id="collapseSeven" class="panel-collapse collapse">
+                     <div class="panel-body">
+                        <div class="row">
+                           <span class="inputs">
+                              <ul>
+                              <p>
+                              <li>Creating two branches from the trunk and checking them out with different 
+                                 names.
+                              </li>
+                              </p>
+                              <p>
+                              <li>In "branch1" we appended to a text file some additional text.
+                                 We then committed the change.
+                              </li>
+                              </p>
+                              <p>
+                              <li>In "branch2" we appended to a text file of the same name as in "branch1" 
+                                 some different additional text.
+                                 We then committed the change.
+                              </li>
+                              </p>
+                              <p>
+                              <li>We then merged "branch1" into "branch2".
+                                 This created a Text conflict.
+                              </li>
+                              </p>
+                           </span>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <p><code>fcm st</code> returns the following when there is a text conflict on the
+               repository:
+            </p>
+            <pre>C    statusesC_text.txt </pre>
+            <p>How did we resolve the text conflict?</p>
+            <div class="panel-group" id="accordion">
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseEight">
+                        <span class="glyphicon"></span>
+                        Answers
+                        </a>
+                     </h4>
+                  </div>
+                  <div id="collapseEight" class="panel-collapse collapse">
+                     <div class="panel-body">
+                        <div class="row">
+                           <ol>
+                              <span class="inputs">
+                                 <p><code>fcm conflicts</code>
+                                    Left clicked on the text option that we want to keep.
+                                 </p>
+                                 <p>Then press "m", or use the toolbar; File -&gt; Exit with MERGED M to merge the 
+                                    change.
+                                 </p>
+                              </span>
+                           </ol>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <p>Now we need to learn more about the command <code>fcm conflicts</code>.</p>
+         </div>
+         <div class="well">
+            <h4>conflicts</h4>
+            <p>The command <code>fcm conflicts|cf</code> is a graphical tool to help
+               resolve conflicts within the local/working copy.
+               Note it cannot help with all conflicts.
+               It works with the most effectively with Text Conflicts.
+            </p>
+            <p>A type of conflict that we may come across are "Text conflicts". 
+               These are returned via <code>fcm st</code> as
+            </p>
+            <pre>C    statusesC_text.txt </pre>
+            <p>where column 1 has a "C" in it.
+            </p>
+            <p>To resolve the text conflict we use the 3-way difference tool xxdiff.
+            </p>
+            <p>For each file with a text conflict, the <code>fcm conflicts</code> command 
+               calls a graphical merge tool (i.e. xxdiff by default) to display a 3-way diff.
+            </p>
+            <h4>How to use xxdiff to help resolve text conflicts</h4>
+            <p>The file on the left is our original file.
+               The file in the middle is the common ancestor from the merge.
+               The file on the right is the file containing the changes which we are merging 
+               in.
+            </p>
+            <p>
+               A quick way of resolving the conflict (from Essentials tutorial III <a href="fcm_essentials.html#st2">text conflicts</a>):
+            </p>
+            <div class="panel-group" id="accordion">
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseNine">
+                        <span class="glyphicon"></span>
+                        Answers
+                        </a>
+                     </h4>
+                  </div>
+                  <div id="collapseNine" class="panel-collapse collapse">
+                     <div class="panel-body">
+                        <div class="row">
+                           <ol>
+                              <span class="inputs">
+                                 <img src="text_conflict2.png" alt="fcm cf screengrab">
+                                 <p>
+                                    # Left click on the text option that we want to keep, it should change colour
+                                    from yellow to purple.
+                                 </p>
+                                 <p># Then press "m", or use the toolbar; File -&gt; Exit with MERGED M.</p>
+                              </span>
+                           </ol>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <h4>Explanations of the three window split xxdiff:</h4>
+            <p>The number on the far right panel of xxdiff tool is the number of unselected 
+               differences, known as "hunks" or "sections" and they are often seen in yellow.
+               The correct term for the highlighted section is hunk, but here we will refer to
+               it as the section as it is easier to understand and remember what we are talking about.
+            </p>
+            <p>When this number is 0 then we are ready to save the merged file.
+            </p>
+            <p>To see how the merged file will look with the current selections, click 
+               Windows-&gt;Toggle Merged View (keyboard shortcut: Alt+Y).
+            </p>
+            <p>An extra window then appears showing the merged output that updates 
+               interactively as we make our selections.
+            </p>
+            <p>
+               Useful xxdiff keyboard shortcuts:
+            </p>
+            <p>
+               Everyday language:
+            </p>
+            <p>p - previous change
+            </p>
+            <p>n - next change
+            </p>
+            <p>o - previous conflict
+            </p>
+            <p>b - next conflict
+            </p>
+            <p>m - accept merge the section that is left clicked on and exit.
+            </p>
+            <p>a - accept and exit.
+            </p>
+            <p>m - reject and exit.
+            </p>
+            <p>
+               FCM/correct language:
+            </p>
+            <p>B - move to the next unselected section
+            </p>
+            <p>O - move to the previous unselected section
+            </p>
+            <p>To exit the 3-way diff (available from the File menu):
+            </p>
+            <p>Exit with MERGE (keyboard shortcut: M)
+            </p>
+            <p>Exit with ACCEPT (keyboard shortcut: A)
+            </p>
+            <p>Exit with REJECT (keyboard shortcut: R)
+            </p>
+            <p>
+               If we just want to exit without making any decisions we can also just close 
+               the window.
+            </p>
+            <p>
+               <a href="http://furius.ca/xxdiff/doc/xxdiff-doc.html">xxdiff documentation</a>
+            </p>
+            <p>
+               If we have resolved all the conflicts in a file then we will be prompted on 
+               whether to run <code>svn resolved</code> on the file to signal that the file 
+               is no longer in conflict.
+            </p>
+            <pre>
+fcm conflicts
+Conflicts in file: statusesC_text.txt
+You have chosen to ACCEPT all the changes
+Would you like to run "svn resolved"?
+Enter "y" or "n" (or just press <return> for "n"): <span class="enter">y</span>
+Resolved conflicted state of 'statusesC_text.txt'
+</pre>
+            <p>Here we only had one file with one small conflict.
+            </p>
+            <p>If we have 2 versions of a file, both with substantial changes, then the xxdiff
+               display will be extremely colourful but very helpful.
+            </p>
+            <p>In these cases it is often easier to start with one version of the file and 
+               manually re-apply the changes from the other version.
+            </p>
+            <p>It might not be obvious how to do this and we may need to speak to the author 
+               of the other change to agree how to correctly combine the change.
+            </p>
+            <p>Fortunately this situation should be very rare.</p>
+         </div>
+         <div class="well">
+            <h4>resolve</h4>
+            <p>The <code>fcm resolve</code> command can be used to resolve conflicts in 
+               local/working copy files or directories.
+            </p>
+            <p>A common way of using this command is:
+            </p>
+            <p><code>fcm resolve --accept working &lt;FILENAME&gt;</code>
+            </p>
+            <pre>
+cd ~/my_fcm_tutorial/specifics
+fcm sw fcm:fcm_sp/branches/dev/${LOGNAME}/r36_branch_resolve
+fcm bls
+<span class="outputs">
+[info] fcm:fcm_sp@78: 9 match(es)
+fcm:fcm_sp/branches/dev/$LOGNAME/r36_branch_conflict_tree@78
+fcm:fcm_sp/branches/dev/$LOGNAME/r36_branch_conflict_tree2@78
+fcm:fcm_sp/branches/dev/$LOGNAME/r36_branch_merge_custom@78
+fcm:fcm_sp/branches/dev/$LOGNAME/r36_branch_merge_custom2@78
+fcm:fcm_sp/branches/dev/$LOGNAME/r36_branch_propdel@78
+fcm:fcm_sp/branches/dev/$LOGNAME/r36_branch_propedit@78
+fcm:fcm_sp/branches/dev/$LOGNAME/r36_branch_propset_exe@78
+fcm:fcm_sp/branches/dev/$LOGNAME/r36_branch_propset_ign@78
+fcm:fcm_sp/branches/dev/$LOGNAME/r36_branch_resolve@78
+</span>
+fcm merge fcm:fcm_sp_br/dev/$LOGNAME/branch_conflict_tree
+<span class="outputs">
+Eligible merge(s) from /specifics/branches/dev/$LOGNAME/r36_branch_conflict_tree@78: 46 45
+Enter a revision (or just press &lt;return&gt; for "46"): 
+--------------------------------------------------------------------------------
+Merge: /specifics/branches/dev/$LOGNAME/r36_branch_conflict_tree@46
+ c.f.: /specifics/trunk@643
+-------------------------------------------------------------------------dry-run
+--- Merging r44 through r46 into '.':
+   C lib/utility
+   A lib/utility/tool_list.txt
+D    tree_conflict.txt
+Summary of conflicts:
+  Tree conflicts: 1
+-------------------------------------------------------------------------dry-run
+Would you like to go ahead with the merge?
+Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+Merge succeeded.
+--------------------------------------------------------------------------actual
+--- Recording mergeinfo for merge of r42 through r43 into '.':
+ U   .
+--- Merging r44 through r46 into '.':
+   C lib/utility
+   A lib/utility/tool_list.txt
+D    tree_conflict.txt
+--- Recording mergeinfo for merge of r44 through r46 into '.':
+ U   lib/utility/tool_list.txt
+ G   .
+Summary of conflicts:
+  Tree conflicts: 1
+--------------------------------------------------------------------------actual
+</span>
+fcm st
+<span class="outputs">
+ M      .
+      C lib/utility
+      &gt;   local dir obstruction, incoming dir add upon merge
+ M      lib/utility/tool_list.txt
+D       tree_conflict.txt
+Summary of conflicts:
+  Tree conflicts: 1
+</span>
+fcm resolve --accept working lib/utility
+<span class="outputs">
+Resolved conflicted state of 'lib/utility'
+</span>
+</pre>
+            <p>
+               The conflict has been resolved.
+            </p>
+            <p>
+               We will use this command further in the <a href="#cf">conflicts</a> 
+               section and scroll down to the tree conflict sub-section.
+            </p>
+         </div>
+         <div class="well">
+            <h4>Tree conflicts</h4>
+            <p>Tree conflict, which are otherwise known as a structural or filesystem-based 
+               conflicts.
+            </p>
+            <p>These can be more complicated than text conflicts.
+            </p>
+            <p><code>fcm st</code> returns the following when there is a tree conflict on the
+               repository, indicated by a "C" present in column 7 of the returned output:
+            </p>
+            <pre>       C lib/utility/my_tools</pre>
+            <p>
+               <code>fcm conflicts</code> should manually resolve the problem by prompting us 
+               to choose a course of action.
+               We can either keep the file as it was before the merge (keeping the local copy),
+               or accept the external changes to the file.
+            </p>
+            <p>
+               FCM has issues when the same directory or file has been added to two separate branches.
+               The problem can occur when merging two branches that both have the same
+               directory or file added.
+               E.g. JoeBloggs added <samp>lib/utility/my_tool</samp> to a branch and we also added the
+               same directory or file.
+               Assuming that both add exactly the same directories or files then running
+               the following command in our local/working copy should get around this problem.
+            </p>
+            <p><code>fcm resolve --accept working lib/utility/my_tools</code>
+            </p>
+            <p>As we used above in the <a href="#cf">resolve</a> sub-section.
+            </p>
+            <p>
+               A common way to generate a tree conflict after a merge is when a file has been 
+               deleted or renamed on one branch, and modified on another.
+               These are incompatible changes, therefore Subversion doesn't know which 
+               action to take.
+               This is the cause of the tree conflict dilemma which the user must solve.
+            </p>
+            <pre>
+cd ~/my_fcm_tutorial/specifics
+fcm sw fcm:fcm_sp/branches/dev/${LOGNAME}/r36_branch_conflict_tree
+fcm up
+# The file tree_conflict.txt has been deleted from it.
+# Merge in branch_conflict_tree2 which has a modification to tree_conflict.txt
+</pre>
+            <div class="panel-group" id="accordion">
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseTen">
+                        <span class="glyphicon"></span>
+                        Answers
+                        </a>
+                     </h4>
+                  </div>
+                  <div id="collapseTen" class="panel-collapse collapse">
+                     <div class="panel-body">
+                        <div class="row">
+                           <pre>
+<span class="inputs">
+fcm merge fcm:fcm_sp_br/dev/$LOGNAME/branch_conflict_tree2
+</span>
+</pre>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <p>Accept the merge.
+            </p>
+            <pre>
+<span class="outputs">
+Eligible merge(s) from /specifics/branches/dev/$LOGNAME/r36_branch_conflict_tree2@78: 48
+--------------------------------------------------------------------------------
+Merge: /specifics/branches/dev/$LOGNAME/r36_branch_conflict_tree2@48
+ c.f.: /specifics/trunk@643
+-------------------------------------------------------------------------dry-run
+--- Merging r47 through r48 into '.':
+   C tree_conflict.txt
+Summary of conflicts:
+  Tree conflicts: 1
+-------------------------------------------------------------------------dry-run
+Would you like to go ahead with the merge?
+Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+Merge succeeded.
+--------------------------------------------------------------------------actual
+--- Recording mergeinfo for merge of r44 through r46 into '.':
+ U   .
+--- Merging r47 through r48 into '.':
+   C tree_conflict.txt
+--- Recording mergeinfo for merge of r47 through r48 into '.':
+ G   .
+Summary of conflicts:
+  Tree conflicts: 1
+--------------------------------------------------------------------------actual
+</span>
+</pre>
+            <p>How can we try to resolve the conflict?</p>
+            <div class="panel-group" id="accordion">
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseEleven">
+                        <span class="glyphicon"></span>
+                        Answers
+                        </a>
+                     </h4>
+                  </div>
+                  <div id="collapseEleven" class="panel-collapse collapse">
+                     <div class="panel-body">
+                        <div class="row">
+                           <pre>
+<span class="inputs">
+fcm conflicts
+# choose to keep the local version or not.
+</span>
+</pre>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <pre>
+<span class="outputs">
+[info] tree_conflict.txt: in tree conflict.
+Locally: deleted.
+Externally: edited.
+Answer (y) to accept the local delete.
+Answer (n) to keep the file.
+Keep the local version?
+Enter "y" or "n" (or just press &lt;return&gt; for "n") <span class="enter">y</span>
+Resolved conflicted state of 'tree_conflict.txt'
+</span>
+</pre>
+            <p>In this example, to keep the file as it was before (in a deleted state), enter 
+               <samp>y</samp>.
+            </p>
+            <p>Otherwise, to accept the merge branch version of the file (adding it with the 
+               edited changes), enter <samp>n</samp>.
+            </p>
+            <p>
+               <code>fcm conflicts</code> does not cover tree conflicts on directories 
+               because of the potential nesting of conflicts within the directories.
+            </p>
+            <p>We have already covered an example of this above in the 
+               <a href="#cf">resolve</a> sub-section.
+            </p>
+            <p>Note, it can often be difficult to identify the problem and figure out the solution in the case of directory conflicts, and the easiest solution may be to 
+               try to resolve the discrepancy before the merge.
+            </p>
+            <p>Use <code>fcm st</code> to find out if the tree conflict has arisen from a 
+               rename.
+               A rename can have occurred locally or externally.
+               An external rename would show up in <code>fcm status</code> as an addition with history 
+               (A with +): for example:
+            </p>
+            <pre>
+<span class="outputs">
+A   +   FILENAME
+</span>
+</pre>
+            <p>Now we can use <code>fcm log -v &lt;FILENAME&gt;</code> to examine if this is 
+               really just a rename then it will show up as FILENAME (from ORIGINAL_FILENAME).
+            </p>
+            <p>Warning, local renames that have been committed won't show up in 
+               <code>fcm status</code>.
+               However, these can still be found using <code>fcm log -v</code> for each 
+               filename.
+            </p>
+            <h4>tree conflicts resolution list</h4>
+            Commands to use to help with resolving tree conflicts:
+            <pre>
+fcm st
+fcm log -v &lt;FILENAME&gt;
+fcm resolve --accept working &lt;FILENAME&gt;
+fcm help &lt;COMMAND&gt;
+</pre>
+            <p>
+               <samp>local add, incoming add upon merge</samp>
+            </p>
+            <ul>
+               <p>
+               <li>meaning: files or directories added with the same name independently</li>
+               </p>
+               <p>
+               <li>
+                  what <samp>keep local</samp> does: it uses rename to shuffle the old file 
+                  to a different name, copies the new file in, renames the new file to the 
+                  original name but with a temporary-style suffix (e.g. hello.py -&gt; hello.py.xD4),and again renames the old file to the original name.
+                  </p>
+                  <p>Then it runs <code>fcm resolve</code>.
+               </li>
+               </p>
+               <p>
+               <li>
+                  what <samp>discarding local</samp> does: it renames the old file to give it
+                  a temporary-style suffix (e.g. hello.py -&gt; hello.py.r6Ys), and copies the new 
+                  file into the original name.
+                  </p>
+                  <p>Then it runs <code>fcm resolve</code>.
+               </li>
+               </p>
+            </ul>
+            <p>
+               <samp>local edit, incoming delete upon merge (no renaming)</samp>
+            </p>
+            <ul>
+               <p>
+               <li>meaning: file or directory modified on the branch locally, but deleted on 
+                  the merge branch
+               </li>
+               </p>
+               <p>
+               <li>what <samp>keep local</samp> does: it just runs <code>fcm resolve</code>
+                  .
+               </li>
+               </p>
+               <p>
+               <li>what <samp>discarding local</samp> does: it deletes the file or directory 
+                  and then runs <code>fcm resolve</code>.
+               </li>
+               </p>
+            </ul>
+            <p><samp>local edit, incoming delete upon merge (renaming)</samp></p>
+            <ul>
+               <p>
+               <li>meaning: file modified on branch locally, but renamed on merge branch</li>
+               </p>
+               <p>
+               <li>
+                  what <samp>keep local</samp> does: it copies over the renamed file, and 
+                  the common ancestor of the file on the branches, and uses them for a text 
+                  conflict style merge into the old (local) filename. 
+                  </p>
+                  <p>It then removes the renamed file and then runs <code>fcm resolve</code>.
+               </li>
+               </p>
+               <p>
+               <li>
+                  what <samp>discarding local</samp> does: it copies over the renamed file, 
+                  and the common ancestor of the file on the branches, and uses them for a text 
+                  conflict style merge into the new renamed file.
+                  </p>
+                  <p> It then deletes the old file and then runs <code>fcm resolve</code>.
+               </li>
+               </p>
+            </ul>
+            </p>
+            <samp>local delete, incoming delete upon merge (no renaming)</samp></p>
+            <ul>
+               <p>
+               <li>meaning: same filename deleted both locally and externally</li>
+               </p>
+               <p>
+               <li>for both: it just runs <code>fcm resolve</code>.</li>
+               </p>
+            </ul>
+            <p><samp>local delete, incoming delete upon merge (just external renaming)</samp></p>
+            <ul>
+               <p>
+               <li>meaning: file deleted locally, but renamed externally</li>
+               </p>
+               <p>
+               <li>what <samp>keep local</samp> does: it just runs <code>fcm resolve</code>.</li>
+               </p>
+               <p>
+               <li>what <samp>discarding local</samp> does: it just deletes the new renamed 
+                  file and then runs <code>fcm resolve</code>.
+               </li>
+               </p>
+            </ul>
+            <p>
+               <samp>local delete, incoming delete upon merge (just local renaming)</samp>
+            </p>
+            <ul>
+               <p> 
+               <li>meaning: file renamed locally, but deleted externally</li>
+               </p>
+               <p>
+               <li>what <samp>keep local</samp> does: it just runs <code>fcm resolve</code>.</li>
+               </p>
+               <p>
+               <li>what <samp>discarding local</samp> does: it deletes the local renamed file 
+                  and then runs <code>fcm resolve</code>.
+               </li>
+               </p>
+            </ul>
+            <p>
+               <samp>local delete, incoming delete upon merge (local renaming AND external 
+               renaming)</samp>
+            </p>
+            <ul>
+               <p>
+               <li>meaning: same file renamed locally AND externally, to two different names.</li>
+               </p>
+               <p>
+               <li>
+                  what <samp>keep local</samp> does: it copies in the external file and 
+                  the common ancestor file to construct a text-style merge using xxdiff into the 
+                  locally-renamed filename.
+                  </p>
+                  <p> It then removes the external rename and then runs <code>fcm resolve</code>.
+               </li>
+               </p>
+               <p>
+               <li>
+                  what <samp>discarding local</samp> does: it copies in the external file and
+                  the common ancestor file to construct a text-style merge using xxdiff into the 
+                  externally-renamed filename.
+                  </p>
+                  <p> It then removes the local rename and then runs <code>fcm resolve</code>.
+               </li>
+               </p>
+            </ul>
+            <p>
+               <samp>local missing, incoming edit upon merge (no renaming)</samp>
+            </p>
+            <ul>
+               <p>
+               <li>meaning: locally deleted file, add newer file from merge branch?</li>
+               </p>
+               <p>
+               <li>what <samp>keep local</samp> does: it just runs <code>fcm resolve</code>.</li>
+               </p>
+               <p>
+               <li>what <samp>discarding local</samp> does: it copies in the external file 
+                  using its URL and then runs <code>fcm resolve</code>.
+               </li>
+               </p>
+            </ul>
+            <p>
+               <samp>local missing, incoming edit upon merge (renaming)</samp>
+            </p>
+            <ul>
+               <p>
+               <li>meaning: locally renamed file, but external changes to the old filename</li>
+               </p>
+               <p>
+               <li>
+                  what <samp>keep local</samp> does: it copies in the external file and 
+                  the common ancestor to construct a text-style merge using xxdiff, into the 
+                  locally-renamed filename.
+                  </p>
+            </ul>
+            <p> <samp>local missing, incoming edit upon merge (renaming)</samp></p>
+            <ul>
+               <p> 
+               <li>meaning: locally renamed file, but external changes to the old filename</li>
+               </p>
+               <p>
+               <li>
+                  what <samp>keep local</samp> does: it copies in the external file and 
+                  the common ancestor to construct a text-style merge using xxdiff, into the 
+                  locally-renamed filename.
+                  </p>
+                  <p>It then runs <code>fcm resolve</code>.
+               </li>
+               </p>
+               <p>
+               <li>
+                  what <samp>discarding local</samp> does: it copies in the external file and
+                  the common ancestor to construct a text-style merge using xxdiff, into the 
+                  original filename.
+                  </p>
+                  <p> It then deletes the locally-renamed file and adds the original filename, then 
+                     it runs <code>fcm resolve</code>.
+               </li>
+               </p>
+            </ul>
+            <p>
+               <strong>A final resort or a simpler solution: checkout a new working/local
+               copy of the trunk/branch or create a new branch from the trunk/branch and 
+               apply your changes using best working practices and only making one or a few 
+               changes at a time, committing the changes to your branch and merging to the trunk only a few changes at a time.</strong>
+            </p>
+         </div>
+         <div class="page-header">
+            <h2><a id="make">fcm make, cherry pick</a></h2>
+         </div>
+         <div class="well">
+            <h4>fcm make</h4>
+            <p><code>fcm make</code> is not covered in this tutorial.
+            </p>
+            <p>Please refer to the <a href="http://metomi.github.io/fcm/doc/user_guide/make.html">fcm make</a> pages.</p>
+         </div>
+         <div class="well">
+            <h4>cherry pick</h4>
+            <p>There is no support for cherry picking from a branch in FCM.
+            </p>
+            <p>If you decide to try to do this then there will be no user support.</p>
+         </div>
+         <div class="well">
+            <h2>Congratulations you have completed the FCM tutorial!</h2>
+         </div>
+         <p>Don't forget to remove the repository if it is not needed anymore or if you
+            wish to do the repository again in the future.
+            <code>rm -rf ~/fcm_tutorial; rm -rf ~my_fcm_tutorial</code>
+         </p>
+         <hr/>
+         <div class="container-fluid text-center">
+            <div class="row">
+               <div class="col-md-12">
+                  <address><small>
+                     &copy; British Crown Copyright 2006-16
+                     <a href="http://www.metoffice.gov.uk">Met Office</a>.<br />
+                     This document is released under the British <a href=
+                        "http://www.nationalarchives.gov.uk/doc/open-government-licence/" rel=
+                        "license">Open Government Licence</a>.<br />
+                     </small>
+                  </address>
+               </div>
+            </div>
+         </div>
+         <!-- Bootstrap core JavaScript
+            ================================================== -->
+         <!-- Placed at the end of the document so the pages load faster -->
+         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+         <script>window.jQuery || document.write('<script src="./js/vendor/jquery.min.js"><\/script>')</script>
+         <script src="../etc/bootstrap/js/bootstrap.min.js"></script>
+         <script src="./js/docs.min.js"></script>
+         <script LANGUAGE="JavaScript">
+            update = new Date(document.lastModified);
+            theMonth = update.getMonth() + 1;
+            theDate = update.getDate();
+            theYear = update.getFullYear();
+            theHour = update.getHours();
+            theMin = update.getMinutes();
+            theSec = update.getSeconds();
+            document.write("<strong> Last Modified:</strong> " + theYear + "-" + theMonth + "-" + theDate + "T" + theHour + ":" + theMin + ":" + theSec + "Z");
+         </script>
+      </div>
+   </body>
+</html>
+

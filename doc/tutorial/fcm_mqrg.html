@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+        <meta name="description" content="FCM Tutorial">
+        <meta name="author" content="FCM team">
+        <link rel="icon" href="fcm_logo.png">
+        <title>FCM My Quick Reference Guide</title>
+        <!-- Bootstrap core CSS -->
+        <link href="../etc/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <!-- Bootstrap theme -->
+        <link href="../etc/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+        <!-- Custom styles for this template -->
+        <link href="general_theme.css" rel="stylesheet">
+    </head>
+    <body>
+        <!-- Fixed navbar -->
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">FCM My Quick Reference Guide</a>
+                </div>
+                <div id="navbar" class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <!-- Add link to Homepage to training when created -->
+                        <li class="active"><a href="#">Home</a></li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">MQRG<span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#S1">Committing local/working copy</a></li>
+                                <li><a href="#S2">Updating a local/working copy</a></li>
+                                <li><a href="#S3">Using a keyword to check the log</a></li>
+                                <li><a href="#S4">Checkout the trunk and create a branch</a></li>
+                                <li><a href="#S5">Creating a branch of a branch</a></li>
+                                <li><a href="#S6">Reverting an uncommitted change</a></li>
+                                <li><a href="#S7">Reverting a committed change</a></li>
+                                <li><a href="#S8">Merging a local/working copy</a></li>
+                                <li><a href="#S9">Listing branches and then checking one out</a></li>
+                                <li><a href="#S10">Text conflicts and accepting the working copy</a></li>
+                            </ul>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Other material <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li class="dropdown-header">Quizzes</li>
+                                <li><a href="fundamentals_quiz.html">Fundamentals Quiz</a></li>
+                                <li><a href="essentials_quiz.html">Essentials Quiz</a></li>
+                                <li><a href="specfics_quiz.html">Specifics Quiz</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li class="dropdown-header">Tutorials and practical's</li>
+                                <li><a href="fcm_fundamentals.html">Fundamentals</a></li>
+                                <li><a href="fcm_essentials.html">Essentials</a></li>
+                                <li><a href="fcm_specifics.html">Specifics</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li class="dropdown-header">Help/info</li>
+                                <li><a href="fcm_links.html">Links</a></li>
+                                <li><a href="fcm_glossary.html">Glossary List</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <!--/.nav-collapse -->
+            </div>
+        </nav>
+        <div class="container theme-showcase" role="main">
+            <div class="jumbotron">
+                <h2>My Quick Reference Guide</h2>
+                <br>
+                Here are sets of commands that are commonly used and the order that they are they are usually issued in.
+                <ul>
+                    <li><a href="#S1">Committing local/working copy</a></li>
+                    <li><a href="#S2">Updating a local/working copy</a></li>
+                    <li><a href="#S3">Using a keyword to check the log</a></li>
+                    <li><a href="#S4">Checkout the trunk and create a branch</a></li>
+                    <li><a href="#S5">Creating a branch of a branch</a></li>
+                    <li><a href="#S6">Reverting an uncommitted change</a></li>
+                    <li><a href="#S7">Reverting a committed change</a></li>
+                    <li><a href="#S8">Merging a local/working copy</a></li>
+                    <li><a href="#S9">Listing branches and then checking one out</a></li>
+                    <li><a href="#S10">Text conflicts and accepting the working copy</a></li>
+                </ul>
+            </div>
+            <br/>
+            <h1><a id="S1">Committing local/working copy</a></h1>
+            <div class="well">
+                <pre>
+# check that you are in the correct copy and revision of your local/working copy of the repository
+fcm info
+# check the changes compared to the committed version of the repository.
+fcm st
+# make appropriate changes.
+# commit the local changes to the repository.
+fcm ci
+# confirm there are no changes in the local copy.
+fcm st
+# confirm the revision number has increased as expected.
+fcm info
+</pre>
+            </div>
+            <br/>
+            <h1><a id="S2">Updating a local/working copy</a></h1>
+            <div class="well">
+                <pre>
+fcm info
+fcm st
+# check what updates (-u) could be applied to the local/working copy.
+fcm st -u
+# if you are happy with them update your local/working copy.
+fcm update
+# check the status and commit to the repository any required changes.
+fcm st
+fcm ci
+</pre>
+            </div>
+            <br/>
+            <h1><a id="S3">Using a keyword to check the log</a></h1>
+            <div class="well">
+                <pre>
+# set-up your keyword.
+cd ~/.metomi/fcm/
+# edit the <samp>keyword.cfg</samp> file, for example (using the expanded variable for $HOME):
+location{primary}[fcm_esIII] = file:////$HOME/fcm_tutorial/repository/essentialsIII
+# check the log of the local/working copy.
+fcm log fcm:fcm_esIII
+</pre>
+            </div>
+            <br/>
+            <h1><a id="S4">Checkout the trunk and create a branch</a></h1>
+            <div class="well">
+                <pre>
+# checkout the trunk with the URL.
+fcm co URL &lt;LOCATION OF WORKING/LOCAL COPY&gt;
+# checkout the trunk with the keyword if it is set-up.
+fcm co fcm:fcm_esIII_tr &lt;LOCATION OF WORKING/LOCAL COPY&gt;
+# create a branch of the trunk.
+fcm bc &lt;NAME OF BRANCH&gt;
+#
+# if you already have a local/working copy of the trunk and want to branch from
+# that...
+cd &lt;LOCATION OF WORKING/LOCAL COPY OF TRUNK&gt;
+# check it is the trunk version.
+fcm info
+# check for any updates and if you want them.
+fcm st -u
+# update if there are changes and you want them.
+fcm update
+# create a branch of the trunk.
+fcm bc &lt;NAME OF BRANCH&gt;
+# checkout the branch
+fcm co &lt;BRANCH_URL&gt; &lt;LOCATION OF WORKING/LOCAL COPY OF BRANCH&gt;
+cd &lt;LOCATION OF WORKING/LOCAL COPY OF BRANCH&gt;
+</pre>
+            </div>
+            <br/>
+            <h1><a id="S5">Creating a branch of a branch</a></h1>
+            <div class="well">
+                <pre>
+fcm info
+# if you are in the trunk and need to switch to the branch do so.
+fcm sw &lt;NAME OF BRANCH&gt;
+# or if you checked it out
+cd &lt;LOCATION OF WORKING/LOCAL COPY OF BRANCH&gt;
+fcm info
+fcm st
+# commit any changes if needed.
+fcm ci
+# check for updates from the repository.
+fcm st -u
+# update the local/working copy of needed.
+fcm update
+# now create the branch of the branch.
+fcm bc --bob  &lt;NAME OF BRANCH OF BRANCH&gt;
+# if you want to branch from a different revision and not the HEAD.
+fcm bc --bob BRANCH_URL@REV &lt;NAME OF BRANCH OF BRANCH&gt; 
+# either switch to the branch or check it out and move to it.
+</pre>
+            </div>
+            <br/>
+            <h1><a id="S6">Reverting an uncommitted change</a></h1>
+            <div class="well">
+                <pre>
+# this only works on changes in the local/working copy which have not yet been 
+#committed to the repository.
+fcm st
+# select the local changes that you want to revert and revert them.
+fcm revert &lt;FILENAME1&gt; &lt;FILENAME2&gt; &lt;DIRECTORY1&gt;
+# check the changes are correct.
+fcm st
+# commit the changes if all is as required.
+fcm ci
+</pre>
+            </div>
+            <br/>
+            <h1><a id="S7">Reverting a committed change</a></h1>
+            <div class="well">
+                <pre>
+# check what revisions are available for reverting.
+fcm binfo 
+# to revert changes that you have already committed
+fcm merge --reverse --revision M:N
+# check the status and commit if as required.
+fcm st
+fcm info 
+</pre>
+            </div>
+            <br/>
+            <h1><a id="S8">Merging a local/working copy</a></h1>
+            <div class="well">
+                <pre>
+# merging a local copy branch into the trunk.
+# change or switch to the trunk local/working copy.
+fcm merge &lt;BRANCH_URL&gt;
+# accept the merge if it is correct and commit changes.
+fcm ci
+</pre>
+            </div>
+            <br/>
+            <h1><a id="S9">Listing branches and then checking one out</a></h1>
+            <div class="well">
+                <pre>
+# list possible branches
+fcm bls
+# select one to checkout
+fcm co &lt;BRANCH_URL&gt; &lt;LOCATION OF WORKING/LOCAL COPY OF BRANCH&gt;
+cd &lt;LOCATION OF WORKING/LOCAL COPY OF BRANCH&gt;
+</pre>
+            </div>
+            <br/>
+            <h1><a id="S10">Text conflicts and accepting the working copy</a></h1>
+            <div class="well">
+                <pre>
+fcm st
+# if it is a text conflict, e.g.
+# C    statusesC_text.txt
+# not a tree conflict, e.g.
+#        C src/utility/my_tools
+# we can use:
+fcm cf
+# this brings up an xxdiff three-way window.
+# The middle frame of the three is the common ancestor of the two.
+# The one on the left is the local/working copy directory that we are in, the
+# one considered the original.
+# The one on the right is the one we are trying to merge in.
+# Left click on the text option that we want to keep, it should change colour
+# from yellow to purple.
+# Then press "m", or use the toolbar; File -&gt; Exit with MERGED M.
+<font color="blue">
+        [info] statusesC_text.txt: in text conflict.
+        You merged all the changes.
+        Run "svn resolve --accept working statusesC_text.txt"?
+        Enter "y" or "n" (or just press &lt;return&gt; for "n") <font color="black">y</font>
+        Resolved conflicted state of 'statusesC_text.txt
+</font>
+#
+#
+fcm st
+# if it is a tree conflict.
+# find out more information about the file/directory concerned.
+fcm log -v &lt;FILENAME&gt;
+# if you want to keep your local/working copy you 
+# can try:
+fcm resolve --accept working &lt;FILENAME&gt;
+<font color="blue">
+        Resolved conflicted state of 'src/utility'
+</font>
+# Please see the <a href="fcm_specifics.html#S5">Text/Tree Conflicts</a> sections in
+# the Specifics Tutorial for additional information, this page is only a quick
+# guide.
+</pre>
+            </div>
+            <br>
+            <br>
+            <hr/>
+            <div class="container-fluid text-center">
+                <div class="row">
+                    <div class="col-md-12">
+                        <address><small>
+                            &copy; British Crown Copyright 2006-16
+                            <a href="http://www.metoffice.gov.uk">Met Office</a>.<br />
+                            This document is released under the British <a href=
+                                "http://www.nationalarchives.gov.uk/doc/open-government-licence/" rel=
+                                "license">Open Government Licence</a>.<br />
+                            </small>
+                        </address>
+                    </div>
+                </div>
+            </div>
+            <!-- Bootstrap core JavaScript
+                ================================================== -->
+            <!-- Placed at the end of the document so the pages load faster -->
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+            <script>window.jQuery || document.write('<script src="./js/vendor/jquery.min.js"><\/script>')</script>
+            <script src="../etc/bootstrap/js/bootstrap.min.js"></script>
+            <script src="./js/docs.min.js"></script>
+            <script LANGUAGE="JavaScript">
+                update = new Date(document.lastModified);
+                theMonth = update.getMonth() + 1;
+                theDate = update.getDate();
+                theYear = update.getFullYear();
+                theHour = update.getHours();
+                theMin = update.getMinutes();
+                theSec = update.getSeconds();
+                document.write("<strong> Last Modified:</strong> " + theYear + "-" + theMonth + "-" + theDate + "T" + theHour + ":" + theMin + ":" + theSec + "Z");
+            </script>
+        </div>
+    </body>
+</html>
+

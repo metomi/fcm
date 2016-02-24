@@ -1,0 +1,397 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>     
+        <script>window.jQuery || document.write('<script src="./js/vendor/jquery.min.js"><\/script>')</script>
+        <script type="text/javascript" src="./js/quiz.js"></script>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+        <meta name="description" content="FCM Tutorial" />
+        <meta name="author" content="FCM team" />
+        <link rel="icon" href="fcm_logo.png" />
+        <title>Specifics Quiz</title>
+        <!-- Bootstrap core CSS -->
+        <link href="../etc/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+        <!-- Bootstrap theme -->
+        <link href="../etc/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet" />
+        <!-- Custom styles for this template -->
+        <link href="general_theme.css" rel="stylesheet" />
+    </head>
+    <body>
+        <!-- Fixed navbar -->
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">Specifics Quiz</a>
+                </div>
+                <div id="navbar" class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <!-- Add link to Homepage to training when created -->
+                        <li class="active"><a href="#">Home</a></li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Other material <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li class="dropdown-header">Quizzes</li>
+                                <li><a href="fundamentals_quiz.html">Fundamentals Quiz</a></li>
+                                <li><a href="essentials_quiz.html">Essentials Quiz</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li class="dropdown-header">Tutorials and practical's</li>
+                                <li><a href="fcm_fundamentals.html">Fundamentals</a></li>
+                                <li><a href="fcm_essentials.html">Essentials</a></li>
+                                <li><a href="fcm_specifics.html">Specifics</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li class="dropdown-header">Help/info</li>
+                                <li><a href="fcm_glossary.html">Glossary List</a></li>
+                                <li><a href="fcm_links.html">Links</a></li>
+                                <li><a href="fcm_mqrg.html">My Quick Reference Guide</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <!--/.nav-collapse -->
+            </div>
+        </nav>
+        <div class="container theme-showcase" role="main">
+        <div class="jumbotron">
+            <h2>FCM Specifics Preparation quiz</h2>
+            <h3>FCM questions</h3>
+            <br/>
+            The aim of this quiz is to develop your thinking in "fcm talk" and to help you gauge what you do and do not know and hopefully encourage you that it is not as complicated as you may have once thought.
+            <br/>
+            This quiz can also be used as a revision/reminder tool.
+            <br/>
+            Please try to attempt all aspects of the quiz, you may be able to do none or all, you don't know until you try.
+            <br/>
+            <h3>Specifics quiz</h3>
+            <div class="well">
+                <div id="results"></div>
+            </div>
+            <div class="well">
+                <form id="qform" action=".">
+                    <ol>
+                        <li>
+                            <p>Which command could you not use to look at what the differences are between two items in the repository using the xxdiff tool?</p>
+                            <div id="1" class="questions">
+                                <ol type="A">
+                                    <li><input type="radio" value="A" /><label for="A">xxdiff &lt;FCM_URL1&gt; &lt;FCM_URL2&gt;</label><br/></li>
+                                    <li><input type="radio"  value="B" /><label for="B">xxdiff &lt;FILE1&gt; &lt;FILE2&gt;</label><br/></li>
+                                    <li><input type="radio" value="C" /><label for="C">xxdiff &lt;FCM_URL1@REVNUMBER1&gt; &lt;FCM_URL1@REVNUMBER2&gt;</label><br/></li>
+                                    <li><input type="radio" value="D" /><label for="D">xxdiff &lt;URL1~rev=1&gt; &lt;URL1~rev=2&gt;</label><br/></li>
+                                </ol>
+                                <p class="answers D"><em>D</em></p>
+                            </div>
+                        </li>
+                        <li>
+                            <p>How do you change the properties on a file so that the file is executable?</p>
+                            <div id="2" class="questions">
+                                <ol type="A">
+                                    <li><input type="radio" value="A" /><label for="A">fcm propset|ps svn:executable &lt;FILE&gt;</label><br/></li>
+                                    <li><input type="radio" value="B" /><label for="B">fcm propset|ps svn:executable ON &lt;FILE&gt;</label><br/></li>
+                                    <li><input type="radio" value="C" /><label for="C">fcm prop svn:executable ON &lt;FILE&gt;</label><br/></li>
+                                    <li><input type="radio" value="D" /><label for="D">fcm prop svn:executable &lt;FILE&gt;</label><br/></li>
+                                </ol>
+                                <p class="answers B"><em>B</em></p>
+                            </div>
+                        </li>
+                        <li>
+                            <p class="question">How do you change the properties on a file so that the file is not executable?</p>
+                            <div id="3" class="questions">
+                                <ol type="A">
+                                    <li><input type="radio" value="A" /><label for="A">fcm propdel svn:executable OFF &lt;FILE&gt;</label><br/></li>
+                                    <li><input type="radio" value="B" /><label for="B">fcm prop svn:executable OFF &lt;FILE&gt;</label><br/></li>
+                                    <li><input type="radio" value="C" /><label for="C">fcm propdel svn:executable &lt;FILE&gt;</label><br/></li>
+                                    <li><input type="radio" value="D" /><label for="D">fcm propnot svn:executable &lt;FILE&gt;</label><br/></li>
+                                </ol>
+                                <p class="answers C"><em>C</em></p>
+                            </div>
+                        </li>
+                        <li>
+                            <p class="question">How do you change log message on a commit?</p>
+                            <div id="4" class="questions">
+                                <ol type="A">
+                                    <li><input type="radio" value="A" /><label for="A">fcm propedit svn:log --revprop -r &lt;REVISION&gt;</label><br/></li>
+                                    <li><input type="radio" value="B" /><label for="B">fcm propedit svn:log -r &lt;REVISION&gt; fcm:ops</label><br/></li>
+                                    <li><input type="radio" value="C" /><label for="C">fcm propedit svn:log --revprop &lt;REVISION&gt;</label><br/></li>
+                                    <li><input type="radio" value="D" /><label for="D">fcm propedit svn:log --revprop -r &lt;REVISION&gt; fcm:ops</label><br/></li>
+                                </ol>
+                                <p class="answers D"><em>D</em></p>
+                            </div>
+                        </li>
+                        <li>
+                            <p class="question">fcm conflicts|cf, denoted by the "C" after running fcm status, can be used to resolve which type(s) of conflicts?</p>
+                            <div id="5" class="questions">
+                                <ol type="A">
+                                    <li><input type="radio" value="A" /><label for="A">tree only</label><br/></li>
+                                    <li><input type="radio" value="B" /><label for="B">text only</label><br/></li>
+                                    <li><input type="radio" value="C" /><label for="C">tree and text</label><br/></li>
+                                </ol>
+                                <p class="answers C"><em>C</em></p>
+                            </div>
+                        </li>
+                        <li>
+                            <p class="question">How can you invoke the web-browser to launch the corresponding URL of the web-based repository browser (currently Trac browser)?</p>
+                            <div id="6" class="questions">
+                                <ol type="A">
+                                    <li><input type="radio" value="A" /><label for="A">fcm browse</label><br/></li>
+                                    <li><input type="radio" value="B" /><label for="B">fcm browse|trac</label><br/></li>
+                                    <li><input type="radio" value="C" /><label for="C">fcm browse|www</label><br/></li>
+                                    <li><input type="radio" value="D" /><label for="D">fcm browse|trac|www</label><br/></li>
+                                </ol>
+                                <p class="answers D"><em>D</em></p>
+                            </div>
+                        </li>
+                        <li>
+                            <p class="question">How could you launch Trac with your default web browser to report the diff?</p>
+                            <div id="7" class="questions">
+                                <ol type="A">
+                                    <li><input type="radio" value="A" /><label for="A">fcm branch-diff --trac</label><br/></li>
+                                    <li><input type="radio" value="B" /><label for="B">fcm branch-diff --trac|-t</label><br/></li>
+                                    <li><input type="radio" value="C" /><label for="C">fcm branch-diff --trac|--t</label><br/></li>
+                                    <li><input type="radio" value="D" /><label for="D">fcm branch-diff-trac</label><br/></li>
+                                </ol>
+                                <p class="answers B"><em>B</em></p>
+                            </div>
+                        </li>
+                        <li>
+                            <p class="question">What is Trac for?</p>
+                            <div id="8" class="questions">
+                                <ol type="A">
+                                    <li><input type="radio" value="A" /><label for="A">A built-in wiki system which you can use for organizing knowledge and information in a very flexible way</label><br/></li>
+                                    <li><input type="radio" value="B" /><label for="B">A built-in wiki system which you can use for organizing knowledge and information but it is not flexible</label><br/></li>
+                                    <li><input type="radio" value="C" /><label for="C">A built-in wiki system which you can use for organizing knowledge and information but you cannot share it with anyone</label><br/></li>
+                                    <li><input type="radio" value="D" /><label for="D">A built-in wiki system which you can use for organizing knowledge and information but its only there to look cool</label><br/></li>
+                                </ol>
+                                <p class="answers A"><em>A</em></p>
+                            </div>
+                        </li>
+                        <li>
+                            <p class="question">Tickets have what purpose(s)?</p>
+                            <div id="9" class="questions">
+                                <ol type="A">
+                                    <li><input type="radio" value="A" /><label for="A">Make work for people</label><br/></li>
+                                    <li><input type="radio" value="B" /><label for="B">Allow people to follow an issue, or a list of tickets matching your chosen criterion</label><br/></li>
+                                    <li><input type="radio" value="C" /><label for="C">Allow people to follow an issue, but not interact with it</label><br/></li>
+                                    <li><input type="radio" value="D" /><label for="D">Allow people to follow an issue, but they cannot report bugs or link to them as they are completely standalone</label><br/></li>
+                                </ol>
+                                <p class="answers B"><em>B</em></p>
+                            </div>
+                        </li>
+                        <li>
+                            <p class="question">What option cannot be added to fcm list|ls [OPTIONS] [TARGET]?</p>
+                            <div id="10" class="questions">
+                                <ol type="A">
+                                    <li><input type="radio" value="A" /><label for="A">None - Lists directory entries in TARGET</label><br/></li>
+                                    <li><input type="radio" value="B" /><label for="B">-r N - Lists directory entries of revision N</label><br/></li>
+                                    <li><input type="radio" value="C" /><label for="C">-v - Lists directory entries in verbose mode</label><br/></li>
+                                    <li><input type="radio" value="D" /><label for="D">-R - Lists directory entries recursively down the directories</label><br/></li>
+                                    <li><input type="radio" value="E" /><label for="E">-T - Lists directory entries linked to a Trac page</label><br/></li>
+                                </ol>
+                                <p class="answers E"><em>E</em></p>
+                            </div>
+                        </li>
+                        <li>
+                            <p class="question">fcm resolve always takes the form:</p>
+                            <div id="11" class="questions">
+                                <ol type="A">
+                                    <li><input type="radio" value="A" /><label for="A">fcm resolve --accept working &lt;FILENAME&gt;</label><br/></li>
+                                    <li><input type="radio" value="B" /><label for="B">fcm resolve working &lt;FILENAME&gt;</label><br/></li>
+                                    <li><input type="radio" value="C" /><label for="C">fcm resolve -accept working &lt;FILENAME&gt;</label><br/></li>
+                                    <li><input type="radio" value="D" /><label for="D">fcm resolve --accept &lt;FILENAME&gt;</label><br/></li>
+                                </ol>
+                                <p class="answers B"><em>B</em></p>
+                            </div>
+                        </li>
+                        <li>
+                            <p class="question">split merge is useful when resolving conflicts when you want to do what?</p>
+                            <div id="12" class="questions">
+                                <ol type="A">
+                                    <li><input type="radio" value="A" /><label for="A">split the current diff hunk so you can select the pieces you want from the left side</label><br/></li>
+                                    <li><input type="radio" value="B" /><label for="B">split the current diff hunk so you can select the pieces you want from both sides
+                                        </label><br/>
+                                    </li>
+                                    <li><input type="radio" value="C" /><label for="C">split the current diff hunk so you can select the pieces you want from the right side</label><br/></li>
+                                    <li><input type="radio" value="D" /><label for="D">split the current diff hunk so you can select the pieces you want from the middle panel
+                                        </label><br/>
+                                    </li>
+                                </ol>
+                                <p class="answers B"><em>B</em></p>
+                            </div>
+                        </li>
+                        <li>
+                            <p class="question">text conflicts are returned in the <code>fcm status</code> by:&nbsp;</p>
+                            <div id="13" class="questions">
+                                <ol type="A">
+                                    <li>
+                                        <input type="radio" value="A" />
+                                        <label for="A">
+                                            <pre>C    src/module/hello_constants.py</pre>
+                                        </label>
+                                        <br/>
+                                    </li>
+                                    <li>
+                                        <input type="radio" value="B" />
+                                        <label for="B">
+                                            <pre>   C src/module/hello_num.py</pre>
+                                        </label>
+                                        <br/>
+                                    </li>
+                                    <li>
+                                        <input type="radio" value="C" />
+                                        <label for="C">
+                                            <pre> M      .</pre>
+                                        </label>
+                                        <br/>
+                                    </li>
+                                    <li>
+                                        <input type="radio" value="D" />
+                                        <label for="D">
+                                            <pre>?       src/module/hello.py</pre>
+                                        </label>
+                                        <br/>
+                                    </li>
+                                </ol>
+                                <p class="answers A"><em>A</em></p>
+                            </div>
+                        </li>
+                        <li>
+                            <p class="question">tree conflicts are returned in the <code>fcm status</code> by:&nbsp;</p>
+                            <div id="14" class="questions">
+                                <ol type="A">
+                                    <li>
+                                        <input type="radio" value="A" />
+                                        <label for="A">
+                                            <pre>C    src/module/hello_constants.py</pre>
+                                        </label>
+                                        <br/>
+                                    </li>
+                                    <li>
+                                        <input type="radio" value="B" />
+                                        <label for="B">
+                                            <pre>   C src/module/hello_num.py</pre>
+                                        </label>
+                                        <br/>
+                                    </li>
+                                    <li>
+                                        <input type="radio" value="C" />
+                                        <label for="C">
+                                            <pre> M      .</pre>
+                                        </label>
+                                        <br/>
+                                    </li>
+                                    <li>
+                                        <input type="radio" value="D" />
+                                        <label for="D">
+                                            <pre>?       src/module/hello.py</pre>
+                                        </label>
+                                        <br/>
+                                    </li>
+                                </ol>
+                                <p class="answers B"><em>B</em></p>
+                            </div>
+                        </li>
+                        <li>
+                            <p class="question">How do you cherry pick from branch?</p>
+                            <div id="15" class="questions">
+                                <ol type="A">
+                                    <li><input type="radio" value="A" /><label for="A">fcm --cp branch_from branch_to</label><br/></li>
+                                    <li><input type="radio" value="B" /><label for="B">fcm --pick branch_from branch_to</label><br/></li>
+                                    <li><input type="radio" value="C" /><label for="C">fcm --cherry-pick branch_from branch_to</label><br/></li>
+                                    <li><input type="radio" value="D" /><label for="D">There is not proper support for this</label><br/></li>
+                                </ol>
+                                <p class="answers D"><em>D</em></p>
+                            </div>
+                        </li>
+                        <li>
+                            <p class="question">How can you discard some changes that have not been checked in yet?</p>
+                            <div id="16" class="questions">
+                                <ol type="A">
+                                    <li><input type="radio" value="A" /><label for="A">fcm rewind &lt;FILENAME1&gt; &lt;FILENAME2&gt; &lt;FILENAME3&gt;</label><br/></li>
+                                    <li><input type="radio" value="B" /><label for="B">fcm reverse &lt;FILENAME1&gt; &lt;FILENAME2&gt; &lt;FILENAME3&gt;</label><br/></li>
+                                    <li><input type="radio" value="C" /><label for="C">fcm discard &lt;FILENAME1&gt; &lt;FILENAME2&gt; &lt;FILENAME3&gt;</label><br/></li>
+                                    <li><input type="radio" value="D" /><label for="D">fcm revert &lt;FILENAME1&gt; &lt;FILENAME2&gt; &lt;FILENAME3&gt;</label><br/></li>
+                                </ol>
+                                <p class="answers D"><em>D</em></p>
+                            </div>
+                        </li>
+                        <li>
+                            <p class="question">How can you merge in the changes between two revisions, 2 and 8?</p>
+                            <div id="17" class="questions">
+                                <ol type="A">
+                                    <li><input type="radio" value="A" /><label for="A">fcm merge --custom --revision 2:8</label><br/></li>
+                                    <li><input type="radio" value="B" /><label for="B">fcm merge --custom --r 2:8</label><br/></li>
+                                    <li><input type="radio" value="C" /><label for="C">fcm merge --custom --r 8:2</label><br/></li>
+                                    <li><input type="radio" value="D" /><label for="D">fcm merge --custom --revision 8:2</label><br/></li>
+                                </ol>
+                                <p class="answers A"><em>A</em></p>
+                            </div>
+                        </li>
+                        <li>
+                            <p class="question">How can you merge a changeset?</p>
+                            <div id="18" class="questions">
+                                <ol type="A">
+                                    <li><input type="radio" value="A" /><label for="A">fcm merge --revision first_changeset:last_changeset fcm:branch_containing_changesets</label><br/></li>
+                                    <li><input type="radio" value="B" /><label for="B">fcm merge --custom --revision first_changeset:last_changeset fcm:branch_containing_changesets</label><br/></li>
+                                    <li><input type="radio" value="C" /><label for="C">fcm merge --custom --revision first_changeset:last_changeset</label><br/></li>
+                                    <li><input type="radio" value="D" /><label for="D">fcm merge --custom --revision first_changeset:last_changeset --location fcm:branch_containing_changesets</label><br/></li>
+                                </ol>
+                                <p class="answers A"><em>A</em></p>
+                            </div>
+                        </li>
+                    </ol>
+                </form>
+            </div>
+            <div class="page-header">
+                <h3 id="answer">Answers</h3>
+            </div>
+            <div class="well">
+                <p id="submit-container"><button id="submitbutton">Check
+                    Answers</button>
+                </p>
+            </div>
+        </div>
+        <div class="container">
+            <p><a class="btn btn-lg btn-success" href="fcm_specifics.html" role="button">Specifics</a></p>
+        </div>
+        <hr/>
+        <div class="container-fluid text-center">
+            <div class="row">
+                <div class="col-md-12">
+                    <address><small>
+                        &copy; British Crown Copyright 2006-16
+                        <a href="http://www.metoffice.gov.uk">Met Office</a>.<br />
+                        This document is released under the British <a href=
+                            "http://www.nationalarchives.gov.uk/doc/open-government-licence/" rel=
+                            "license">Open Government Licence</a>.<br />
+                        </small>
+                    </address>
+                </div>
+            </div>
+        </div>
+        <!-- Bootstrap core JavaScript
+            ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="../etc/bootstrap/js/bootstrap.min.js"></script>
+        <script src="./js/docs.min.js"></script>
+        <script LANGUAGE="JavaScript">
+        update = new Date(document.lastModified);
+        theMonth = update.getMonth() + 1;
+        theDate = update.getDate();
+        theYear = update.getFullYear();
+        theHour = update.getHours();
+        theMin = update.getMinutes();
+        theSec = update.getSeconds();
+        document.write("<strong> Last Modified:</strong> " + theYear + "-" + theMonth + "-" + theDate + "T" + theHour + ":" + theMin + ":" + theSec + "Z");
+
+        </script>
+        </div>
+    </body>
+</html>
+

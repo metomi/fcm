@@ -1,0 +1,3694 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+   <head>
+      <head>
+         <meta charset="utf-8" />
+         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+         <meta name="viewport" content="width=device-width, initial-scale=1" />
+         <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+         <meta name="description" content="FCM Tutorial" />
+         <meta name="author" content="FCM team" />
+         <link rel="icon" href="fcm_logo.png" />
+         <title>FCM essentials</title>
+         <!-- Bootstrap core CSS -->
+         <link href="../etc/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+         <!-- Bootstrap theme -->
+         <link href="../etc/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet" />
+         <!-- Custom styles for this template -->
+         <link href="general_theme.css" rel="stylesheet" />
+   </head>
+   <body>
+      <!-- Fixed navbar -->
+      <nav class="navbar navbar-inverse navbar-fixed-top">
+         <div class="container">
+            <div class="navbar-header">
+               <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+               <span class="sr-only">Toggle navigation</span>
+               <span class="icon-bar"></span>
+               <span class="icon-bar"></span>
+               <span class="icon-bar"></span>
+               </button>
+               <a class="navbar-brand" href="#">FCM Essentials</a>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+               <ul class="nav navbar-nav">
+                  <!-- Add link to Homepage to training when created -->
+                  <li class="active"><a href="#">Home</a></li>
+                  <li class="dropdown">
+                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Essentials material <span class="caret"></span></a>
+                     <ul class="dropdown-menu">
+                        <li class="dropdown-header">Repository setup</li>
+                        <li><a href="#trepo">Tutorial Repositories</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li class="dropdown-header">Essential Tutorials I</li>
+                        <li><a href="#gen">General info</a></li>
+                        <li><a href="#help">Help and verbose mode</a></li>
+                        <li><a href="#info">Info, list</a></li>
+                        <li><a href="#co">Checkout, Status, Commit</a></li>
+                        <li><a href="#log">Log, keywords</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li class="dropdown-header">Essential Tutorials II</li>
+                        <li><a href="#branch">Branch, branch-create, switch</a></li>
+                        <li><a href="#merge">Merge</a></li>
+                        <li><a href="#diff">Diff, branch-diff, --graphical</a></li>
+                        <li><a href="#st">Status</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#eg">Example Essentials I & II </a></li>
+                        <li role="separator" class="divider"></li>
+                        <li class="dropdown-header">Essential Tutorials III</li>
+                        <li><a href="#bl">Branch-list, branch-delete</a></li>
+                        <li><a href="#up">Update</a></li>
+                        <li><a href="#rev">Revert, merge --reverse</a></li>
+                        <li><a href="#st2">Status advanced</a></li>
+                     </ul>
+                  <li class="dropdown">
+                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Other material <span class="caret"></span></a>
+                     <ul class="dropdown-menu">
+                        <li class="dropdown-header">Quizzes</li>
+                        <li><a href="fundamentals_quiz.html">Fundamentals Quiz</a></li>
+                        <li><a href="essentials_quiz.html">Essentials Quiz</a></li>
+                        <li><a href="specifics_quiz.html">Specifics Quiz</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li class="dropdown-header">Tutorials and practical's</li>
+                        <li><a href="fcm_fundamentals.html">Fundamentals</a></li>
+                        <li><a href="fcm_specifics.html">Specifics</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li class="dropdown-header">Help/info</li>
+                        <li><a href="fcm_glossary">Glossary List</a></li>
+                        <li><a href="fcm_links.html">Links</a></li>
+                        <li><a href="fcm_mqrg.html">My Quick Reference Guide</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </div>
+            <!--/.nav-collapse -->
+         </div>
+      </nav>
+      <div class="container theme-showcase" role="main">
+      <div class="jumbotron">
+         <h1>Essentials of FCM</h1>
+         <p>This aims to explain and provide tutorial examples for the following topics:
+         <ol>
+            Repository setup
+            <ul>
+               <li><a href="#trepo">Setting-up the tutorial repositories</a></li>
+            </ul>
+            Essential Tutorials I
+            <ul>
+               <li><a href="#gen">General info</a></li>
+               <li><a href="#help">Help and verbose mode</a></li>
+               <li><a href="#info">Info, list</a></li>
+               <li><a href="#co">Checkout, Status, Commit</a></li>
+               <li><a href="#log">Log, keywords</a></li>
+            </ul>
+            Essential Tutorials II
+            <ul>
+               <li><a href="#branch">Branch, branch-create, switch</a></li>
+               <li><a href="#merge">Merge</a></li>
+               <li><a href="#diff">Diff, branch-diff, --graphical</a></li>
+               <li><a href="#st">Status</a></li>
+            </ul>
+            Essentials Tutorials I &amp; I example
+            <ul>
+               <li><a href="#eg">Example Essentials I &amp; II </a></li>
+            </ul>
+            Essential Tutorials III
+            <ul>
+               <li><a href="#bl">Branch-list, branch-delete</a></li>
+               <li><a href="#up">Update</a></li>
+               <li><a href="#rev">Revert, merge --reverse</a></li>
+               <li><a href="#st2">Status advanced</a></li>
+            </ul>
+         </ol>
+         </p>
+      </div>
+      <div class="well">
+         <p>Now lets do the Essentials Quiz if you have not already done it at the end of 
+            the Fundamentals section to see how much you already know and what we will need
+            to focus on in this section.
+         </p>
+      </div>
+      <div class="container">
+         <p><a class="btn btn-lg btn-success" href="essentials_quiz.html" role="button">Essentials Quiz</a></p>
+      </div>
+      <h1>Repository setup</h1>
+      <div class="page-header">
+         <h2><a id="trepo">Setting-up the tutorial repositories</a></h2>
+      </div>
+      <div class="well">
+         <p>Please run the following <a href="./repos/tutorial_repo_setup">tutorial repositories script</a> if you have not already done so by running the following 
+            command in a terminal 
+            <code>~/kerryday/fcm_tutorial_docs/bootstrap/docs/repos/tutorial_repo_setup</code> 
+            this will set-up the repositories that you will need for all of the tutorials.
+            <strong> WARNING: This script adds and creates if required keywords the 
+            file ~/.metomi/fcm/keywords.cfg if the file already exists it copies the 
+            orginal to ~/.metomi/fcm/keywords_orig1.cfg.
+            If you rerun the script it will do the same but re-number older versions of the
+            configuation file keeping all version.
+            Please monitor the number of these that you have and tidy up the folder 
+            periodically keeping only the desired versions.</strong>
+         </p>
+         <p><strong>If at any stage the repository gets corrupted then we can start again:</strong></p>
+         <pre>
+cd
+# Warning this tears down the whole repository to start from scratch.
+rm -rf ~/fcm_tutorial
+rm -rf ~/my_fcm_tutorial
+# The tutorial repositories script
+tutorial_repo_setup
+</pre>
+         <p>
+            All of the tutorial sections are separate and do not depend on each other 
+            therefore it is safe to teardown the repositories.
+            The only issue that you encounter is that the revision number may not match, but 
+            that is not important for the tutorials.
+         </p>
+      </div>
+      <h1>Essential Tutorials I</h1>
+      <div class="page-header">
+         <h2><a id="gen">General info</a></h2>
+      </div>
+      <div class="well">
+      <h4>What we need to know...</h4>
+      <ol>
+         <p>...Some reminders and a bit of little new information for future references.</p>
+         <p><strong>REMEMBER: $LOGNAME needs or should be your username  for accessing the 
+            repository.
+            Please either define this before continuing if your system does not or remember
+            to substitute in your username.</strong>
+         </p>
+         <ul>
+            <li>
+               <h5>Working/Local copy v trunk v branch </h5>
+            </li>
+            <p>Here are some incomplete sentences, read them and try to complete them from 
+               the list below:
+            </p>
+            <p>
+               The trunk of a repository is the version that is the...
+            </p>
+            <p>The branch of a repository is the version that is the... ... on the trunk and 
+               if the changes are successful then they
+               are usually merged back to the trunk.
+            </p>
+            <p>The working/local copy of a repository is the version that is the... 
+            </p>
+            <p>
+               Pick the correct option to fill the gaps
+            </p>
+            <ol>
+               <li>
+                  <p>checked out copy of the trunk or branch that the user is working on in their 
+                     local space
+                  </p>
+               </li>
+               <li>
+                  <p>main body of development, originating from the start of the project</p>
+               </li>
+               <li>
+                  <p>copy of code derived from a certain point on the trunk and if the changes are 
+                     successful then they are usually merged back to the trunk
+                  </p>
+               </li>
+            </ol>
+            <div class="panel-group" id="accordion">
+            <div class="panel panel-default">
+               <div class="panel-heading">
+                  <h4 class="panel-title">
+                     <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+                     <span class="glyphicon"></span>
+                     Answers
+                     </a>
+                  </h4>
+               </div>
+               <div id="collapseOne" class="panel-collapse collapse">
+                  <div class="panel-body">
+                     <div class="row">
+                        <p>The trunk of a repository is the version that is the <span class="inputs">main 
+                           body of development, originating from the start of the project</span>.
+                        </p>
+                        <p>The branch of a repository is the version that is the <span class="inputs">copy of
+                           code derived from a certain point on the trunk and if the changes are 
+                           successful then they are usually merged back to the trunk</span>.
+                        </p>
+                        <p>The working/local copy of a repository is the version that is the 
+                           <span class="inputs">checked out copy of the trunk or branch that the user is 
+                           working on in their local space</span>.
+                        </p>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </ul>
+         <ul>
+            <li>
+               <h5>Good practice</h5>
+            </li>
+            <p>Please sort the following into <strong>should</strong> and 
+               <strong>should not</strong>:
+            </p>
+            <ul>
+               <li>
+                  <p>Try to reuse branches</p>
+               </li>
+               <li>
+                  <p>Commit changes regularly</p>
+               </li>
+               <li>
+                  <p>Create repositories without considering the needs</p>
+               </li>
+               <li>
+                  <p>Worry about messing up, changes are revert/reversable</p>
+               </li>
+               <li>
+                  <p>Commit ever growing files</p>
+               </li>
+               <li>
+                  <p>Commit ASCII files</p>
+               </li>
+               <li>
+                  <p>Create new branches when needed</p>
+               </li>
+               <li>
+                  <p>Commit byte files</p>
+               </li>
+               <li>
+                  <p>Consider that nothing is every really deleted from FCM</p>
+               </li>
+            </ul>
+            <p>
+               With FCM we should:
+            </p>
+            <p>
+               With FCM we should not:
+            </p>
+            <div class="panel-group" id="accordion">
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+                        <span class="glyphicon"></span>
+                        Answers
+                        </a>
+                     </h4>
+                  </div>
+                  <div id="collapseTwo" class="panel-collapse collapse">
+                     <div class="panel-body">
+                        <div class="row">
+                           With FCM we should:
+                           <ol>
+                              <span class="inputs">
+                                 <li>
+                                    <p>Commit change regularly</p>
+                                 </li>
+                                 <li>
+                                    <p>Commit ASCII files</p>
+                                 </li>
+                                 <li>
+                                    <p>Create new branches when needed</p>
+                                 </li>
+                                 <li>
+                                    <p>Consider that nothing is every really deleted from FCM</p>
+                                 </li>
+                              </span>
+                           </ol>
+                           With FCM we should not:
+                           <ol>
+                              <span class="inputs">
+                                 <li>
+                                    <p>Try to reuse branches</p>
+                                 </li>
+                                 <li>
+                                    <p>Commit byte files</p>
+                                 </li>
+                                 <li>
+                                    <p>Commit ever growing files</p>
+                                 </li>
+                                 <li>
+                                    <p>Create repositories without considering the needs</p>
+                                 </li>
+                                 <li>
+                                    <p>Worry about messing up, changes are revert/reversable</p>
+                                 </li>
+                              </span>
+                           </ol>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <p>If you need to do anything on the "should not" list then please try not to or 
+                  please contact the system administrator prior to attempting , in order to 
+                  discuss the options that are available.
+               </p>
+         </ul>
+      </ol>
+      </div>
+      <div class="page-header">
+         <h2><a id="help">Help and verbose mode</a></h2>
+      </div>
+      <div class="well">
+      <h4>How we can to look things up and debug problems</h4>
+      <ol>
+         <p>Some of these commands/functions that follow are in fact Linux based commands/functions and not FCM specific.
+         </p>
+         <p>I.e., we can use <code>man</code> to display the manual page of a tool.
+            For example <code>man grep</code> will display the manual page for GREP.
+         </p>
+         <h5>
+            <code>help</code>
+         </h5>
+         <p>With FCM we can use <code>(--)help</code> to explain the functionality of
+            a command.
+         </p>
+         <p><code>fcm help</code> returns help for applications that are included in this
+            tutorial.
+         </p>
+         <p>For example: <code>fcm help info</code> or <code>fcm info --help</code> returns the help for the FCM command <code>info</code>.
+         </p>
+         <p>Now try <code>fcm help info</code> at the command line and answer the following questions:</p>
+         <ul>
+            <li>
+               <p>
+                  What are the Valid options?
+               </p>
+            </li>
+            <li>
+               <p>What are the Global options given?
+               </p>
+            </li>
+         </ul>
+         <div class="panel-group" id="accordion">
+            <div class="panel panel-default">
+               <div class="panel-heading">
+                  <h4 class="panel-title">
+                     <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
+                     <span class="glyphicon"></span>
+                     Answers
+                     </a>
+                  </h4>
+               </div>
+               <div id="collapseThree" class="panel-collapse collapse">
+                  <div class="panel-body">
+                     <div class="row">
+                        <ul>
+                           <li>
+                              <p>
+                                 Valid options:
+                           </li>
+                           <span class="inputs"><ul>
+                           <li>-r [--revision] ARG</li>
+                           <li>-R [--recursive]</li>
+                           <li>--depth ARG</li>
+                           <li>--targets ARG</li>
+                           <li>--incremental</li>
+                           <li>--xml</li>
+                           <li>--changelist [--cl] ARG</li></p></ul>
+                           </span>
+                           <li>
+                              <p>
+                                 Global options:
+                           </li>
+                           <span class="inputs"><ul>
+                           <li>--username ARG</li>
+                           <li>--password ARG</li>
+                           <li>--no-auth-cache</li>
+                           <li>--non-interactive</li>
+                           <li>--force-interactive</li>
+                           <li>--trust-server-cert</li>
+                           <li>--config-dir ARG</li>
+                           <li>--config-option ARG</li></p></ul>
+                           </span>
+                        </ul>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <br/>
+            <p><code>--verbose</code></p>
+            <p>We can increase the verbosity of a command that we are running by appending 
+               <code>--verbose</code> or <code>-v -v --debug</code> to the end to get more 
+               information on what is happening when it is run.
+               <br/>
+               You may find this useful to understand why something is behaving how it is.
+            </p>
+      </ol>
+      </div>
+      <div class="page-header">
+         <h2><a id="info">Info, list</a></h2>
+      </div>
+      <div class="well">
+      <ol>
+         <p>
+            <code>Info</code>
+         </p>
+         <p>
+            Here we will learn about using <code>fcm info</code> to help us with FCM and 
+            to use all of the functions and tools.
+         </p>
+         <p>
+            Here is an example of the returned output from running the 
+            <code>fcm info</code> command on a FCM local/working copy:
+         </p>
+         <pre><code>
+<span class="outputs">
+Path: .
+Working Copy Root Path: $HOME/my_fcm_tutorial/fundamentals/trunk
+URL: file:///$HOME/fcm_tutorial/repository/fundamentals/trunk
+Relative URL: ^/fundamentals/trunk
+Repository Root: file:///$HOME/fcm_tutorial/repository
+Repository UUID: e9517eff-a2e5-4968-80e3-54fb2c43ef33
+Revision: 3
+Node Kind: directory
+Schedule: normal
+Last Changed Author: $LOGNAME
+Last Changed Rev: 2
+Last Changed Date: 2016-01-22 07:51:29 +0000 (Fri, 22 Jan 2016)
+</span>
+</code></pre>
+         <p>
+            Questions on the output above:
+         </p>
+         <p> 
+         <ol>
+            <li>
+               <p>What is the revision number?
+            </li>
+            </p>
+            <li>
+               <p>What is the full URL?
+            </li>
+            </p>
+            <li>
+               <p>Who last made a change to the repository?
+            </li>
+            </p>
+            <li>
+               <p>Where is the working copy located?
+            </li>
+            </p>
+            <li>
+               <p>What information do you think you may need to extract at this revision of
+                  the code from the repository?
+               </p>
+            </li>
+         </ol>
+         </p>
+         <div class="panel-group" id="accordion">
+            <div class="panel panel-default">
+               <div class="panel-heading">
+                  <h4 class="panel-title">
+                     <a data-toggle="collapse" data-parent="#accordion" href="#collapseFour">
+                     <span class="glyphicon"></span>
+                     Answers
+                     </a>
+                  </h4>
+               </div>
+               <div id="collapseFour" class="panel-collapse collapse">
+                  <div class="panel-body">
+                     <div class="row">
+                        <ol>
+                           <p> 
+                           <li>What is the revision number?</li>
+                           <span class="inputs">3</span></p>
+                           <p> 
+                           <li>What is the full URL?</li>
+                           <span class="inputs">file:///$HOME/fcm_tutorial/repository/essentialsI/trunk</span></p>
+                           <p>
+                           <li>Who last made a change to the repository?</li>
+                           <span class="inputs">$LOGNAME</span></p>
+                           <p> 
+                           <li>Where is the working copy located?</li>
+                           <span class="inputs">$HOME/my_fcm_tutorial/essentialsI/trunk</span></p>
+                           <p>
+                           <li>What information do you think you may need to extract at this revision of
+                              the code from the repository?
+                           </li>
+                           <span class="inputs">Relative URL and Revision</span></p>
+                        </ol>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            </br>
+            <p>
+               As we have already run the 
+               <a href="./repos/tutorial_repo_setup">tutorial repositories script</a> then
+               we can look at the equivalent directory in our $HOME directory.
+            </p>
+            <pre>
+cd ~/my_fcm_tutorial/fundamentals/trunk
+fcm info
+</pre>
+            <p>
+               Later we will need the information from the <code>fcm info</code> command to
+               use other FCM commands.
+            </p>
+            <p>
+               <code>List</code>
+            </p>
+            <p>
+               Here we will learn about using <code>fcm list</code> to help us with FCM and
+               to use all of the functions and tools.
+            </p>
+            <p><code>fcm list</code> or <code>fcm ls</code> lists the version controlled files
+               within the directory. Note, from here onwards we will present all the options 
+               as follows: <code>fcm list|ls</code>.
+            </p>
+            <p>
+               Here is an <strong>example</strong> of the returned output from running the
+               <code>fcm list</code> command on a FCM repository:
+            </p>
+            <pre>
+essential_managment
+fundamental_managment
+specific_management
+</pre>
+            <p>Here is an <strong>example</strong> of the returned output from running the <code>ls</code> 
+               command on a FCM repository:
+            </p>
+            <pre>
+background_ideas
+essential_managment
+fundamental_managment
+specific_management
+</pre>
+            <p>Questions
+            </p>
+            <p>
+            <ol>
+               <p>
+               <li>If you changed into the directory <samp>specific_management</samp> what 
+                  would you expect to be returned?
+               </li>
+               </p>
+               <p>
+               <li>If you changed into the directory <samp>background_ideas</samp> what 
+                  would you expect to be returned?
+               </li>
+               </p>
+            </ol>
+            <p>
+            <div class="panel-group" id="accordion">
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseFive">
+                        <span class="glyphicon"></span>
+                        Answers
+                        </a>
+                     </h4>
+                  </div>
+                  <div id="collapseFive" class="panel-collapse collapse">
+                     <div class="panel-body">
+                        <div class="row">
+                           <p>
+                           <ol>
+                              <p>
+                              <li>If you changed into the directory <samp>specific_management/</samp> what
+                                 would you expect to be returned?
+                              </li>
+                              <span class="inputs">A list of all of the FCM versions controlled directories 
+                              and files in the <samp>specific_management/</samp> directory.</span></p>
+                              <p>
+                              <li>If you changed into the directory <samp>background_ideas/</samp> what
+                                 would you expect to be returned?
+                              </li>
+                              <span class="inputs">Nothing as <samp>background_ideas/</samp> is not FCM 
+                              version controlled directory.</span></p>
+                           </ol>
+                           </p>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               </br>
+               <p>
+                  This command was also used in the <a href="fcm_fundamentals">Fundamentals tutorial</a> when creating our own repository.
+               </p>
+               <p>We can repeat it here:</p>
+               <pre>
+fcm ls file:///$HOME/fcm_tutorial/repository/fundamentals
+</pre>
+               <p>This lists the changes to the repository, file:///$HOME/fcm_tutorial/repository/fundamentals, and returns the following:</p>
+               <pre>
+<span class="outputs">
+branches/
+trunk/
+</span>
+</pre>
+               <p>
+                  With <code>--verbose</code> appended to the end of the command, the following 
+                  fields will be shown for each item:
+               </p>
+               <p> 
+               <ol>
+                  <p> 
+                  <li>Revision number of the last commit</li>
+                  </p>
+                  <p> 
+                  <li>Author of the last commit</li>
+                  </p>
+                  <p>
+                  <li>If locked, the letter 'O'.  (Use 'svn info URL' to see details)</li>
+                  </p>
+                  <p>
+                  <li>Size (in bytes)</li>
+                  </p>
+                  <p>
+                  <li>Date and time of the last commit</li>
+                  </p>
+               </ol>
+               </p>
+               <p><strong>Don't forget that by using <code>(--) help</code> option than you can 
+                  get more information on the command that you are interested in.</strong>
+               </p>
+      </ol>
+      </div>
+      <div class="page-header">
+      <h2><a id="co">Checkout, Status, Commit</a></h2>
+      </div>
+      <div class="well">
+      <h4>Checkout</h4>
+      <code>fcm checkout|co</code>
+      <p>
+      Check out a copy from the repository to your local directory, providing you 
+      with a local/working copy.
+      </p>
+      <p>Not only can we checkout a copy of the repository from the HEAD (top)
+      of the trunk but we can also checkout the trunk at a revision number using 
+      <code>URL... .../trunk@&lt;REVISION&gt;</code>
+      </p>
+      <p>Here we will be using the repository that we created in <a href="fcm_fundamentasl.html#trepo">Fundamentals</a>, or by
+      the <a href="./repos/tutorial_repo_setup">tutorial repositories script</a> 
+      that we should have run from the 
+      <a href="#trepo">Setting-up the tutorial repositories</a> section of this tutorial.
+      </p>
+      <p>Follow the following instructions:<p>
+      <pre>
+      cd
+      # make the directory for the checkout project from the repository
+      mkdir -p ~/my_fcm_tutorial/essentialsI
+      cd $HOME/fcm_tutorial
+      # checkout the repository "file:///$HOME/fcm_tutorial/repository/essentialsI" to "~/my_fcm_tutorial/essentialsI"
+      fcm co file:///$HOME/fcm_tutorial/repository/essentialsI/trunk ~/my_fcm_tutorial/essentialsI
+      </pre>
+      <p>Notice, this is slightly different from how we made the fundamentals directory
+      structure.
+      We are not creating a branches directory, they will all be located at the same
+      level as the trunk to make them easier for this example.
+      The above commands return:<p>
+      <pre>
+      <span class="outputs">
+      Checked out revision 55.
+      </span>
+      </pre>
+      <p><strong>Remember all revision numbers in these examples are approximate and 
+      depend on what aspects and order that you complete the course in.</strong>
+      </p>
+      <p>Now let us use the command <code>fcm info</code> to find out the following 
+      information:</p>
+      <p><ol>
+      <p><li>What is the revision number?</li></p>
+      <p><li>What is the full URL?</li></p>
+      <p><li>Who last made a change to the repository?</li></p>
+      <p><li>Where is the working copy located?</li></p>
+      </ol></p>
+      <pre>
+      cd ~/my_fcm_tutorial/essentialsI
+      fcm info
+      </pre>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseSix">
+      <span class="glyphicon"></span>
+      Answers
+      </a>
+      </h4>
+      </div>
+      <div id="collapseSix" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <p><ol>
+      <p><li>What is the revision number?</li>
+      <span class="inputs">55</span></p>
+      <p><li>What is the full URL?</li>
+      <span class="inputs">file:///$HOME/fcm_tutorial/repository/essentialsI/trunk</span></p>
+      <p><li>Who last made a change to the repository?</li>
+      <span class="inputs">Your user id</span></p>
+      <p><li>Where is the working copy located?</li>
+      <span class="inputs">~/my_fcm_tutorial/essentialsI</span></p>
+      </ol></p>
+      </div>
+      </div>
+      </div>
+      </div>
+      <br/>
+      <h4>Status</h4>
+      <p><code>fcm status|stat|st</code></p>
+      <p>
+      Return the status of the local/working copy location compared to the version 
+      of the repository that we checkout out.
+      </p>
+      <p>Next we will be making some changes to the trunk of the project esssentialsI</p>
+      <pre>
+      fcm st
+      </pre>
+      <p>This should return nothing as there are no changes to the local copy, (note
+      we should presently be in the directory 
+      <samp>~/my_fcm_tutorial/essentialsI</samp>).
+      </p>
+      <p>We will use the <code>fcm st</code> command a lot throughout the exercises, it 
+      is a very helpful tool and should be used every time before attempting a commit.
+      </p>
+      <p>
+      Now we will make a simple change to the local copy, later we will make more 
+      complicated changes and explain all of the possible statuses returned by 
+      <code>fcm st</code>.
+      </p>
+      <p>We will now create a text file and then add it to the repository.
+      </p>
+      <pre>
+      cat &gt; whoami.txt &lt;&lt; EOF
+      This is my new file, my name is: ${LOGNAME}
+      EOF
+      fcm st
+      </pre>
+      This returns:
+      <pre>
+      <span class="outputs">
+      ?       whoami.txt
+      </span>
+      </pre>
+      <p>The <samp>?</samp> means that the item is not on the repository yet, so we need
+      to add it:</p>
+      <pre>
+      fcm add whoami.txt
+      </pre>
+      This returns:
+      <pre>
+      <span class="outputs">
+      A         whoami.txt
+      </span>
+      </pre>
+      <pre>
+      fcm st
+      </pre>
+      Now returns:
+      <pre>
+      <span class="outputs">
+      A       whoami.txt
+      </span>
+      </pre>
+      <p>Where the <samp>A</samp> means that the file <samp>whoami.txt</samp> has been added locally.
+      </p>
+      <h4>Commit</h4>
+      <p><code>fcm commit|ci</code>
+      </p>
+      <p>Commit/Check-in code from the local/working copy to the repository.
+      </p>
+      <p>Now we want to commit/check-in the changes back to the repository so we can use
+      the FCM command <code>fcm ci</code>.</p>
+      <pre>
+      fcm ci
+      </pre>
+      <p>This invokes a text editor with the following:</p>
+      <pre>
+      <span class="outputs">
+      --Add your commit message ABOVE - do not alter this line or those below--
+      --Change summary (not part of commit message)--
+      [Root: file:///$HOME/fcm_tutorial/repository]
+      [Project: essentialsI]
+      [Branch : trunk]
+      [Sub-dir: ]
+      A       trunk/whoami.txt
+      </span>
+      </pre>
+      <p>Again add an appropriate comment to the file and save and close.
+      Enter "<samp>y</samp>" when promoted to commit the changes.
+      By following these five steps we should see something like:
+      </p>
+      <pre>
+      <span class="outputs">
+      [info] vi: starting commit message editor...
+      Change summary:
+      --------------------------------------------------------------------------------
+      [Root   : file:///$HOME/fcm_tutorial/repository]
+      [Project: essentialsI]
+      [Branch : trunk]
+      [Sub-dir: ]
+      A       whoami.txt
+      --------------------------------------------------------------------------------
+      Commit message is as follows:
+      --------------------------------------------------------------------------------
+      Adding a text file with my name in it.
+      --------------------------------------------------------------------------------
+      *** WARNING: YOU ARE COMMITTING TO THE TRUNK.
+      *** Please ensure that your change conforms to your project's working practices.
+      Would you like to commit this change?
+      Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+      Adding         whoami.txt
+      Transmitting file data .
+      Committed revision 56.
+      Updating '.':
+      At revision 56.
+      </span>
+      </pre>
+      </div>
+      <p>Try using <code>fcm st</code>, what do you expect to see? Where you correct?
+      </p>
+      <p>
+      What changes would you expect to see when you run <code>fcm info</code>?</p>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseSix2">
+      <span class="glyphicon"></span>
+      Answers
+      </a>
+      </h4>
+      </div>
+      <div id="collapseSix2" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <ol>
+      <span class="inputs">
+      <code>fcm st</code> should return nothing.
+      <code>fcm info</code> should show an increase in the revision number.
+      </span>
+      </ol>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      <div class="page-header">
+      <h2><a id="log">Log, keywords</a></h2>
+      </div>
+      <div class="well">
+      <h4>Log</h4>
+      <p>To show the log messages for a set of revisions and/or paths we can use
+      the command <code>fcm log</code>.
+      </p>
+      <p>In the present directory it should return something like this:</p>
+      <pre>
+      ------------------------------------------------------------------------
+      r2 | $LOGNAME | 2016-01-20 16:34:15 +0000 (Wed, 20 Jan 2016) | 2 lines
+      Adding a text file.
+      ------------------------------------------------------------------------
+      r1 | $LOGNAME | 2016-01-20 14:26:45 +0000 (Wed, 20 Jan 2016) | 3 lines
+      My own repository for the FCM tutorials.
+      FOO: new project.
+      ------------------------------------------------------------------------
+      </pre>
+      <p>
+      Use the <code>(--)help</code> option to find out all of the other options that
+      we can append to the <code>fcm log</code>.
+      </p>
+      <h4>Keywords</h4>
+      <p>These can be used for URLs and Revisions.
+      </p>
+      <p>URL keywords are the most commonly used type of keywords.
+      They are used to specify URLs in FCM commands. 
+      </p>
+      <p>We can consider them to be like short-hand or short-cuts to our full URL.
+      </p>
+      <p>Keywords can be defined in the FCM keyword configuration file (i.e. 
+      <samp>$FCM/etc/fcm/keyword.cfg</samp> and 
+      <samp>$HOME/.metomi/fcm/keyword.cfg</samp>).
+      </p>
+      <p>For <strong>example</strong> in our <samp>.cfg</samp> file in our $HOME
+      directory we can define a keyword as follows:</p>
+      <pre>
+      location{primary}[um] = svn://fcm2/UM_svn/UM
+      </pre>
+      <p>now we can abbreviate the URL as in the following examples:</p>
+      <pre>
+      # fcm ls svn://fcm2/UM_svn/UM
+      fcm ls fcm:um
+      # fcm ls svn://fcm2/UM_svn/UM/trunk
+      fcm ls fcm:um_tr  # OR: fcm ls fcm:um-tr
+      # fcm ls svn://fcm2/UM_svn/UM/branches
+      fcm ls fcm:um_br  # OR: fcm ls fcm:um-br
+      # fcm ls svn://fcm2/UM_svn/UM/tags
+      fcm ls fcm:um_tg  # OR: fcm ls fcm:um-tg
+      </pre>
+      <p>There are two main advantages for using URL keywords, what do you think they 
+      could be?</p>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseSeven">
+      <span class="glyphicon"></span>
+      Answers
+      </a>
+      </h4>
+      </div>
+      <div id="collapseSeven" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <ol>
+      <span class="inputs">
+      <p><li>They are shorter and easier to remember.</li></p>
+      <p><li>If the repository needs to be moved then only the keyword definitions need 
+      to be updated (although any working copies you have will still need to be 
+      relocated by issuing a <code>fcm switch --relocate</code> command).
+      </li><p>
+      </span>
+      </ol>
+      </div>
+      </div>
+      </div>
+      </div>
+      </br>
+      <p>
+      Much like URL keywords we can use Revision keywords to specify a revision 
+      number in FCM commands.
+      </p>
+      <p>Revision keywords, like URL keywords, can be used anywhere a revision number or
+      URL can be used.
+      </p>
+      <p>Each Revision keyword is associated with a URL keyword and therefore can only 
+      be used when referring to that specified repository.
+      </p>
+      <p>For example, we can define a Revision keyword in the <samp>.cfg</samp> 
+      by added to the file like this:<samp>revision[fcm:vn1.0] = 112</samp>
+      If we did this then the following commands would be equivalent:
+      </p>
+      <p><code>fcm log -r 112 svn://fcm1/FCM_svn/trunk</code>
+      </p>
+      <p>and
+      </p>
+      <p><code>fcm log -r vn1.0 fcm:fcm_tr</code>
+      </p>
+      <p>To print all the registered keywords for a (URL) location we can use the 
+      following FCM command: <code>fcm keyword-print|kp</code>.
+      </p>
+      <p>Further, we can print the location and revision keywords for a given project, 
+      for example, to print the keywords for the project "UM", type:
+      </p>
+      <p><code>fcm keyword-print fcm:um</code>.
+      </p>
+      <p>
+      We will set-up and use a keyword for our repository later in the tutorial.</p>
+      </div>
+      </div>
+      <h1>Essential Tutorials II</h1>
+      <div class="page-header">
+      <h2><a id="branch">Branch, branch-create, switch</a></h2>
+      </div>
+      <div class="well">
+      <h4>Branch</h4>
+      <p>What does branch mean in terms of a version controlled repository? (Think back 
+      to the General Info section.)</p>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseEight">
+      <span class="glyphicon"></span>
+      Answers
+      </a>
+      </h4>
+      </div>
+      <div id="collapseEight" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <ol>
+      <span class="inputs">
+      The branch of a repository is the version that is the copy of code derived from a certain point on the trunk.
+      It allows us to work in parallel to other changes.
+      </span>
+      </ol>
+      </div>
+      </div>
+      </div>
+      </div>
+      <br/>
+      <p>
+      Here we will cover: <code>fcm branch-create|bcreate|bc</code> and 
+      <code>fcm bc --branch-of-branch|bob</code>.
+      In later sections we will cover: <code>fcm branch-diff|bdiff|bdi</code>,
+      <code>fcm branch-list|blist|bls</code> and 
+      <code>fcm branch-delete|bdelete|bdel</code>
+      </p>
+      <h4>Branch-create</h4>
+      <p>
+      This creates a branch with the name specified in the command from the SOURCE 
+      (URL) that has been provided.
+      </p>
+      <p><code>fcm bc [OPTIONS] NAME [SOURCE]</code>
+      </p>
+      <p>This command allows us to branch not only from the HEAD of the trunk, but as
+      with <code>fcm co</code>, we can branch from a specified revision.
+      </p>
+      <p>We will now create our first branch in the <samp>~/my_fcm_tutorial/essentialsII/trunk/</samp> directory:</p>
+      <pre>
+      # Checkout the trunk of essentials II to the local copy.
+      fcm co file:///$HOME/fcm_tutorial/repository/essentialsII/trunk ~/my_fcm_tutorial/essentialsII/trunk
+      # This returns a "Checked out revision 56" message.
+      # Move to the directory.
+      cd ~/my_fcm_tutorial/essentialsII/trunk
+      # create a branch of the trunk in the current directory called "my_first_branch"
+      fcm bc my_first_branch
+      </pre>
+      <p>This invokes an editor, add an appropriate commit/log entry then save and close.
+      </p>
+      <p>The following should be returned once we have agreed to create the branch:</p>
+      <pre>
+      <span class="outputs">
+      [info] Source: file:///$HOME/fcm_tutorial/repository/essentialsII/trunk@8 (10)
+      [info] vi: starting commit message editor...
+      Change summary:
+      --------------------------------------------------------------------------------
+      A    file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r8_my_first_branch
+      --------------------------------------------------------------------------------
+      Commit message is as follows:
+      --------------------------------------------------------------------------------
+      This will be my first branch for the FCM tutorial.
+      Created /essentialsII/branches/dev/$LOGNAME/r8_my_first_branch from /essentialsII/trunk@8.
+      --------------------------------------------------------------------------------
+      Create the branch?
+      Enter "y" or "n" (or just press &lt;return&gt; for "n") y
+      Committed revision 57.
+      [info] Created: file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r8_my_first_branch
+      </span>
+      </pre>
+      <p>Note here that the revision number has increased even though we have not 
+      changed the trunk and only branched from it. However, we have made a change to 
+      the repository as a whole entity by creating our branch.
+      </p>
+      <p>
+      We could have branched from somewhere other than the HEAD of the trunk by 
+      appending @revision or specifying branch for example:</p>
+      <pre>
+      # fcm bc my_first_branch file://$HOME/fcm_tutorial/repository/essentialsII/trunk@6
+      </pre>
+      <p>In this example we are only going to branch from the HEAD of the trunk.
+      </p>
+      <p>
+      One of the options for <code>fcm bc</code> is 
+      <code> --branch-of-branch</code>. 
+      </p>
+      <p>This will be presented below for use with the next part of this 
+      sub-section, <code>switch</code>.
+      </p>
+      <p>
+      <code>--branch-of-branch</code>
+      </p>
+      <p>If this option is specified and the SOURCE is a branch, then the command 
+      will create a new branch from the SOURCE branch.
+      Otherwise, the branch is created from the trunk.
+      </p>
+      <h4>Working on a branch - two techniques</h4>
+      <p>There are two ways of working on the branch that we just created.</p>
+      <ol>
+      <li>Checkout the branch to our local copy directory</li>
+      <ul>
+      <pre>
+      # Change the command to include your username or use $LOGNAME.
+      fcm co file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r8_my_first_branch \
+      ~/my_fcm_tutorial/essentialsII/my_first_branch
+      <span class="outputs">
+      Checked out revision 57.
+      </span>
+      cd ..
+      <span class="outputs">
+      ~/my_fcm_tutorial/essentialsII
+      </span>
+      ls
+      <span class="outputs">
+      my_first_branch  trunk
+      </span>
+      </pre>
+      We could now change to the directory <samp>my_first_branch/</samp> and create
+      a branch from that branch using the command 
+      <code>fcm bc --bob my_second_branch</code> and again checkout that branch and 
+      move into that directory.
+      This style is not "best working practice" therefore we will only use the
+      other technique in this tutorial.
+      </ul>
+      <p>
+      <li>
+      Switch to the branch copy in our local copy trunk directory.</li></p>
+      <ul>
+      <p>We will try this in the following sub-section, <samp>switch</samp>.<p>
+      </ul>
+      </ol>
+      <h4>switch</h4>
+      <p>This can be summarised as updating the local/working copy to mirror a new URL
+      within the repository.
+      </p>
+      <p><code>fcm switch|sw</code> along with the URL(@REVISION) or trunk(@REVISION)
+      branchname(@REVISION) the local copy will be "switched" from the present local 
+      copy to the requested URL/trunk/branchname(@REVISION).
+      <p/>
+      <p>
+      Now we will create a new branch in the trunk of essentialsII and then switch to the branch that we have created, 
+      <samp>branch_of_trunk</samp>, bt.</p>
+      <ol>
+      <p><li>We will make some changes to the branch and check them back in.</li></p>
+      <p><li>
+      We will branch from bt and change to that branch, 
+      <samp>branch_of_branch</samp>, bb and decide that we want to make changes to 
+      the bob and commit them to the repository. 
+      </li></p>
+      <p><li>
+      We want to merge the changes from bb to the bt.
+      </li></p>
+      <p><li>
+      We will add one final change to bt before we commit bt and then merge all the
+      changes to the trunk.
+      </li></p>
+      <pre>
+      cd ~/my_fcm_tutorial/essentialsII/trunk
+      </pre>
+      <p>We should check the working/local copy to make sure that it is 
+      committed/checked-in to the repository, then check what part of the repository 
+      the local/working copy is working/checked out from.
+      How do you think we can carry out the checks?</p>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseNine">
+      <span class="glyphicon"></span>
+      Answers
+      </a>
+      </h4>
+      </div>
+      <div id="collapseNine" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <ol>
+      <span class="inputs">
+      <p><code>fcm st</code>
+      </p>
+      <p>This should return nothing if the version matches that on the repository.
+      </p>
+      <p><code>fcm info</code></p>
+      <p>This should return something similar to this:</p>
+      </ol>
+      <pre>
+      <span class="outputs">
+      Path: .
+      Working Copy Root Path: ~/my_fcm_tutorial/essentialsII/trunk
+      URL: file:///$HOME/fcm_tutorial/repository/essentialsII/trunk
+      Relative URL: ^/essentialsII/trunk
+      Repository Root: file:///$HOME/fcm_tutorial/repository
+      Repository UUID: e9517eff-a2e5-4968-80e3-54fb2c43ef33
+      Revision: 56
+      Node Kind: directory
+      Schedule: normal
+      Last Changed Author: $LOGNAME
+      Last Changed Rev: 8
+      Last Changed Date: 2016-01-22 10:55:04 +0000 (Fri, 22 Jan 2016)
+      </span>
+      </pre>
+      <ol><p>Here the URL ends with <samp>trunk</samp> showing that the local copy is the 
+      trunk version of the repository.</p></ol>
+      </span>
+      </div>
+      </div>
+      </div>
+      </div>
+      </br>
+      <p>
+      Firstly, lets add a text file to the trunk version of the repository:</p>
+      <pre>
+      cat &gt; trunk.txt &lt;&lt; EOF
+      A text file 1, trunk
+      EOF
+      # check the status of the repository
+      fcm st
+      <span class="outputs">
+      ?       trunk.txt
+      </span>
+      # We need to add the file, remember the <code>-q</code> here is to suppress the 
+      # returned output.
+      fcm add trunk.txt -q
+      fcm ci
+      # Add a commit message, save and close the editor and accept the changes.
+      <span class="outputs">
+      [info] vi: starting commit message editor...
+      Change summary:
+      --------------------------------------------------------------------------------
+      [Root   : file:///$HOME/fcm_tutorial/repository]
+      [Project: essentialsII]
+      [Branch : trunk]
+      [Sub-dir: ]
+      A       trunk.txt
+      --------------------------------------------------------------------------------
+      Commit message is as follows:
+      --------------------------------------------------------------------------------
+      Adding my test for the trunk.
+      --------------------------------------------------------------------------------
+      *** WARNING: YOU ARE COMMITTING TO THE TRUNK.
+      *** Please ensure that your change conforms to your project's working practices.
+      Would you like to commit this change?
+      Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+      Adding         trunk.txt
+      Transmitting file data .
+      Committed revision 58.
+      Updating '.':
+      At revision 58.
+      </span>
+      </pre>
+      <p>Now to create a new branch</p>
+      <pre>
+      fcm bc branch_trunk
+      </pre>
+      <p>Add a comment, save and close and accept the create branch, it should return:</p>
+      <pre>
+      <span class="outputs">
+      [info] Source: file:///$HOME/fcm_tutorial/repository/essentialsII/trunk@58 (58)
+      [info] vi: starting commit message editor...
+      Change summary:
+      --------------------------------------------------------------------------------
+      A    file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r58_branch_trunk
+      --------------------------------------------------------------------------------
+      Commit message is as follows:
+      -------------------------------------------------------------------------------
+      Creating a branch from the trunk.
+      Created /essentialsII/branches/dev/$LOGNAME/r58_branch_trunk from /essentialsII/trunk@58.
+      --------------------------------------------------------------------------------
+      Create the branch?
+      Enter "y" or "n" (or just press &lt;return&gt; for "n") <span class="enter">y</span>
+      Committed revision 58.
+      [info] Created: file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r58_branch_trunk
+      </span>
+      </pre>
+      <p>This time we are not going to checkout the branch to a directory.
+      We are going to use the <code>fcm sw</code> command.
+      </p>
+      <p>
+      Now we can switch to the branch in the trunk folder using the 
+      <code>fcm sw</code> command and the name of the file created from the output:</p>
+      <pre>
+      fcm sw file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r58_branch_trunk
+      </pre>
+      <p>It will return a message like this: <samp><span class="outputs">At revision 59.</span></samp>
+      We can check that we have moved to the branch by:</p>
+      <pre>
+      fcm info
+      </pre>
+      <p>Where it shows that we are now looking a branch_trunk in the trunk directory, 
+      by the Relative URL.</p>
+      <pre>
+      <span class="outputs">
+      Path: .
+      Working Copy Root Path: $HOME/my_fcm_tutorial/essentialsII/trunk
+      URL: file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r58_branch_trunk
+      Relative URL: ^/essentialsII/branches/dev/$LOGNAME/r58_branch_trunk
+      Repository Root: file:///$HOME/fcm_tutorial/repository
+      Repository UUID: e9517eff-a2e5-4968-80e3-54fb2c43ef33
+      Revision: 59
+      Node Kind: directory
+      Schedule: normal
+      Last Changed Author: $LOGNAME
+      Last Changed Rev: 59
+      Last Changed Date: 2016-01-22 14:09:59 +0000 (Fri, 22 Jan 2016)
+      </span>
+      </pre>
+      <p>
+      We can see by listing the contents that the branch, branch_trunk contains the
+      text file <samp>trunk.txt</samp>, it contains all that was present on the trunk
+      version of the repository at the time of the checkout.
+      In the tutorial <a href="#up">Essentials III - Update</a> we will learn how to
+      update our repositories when changes have been made on them by others or while
+      we are working on a different part of the repository.
+      </p>
+      <p>To switch back to the trunk we use:</p>
+      <pre>
+      fcm sw trunk
+      </pre>
+      <p>It will return a message like this: <samp><span class="outputs">At revision 59.</span></samp>.
+      <code>fcm info</code> will return:</p>
+      <pre>
+      <span class="outputs">
+      Path: .
+      Working Copy Root Path: $HOME/my_fcm_tutorial/essentialsII/trunk
+      URL: file:///$HOME/fcm_tutorial/repository/essentialsII/trunk
+      Relative URL: ^/essentialsII/trunk
+      Repository Root: file:///$HOME/fcm_tutorial/repository
+      Repository UUID: e9517eff-a2e5-4968-80e3-54fb2c43ef33
+      Revision: 59
+      Node Kind: directory
+      Schedule: normal
+      Last Changed Author: $LOGNAME
+      Last Changed Rev: 58
+      Last Changed Date: 2016-01-22 10:55:04 +0000 (Fri, 22 Jan 2016)
+      </span>
+      </pre>
+      <p>Note that the revision number keeps increasing with each change to the repository 
+      regardless of whether the change affects the files that we are working on, but
+      not each time that we switch repository versions.
+      </p>
+      <p>
+      Now to switch back to our branch, branch_trunk, add a text file and commit the 
+      changes.
+      </p>
+      <p>
+      Then we will create a branch of a branch, switch back to branch of the branch, 
+      add a text file and commit the changes.
+      This will them lead us on to the next sub-section, Merge.</p>
+      <pre>
+      fcm sw file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r58_branch_trunk
+      # Returns "At revision 59."
+      cat &gt; branch.txt &lt;&lt; EOF
+      This is a branch of my trunk
+      EOF
+      fcm add branch.txt -q
+      fcm ci
+      # Add a commit message (e.g. Adding my branch text file.), close, save and 
+      # accept.
+      fcm bc --bob branch_of_branch
+      # Add a commit message (e.g. My branch of the branch branch_trunk.),  close, 
+      # save and accept
+      fcm sw file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r60_branch_of_branch
+      # To check we have changed to bob.
+      fcm info
+      # To check that we have both the files, trunk.txt from the trunk and branch.txt
+      # from the branch, branch_trunk.
+      ls
+      # Now add a text file for this branch of a branch.
+      cat &gt; bob.txt &lt;&lt; EOF
+      This was my change from my branch of the branch
+      EOF
+      fcm add bob.txt -q
+      fcm ci 
+      # Add a commit message (e.g. Adding my branch of branch text file.), close, 
+      # save and accept.
+      # change back to the branch_trunk part of the repository.
+      fcm sw file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r58_branch_trunk
+      # This returns:
+      <span class="outputs">
+      D    bob.txt
+      Updated to revision 62.
+      </span>
+      </pre>
+      <p>An <code>A</code> returned from <code>fcm st</code> means that a file has 
+      been added. What do you think the <code>D</code> could mean?
+      Remember we just switched back to the branch of the trunk version of the 
+      repository.</p>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTen">
+      <span class="glyphicon"></span>
+      Answers
+      </a>
+      </h4>
+      </div>
+      <div id="collapseTen" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <span class="inputs">
+      Deleted
+      </span>
+      </div>
+      </div>
+      </div>
+      </div>
+      <br/>
+      <p>
+      At this stage we want to merge the <samp>branch_of_branch</samp> changes to the 
+      <samp>branch_trunk</samp> repository before we switch to the trunk and then 
+      merge in those changes too.</p>
+      </div>
+      </div>
+      </div>
+      </div>
+      <div class="page-header">
+      <h2><a id="merge">Merge</a></h2>
+      </div>
+      <div class="well">
+      <h4>Merge</h4>
+      <p><code>fcm merge</code> can be used to merge in the changes from a source to 
+      the local/working copy.
+      </p>
+      <p>The following options are available in <code>fcm merge</code>:</p>
+      <ol>
+      <p><li>fcm merge SOURCE</li></p>
+      <p><li>fcm merge --custom  --revision N[:M] SOURCE</p>
+      <p>
+      fcm merge --custom  URL1[@REV1] URL2[@REV2]
+      </li></p>
+      <p><li>fcm merge --reverse --revision [M:]N</li></p>
+      </ol>
+      <p>Here we will complete a tutorial on 1. and discuss using 2., 3. is covered in <a href="#rev">Essentials III - Revert, merge --reverse</a>
+      </p>
+      <p>
+      We should be in the directory 
+      <samp>~/my_fcm_tutorial/essentialsII/trunk</samp>, if not please change
+      (cd) to that directory now.
+      <code>fcm_info</code> should show that we are in the branch 
+      <samp>branch_trunk</samp> and <code>fcm st</code> should show that 
+      there are no differences between the local copy and the repository.
+      A list of the contents of the directory should show two files, 
+      <samp>trunk.txt</samp> and <samp>branch.txt</samp>.
+      </p>
+      <p>
+      Now we want to merge in our changes that we made in the branch of a branch, "bb".
+      To do this we will use the fcm merge command.</p>
+      <pre>
+      fcm merge  file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r60_branch_of_branch
+      # enter "y" to accept the merge.
+      <span class="outputs">
+      Eligible merge(s) from /essentialsII/branches/dev/$LOGNAME/r60_branch_of_branch@62: 62
+      --------------------------------------------------------------------------------
+      Merge: /essentialsII/branches/dev/$LOGNAME/r60_branch_of_branch@62
+      c.f.: /essentialsII/branches/dev/$LOGNAME/r58_branch_trunk@60
+      -------------------------------------------------------------------------dry-run
+      --- Merging r61 through r62 into '.':
+      A    bob.txt
+      -------------------------------------------------------------------------dry-run
+      Would you like to go ahead with the merge?
+      Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+      Merge succeeded.
+      --------------------------------------------------------------------------actual
+      --- Merging r61 through r62 into '.':
+      A    bob.txt
+      --- Recording mergeinfo for merge of r61 through r62 into '.':
+      U   .
+      --------------------------------------------------------------------------actual
+      </span>
+      </pre>
+      <p>This was a basic merge with only one possible option for merging.
+      </p>
+      <p>If we list the files in the directory we will see that we now have all three
+      of the text files, the one from the trunk, branch and bob.
+      You may also have a <samp>#commit message#</samp> - this is from the merge and will be removed by the
+      system once the changes are commited to the repository.
+      </p>
+      <p>
+      The next merge will inform us that we have options of different revisions that
+      we can merge into our local/working copy.
+      We will do this in a later tutorial.
+      </p>
+      <p>
+      Switch to the trunk of the repository and then merge in all of 
+      the changes that have been made.</p>
+      <ol>
+      <p><li>
+      The best way is to do as we have started doing here.
+      We firstly merged the  <samp>branch_of_branch</samp> to the 
+      <samp>branch_of_trunk</samp>
+      </li></p>
+      <p><li>
+      now we will merge the <samp>branch_of_trunk</samp> to the 
+      <samp>trunk</samp>.</li>
+      </p>
+      <p>
+      Before we do that what do you think we should do next?</p>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseEleven">
+      <span class="glyphicon"></span>
+      Answers
+      </a>
+      </h4>
+      </div>
+      <div id="collapseEleven" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <ol><code>
+      <span class="inputs">
+      fcm st<br/>
+      fcm ci
+      </span>
+      </code></ol>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      <p>
+      Now we can switch to the trunk and merge in the branch of the trunk.
+      Try this yourself, use the "Help" if needed.
+      </p>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwelve">
+      <span class="glyphicon"></span>
+      Help
+      </a>
+      </h4>
+      </div>
+      <div id="collapseTwelve" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <pre>
+      fcm sw trunk
+      <span class="outputs">
+      D    bob.txt
+      D    branch.txt
+      U   .
+      Updated to revision 63.
+      </span>
+      fcm merge file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r58_branch_trunk
+      <span class="outputs">
+      Eligible merge(s) from /essentialsII/branches/dev/$LOGNAME/r58_branch_trunk@63: 63 60
+      Enter a revision (or just press &lt;return&gt; for "63"):
+      </span>
+      # This gives us the option of two different revisions to merge, 63 60.
+      # As we want to merge in all of the changes we will select 63.
+      # And accept the merge changes.
+      <span class="outputs">
+      --------------------------------------------------------------------------------
+      Merge: /essentialsII/branches/dev/$LOGNAME/r58_branch_trunk@63
+      c.f.: /essentialsII/trunk@58
+      -------------------------------------------------------------------------dry-run
+      --- Merging r59 through r63 into '.':
+      A    bob.txt
+      A    branch.txt
+      U   .
+      -------------------------------------------------------------------------dry-run
+      Would you like to go ahead with the merge?
+      Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+      Merge succeeded.
+      --------------------------------------------------------------------------actual
+      --- Merging r59 through r63 into '.':
+      A    bob.txt
+      A    branch.txt
+      U   .
+      --- Recording mergeinfo for merge of r59 through r63 into '.':
+      G   .
+      --------------------------------------------------------------------------actual</span>
+      fcm st
+      # This returns that there are changes compared to the checked in version of the
+      # trunk and that both bob.txt and branch.txt have been add, as we intended.
+      # We should now commit our changes to the trunk repository if we want to keep
+      # them.
+      fcm ci
+      <span class="outputs">
+      [info] vi: starting commit message editor...
+      Change summary:
+      --------------------------------------------------------------------------------
+      [Root   : file:///$HOME/fcm_tutorial/repository]
+      [Project: essentialsII]
+      [Branch : trunk]
+      [Sub-dir: ]
+      M      .
+      A  +    bob.txt
+      A  +    branch.txt
+      --------------------------------------------------------------------------------
+      Commit message is as follows:
+      --------------------------------------------------------------------------------
+      Merged in the branch of the trunk which had had the changes from bob added.
+      Merged into /essentialsII/trunk: /essentialsII/branches/dev/$LOGNAME/r58_branch_trunk@63 cf. /essentialsII/trunk@58
+      --------------------------------------------------------------------------------
+      *** WARNING: YOU ARE COMMITTING TO THE TRUNK.
+      *** Please ensure that your change conforms to your project's working practices.
+      Would you like to commit this change?
+      Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+      Sending        .
+      Adding         bob.txt
+      Adding         branch.txt
+      Committed revision 64.
+      Updating '.':
+      At revision 64.
+      </span>
+      </pre>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      </ol>
+      <p>
+      Merge from a different branch.
+      For example, from my_first_branch.</p>
+      <pre>
+      cd ~/my_fcm_tutorial/essentialsII/
+      # Check that you are on the trunk.
+      fcm info
+      # List the available branches.
+      fcm bls
+      # Switch to that branch to make the changes.
+      fcm sw file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r8_my_first_branch
+      cat &gt; fb.txt &lt;&lt; EOF
+      This is a text file made in my_first_branch
+      EOF
+      fcm add fb.txt -q
+      fcm ci
+      # Add a message, save, close and accept commit.
+      </pre>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseThirteen">
+      <span class="glyphicon"></span>
+      Output returned
+      </a>
+      </h4>
+      </div>
+      <div id="collapseThirteen" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <pre>
+      <span class="outputs">
+      [info] vi: starting commit message editor...
+      Change summary:
+      --------------------------------------------------------------------------------
+      [Root   : file:///$HOME/fcm_tutorial/repository]
+      [Project: essentialsII]
+      [Branch : branches/dev/$LOGNAME/r8_my_first_branch]
+      [Sub-dir: ]
+      A       fb.txt
+      --------------------------------------------------------------------------------
+      Commit message is as follows:
+      --------------------------------------------------------------------------------
+      Adding a first branch text file.
+      --------------------------------------------------------------------------------
+      Would you like to commit this change?
+      Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+      Adding         fb.txt
+      Transmitting file data .
+      Committed revision 65.
+      Updating '.':
+      At revision 65.
+      </span>
+      </pre>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      <pre>
+      # We will need the URL for the next stage so we can use...
+      fcm info
+      fcm sw trunk
+      fcm merge file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r8_my_first_branch
+      </pre>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseFourteen">
+      <span class="glyphicon"></span>
+      Output returned
+      </a>
+      </h4>
+      </div>
+      <div id="collapseFourteen" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <pre>
+      <span class="outputs">
+      Eligible merge(s) from /essentialsII/branches/dev/$LOGNAME/r8_my_first_branch@65: 65
+      --------------------------------------------------------------------------------
+      Merge: /essentialsII/branches/dev/$LOGNAME/r8_my_first_branch@65
+      c.f.: /essentialsII/trunk@8
+      -------------------------------------------------------------------------dry-run
+      --- Merging r57 through r65 into '.':
+      A    fb.txt
+      -------------------------------------------------------------------------dry-run
+      Would you like to go ahead with the merge?
+      Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+      Merge succeeded.
+      --------------------------------------------------------------------------actual
+      --- Merging r57 through r65 into '.':
+      A    fb.txt
+      --- Recording mergeinfo for merge of r57 through r65 into '.':
+      U   .
+      --------------------------------------------------------------------------actual
+      </span>
+      </pre>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      <pre>
+      fcm ci
+      #  Add a message, save, close and accept commit.
+      # Listing the files in the directory now shows that the fb.txt has been added.
+      </pre>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseFifteen">
+      <span class="glyphicon"></span>
+      Output returned
+      </a>
+      </h4>
+      </div>
+      <div id="collapseFifteen" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <pre>
+      <span class="outputs">
+      [info] vi: starting commit message editor...
+      Change summary:
+      --------------------------------------------------------------------------------
+      [Root   : file:///$HOME/fcm_tutorial/repository]
+      [Project: essentialsII]
+      [Branch : trunk]
+      [Sub-dir: ]
+      M      .
+      A  +    fb.txt
+      --------------------------------------------------------------------------------
+      Commit message is as follows:
+      --------------------------------------------------------------------------------
+      Merged in the changes from my_first_branch directory.
+      Merged into /essentialsII/trunk: /essentialsII/branches/dev/$LOGNAME/r8_my_first_branch@65 cf. /essentialsII/trunk@8
+      --------------------------------------------------------------------------------
+      *** WARNING: YOU ARE COMMITTING TO THE TRUNK.
+      *** Please ensure that your change conforms to your project's working practices.
+      Would you like to commit this change?
+      Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+      Sending        .
+      Adding         fb.txt
+      Committed revision 66.
+      Updating '.':
+      At revision 66.
+      </span>
+      </pre>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      <p><h5><code>fcm merge --custom --revision N[:M] SOURCE</code> and <code>fcm merge --custom URL1[@REV1] URL2[@REV2]</code></h5>
+      </p>
+      <p><strong>Examples</strong> of how we could use the above commands:</p>
+      <pre>
+      # In the directory of the local copy that we want to merge to.
+      # Remember to <code>sw</code> if we need to.
+      # These are examples only!
+      #
+      # merging from a source but different revisions
+      # fcm merge --custom --revision 3[:6] file:///$HOME/my_fcm_tutorial/essentialsII/trunk
+      #
+      # merging from two different sources
+      # fcm merge --custom file:///$HOME/my_fcm_tutorial/essentialsII/trunk@3 file:///$HOME/my_fcm_tutorial/essentialsII/branches/dev/${LOGNAME}/r8_my_first_branch@12
+      </pre>
+      <p>
+      Merges can be much more complicated than this where there are conflicts in the 
+      merge.
+      These will be covered in the <code>fcm conflicts</code> 
+      <a href="fcm_specifics#cf">conflicts</a> section of the Specifics tutorial.</p>
+      </div>
+      <div class="page-header">
+      <h2><a id="diff">Diff, branch-diff, --graphical</a></h2>
+      </div>
+      <div class="well">
+      <h4>Diff</h4>
+      <p>A difftool enables use to compare revisions, and more, which we will see later.
+      </p>
+      <p>
+      The default difftool for FCM is xxdiff.
+      </p>
+      <p>
+      The command <code>fcm diff|di</code> displays the local changes or the 
+      differences between two revisions or paths.
+      </p>
+      <ul>
+      <p><li>Local changes</li>
+      </p>
+      <p>We will make a local change and then use the <code>diff</code> command to view 
+      the change.</p>
+      <pre>
+      # Please make sure that you are in the directory ~/my_fcm_tutorial/essentialsII/trunk
+      # and on the trunk. How would could we check this?
+      cat &gt; trunk.txt &lt;&lt; EOF
+      A text file 1, trunk. With added text
+      EOF
+      fcm diff
+      # This returns the following:
+      <span class="outputs">
+      Index: trunk.txt
+      ===================================================================
+      --- trunk.txt	(revision 66)
+      +++ trunk.txt	(working copy)
+      @@ -1 +1 @@
+      -A text file 1, trunk
+      +A text file 1, trunk. With added text
+      </span>
+      </pre>
+      <p>
+      <li>Difference between two revisions</li>
+      </p>
+      <pre>
+      # In the same location as for local changes.
+      fcm diff -r 64:59
+      <span class="outputs">
+      Index: bob.txt
+      ===================================================================
+      --- bob.txt	(revision 64)
+      +++ bob.txt	(revision 59)
+      @@ -1 +0,0 @@
+      -This was my change from my branch of the branch
+      Index: branch.txt
+      ===================================================================
+      --- branch.txt	(revision 64)
+      +++ branch.txt	(revision 59)
+      @@ -1 +0,0 @@
+      -This is a branch of my trunk
+      Index: .
+      ===================================================================
+      --- .	(revision 64)
+      +++ .	(revision 59)
+      Property changes on: .
+      ___________________________________________________________________
+      Deleted: svn:mergeinfo
+      Reverse-merged /essentialsII/branches/dev/$LOGNAME/r58_branch_trunk:r59-63
+      Reverse-merged /essentialsII/branches/dev/$LOGNAME/r60_branch_of_branch:r61-62
+      </span>
+      </pre>
+      <p>
+      <li>Difference between two paths</li>
+      </p>
+      <pre>
+      # In the same location as for local changes.
+      fcm diff file:///$HOME/fcm_tutorial/repository/essentialsII/trunk@12 file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r8_my_first_branch
+      <span class="outputs">
+      Index: fb.txt
+      ===================================================================
+      --- fb.txt	(.../trunk)	(revision 0)
+      +++ fb.txt	(.../branches/dev/$LOGNAME/r8_my_first_branch)	(revision 66)
+      @@ -0,0 +1 @@
+      +This is a text file made in my_first_branch
+      </span>
+      </pre>
+      <p>What command could we use to find out the differences between the branch 
+      <code>my_first_branch</code> at revision number 66 and 
+      <code>branch_of_branch</code> at revision number 62?</p>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseSixteen">
+      <span class="glyphicon"></span>
+      Answer
+      </a>
+      </h4>
+      </div>
+      <div id="collapseSixteen" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <pre>
+      <span class="outputs">
+      fcm diff file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r8_my_first_branch@66 file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r60_branch_of_branch@62
+      </span>
+      </pre>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      </ul>
+      <h4>branch-diff</h4>
+      <p>The command <code>fcm branch-diff</code> is used to show differences relative 
+      to the base of the target branch, i.e. the changes available for merging from 
+      the target branch into its parent.
+      <code>
+      fcm branch-diff|bdiff|bdi [OPTIONS] [TARGET]
+      </code>
+      Where the target is either a URL or a local/working copy.</p>
+      <pre>
+      # We need to add some files and check them in to create different revisions of
+      # the branch "my_first_branch"
+      cd ~/my_fcm_tutorial/essentialsII
+      fcm info
+      # If not r8_my_first_branch, then switch to it.
+      fcm sw file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r8_my_first_branch
+      cat &gt; change1.txt &lt;&lt; EOF
+      Change number 1
+      EOF
+      fcm add	change1.txt -q
+      fcm ci
+      # Add a commit command, close, save and then accept the changes.
+      cat &gt; change2.txt &lt;&lt; EOF
+      Change number 2
+      EOF
+      fcm add	change2.txt -q
+      fcm ci
+      # Add a commit command, close, save and then accept the changes.
+      #
+      # Now move back to the trunk of the project and branch-diff the trunk to
+      # my_first_branch
+      </pre>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseSeventeen">
+      <span class="glyphicon"></span>
+      Help
+      </a>
+      </h4>
+      </div>
+      <div id="collapseSeventeen" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <pre>
+      <span class="inputs">
+      fcm sw trunk
+      fcm branch-diff file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r8_my_first_branch
+      </pre>
+      </span>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      <pre>
+      <span class="outputs">
+      Index: change1.txt
+      ===================================================================
+      --- change1.txt	(revision 0)
+      +++ change1.txt	(revision 68)
+      @@ -0,0 +1 @@
+      +Change number 1
+      Index: change2.txt
+      ===================================================================
+      --- change2.txt	(revision 0)
+      +++ change2.txt	(revision 68)
+      @@ -0,0 +1 @@
+      +Change number 2
+      </span>
+      </pre>
+      <p>We are going to look at one last thing in this sub-section, go to 
+      <samp>my_first_branch</samp>, change the contents of change2.txt to 
+      read "Change number 2.1".
+      </p>
+      <p>Check the status.
+      </p>
+      <p>Make appropriate changes.
+      </p>
+      <p>Commit the changes.
+      </p>
+      <p>Review the change log.
+      </p>
+      <p>Move to the trunk and use the <samp>branch-diff</samp> FCM command to view the 
+      branch differences.</p>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseEighteen">
+      <span class="glyphicon"></span>
+      Help
+      </a>
+      </h4>
+      </div>
+      <div id="collapseEighteen" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <pre>
+      <span class="inputs">
+      fcm sw file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r8_my_first_branch
+      cat &gt; changew.txt &lt;&lt; EOF
+      Change number 2.1
+      EOF
+      fcm st
+      fcm ci
+      # Add a commit command, close, save and then accept the changes.
+      fcm log
+      <span class="outputs">
+      ------------------------------------------------------------------------
+      r69 | $LOGNAME | 2016-01-25 17:26:07 +0000 (Mon, 25 Jan 2016) | 2 lines
+      Editing the file change2.txt.
+      ------------------------------------------------------------------------
+      r68 | $LOGNAME | 2016-01-25 17:05:19 +0000 (Mon, 25 Jan 2016) | 2 lines
+      Change 2 for the branch-diff tutorial.
+      ------------------------------------------------------------------------
+      r67 | $LOGNAME | 2016-01-25 17:04:29 +0000 (Mon, 25 Jan 2016) | 2 lines
+      Change 1 for the branch-diff tutorial.
+      ------------------------------------------------------------------------
+      r65 | $LOGNAME | 2016-01-25 13:41:20 +0000 (Mon, 25 Jan 2016) | 2 lines
+      Adding a first branch text file.
+      ------------------------------------------------------------------------
+      r57 | $LOGNAME | 2016-01-25 10:58:41 +0000 (Mon, 25 Jan 2016) | 3 lines
+      This will be my first branch for the FCM tutorial.
+      Created /essentialsII/branches/dev/$LOGNAME/r8_my_first_branch from /essentialsII/trunk@8.
+      ------------------------------------------------------------------------
+      r8 | $LOGNAME | 2016-01-25 10:47:43 +0000 (Mon, 25 Jan 2016) | 1 line
+      New folder essentialsII/trunk
+      ------------------------------------------------------------------------
+      </span>
+      fcm info
+      # If not on the trunk switch to it.
+      fcm sw trunk
+      fcm branch-diff file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r8_my_first_branch
+      </span>
+      <span class="outputs">
+      Index: change1.txt
+      ===================================================================
+      --- change1.txt	(revision 0)
+      +++ change1.txt	(revision 69)
+      @@ -0,0 +1 @@
+      +Change number 1
+      Index: change2.txt
+      ===================================================================
+      --- change2.txt	(revision 0)
+      +++ change2.txt	(revision 69)
+      @@ -0,0 +1 @@
+      +Change number 2.1
+      </span>
+      </pre>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      <h4>--graphical</h4>
+      <p>One of the most commonly used options is <code>--graphical|-g</code>.
+      </p>
+      <p>It can be used to enhance other commands and functions such as 
+      <code>fcm di</code> and <code>fcm branch-diff</code>.
+      </p>
+      <p>
+      Lets find out a little more about them and then how we can combine them with
+      <code>--graphical</code> to enhance our user experience with FCM.
+      </p>
+      <p>What command can we use to see a full list of the options for 
+      <code>fcm di</code> and <code>fcm branch-diff</code>?</p>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseNineteen">
+      <span class="glyphicon"></span>
+      Answer
+      </a>
+      </h4>
+      </div>
+      <div id="collapseNineteen" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <pre>
+      <span class="inputs">
+      fcm help di | fcm di --help
+      fcm help branch-diff | fcm branch-diff --help
+      </span>
+      </pre>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      <p>
+      <code>fcm diff -g</code>:
+      </p>
+      <p>The command uses a graphical tool to display the differences, instead of 
+      inline text. This option can be used in combination with all other valid 
+      options except --diff-cmd and --extensions.
+      </p>
+      <p>
+      Change to the trunk of essentialsII and run the <code>fcm diff -g </code> 
+      command.
+      How is this different from the <code>fcm diff</code>?
+      Rerun the command if you have forgotten.</p>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwenty">
+      <span class="glyphicon"></span>
+      Answer
+      </a>
+      </h4>
+      </div>
+      <div id="collapseTwenty" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <pre>
+      <span class="inputs">
+      It displays the changes in full using the xxdiff tool and only returns to the 
+      screen:
+      <span class="outputs">
+      Index: trunk.txt
+      ===================================================================
+      --- trunk.txt	(revision 66)
+      +++ trunk.txt	(working copy)
+      </span>
+      </span>
+      </pre>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      <p><code>fcm branch-diff -g</code>:
+      </p>
+      <p>Is equivalent to "--diff-cmd=fcm_graphic_diff".
+      </p>
+      </div>
+      <div class="page-header">
+      <h2><a id="st">Status</a></h2>
+      </div>
+      <div class="well">
+      <h4>Status</h4>
+      <p>The command <code>fcm status</code> is a very powerful command and one which 
+      should be used frequently to aid with our use of FCM.
+      </p>
+      <p><code>fcm status</code> returns the status of the local/working copy files and 
+      directories.
+      </p>
+      <p>
+      Previously we have seen some of the returned output, for example 
+      <samp>A</samp> and <samp>D</samp>.
+      Now we will look at the most common returned statuses including the meaning 
+      of them and the implications on the repository.
+      Later in essentialsIII  <a href="#st2">Status advanced</a>  and in specifics
+      <a href="fcm_specifics.html#cf">Text conflicts, conflicts, resolve, tree conflicts</a> 
+      we will look at some of the returned statuses which are more complex to resolve.
+      </p>
+      <p>
+      Information on the status of the file or directory is given in the first seven
+      columns.</p>
+      <ol>
+      <li><sup>st</sup> column - added/deleted/changed
+      <br/>
+      Below is the list of the statuses, what do you think they could mean?
+      <pre>
+      ' '
+      'A'
+      'C'
+      'D'
+      'I'
+      'M'
+      'R'
+      'X'
+      '?'
+      '!' 
+      '~'
+      </pre>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwentyOne">
+      <span class="glyphicon"></span>
+      Answers
+      </a>
+      </h4>
+      </div>
+      <div id="collapseTwentyOne" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <pre>
+      <span class="inputs">
+      ' ' no modifications </span> - there have been no changes to the file or 
+      directory when compared to the committed/checked-in repository version.
+      <span class="inputs">
+      'A' Added </span>- A file or directory has been add to the repository, 
+      generally no action needs to be taken.
+      <span class="inputs">
+      'C' Conflicted </span>- There are conflicts. These must be resolved before the 
+      changes can be committed to the repository. This is covered later.
+      <span class="inputs">
+      'D' Deleted </span>- A file or directory has been deleted from the repository, 
+      generally no action needs to be taken.
+      <span class="inputs">
+      'I' Ignored </span>- This item is ignored by then repository, it has been 
+      assigned the ignore flag, using the <span class="error">svn:ignore</span> property. 
+      For Example: <span class="error">fcm propset svn:ignore "&lt;FILENAME&gt;" .</span> 
+      <span class="inputs">
+      'M' Modified </span>- A file or directory has been modified compared to the 
+      committed/checked-in repository version.
+      <span class="inputs">
+      'R' Replaced </span>- A file or directory has been replaced in your working 
+      copy. 
+      This means the file was scheduled for deletion, and then a new file with the 
+      same name was scheduled for addition in its place. 
+      Replaced itemscan lead to complications. 
+      <span class="inputs">
+      'X' an unversioned directory created by an externals definition </span>- This 
+      is a marker as with 'I'.
+      <span class="inputs">
+      '?' item is not under version control </span> - This may be an item that you 
+      want to add to the repository. You do not have to, you may want to keep it
+      outside of the repository because it is big or always changing. However, 
+      remember that without adding it if the repository is checked out then the
+      check out will not include this item.
+      <span class="inputs">
+      '!' item is missing (removed by non-svn command) or incomplete </span> - this
+      item may have been deleted by a non-FCM command, you can solve this by using
+      <samp>fcm rm -c &lt;FILE/DIRNAME&gt;</samp>
+      <span class="inputs">
+      '~' item is versioned as one kind of object (file, directory, link), but has 
+      been replaced by a different kind of object. </span> - 
+      </pre>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      <p>Checking the status of the files and directories can be used to highlight 
+      forgotten or unexpected changes, for example; 
+      </p>
+      <p>if we had not intended deleting an item, or modifying an item, or 
+      just simple forgot to add a new file that we had created, it would 
+      provide the information required,
+      </p>
+      <p>If we notice that we have added/deleted/modified a file unintentionally we 
+      can revert the change before we commit it.
+      This is covered in the <a href="#rev">Revert, merge --reverse</a> sub-section.
+      You can also reverse a change if we have already checked it into the 
+      repository, this is also covered in the 
+      <a href="#rev">Revert, merge --reverse</a> sub-section.
+      </li>
+      </p>
+      <p>
+      <li><sup>nd</sup> column - the status of a file or directory's properties.
+      <pre>
+      '  ' no modifications
+      ' C' Conflicted - Properties for this item are in conflict with property 
+      updates received from the repository. 
+      ' M' Modified - Properties for this item have been modified.
+      </pre>
+      </li>
+      </p>
+      <p>The rest of these statuses are less common and will not be covered here in 
+      detail.
+      There is one exception, column 7.
+      </p>
+      <p>For full details please use the <code>help</code> command, below is a 
+      brief summary of what items in each column mean.
+      </p>
+      <p>
+      <li><sup>rd</sup> column - only populated if the local/working copy is locked.
+      </li></p>
+      <p><li><sup>th</sup> column - only if the item is scheduled for addition-with-history.
+      </li></p>
+      <p><li><sup>th</sup> column - only if the item is switched relative to its parent.
+      </li></p>
+      <p><li><sup>th</sup> column - is populated with lock information.
+      </li></p>
+      <p><li><sup>th</sup> column - only if the item is the victim of a tree conflict.
+      </li></p>
+      <pre>'      C' Conflicted -  a tree conflict.</pre>
+      </ol>
+      <p>
+      Examples of statuses:
+      </p>
+      <p>Example 1
+      </p>
+      <p>What do the following statuses mean? What action if any should be taken?</p>
+      <pre>
+      ?       bar.txt
+      A       stuff/foo
+      A       stuff/foo/new.txt
+      D       stuff/foo.txt
+      M       baz.txt
+      </pre>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwentyTwo">
+      <span class="glyphicon"></span>
+      Answers
+      </a>
+      </h4>
+      </div>
+      <div id="collapseTwentyTwo" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <pre>
+      <span class="inputs">
+      bar.txt is not under version control so should be added with <span class="error">fcm add bar.txt</span>.
+      stuff/foo and stuff/foo/new.txt have been added.
+      stuff/foo.txt has been deleted.
+      baz.txt has been modified.
+      </span>
+      </pre>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      <p>
+      Example 2
+      </p>
+      <p>What do the following statuses mean? What action if any should be taken?</p>
+      <pre>
+      I       readme.txt
+      !       wibble.txt
+      X       blah
+      ~       wobble.txt
+      M       stuff/foo
+      M       stuff/foo/new.txt
+      </pre>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwentyThree">
+      <span class="glyphicon"></span>
+      Answers
+      </a>
+      </h4>
+      </div>
+      <div id="collapseTwentyThree" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <pre>
+      <span class="inputs">
+      readme.txt is ignored by fcm.
+      wibble.txt is missing, it may have been deleted outside of version control, use <span class="error">fcm rm -c wibble.txt</span> to remove it from the repository.
+      blah is an unversioned directory created by an externals definition.
+      wobble.txt is versioned as a file but has been replaced by a directory.
+      stuff/foo has had its file permissions changed (this is covered in <a href="fcm_specifics.html#prop">propset, propdel, propedit</a> specifics.
+      stuff/foo/new.txt has been modified.
+      </span>
+      </pre>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      <p>
+      Example 3
+      </p>
+      <p>What do the following statuses mean? What action if any should be taken?</p>
+      <pre>
+      R       bar.txt    
+      C       stuff/foo/new.txt 
+      L       baz.txt
+      C       readme.txt
+      C wibble.txt
+      </pre>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwentyFour">
+      <span class="glyphicon"></span>
+      Answers
+      </a>
+      </h4>
+      </div>
+      <div id="collapseTwentyFour" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <pre>
+      <span class="inputs">
+      bar.txt has been replaced. This needs addressing before we commit to the repository.
+      stuff/foo/new.txt has property conflicts with the repository. This needs addressing before we commit to the repository.
+      baz.txt is locked, it may be that we are or someone else has the file open or is editing it.
+      readme.txt has a conflict with the repository. This needs addressing before we commit to the repository.
+      wibble.txt has a tree conflict with the repository. This needs addressing before we commit to the repository.
+      Conflicts and Replacements are looked at in greater detail in <a href="#st2">Status advanced</a> and <a href="fcm_specifics.html#cf">Tree Conflicts</a>.
+      </span>
+      </pre>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      <h4>Common FCM commands based on Linux commands</h4>
+      <p>The following commands are often used and can help resolve some of the 
+      problematic<code>fcm status</code> returned values.</p>
+      <ol>
+      <p><li><code>fcm add &lt;FILE/DIRNAME&gt;</code> - add a file/directory</li></p>
+      <p><li><code>fcm copy|cp &lt;FILE/DIRNAME&gt;</code> - copy a file/directory</li></p>
+      <p><li><code>fcm delete|del|remove|rm &lt;FILE/DIRNAME&gt;</code> - delete a file/directory</li>
+      <p><li><code>fcm mkdir &lt;FILE/DIRNAME&gt;</code> - create a file/directory</li></p>
+      <p><li><code>fcm move|mv|rename|ren &lt;FILE/DIRNAME&gt;</code> - move file/directory</li></p>
+      </ol>
+      <p>We have already used <code>add</code> and <code>mkdir</code> now we will use
+      the others as well.</p>
+      </div>
+      <div class="page-header">
+      <h2><a id="eg">Summary example using Essentials I and II</a></h2>
+      </div>
+      <div class="well">
+      <p>Here we will apply all of the above learning into one example which will 
+      allow us to build up and develop a more complex repository and practice all of
+      the aspects that we have learnt so far.
+      </p>
+      <ol>
+      <p><li>Move to the local/working copy of the trunk of the essentials II repository
+      </li>
+      </p>
+      <p><li>How can we check that we are in trunk of the local/working copy of the 
+      repository?
+      What exact part tells us this information?</li>
+      </p>
+      <p><li>List the FCM contents of the directory</li>
+      </p>
+      <p><li>What command will inform us of any local changes and if we need to commit
+      anything to the repository before we checkout a new branch?
+      Is there anything that needs to be done, if so what should we do?</li>
+      </p>
+      <p><li>It would be a good idea to remind ourselves of all the changes that have 
+      occurred on the trunk.
+      How many changes have been recorded?</li> 
+      </p>
+      <p><li>
+      Before we checkout the repository to a new branch then to make our lives easier
+      we should set-up some keywords.
+      </p>
+      <p>We want to set-up the keyword "esII" for the esssentialsII 
+      repository. How can we do this?
+      How can we check this has worked?</li>
+      </p>
+      <p><li>Now lets create a branch called "my_examples_branch" from the trunk using the 
+      keyword so that we could be anywhere in the repository. What is the URL created
+      for the branch?
+      </li>
+      </p>
+      <p><li>How can we work on the branch?</li>
+      </p>
+      <p><li>Now to work on the branch my_examples_branch, remember to use the
+      keyword. Move to the branch that we just created, what command and
+      what returned output confirms that we are in the correct location? 
+      Record the revision number which we will need it later.</li>
+      </p>
+      <p><li>Edit trunk.txt, create a text file called eb.txt and then include it in the repository using FCM. Erase fb.txt using the FCM command. Check the status and resolve any issues and check the branch back into the repository.</li>
+      </p>
+      <p><li>fcm mkdir a directory called foo, then create a file in the directory 
+      called new.txt, fcm copy the file trunk.txt to trunk2.txt, fcm move eb.txt to 
+      the foo directory.
+      Check the status and resolve any issues and check the branch back into the 
+      repository.</li>
+      </p>
+      <p><li>rm the trunk.txt file, mv the trunk2.txt to foo, make the directory bar (do not use fcm for these commands). Check the status and resolve any issues and check the branch back into the repository. Record the revision number which we will need it later.</li>
+      </p>
+      <p><li>Difference the revisions from question 10 and 13 (70-73), then make a change to foo/eb.txt and use the graphical diff to view the change.</li>
+      </p>
+      <p><li>Merge the examples branch at the previous revision to the trunk.</li>
+      </p>
+      </ol>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwentyFive">
+      <span class="glyphicon"></span>
+      Answers
+      </a>
+      </h4>
+      </div>
+      <div id="collapseTwentyFive" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <ol>
+      <p><li>Move to the local/working copy of the trunk of the essentials II repository
+      </li>
+      <span class="inputs">cd ~/my_fcm_tutorial/essentialsII</span>
+      </p>
+      <p>
+      <li>How can we check that we are in trunk of the local/working copy of 
+      essentialsII?
+      What exact part tells us this information?</li>
+      <span class="inputs">fcm info</span>
+      </p>
+      <p><span class="inputs">URL: and Relative URL:</span>
+      </p>
+      <p>
+      <li>List the FCM contents of the directory</li>
+      <span class="inputs">fcm list</span></p>
+      <p><pre>
+      <span class="outputs">
+      bob.txt
+      branch.txt
+      fb.txt
+      trunk.txt 
+      </span>
+      </pre>
+      </p>
+      <p>
+      <li>What command will inform us of any local changes and if we need to commit
+      anything to the repository before we checkout a new branch?
+      Is there anything that needs to be done, if so what should we do?</li>
+      <span class="inputs">fcm status</span>
+      </p>
+      <p><span class="inputs">Nothing was returned therefore there is nothing to do</span>
+      </p>
+      <p>
+      <li>How many changes have been recorded?</li>
+      <span class="inputs">Four, use "fcm log" and count them</span>
+      </p>
+      <p>
+      <li>We want to set-up the keyword "esII" for the esssentialsII 
+      repository. How can we do this?
+      How can we check this has worked?</li>
+      <pre>
+      <span class="inputs">
+      mkdir ~/.metomi/fcm
+      cat &gt; ~/.metomi/fcm/keyword.cfg &lt;&lt; EOF
+      location{primary}[fcm_esII] = file:///$HOME/fcm_tutorial/repository/essentialsII
+      EOF
+      fcm kp fcm:fcm_esII
+      <span class="outputs">location{primary}[fcm_esii] = file:///$HOME/fcm_tutorial/repository/essentialsII</span>
+      Note here that $HOME will be expanded and this is correct.
+      </pre>
+      Note from the output that the keywords are not case-sensitive.
+      </span>
+      </p>
+      <p>
+      <li>Now lets create a branch called "my_examples_branch" from the trunk using the 
+      keyword so that we could be anywhere in the repository. What is the URL created
+      for the branch?</li>
+      <span class="inputs">
+      fcm bc my_examples_branch fcm:fcm_esII
+      </p>
+      <p>file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r66_my_examples_branch
+      </span>
+      </p>
+      <p>
+      <li>How can we work on the branch?</li>
+      <span class="inputs">
+      <code>fcm switch</code>
+      </span>
+      </p>
+      <p>
+      <li>Now to work on the branch my_examples_branch, remember to use the
+      keyword. Move to the branch that we just created, what command and
+      what returned output confirms that we are in the correct location?
+      Record the revision number which we will need it later.</li>
+      <pre>
+      <span class="inputs">
+      fcm sw  fcm:fcm_esII/branches/dev/$LOGNAME/r20_my_examples_branch
+      </span>
+      </pre>
+      <code>fcm info</code>
+      </p>
+      <p><span class="outputs">
+      URL: file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r66_my_examples_branch
+      Relative URL: ^/essentialsII/branches/dev/$LOGNAME/r66_my_examples_branch
+      </p>
+      <p>Revision: 70</p>
+      </span>
+      <p>
+      <li>Edit trunk.txt, create a text file called eb.txt and then include it in the repository using FCM. Erase fb.txt using the FCM command. Check the status and resolve any issues and check the branch back into the repository.</li>
+      </p>
+      <p><pre>
+      <span class="inputs">
+      cat &gt; trunk.txt &lt;&lt; EOF
+      text to append
+      EOF
+      cat &gt; eb.txt &lt;&lt; EOF
+      This is the examples text file.
+      EOF
+      fcm add eb.txt
+      fcm rm fb.txt
+      fcm st
+      <span class="outputs">
+      A       eb.txt
+      D       fb.txt
+      M       trunk.txt
+      </span>
+      </pre>
+      No issues to resolve.
+      </p>
+      <p> <pre>
+      fcm ci
+      <span class="outputs">
+      [info] vi: starting commit message editor...
+      Change summary:
+      --------------------------------------------------------------------------------
+      [Root   : file:///$HOME/fcm_tutorial/repository]
+      [Project: essentialsII]
+      [Branch : branches/dev/$LOGNAME/r66_my_examples_branch]
+      [Sub-dir: ]
+      A       eb.txt
+      D       fb.txt
+      M       trunk.txt
+      --------------------------------------------------------------------------------
+      Commit message is as follows:
+      --------------------------------------------------------------------------------
+      First part of the summary essentials II example.
+      --------------------------------------------------------------------------------
+      Would you like to commit this change?
+      Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+      Adding         eb.txt
+      Deleting       fb.txt
+      Sending        trunk.txt
+      Transmitting file data ..
+      Committed revision 71.
+      Updating '.':
+      At revision 71.
+      </span>
+      </span>
+      </pre>
+      </p>
+      <p><li>fcm mkdir a directory called foo, then create a file in the directory called new.txt, fcm copy the file trunk.txt to trunk2.txt, fcm move eb.txt to the foo director.  Check the status and resolve any issues and check the branch back into the repository.</li>
+      <pre>
+      <span class="inputs">
+      fcm mkdir foo
+      cd foo
+      cat &gt; new.txt &lt;&lt; EOF
+      Text file for example in the directory foo/
+      EOF
+      cd ..
+      fcm cp trunk.txt trunk2.txt
+      fcm move eb.txt foo/.
+      fcm st
+      <span class="outputs">
+      D       eb.txt
+      &gt; moved to foo/eb.txt
+      A       foo
+      A  +    foo/eb.txt
+      &gt; moved from eb.txt
+      ?       foo/new.txt
+      A  +    trunk2.txt
+      </span>
+      </pre>
+      One issue to resolve, 
+      <pre>
+      <span class="outputs">
+      ?       foo/new.txt
+      </span>
+      </pre>
+      <pre>
+      <span class="inputs">
+      fcm add foo/new.txt
+      fcm st
+      </span>
+      </pre>
+      No issues to resolve.
+      <pre>
+      <span class="inputs">
+      fcm ci
+      </span>
+      <span class="outputs">
+      [info] vi: starting commit message editor...
+      Change summary:
+      --------------------------------------------------------------------------------
+      [Root   : file:///$HOME/fcm_tutorial/repository]
+      [Project: essentialsII]
+      [Branch : branches/dev/$LOGNAME/r66_my_examples_branch]
+      [Sub-dir: ]
+      D       eb.txt
+      &gt; moved to foo/eb.txt
+      A       foo
+      A  +    foo/eb.txt
+      &gt; moved from eb.txt
+      A       foo/new.txt
+      A  +    trunk2.txt
+      --------------------------------------------------------------------------------
+      Commit message is as follows:
+      --------------------------------------------------------------------------------
+      Second part of the summary essentials II example.
+      --------------------------------------------------------------------------------
+      Would you like to commit this change?
+      Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+      Deleting       eb.txt
+      Adding         foo
+      Adding         foo/eb.txt
+      Adding         foo/new.txt
+      Adding         trunk2.txt
+      Transmitting file data .
+      Committed revision 72.
+      Updating '.':
+      At revision 72.
+      </span>
+      </pre>
+      </p>
+      <p>
+      </span>
+      <li>rm the trunk.txt file, mv the trunk2.txt to foo, make the directory bar (do not use FCM for these commands). Check the status and resolve any issues and check the branch back into the repository. Record the revision number which we will need it later.</li>
+      <pre>
+      <span class="inputs">
+      rm trunk.txt
+      mv trunk2.txt foo/.
+      mkdir bar
+      fcm st
+      </span>
+      <span class="outputs">
+      ?       bar
+      ?       foo/trunk2.txt
+      !       trunk.txt
+      !       trunk2.txt
+      </span>
+      </pre>
+      <span class="inputs">
+      Four issues to resolve.
+      <pre>
+      <span class="inputs">
+      fcm add bar
+      fcm add foo/trunk2.txt
+      fcm rm -c trunk.txt
+      <span class="outputs">
+      !       trunk.txt
+      Would you like to run "svn delete trunk.txt"?
+      Enter "y", "n" or "a" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+      </span>
+      fcm rm -c trunk2.txt
+      <span class="outputs">
+      !       trunk2.txt
+      Would you like to run "svn delete trunk2.txt"?
+      Enter "y", "n" or "a" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+      </span>
+      fcm st
+      <span class="outputs">
+      A       bar
+      A       foo/trunk2.txt
+      D       trunk.txt
+      D       trunk2.txt
+      </span>
+      </span>
+      </pre>
+      All issues resolved
+      </span>
+      <pre>
+      fcm ci
+      <span class="outputs">
+      [info] vi: starting commit message editor...
+      Change summary:
+      --------------------------------------------------------------------------------
+      [Root   : file:///$HOME/fcm_tutorial/repository]
+      [Project: essentialsII]
+      [Branch : branches/dev/$LOGNAME/r66_my_examples_branch]
+      [Sub-dir: ]
+      A       bar
+      A       foo/trunk2.txt
+      D       trunk.txt
+      D       trunk2.txt
+      --------------------------------------------------------------------------------
+      Commit message is as follows:
+      --------------------------------------------------------------------------------
+      Third part of the summary essentials II example.
+      --------------------------------------------------------------------------------
+      Would you like to commit this change?
+      Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+      Adding         bar
+      Adding         foo/trunk2.txt
+      Deleting       trunk.txt
+      Deleting       trunk2.txt
+      Transmitting file data .
+      Committed revision 73.
+      Updating '.':
+      At revision 73.
+      <span class="inputs">
+      fcm info
+      </span>
+      <span class="outputs">
+      Revision: 73
+      </span>
+      </pre>
+      </span>
+      </p>
+      <p>
+      <li>Difference the revisions from question 10 and 13 (70-73), then make a change to foo/eb.txt and use the graphical diff to veiw the change.</li>
+      <pre>
+      <span class="inputs">
+      fcm diff -r 73:70
+      <span class="outputs">
+      Index: foo/trunk2.txt
+      ===================================================================
+      --- foo/trunk2.txt	(revision 73)
+      +++ foo/trunk2.txt	(revision 70)
+      @@ -1,2 +0,0 @@
+      -A text file 1, trunk
+      -text to append
+      Index: foo/eb.txt
+      ===================================================================
+      --- foo/eb.txt	(revision 73)
+      +++ foo/eb.txt	(revision 70)
+      @@ -1 +0,0 @@
+      -This is the examples text file.
+      Index: foo/new.txt
+      ===================================================================
+      --- foo/new.txt	(revision 73)
+      +++ foo/new.txt	(revision 70)
+      @@ -1 +0,0 @@
+      -Text file for example in the directory foo/
+      Index: trunk.txt
+      ===================================================================
+      --- trunk.txt	(revision 0)
+      +++ trunk.txt	(revision 70)
+      @@ -0,0 +1 @@
+      +A text file 1, trunk
+      Index: fb.txt
+      ===================================================================
+      --- fb.txt	(revision 0)
+      +++ fb.txt	(revision 70)
+      @@ -0,0 +1 @@
+      +This is a text file made in my_first_branch
+      </span>
+      cat &lt; foo/eb.txt &gt;&gt; EOF
+      Adding to the example branch text.
+      EOF
+      fcm diff -g
+      <span class="outputs">
+      Index: foo/eb.txt
+      ===================================================================
+      --- foo/eb.txt	(revision 73)
+      +++ foo/eb.txt	(working copy)
+      </span>
+      fcm ci
+      </span>
+      <span class="outputs">
+      [info] vi: starting commit message editor...
+      Change summary:
+      --------------------------------------------------------------------------------
+      [Root   : file:///$HOME/fcm_tutorial/repository]
+      [Project: essentialsII]
+      [Branch : branches/dev/$LOGNAME/r66_my_examples_branch]
+      [Sub-dir: ]
+      M       foo/eb.txt
+      --------------------------------------------------------------------------------
+      Commit message is as follows:
+      --------------------------------------------------------------------------------
+      Forth part of the summary essentials II example.
+      --------------------------------------------------------------------------------
+      Would you like to commit this change?
+      Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+      Sending        foo/eb.txt
+      Transmitting file data .
+      Committed revision 74.
+      Updating '.':
+      At revision 74.
+      </span>
+      </pre>
+      </p>
+      <p>
+      <li>Merge the examples branch at revision the previous revision to the trunk.</li>
+      <span class="inputs">
+      We need to know the URL and the present revision number so that we can select 
+      the previous revision number to merge from
+      <pre>
+      <span class="inputs">
+      fcm info
+      </span>
+      <span class="outputs">
+      URL: file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r66_my_examples_branch
+      Revision: 74
+      </span>
+      </pre>
+      We should also move to the trunk of the essentials II repository and check that
+      we are looking at the trunk and not a branch and then check that there are no 
+      local revisions that need committing before we merge the branch.
+      <pre>
+      <span class="inputs">
+      fcm sw trunk
+      fcm info
+      <span class="outputs">
+      URL: file:///$HOME/fcm_tutorial/repository/essentialsII/trunk
+      </span>
+      fcm st
+      fcm merge file:///$HOME/fcm_tutorial/repository/essentialsII/branches/dev/$LOGNAME/r66_my_examples_branch@74
+      <span class="outputs">
+      Eligible merge(s) from /essentialsII/branches/dev/$LOGNAME/r66_my_examples_branch@74: 74 73 72
+      Enter a revision (or just press &lt;return&gt; for "74"): 
+      </span>
+      We specified 74 so that was the version that we want. We could have not specified and then selected 74 at this point.
+      <span class="outputs">
+      Eligible merge(s) from /essentialsII/branches/dev/$LOGNAME/r66_my_examples_branch@74: 74 73 72
+      Enter a revision (or just press &lt;return&gt; for "74"): 
+      --------------------------------------------------------------------------------
+      Merge: /essentialsII/branches/dev/$LOGNAME/r66_my_examples_branch@74
+      c.f.: /essentialsII/trunk@66
+      -------------------------------------------------------------------------dry-run
+      --- Merging r72 through r74 into '.':
+      A    foo
+      A    foo/trunk2.txt
+      A    foo/eb.txt
+      A    foo/new.txt
+      A    bar
+      D    fb.txt
+      D    trunk.txt
+      -------------------------------------------------------------------------dry-run
+      Would you like to go ahead with the merge?
+      Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+      Merge succeeded.
+      --------------------------------------------------------------------------actual
+      --- Merging r72 through r74 into '.':
+      A    foo
+      A    foo/trunk2.txt
+      A    foo/eb.txt
+      A    foo/new.txt
+      A    bar
+      D    fb.txt
+      D    trunk.txt
+      --- Recording mergeinfo for merge of r24 through r27 into '.':
+      U   .
+      --------------------------------------------------------------------------actual
+      </span>
+      fcm st
+      fcm ci
+      </span>
+      </pre>
+      Now the changes made on the example branch from revision 27 are merged into the
+      trunk and checked into the repository.
+      </span>
+      </p>
+      </ol>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      <h1>Essential Tutorials III</h1>
+      <div class="page-header">
+      <h2><a id="bl">Branch-list, branch-info, branch-delete</a></h2>
+      </div>
+      <div class="well">
+      <h4>Branch-list</h4>
+      <p><code>fcm branch-list|blist|bls</code>
+      </p>
+      <p>This command searches and lists all of the branches in projects.
+      By default, it only lists the branches created by the current user.
+      To see the branches by all users please use the option 
+      <code>--show-all|-a</code>.
+      </p>
+      <p>We can list all of the branches for this section of the tutorial, which have 
+      been pre-created in the set-up script by:
+      <pre>
+      cd ~/my_fcm_tutorial/essentialsIII
+      fcm bls
+      <span class="outputs">
+      [info] fcm:fcm_esiii@75: 10 match(es)
+      fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_conflict_text@75
+      fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_conflict_text2@75
+      fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_conflict_tree@75
+      fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_conflict_tree2@75
+      fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_delete@75
+      fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_merge_reverse@75
+      fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_replacement@75
+      fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_revert@75
+      fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_update@75
+      </span>
+      </pre></p>
+      <p>Why do you think that we are seeing the information displayed in the format:
+      <samp>fcm:fcm_esiii@75</samp> and what does the number mean?</p>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwentySix">
+      <span class="glyphicon"></span>
+      Answers
+      </a>
+      </h4>
+      </div>
+      <div id="collapseTwentySix" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <ol>
+      <span class="inputs">
+      fcm:fcm_esiii is the keyword that has been set-up, check in our 
+      <samp>~/.metmoi/fcm/keywords.cfg</samp> file.
+      <br/>
+      The number is the revision from the trunk that the branches were made.
+      </span>
+      </ol>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      There are 10 branches in the 
+      <samp>~/my_fcm_tutorial/essentialsIII/</samp> directory for us to work on.
+      </div>
+      <div class="well">
+      <h4>Branch-info</h4>
+      <p><code>fcm branch-info|binfo &lt;URL&gt;</code>
+      </p>        <p>Displays the information of a branch, if we are not in the local/working copy 
+      then we must specify the URL or the URL of the local/working copy.
+      </p>
+      <p>In the trunk/ directory, still we want to know the information about the branch 
+      <samp>branch_merge_reverse</samp>:</p>
+      <pre>
+      fcm binfo fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_merge_reverse
+      <span class="outputs">
+      URL: file:///$HOME/fcm_tutorial/repository/essentialsIII/branches/dev/$LOGNAME/r17_branch_merge_reverse
+      Repository Root: file:///$HOME/fcm_tutorial/repository
+      Revision: 75
+      Last Changed Author: $LOGNAME
+      Last Changed Rev: 21
+      Last Changed Date: 2016-01-30T15:08:30.774264Z
+      --------------------------------------------------------------------------------
+      Branch Create Author: $LOGNAME
+      Branch Create Rev: 18
+      Branch Create Date: 2016-01-30 15:08:29 +0000 (Sat, 30 Jan 2016)
+      --------------------------------------------------------------------------------
+      Branch Parent: file:///$HOME/fcm_tutorial/repository/essentialsIII/trunk@17
+      Merges Avail From Parent: 75
+      Merges Avail Into Parent: 21 20 19
+      </span>
+      </pre>
+      <p>What do you think the line <samp>Merges Avail Into Parent: 21 20 19</samp> 
+      could mean, thinking about questions that we have been asked before that are
+      to do with <samp>merge</samp>?</p>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwentySeven">
+      <span class="glyphicon"></span>
+      Answers
+      </a>
+      </h4>
+      </div>
+      <div id="collapseTwentySeven" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <ol>
+      <span class="inputs">
+      That there have been three changes to the branch 
+      <code>branch_merge_reverse</code> that could be mergeed into the trunk.
+      </span>
+      </ol>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      <div class="well">
+      <h4>Branch-delete</h4>
+      <p><code>fcm branch-delete|bdelete|bdel &lt;URL|BRANCHNAME&gt;</code>
+      </p>        <p>This command deletes the branch.
+      </p>
+      <p>Now we will delete the branch <samp>branch_delete</samp></p>
+      <pre>
+      fcm bdel fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_delete
+      </pre>
+      <p>Add a comment, save, close and accept deleting the branch.</p>
+      <pre>
+      <span class="outputs">
+      URL: file:///$HOME/fcm_tutorial/repository/essentialsIII/branches/dev/$LOGNAME/r17_branch_delete
+      Repository Root: file:///$HOME/fcm_tutorial/repository
+      Revision: 75
+      Last Changed Author: $LOGNAME
+      Last Changed Rev: 17
+      Last Changed Date: 2016-01-30T15:08:29.446762Z
+      --------------------------------------------------------------------------------
+      Branch Create Author: $LOGNAME
+      Branch Create Rev: 17
+      Branch Create Date: 2016-01-30 15:08:29 +0000 (Sat, 30 Jan 2016)
+      --------------------------------------------------------------------------------
+      Branch Parent: file:///$HOME/fcm_tutorial/repository/essentialsIII/trunk@210
+      Merges Avail From Parent: 75
+      [info] vi: starting commit message editor...
+      Change summary:
+      --------------------------------------------------------------------------------
+      D    file:///$HOME/fcm_tutorial/repository/essentialsIII/branches/dev/$LOGNAME/r17_branch_delete
+      --------------------------------------------------------------------------------
+      Commit message is as follows:
+      --------------------------------------------------------------------------------
+      Deleting the branch as we don't need it anymore.
+      Deleted /essentialsIII/branches/dev/$LOGNAME/r17_branch_delete.
+      --------------------------------------------------------------------------------
+      Would you like to go ahead and delete this branch?
+      Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+      Deleting branch file:///$HOME/fcm_tutorial/repository/essentialsIII/branches/dev/$LOGNAME/r17_branch_delete ...
+      Committed revision 76.
+      </span>
+      </pre>
+      <p>Why do you think that the revision number has increased?</p>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwentyEight">
+      <span class="glyphicon"></span>
+      Answers
+      </a>
+      </h4>
+      </div>
+      <div id="collapseTwentyEight" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <ol><span class="inputs">
+      We have made a change to the repository and this increments to the 
+      revision number.
+      </span></ol>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      <div class="page-header">
+      <h2><a id="up">Update</a></h2>
+      </div>
+      <div class="well">
+      <h4>Update</h4>
+      <p><code>fcm update|up (trunk|local/working copy)</code>
+      </p>
+      <p>This command allows updates that have occurred on the repository to be applied
+      to our working copy.
+      These may be updates to a branch if there are multiple users working on a 
+      branch or we may have a branch and want to update it with the changes on the 
+      trunk, or we may want to update our version of the trunk.
+      </p>
+      <p>This example could be used if there were changes on the trunk that we wanted
+      to apply to the branch we were working on.
+      <strong>WARNING:</strong> best practice is given at the end of this sub-section 
+      please use that method instead of the following method.
+      <code>fcm sw trunk; fcm update (trunk); fcm sw &lt;URL|BRANCHNAME&gt;;fcm merge trunk</code>
+      </p>
+      <p>This example updates the branch <samp>branch_updates</samp> with the 
+      HEAD of that repository.</p>
+      <pre>
+      cd ~/my_fcm_tutorial/essentialsIII
+      fcm sw fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_update
+      fcm update
+      <span class="outputs">
+      update: status of ".":
+      *      14   update_branch.txt
+      update: continue?
+      Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+      Updating '.':
+      U    update_branch.txt
+      Updated to revision 76
+      </span>
+      </pre>
+      <p>After an update would we expect to have to check in the changes that have been
+      made to the local/working copy of the branch?</p>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwentyNine">
+      <span class="glyphicon"></span>
+      Answers
+      </a>
+      </h4>
+      </div>
+      <div id="collapseTwentyNine" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <ol><span class="inputs">
+      No, because accepting the update incremented the repository revision number.
+      </span></ol>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      <p>
+      <strong>Best working practices method of working follows for updating the 
+      working copy of a branch to match the HEAD of the trunk:</strong>
+      </p>
+      <p>
+      <span class="info">
+      Make changes to our local/working copy of the branch we are developing.
+      When we want to add in the latest changes from the trunk, we should create a
+      new branch from the HEAD of the trunk, check it out and then merge our changes
+      from the old branch to the new branch.
+      Now this new branch will only have the changes that we have made in the 
+      changeset.
+      </p>
+      <p>See <a href="fcm_fundamentals.html#bwp">Best working practice for merging</a> for a
+      diagram explaining this concept.
+      </span>
+      </div>
+      <div class="page-header">
+      <h2><a id="rev">Revert, merge --reverse</a></h2>
+      </div>
+      <div class="well">
+      <h4>Revert</h4>
+      <p><code>fcm revert &lt;FILENAME/PATH&gt;</code>
+      </p>
+      <p>Only works on a local/working copy which has not been committed back to the repository
+      yet.</p>
+      <pre>
+      cd ~/my_fcm_tutorial/essentialsIII
+      fcm sw fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_revert
+      less revert.txt
+      <span class="outputs">
+      This text file is for the revert demo.
+      revert.txt (END)
+      </span>
+      cat &gt; revert.txt &lt;&lt; EOF
+      Adding some text to the revert.txt file.
+      EOF 
+      less revert.txt
+      <span class="outputs">
+      This text file is for the revert demo.
+      Adding some text to the revert.txt file.
+      revert.txt (END)
+      </span>
+      fcm st
+      <span class="outputs">
+      M       revert.txt
+      </span>
+      fcm revert revert.txt
+      <span class="outputs">
+      Reverted 'revert.txt'
+      </span>
+      fcm st
+      less revert.txt
+      <span class="outputs">
+      This text file is for the revert demo.
+      revert.txt (END)
+      </span>
+      </pre>
+      <p>Nothing is returned by <code>fcm st</code> because the file is the same as before 
+      we changed it as a result of using <code>fcm revert</code>.</p>
+      </div>
+      <div class="well">
+      <h4>merge --reverse</h4>
+      <p><code>fcm merge --reverse --revision M:N </code>
+      </p>
+      <p>This can be used to revert(reverse) changes that have been committed back to the
+      repository.
+      </p>
+      <pre>
+      cd ~/my_fcm_tutorial/essentialsIII
+      fcm sw fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_merge_reverse
+      fcm binfo
+      <span class="outputs">
+      URL: file:///$HOME/fcm_tutorial/repository/essentialsIII/branches/dev/$LOGNAME/r17_branch_merge_reverse
+      Repository Root: file:///$HOME/fcm_tutorial/repository
+      Revision: 76
+      Last Changed Author: $LOGNAME
+      Last Changed Rev: 21
+      Last Changed Date: 2016-01-30T16:59:50.794874Z
+      --------------------------------------------------------------------------------
+      Branch Create Author: $LOGNAME
+      Branch Create Rev: 18
+      Branch Create Date: 2016-01-30 16:59:50 +0000 (Sat, 30 Jan 2016)
+      --------------------------------------------------------------------------------
+      Branch Parent: file:///$HOME/fcm_tutorial/repository/essentialsIII/trunk@232
+      Merges Avail From Parent: 76
+      Merges Avail Into Parent: 21 20 19
+      </span>
+      fcm up
+      fcm merge --reverse --revision 21:19
+      <span class="outputs">
+      -------------------------------------------------------------------------dry-run
+      --- Reverse-merging r21 through r20 into '.':
+      U    merge_reverse.txt
+      -------------------------------------------------------------------------dry-run
+      Would you like to go ahead with the merge?
+      Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+      Merge succeeded.
+      --------------------------------------------------------------------------actual
+      --- Reverse-merging r21 through r20 into '.':
+      U    merge_reverse.txt
+      --- Recording mergeinfo for reverse merge of r21 through r20 into '.':
+      U   .
+      --- Eliding mergeinfo from '.':
+      U   .
+      --------------------------------------------------------------------------actual</span>
+      less merge_reverse.txt
+      <span class="outputs">
+      This text file is for the merge reverse
+      and it is one sentence long.
+      This is the second sentence.
+      merge_reverse.txt (END) 
+      </span>
+      fcm st
+      <span class="outputs">
+      M       merge_reverse.txt
+      </span>
+      </pre>
+      <p>If we are happy with reversing the file to two revisions previously then we
+      can commit the file.
+      Else what can we do to get it back to the original file?<p>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseThirty">
+      <span class="glyphicon"></span>
+      Answers
+      </a>
+      </h4>
+      </div>
+      <div id="collapseThirty" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <ol><span class="inputs">
+      fcm revert merge_reverse.txt
+      </span></ol>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      <p>This is very helpful in case we reverse merge the wrong revisions.
+      </p>
+      <p>
+      See the flow diagram on <a href=fcm_fundamentals.html#D1><code>fcm revert</code> v <code>fcm merge --reverse --revision [M:N]</code></a>.</p>
+      </div>
+      <div class="page-header">
+      <h2><a id="st2">Status Advanced</a></h2>
+      </div>
+      <div class="well">
+      <h4>Status R</h4>
+      What does the status "R" mean when returned by <code>fcm st</code>?
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseThirtyOne">
+      <span class="glyphicon"></span>
+      Answers
+      </a>
+      </h4>
+      </div>
+      <div id="collapseThirtyOne" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <ol><span class="inputs">
+      'R' Replaced - A file or directory has been replaced. Replaced items 
+      can lead to complications. It is best not to have replaced items, adding or 
+      deleting files or directories is preferable to replacing them.
+      </span></ol>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      <p>We will create a replaced status now and correct the problem so that the branch
+      can be committed to the repository.</p>
+      <pre>
+      cd ~/my_fcm_tutorial/essentialsIII
+      fcm sw fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_replacement
+      fcm rm statusesR.txt
+      cat &gt; statusesR.txt &lt;&lt; EOF
+      By fcm deleting a file of this name and then creating a new file of the same name, we create a fcm status of R.
+      EOF 
+      fcm add statusesR.txt
+      fcm st
+      <span class="outputs">
+      R       statusesR.txt
+      </span>
+      </pre>
+      <p>We may wish to have done this, but the method we used was not ideal.
+      Preferably we would modify the existing file.
+      It is not ideal to delete the file and then add a file of the same name.
+      </p>
+      <p>
+      To resolve this undesired status we can revert the change as we have not 
+      committed to the repository, then we can correctly make our change.
+      How do you think we could do this?</p>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseThirtyTwo">
+      <span class="glyphicon"></span>
+      Answers
+      </a>
+      </h4>
+      </div>
+      <div id="collapseThirtyTwo" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <pre>
+      <span class="inputs">
+      fcm revert statusesR.txt
+      fcm st
+      </pre>
+      <ol><p>This returns nothing is this case as this was the only change we had made.
+      If we had made other changes we would see them but the changes to 
+      <samp>statusesR.txt</samp> would be reverted.
+      </p>
+      <p>Now we can modify the file correctly.</p></ol>
+      <pre>
+      cat &gt; statusesR.txt &lt;&lt; EOF
+      By fcm deleting a file of this name and then creating a new file of the same name, we create a fcm status of R.
+      EOF 
+      fcm st
+      <span class="outputs">
+      M       statusesR2.txt
+      </span>
+      </pre>
+      <ol><p>Now we can commit our change to the repository if we wish.</p></ol>
+      </span>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      <p>Something that is very important to note from this example, <code>fcm st</code>
+      is very important.
+      We should use <code>fcm st</code> regularly to keep a close look on the changes
+      that we are making so we can correct them asap.
+      Also, by committing our code to the repository regularly it is very simple
+      and easy to revert any change or mistake that we have made.
+      </p>
+      <p>Remember that we can use <code>fcm merge --reverse --revision M:N</code> if we
+      have committed a change that we did not really want to, but this does not just
+      revert the one file like <code>fcm revert &lt;FILENME&gt;</code> but reverses
+      the whole changeset.</p>
+      </div>
+      <div class="well">
+      <h4>Status C text conflicts</h4>
+      <p>What does the status "C" mean when returned by <code>fcm st</code> in column 1?</p>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseThirtyThree">
+      <span class="glyphicon"></span>
+      Answers
+      </a>
+      </h4>
+      </div>
+      <div id="collapseThirtyThree" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <ol><span class="inputs">
+      'C' Conflicted - There are conflicts. These must be resolved before the 
+      changes can be committed to the repository.
+      This is a TEXT conflict and usually not difficult to resolve.
+      </span></ol>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      <p>We will create a text conflict now and resolve it in the <a href="fcm_specifics.html">Specifics tutorial</a> in full detail, but quickly resolve it here.</p>
+      <pre>
+      cd ~/my_fcm_tutorial/essentialsIII
+      fcm sw fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_conflict_text
+      cat &gt; statusesC_text.txt &lt;&lt; EOF
+      My first change to make a text conflict.
+      EOF 
+      fcm ci
+      # add a comment, save, close and accept the change.
+      fcm sw fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_conflict_text2
+      cat &gt; statusesC_text.txt &lt;&lt; EOF
+      My second change to make a text conflict.
+      EOF
+      fcm ci
+      # add a comment, save, close and accept the change.
+      # to get the list of possible branches to merge
+      fcm bls
+      # merge in the branch_conflict_text into branch_conflict_text2
+      fcm merge fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_conflict_text
+      <span class="outputs">
+      Eligible merge(s) from /essentialsIII/branches/dev/$LOGNAME/r17_branch_conflict_text@78: 77
+      --------------------------------------------------------------------------------
+      Merge: /essentialsIII/branches/dev/$LOGNAME/r17_branch_conflict_text@77
+      c.f.: /essentialsIII/trunk@22
+      -------------------------------------------------------------------------dry-run
+      --- Merging r23 through r77 into '.':
+      C    statusesC_text.txt
+      Summary of conflicts:
+      Text conflicts: 1
+      -------------------------------------------------------------------------dry-run
+      Would you like to go ahead with the merge?
+      Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+      Merge succeeded.
+      --------------------------------------------------------------------------actual
+      --- Merging r23 through r77 into '.':
+      C    statusesC_text.txt
+      --- Recording mergeinfo for merge of r23 through r77 into '.':
+      U   .
+      Summary of conflicts:
+      Text conflicts: 1
+      --------------------------------------------------------------------------actual
+      </span>
+      </pre>
+      <p>We are going use a command that we have used before and another that we have 
+      not come across yet, that command will be explained in  
+      <a href="fcm_specifics.html">Specifics tutorial</a>.
+      </p>
+      <p>For now we will resolve it using the following method:</p>
+      <pre>
+      fcm diff -g
+      <img src="text_conflict1.png" alt="fcm diff -g screengrab">
+      <span class="outputs">
+      Index: statusesC_text.txt
+      ===================================================================
+      --- statusesC_text.txt	(revision 78)
+      +++ statusesC_text.txt	(working copy)
+      Index: .
+      ===================================================================
+      --- .	(revision 78)
+      +++ .	(working copy)
+      Property changes on: .
+      ___________________________________________________________________
+      Added: svn:mergeinfo
+      Merged /essentialsIII/branches/dev/$LOGNAME/r17_branch_conflict_text:r23-77
+      </span>
+      fcm conflicts
+      <img src="text_conflict2.png" alt="fcm cf screengrab">
+      # The middle frame of the three is the common ancestor of the two.
+      # The one on the left is the local/working copy directory that we are in, the
+      # one considered the original.
+      # The one on the right is the one we are trying to merge in.
+      # Left click on the text option that we want to keep, it should change colour
+      # from yellow to purple.
+      # Then press "m", or use the toolbar; File -&gt; Exit with MERGED M.
+      <span class="outputs">
+      [info] statusesC_text.txt: in text conflict.
+      You merged all the changes.
+      Run "svn resolve --accept working statusesC_text.txt"?
+      Enter "y" or "n" (or just press &lt;return&gt; for "n") y
+      Resolved conflicted state of 'statusesC_text.txt
+      </span>
+      </pre>
+      Remember that we will cover this in more detail in 
+      <a href="fcm_specifics.html#cf">Specifics tutorial text conflicts</a>.
+      </div>
+      <div class="well">
+      <h4>Status C tree conflicts</h4>
+      <p>What does the status "C" mean when returned by <code>fcm st</code> in column 7?</p>
+      <div class="panel-group" id="accordion">
+      <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">
+      <a data-toggle="collapse" data-parent="#accordion" href="#collapseThirtyFour">
+      <span class="glyphicon"></span>
+      Answers
+      </a>
+      </h4>
+      </div>
+      <div id="collapseThirtyFour" class="panel-collapse collapse">
+      <div class="panel-body">
+      <div class="row">
+      <pre>
+      <span class="inputs">
+      '       C' Conflicted - There are conflicts. These must be resolved before the
+      changes can be committed to the repository.
+      This is a TREE conflict and sometimes more difficult to resolve than text 
+      conflicts.
+      </span>
+      </pre>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+      <p>We will create a tree conflict now and resolve it in the <a href="fcm_specifics.html#cf">Specifics tutorial tree conflicts</a></p>
+      <pre>
+      cd ~/my_fcm_tutorial/essentialsIII
+      fcm sw fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_conflict_tree2
+      fcm bls
+      <span class="outputs">
+      [info] fcm:fcm_esiii@78: 10 match(es)
+      fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_conflict_text@78
+      fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_conflict_text2@78
+      fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_conflict_tree@78
+      fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_conflict_tree2@78
+      fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_delete@78
+      fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_merge_reverse@78
+      fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_replacement@78
+      fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_revert@78
+      fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_update@78
+      fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_update2@78
+      </span>
+      fcm merge fcm:fcm_esiii/branches/dev/$LOGNAME/r17_branch_conflict_tree
+      <span class="outputs">
+      Eligible merge(s) from /essentialsIII/branches/dev/$LOGNAME/r17_branch_conflict_tree@78: 26
+      --------------------------------------------------------------------------------
+      Merge: /essentialsIII/branches/dev/$LOGNAME/r17_branch_conflict_tree@26
+      c.f.: /essentialsIII/trunk@24
+      -------------------------------------------------------------------------dry-run
+      --- Merging r25 through r26 into '.':
+      C utils
+      A utils/tool_list.txt
+      Summary of conflicts:
+      Tree conflicts: 1
+      -------------------------------------------------------------------------dry-run
+      Would you like to go ahead with the merge?
+      Enter "y" or "n" (or just press &lt;return&gt; for "n"): <span class="enter">y</span>
+      Merge succeeded.
+      --------------------------------------------------------------------------actual
+      --- Merging r25 through r26 into '.':
+      C utils
+      A utils/tool_list.txt
+      --- Recording mergeinfo for merge of r25 through r26 into '.':
+      U   utils/tool_list.txt
+      U   .
+      Summary of conflicts:
+      Tree conflicts: 1
+      --------------------------------------------------------------------------actual
+      </span>
+      fcm st
+      <span class="outputs">
+      M      .
+      C utils
+      &gt;   local dir obstruction, incoming dir add upon merge
+      M      utils/tool_list.txt
+      Summary of conflicts:
+      Tree conflicts: 1
+      </span>
+      </pre>
+      <h4>How this was set-up for us</h4>
+      <p>Both <samp>branch_conflict_tree</samp> and <samp>branch_conflict_tree2</samp> 
+      were checked out from the trunk at the same revision.
+      </p>
+      <p>However, independently they both had an utils/ directory added and both with a 
+      file called tools_list.txt, but with different information in tools_list.txt.
+      The changes were checked back into the respective repositories.
+      </p>
+      <p><samp>branch_conflict_tree2</samp>  was then updated using, <code>fcm up</code>.
+      </p>
+      <p>This is the repositories set-up ready for our interaction with them.
+      </p>
+      <p>Then <samp>branch_conflict_tree</samp> was merged into 
+      <samp>branch_conflict_tree2</samp> by us above, etc.
+      </p>
+      <p>This and other tree conflicts will be resolved in the 
+      <a href="fcm_specifics.html">Specifics tutorial</a>.</p>
+      </div>
+      <div class="well">
+      Now lets do the Specifics Quiz to see how much you already know and what we 
+      will need to focus on in the next section.
+      </div>
+      <div class="container">
+      <p><a class="btn btn-lg btn-success" href="specifics_quiz.html" role="button">Specifics Quiz</a></p>
+      </div>
+      <hr/>
+      <div class="container-fluid text-center">
+      <div class="row"><div class="col-md-12">
+      <address><small>
+      &copy; British Crown Copyright 2006-16
+      <a href="http://www.metoffice.gov.uk">Met Office</a>.<br />
+      This document is released under the British <a href=
+         "http://www.nationalarchives.gov.uk/doc/open-government-licence/" rel=
+         "license">Open Government Licence</a>.<br />
+      </small></address>
+      </div></div>
+      </div>
+      <!-- Bootstrap core JavaScript
+         ================================================== -->
+      <!-- Placed at the end of the document so the pages load faster -->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+      <script>window.jQuery || document.write('<script src="./js/vendor/jquery.min.js"><\/script>')</script>
+      <script src="../etc/bootstrap/js/bootstrap.min.js"></script>
+      <script src="./js/docs.min.js"></script>
+      <script LANGUAGE="JavaScript">
+         update = new Date(document.lastModified);
+         theMonth = update.getMonth() + 1;
+         theDate = update.getDate();
+         theYear = update.getFullYear();
+         theHour = update.getHours();
+         theMin = update.getMinutes();
+         theSec = update.getSeconds();
+         document.write("<strong> Last Modified:</strong> " + theYear + "-" + theMonth + "-" + theDate + "T" + theHour + ":" + theMin + ":" + theSec + "Z");
+      </script>
+      </div>
+   </body>
+</html>
+

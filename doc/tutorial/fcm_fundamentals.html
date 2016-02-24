@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8" />
+      <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+      <meta name="description" content="FCM Tutorial" />
+      <meta name="author" content="FCM team" />
+      <link rel="icon" href="fcm_logo.png" />
+      <title>FCM fundamentals</title>
+      <!-- Bootstrap core CSS -->
+      <link href="../etc/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+      <!-- Bootstrap theme -->
+      <link href="../etc/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet" />
+      <!-- Custom styles for this template -->
+      <link href="general_theme.css" rel="stylesheet" />
+   </head>
+   <body>
+      <!-- Fixed navbar -->
+      <nav class="navbar navbar-inverse navbar-fixed-top">
+         <div class="container">
+            <div class="navbar-header">
+               <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+               <span class="sr-only">Toggle navigation</span>
+               <span class="icon-bar"></span>
+               <span class="icon-bar"></span>
+               <span class="icon-bar"></span>
+               </button>
+               <a class="navbar-brand" href="#">FCM Fundamentals</a>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+               <ul class="nav navbar-nav">
+                  <!-- Add link to Homepage to training when created -->
+                  <li class="active"><a href="#">Home</a></li>
+                  <li class="dropdown">
+                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Fundamentals material <span class="caret"></span></a>
+                     <ul class="dropdown-menu">
+                        <li class="dropdown-header">Fundamentals Tutorials</li>
+                        <li><a href="#vc">Why use version control</a></li>
+                        <li><a href="#subvc">Subversion</a></li>
+                        <li><a href="#scens">scenarios</a></li>
+                        <li><a href="#cfg">configuration</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li class="dropdown-header">Fundamentals Practical's</li>
+                        <li><a href="#orepo">own repository</a></li>
+                        <li><a href="#trepo">tutorial repositories</a></li>
+                     </ul>
+                  <li class="dropdown">
+                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Other material <span class="caret"></span></a>
+                     <ul class="dropdown-menu">
+                        <li class="dropdown-header">Quizzes</li>
+                        <li><a href="fundamentals_quiz.html">Fundamentals Quiz</a></li>
+                        <li><a href="essentials_quiz.html">Essentials Quiz</a></li>
+                        <li><a href="specifics_quiz.html">Specifics Quiz</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li class="dropdown-header">Tutorials and practical's</li>
+                        <li><a href="fcm_essentials.html">Essentials</a></li>
+                        <li><a href="fcm_specifics.html">Specifics</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li class="dropdown-header">Help/info</li>
+                        <li><a href="fcm_glossary.html">Glossary List</a></li>
+                        <li><a href="fcm_links.html">Links</a></li>
+                        <li><a href="fcm_mqrg.html">My Quick Reference Guide</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </div>
+            <!--/.nav-collapse -->
+         </div>
+      </nav>
+      <div class="container theme-showcase" role="main">
+      <div class="jumbotron">
+         <h1>Fundamentals of version control, Subversion and FCM</h1>
+         <p>This aims to explain the importance of:
+         <ul>
+            <li><a href="#vc">Using version control</a></li>
+            <li><a href="#subvc">The basics of Subversion and where to learn more</a></li>
+            <li><a href="#scens">Scenarios</a></li>
+            <li><a href="#cfg">General configuration</a></li>
+            <li><a href="#orepo">Setting-up your own repository</a></li>
+            <li><a href="#trepo">Setting-up the tutorial repositories</a></li>
+         </ul>
+         </p>
+      </div>
+      <div class="well">
+         <p id="all_text">First let's do the Fundamentals Quiz to see how much you already know and what we
+            will need to focus on in this section, note there are no right or wrong answers
+            for the first five questions.
+         </p>
+      </div>
+      <div class="container">
+         <p><a class="btn btn-lg btn-success" href="fundamentals_quiz.html" role="button">Fundamentals Quiz</a></p>
+      </div>
+      <br/>
+      <h1 id="vc">Using version control</h1>
+      <p>
+      <ul>
+         <li>
+            <h2>Introduction</h2>
+         </li>
+         <h3 class="page-header">Why use a version control system?</h3>
+         <div class="well">
+            Any good version control system provides helpful tools to allow users to;
+            <ul>
+               <li>share work and encourage collaboration,</li>
+               <li>track the progression and incremental changes to versions/revisions of 
+                  work,
+               </li>
+               <li>allow multiple flavours of the some work to investigate the impact of a 
+                  change,
+               </li>
+               <li>traceability of work, for example what version of the work was used and 
+                  when,
+               </li>
+               <li>to revert a change,</li>
+               <li>branch from a version,</li>
+               <li>merge in changes</li>
+               <li>and so much more.</li>
+            </ul>
+         </div>
+         <h3 class="page-header">Subversion</h3>
+         <div class="well">
+            <p>Subversion has some very good documentation, 
+               <a href="http://svnbook.red-bean.com/en/1.8/">Version Control with Subversion</a>, 
+               referred to in this training material as the <samp>Subversion book.</samp>
+               It is recommended that you read this as it provides a good introduction to 
+               the basic concepts of version control.
+               Please read <a href="http://svnbook.red-bean.com/en/1.8/svn.basic.html">Fundamental Concepts</a> 
+               if you are not already familiar with Subversion.
+               Specific topics to focus on are Copy-Modify-Merge for shared file systems and 
+               Global Revision Numbers.
+            </p>
+            <p>  Note that FCM working practices ensure that your working copy (a local copy of 
+               the repository's files and directories where you can prepare changes) always 
+               corresponds to exactly one revision.
+            </p>
+            <br/>
+            <h4>Key Features of Subversion:</h4>
+            <p>
+            <ul>
+               <li>It is an incremental change tracking system.</li>
+               <li>We can explore the changes at each change and recall a version using its 
+                  revision number.
+               </li>
+               <li>It takes snapshots of the directory tree vs time and records only the incremental changes.
+               </li>
+               <li>A working copy, which is in fact, a local copy of a particular version of 
+                  the repository is availiable for users to freely work on.
+                  Note managing the version control of the working copy and communicating 
+                  changes is the responsibility of the user.
+               </li>
+               <li>Using copy-modify-merge allows each user of the repository to have their 
+                  own personal working copy and they can work simultaneously and independently 
+                  to modify their personal copies which can then be merged together later. 
+                  Note it is the humans' reponsibility to merge the files correctly and 
+                  resolve any conflicts by manually.
+                  This may mean choosing the correct file after discussions with any others 
+                  editing the repository.
+               </li>
+               <li>Each change committed to the repository creates a new state of the 
+                  filesystem tree (snapshot).
+                  This is called a revision number.
+               </li>
+               <li>The revision number is applied to the entire repository tree and not 
+                  individual files and is therefore also known as the Global Revision Number.
+                  For example: at revision number N then a file may be the same as it was at 
+                  revision number M but a <strong>different</strong> file was changed 
+                  between the two revisions.
+               </li>
+            </ul>
+            </p>
+            <p>
+               Version Control information
+            </p>
+            <p> The <a href="http://svnbook.red-bean.com/">Red bean book</a> describes a 
+               version control system.
+            </p>
+         </div>
+         </p>
+      </ul>
+      <h1 id="subvc">The basics of Subversion and where to learn more</h1>
+      <p>
+      <ul>
+      <h3 class="page-header">Diagrams to explain ideas and concepts</h3>
+      <div class="well">
+         <pre>
+&lt;root&gt;
+    |
+    |-- &lt;project 1&gt;
+    |       |
+    |       |-- trunk
+    |       |-- branches
+    |
+    |-- &lt;project 2&gt;
+    |       |
+    |       |-- trunk
+    |       |-- branches
+    |
+    |-- ...
+
+</pre>
+         <p>The structure of a repository, note it contains multiple projects with
+            their own trunk and branches.
+         </p>
+         <pre>
+                &lt;Trunk&gt;
+                   |
+    &lt;Branch3&gt;------|---------&lt;Branch2&gt;------&lt;Branch1&gt;
+       |           |#1          |              |
+       |           |            |#2            |
+       |#3         |            |              |
+       |           |#4          |              |
+       |           |            |              |#5
+       |           |            |              |#6
+       |           |            |              |
+       |           |#7          |              |
+       |#8         |            |              |
+       |           |            |#9            |
+       |-----------|#10         |              |
+                   |#11---------|              |
+                   |                           |#12
+                   |#13------------------------|
+                   |
+                   |#14
+
+</pre>
+         <p>The concept of revision number. Every change that occurs results in an increase
+            in the revision number, shown here by the <samp>#</samp>.
+         </p>
+         <img src="merge_good.png" id="bwp">
+         <p>
+            The diagram above represents the best working practice for merging.
+            Here <strong>only</strong> the changes made in Branch 1 are merged into
+            the new branch, Branch 2  which at a later date can be merged into the trunk.
+            Therefore only the changes made on the branches and not the trunk changes are
+            included in the log/changeset for the branch merge.
+            For example, here only changes 3 and 5 are merged into the trunk.
+            This makes applying/viewing/understanding changes associated with the 
+            branch easier. 
+         </p>
+         <img src="merge_bad.png" id="wwp">
+         <p>
+            The problem with this second method is that in Branch 1 all of the branch 
+            changes are mixed with the trunk changes.
+            For example a merge of the branch would include changes 1-7 and not just 
+            the changes 3 and 5 that were made on the branch.
+            This is unlike the best practice method where the changes are still separate
+            and therefore it is easy to see what changes belong to the branch and what 
+            changes belong to the trunk.
+         </p>
+         <h4 id="D1">Undoing changes: <code>fcm revert</code> v <code>fcm merge --reverse --revision [M:N]</code></h4>
+         <pre>
+Local/working copy---&gt;Made changes---&gt;fcm st---&gt;Issue---&gt;fcm revert &lt;problem file(s)&gt;
+
+Local/workin copy---&gt;Made changes---&gt;fcm ci---&gt;fcm st---&gt;Issue---&gt;fcm merge --reverse --revision [M:N]
+</pre>
+         <p>Sometimes we make changes to a file or diectory and realise that we did not
+            mean to make the change.
+            What we do next depends on if we have commited the changes to the repository
+            or if they are only in the local/working copy.
+            More information on this follow and full details are included in
+            the
+            <a href="fcm_essentials.html">Essentials</a> tutorial.
+         </p>
+         <p>The above flow diagram explains what we can do depending on the situation.
+         </p>
+         <pre>
+                &lt;Trunk&gt;
+                   |
+    &lt;L/W-C&gt;--------|---------&lt;Branch2&gt;------&lt;Branch1&gt;
+       |           |            |              |
+       |           |            |              |
+    change         |            |              |
+       |           |            |            change
+     test          |         change            |
+       |           |            |        test and commit branch
+     commit-------&gt;|            |              | 
+                   | test and commit branch    |
+                   |            |              |
+                   |--update---&gt;|              |
+                   |            |              | 
+                   |         change            |
+                   |            |            change
+                   | test and commit branch    |
+                   |            |        test and commit branch
+                   |----------------update----&gt;|
+                   |&lt;------merge-Branch1-------|
+                   |            |
+                 commit         |
+                   |            |
+                   |         change
+                   |            |
+                   | test and commit branch
+                   |--update---&gt;|
+                   |            |
+                   |&lt;---merge-Branch2
+                   |
+                 commit
+                 
+</pre>
+         <p>Flow diagram of best working practice for local/working-copies and branches.
+         </p>
+         <pre>
+                &lt;Trunk&gt;
+                   |
+    &lt;L/W-C&gt;--------|------------------------&lt;Branch1&gt;
+       |           |                           |
+       |           |                         change
+    change         |                           |
+       |           |                 test and commit branch
+     test          |                           |
+       |           |   &lt;Branch of BranchA&gt;-----|-----&lt;Branch of BranchB&gt;        
+     commit-------&gt;|            |              |              |
+                   |         change            |              |
+                   |            |              |           change 
+                   |  test and commit bob      |              |
+                   |            |              |    test and commit bob
+                   |------------------update--&gt;|              |
+                   |            |           commit            |
+                   |            |&lt;-update------|              | 
+                   |         commit            |              |
+                   |            |              |           change
+                   |            |              |              |
+                   |            |              |   test and commit bob
+                   |         merge bob--------&gt;|              |
+                   |                           |              |
+                   |                         commit           |
+                   |                           |-----update--&gt;|
+                   |                           |           commit
+                   |                           |&lt;-merge bob---|
+                   |                         commit
+                   |&lt;--merge branch------------|
+                   |
+                commit
+</pre>
+         <p>Flow diagram of best working practice for local/working-copies and branches 
+            with branches of branches (bob).
+         </p>
+      </div>
+      <div class="well">
+         <p>The rest of this tutorial focuses on the toolkit (wrapper) and working 
+            practices at the Met Office, <strong>FCM</strong>.
+         </p>
+      </div>
+      <h3 class="page-header">Basics of using an existing FCM repository</h3>
+      <div class="well">
+         <p>
+         <ul>
+            <li>trunk v local</li>
+            "trunk" is the main/original version of the repository.
+            You can work on a local/working copy of the trunk.
+            When it is committed to the repository it is said to be
+            the checked in version.
+            </p>
+            <p>"local" is also known as the working copy and it is where a copy of the 
+               checked out trunk or branch is copied to for the user to develop.
+            </p>
+            <li>
+               Branching
+            </li>
+            <p>Branching is "cheap", it is good practice to branch.
+               We can branch from the trunk or a branch of the repository.
+               Note we do not have to "recycle old branches" just create a new one.
+               Branching let's us work in parallel with the trunk of a repository.
+            </p>
+      </div>
+      </ul>
+      <ul>
+         <h3 class="page-header">What is FCM?</h3>
+         <div class="well">
+         <p>FCM was designed to be a helpful and simple interface for users to version 
+            control work which is based on and built around Subversion.
+         </p>
+         <p>FCM is a toolkit (wrapper) for Subversion and adds features to support the user 
+            experience of managing code and work easier.
+         </p>
+         <p>FCM simplifies and enhances working with Subversion to provide a user friendly 
+            interface to Subversion therefore allowing users to effectively version control 
+            there work.
+         </p>
+         <p>FCM can be used, if the site is setup, to link together Subversion and Trac.
+            Trac is an environment by which projects can be hosted, by the site, and used 
+            to record information and tickets/issues.
+         </p>
+         <h4>FCM user guide</h4>
+         <ul>
+            <p>  
+            <li><a href="../user_guide/getting_started.html">Getting started</a></li>
+            </p>
+         </ul>
+         <p>
+            FCM is best used via the command line and is better not to interchange it with
+            Subversion.
+            FCM uses the site repositories, where the code can be managed in local 
+            repositories.
+         </p>
+         <h4>Repositories</h4>
+         <p>FCM uses repositories for centrally storing data for a given project.
+         </p>
+         <p>Such repositories work in much the same way as most compute systems where they 
+            work with a filesytem tree consisting of directories and files.
+         </p>
+         <p>Multiple users can connect to a repository and depending on the permissions 
+            associated with the repository they can read, write to or execute code 
+            from a local/working copy a repository.
+         </p>
+         <p>This allows for collborations therefore encouraging sharing, developing and 
+            using code for a common purpose.
+         </p>
+         <p>One of the key aspect of a version control system is that it records the 
+            incremental repository changes.
+         </p>
+         <p>The version control system records each version change and who made 
+            the change to the repository.
+         </p>
+         <p>As version control system record each change and not just the last (most 
+            recent) then a user can work with a specified version of the code from the 
+            repository.
+         </p>
+         <p>Therefore a user does not need to always work with the most recently lodged 
+            (committed) code but can work with an alternative version, which 
+            can be helpful for comparisons of changes with older repository versions of 
+            the same code.
+         </p>
+         <p>This functionality also allows users to explore what the repository contained 
+            at a point in time and who has made changes at what time to the repository.
+            Users can view specific commit messages via a number of techniques, for example
+            <code>fcm log</code> along with a revision number, Trac, etc.
+            <code>fcm log</code> will be discussed further in <a href="fcm_essentials.html">Essentials</a>
+            tutorial and Trac in the <a href="fcm_specifics.html">Specifics</a> tutorial.
+      </ul>
+      </p>
+      <h1 id="scens">Scenarios</h1>
+      <p>
+      <ul>
+         <h3 class="page-header">What, why, how, who?</h3>
+         <div class="well">
+         <ul>
+            <li>
+               <p>Scenario 1</p>
+            </li>
+            <p>
+               Nicholas, Danny and Dorris are all working on a new project where they need to develop joint code and a joint webpage.
+            </p>
+            <p>Nicholas and Danny want to work on a file one at a time and then pass around the file to the next person when they have finished the changes they want to make at that moment in time.
+            </p>
+            <p>Dorris wants to use a version controlled repository so that they can all work on the code together and therefore not have to wait for the previous person to have finished.
+            </p>
+            <div class="panel-group" id="accordion">
+               <div class="panel panel-default">
+                  <div class="panel-heading">
+                     <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+                        <span class="glyphicon"></span>
+                        What other pros and cons can you think of for each of the ways of working?
+                        </a>
+                     </h4>
+                  </div>
+                  <div id="collapseOne" class="panel-collapse collapse">
+                     <div class="panel-body">
+                        <strong>Nicholas and Danny pros:</strong>
+                        <p>
+                           There will be no chance of conflicts.
+                        </p>
+                        <strong>Nicholas and Danny cons:</strong>
+                        <p>
+                           Someone may make a change that the first person does not agree with.
+                        </p>
+                        <p>The code will take longer to develop.
+                        </p>
+                        <p>Changes cannot be tracked as easily.
+                        </p>
+                        <p>Dorris pros
+                        </p>
+                        <p>Simultaneous code development, therefore speeding up the project.
+                        </p>
+                        <p>Full version controlled, with who did what when.
+                        </p>
+                        <p>Fully traceable.
+                        </p>
+                        <p>Dorris cons</p>
+                        <p>They will have do manually resolve any conflicts on merging, however this is the same as Nicholas and Danny's suggestion except here they will be able to see how their code changes interact with each other.
+                           This is unlike Nicholas and Danny's suggestion where they will make changes pass the code on and then will probably have to pass around a few times to agree on the code changes.
+                        </p>
+                        <p>
+                           Did you get all the reasons above and think of others?
+                        </p>
+                     </div>
+                  </div>
+               </div>
+               <li>
+                  <p>Scenario 2</p>
+               </li>
+               <p>Daisy has been developing some code, she now wants help from Mike to develop the code further using Mike's expertise.
+               </p>
+               <p>Mike has taken a copy of the code and Daisy is still developing it.
+               </p>
+               <p>Mike tries to merge his code in to the trunk version that Daisy has committed but the code has been updated and there is a conflict.
+               </p>
+               <p>Using FCM they can see the conflict and resolve it using a built in tool.
+               </p>
+               <strong>Benifits of using FCM:</strong>
+               <p>
+               <ul>
+                  <li>
+                     They could see that there is a conflict when they try to merge.
+                  </li>
+                  <li>
+                     FCM informs them of the type of conflict.
+                     Which helps them resolve it.
+                  </li>
+                  <li>
+                     FCM tools can be used to help resolve the conflict.
+                  </li>
+               </ul>
+               </p>
+               <li>
+                  <p>
+                     Scenario 3
+                  </p>
+               </li>
+               <p>Tim and Alan need to re-run an older version of some code as a customer, DarkStar comics, wants to reproduce data from three years ago as they have lost the data and need to run the code with the setting from three years ago for the Inland Revenue.
+               </p>
+               <p>Tim is using a version control system and can extract the code from the correct time period and reproduce the data.
+               </p>
+               <p>Alan did not use version control and just changes the code every time the rates changed.
+               </p>
+               <p>He has to look-up the correct values and rewrite the code before he can reproduce the data.
+               </p>
+               <p>If his notes aren't complete he will have to try and remember the correct settings.
+               </p>
+               <li>
+                  <p>
+                     Scenario 4
+                  </p>
+               </li>
+               <p>Marsha and Twist work in fashion marketing. Marsha has provided Twist with some market changes forecasting code from a version control repository.
+               </p>
+               <p>The code forecasts the supply and demand trend for the coming month based on previous years' data and trends.
+               </p>
+               <p>Twist made some changes to her code in her local/working copy and ran the code.
+               </p>
+               <p>This produced some very unrealistic results and Twist realised that she had made some fundamental mistakes.
+               </p>
+               <p>As she had not committed her changes to the version control repository then she can just revert her local changes and start again.
+               </p>
+               <li>
+                  <p>
+                     Scenario 5
+                  </p>
+               </li>
+               <p>Following on from Scenario 4 Twist this time made the changes and the code failed but this time she had committed the code to the repository.
+               </p>
+               <p>It is all okay as she can use version control to go back to the last checked in version that worked as expected.
+               </p>
+               <li>
+                  <p>
+                     Scenario 6
+                  </p>
+               </li>
+               <p>A group of software engineers, Shaun, Ed, Liz, Dianne and David, are working on project to improve the scheduling and running of weather forecast models.
+               </p>
+               <p>They are all continuously getting the code from a version controlled repository and making changes, testing it and if it improves the system they commit it back to the trunk for others to then use.
+               </p>
+               <p>The others in the group can then "update" their local copy to the trunk version using the FCM tool provided, <code>fcm update</code>.
+               </p>
+               <li>
+                  <p>
+                     Scenario 7
+                  </p>
+               </li>
+               <p>Following on from Scenario 6 at a later date David decides that he wants to deviate from the trunk and is not sure it will work so decides to go it alone, but he may want to apply his change to the trunk at a later date.
+               </p>
+               <p>David can do this by branching from the trunk, making changes to his branch and testing them.
+               </p>
+               <p>David can then either delete the branch if the results are not improved or he can merge his branch changes into the up to date trunk when he is happy that the changes are suitable.</p>
+         </ul>
+         </div>
+      </ul>
+      </p>
+      <h1 id="cfg">General configuration</h1>
+      <p>
+      <ul>
+         <h3 class="page-header">Editor Configuration</h3>
+         <div class="well">
+         <p>
+            Configure an editor for Subversion
+         </p>
+         <p>Subversion will open an editor when we try to create a branch or commit changes
+            to the repository as it generally requires a commit log message to accompany 
+            the change.
+         </p>
+         <p>The default editor is vi. 
+         </p>
+         <p>To change the default editor set the environment variable SVN_EDITOR.
+         </p>
+         <p>The editor-cmd option is in the [helpers] section of the user's 
+            ~/.subversion/config file.
+         </p>
+         <p>For further information on this please see the file.
+         </p>
+      </ul>
+      </p>
+      <h1 id="orepo">Setting-up your own repository</h1>
+      <ul>
+         <div class="well">
+            <h4>General Guidance</h4>
+            <p>Always consider how large the repository will grow to.
+            </p>
+            <p>With this in mind carefully consider where the repository is to be located. For example:
+            </p>
+            <ul>
+               <li>Only locally as it is only ever for personal use and it is small.</li>
+               <li>On a shared storage area for the group to all work on.</li>
+               <li>As part of a FCM project area as all need to be able to access it, note the 
+                  repository can have limited commit access which is done at set-up and can be 
+                  altered as appropriate via the Trac pages (see the Specific 
+                  <a href="fcm_specifics.html#trac">Trac</a> tutorial for more on Trac).
+               </li>
+            </ul>
+            <p>
+               At some sites the FCM repository is backed up so a personal back-up is not required.
+               Please check with your local FCM admin team to find out if you need to make back-ups.
+            </p>
+            <p>Any local repository that has been personally created will not necessarily be 
+               backed up so the responsiblility is on the person.
+            </p>
+            <h4>Creating your own central FCM repository</h4>
+            <p>Normally, you would contact your local FCM admin team for help with setting 
+               up the initial central repository.
+            </p>
+            <p>A personal repository can be created as follows:
+            </p>
+            <p>
+               First create a directory in your $HOME directory to work on the FCM tutorial material:
+            </p>
+            <pre>
+cd
+mkdir ~/fcm_tutorial
+cd ~/fcm_tutorial
+svnadmin create repository
+</pre>
+            <p>
+               This creates a repository called <samp>repository</samp> using the 
+               <code>svnadmin</code> tool.
+            </p>
+            <p>
+               Here we will be using commands that have not been fully explained yet.
+               They will all be covered in the Essentials tutorials.
+            </p>
+            <p>
+               Now run the following commands to set-up the rest of the repository for the Fundamentals tutorial:
+            </p>
+            <pre>
+fcm mkdir file:///$HOME/fcm_tutorial/repository/fundamentals -m 'New project fundamentals'
+</pre>
+            <p>
+               using the <code>-m option</code> means that we do not have to add the comment 
+               to the editor which is involved by the command for the commit message.
+            </p>
+            <p>We can see from the command that we can use <code>mkdir</code> to make the 
+               directory like we would in Linux. Many of the commands that we can use are 
+               the same as we would use in Linux to help make it easier for the user.
+            </p>
+            <p>The returned message is:</p>
+            <pre>
+<span class="outputs">
+Committed revision 1.
+</span>
+</pre>
+            <p>
+               Please run the following:
+            </p>
+            <pre>
+fcm mkdir file:///$HOME/fcm_tutorial/repository/fundamentals/trunk -m 'New folder fundamentals/trunk'
+fcm mkdir file:///$HOME/fcm_tutorial/repository/fundamentals/branches -m 'New folder fundamentals/branches'
+</pre>
+            <p>
+               The returned messages are:
+            </p>
+            <pre>
+<span class="outputs">
+Committed revision 2.
+
+Committed revision 3.
+</span>
+</pre>
+            <p>respectively.
+            </p>
+            <pre>
+fcm ls file:///$HOME/fcm_tutorial/repository/fundamentals
+</pre>
+            <p>This lists the changes to the repository and returns:</p>
+            <pre>
+<span class="outputs">
+branches/
+trunk/
+</span>
+</pre>
+            <p>Now to make our working copy, which is not the same place the repository.
+               For this we can use the Linux command <code>mkdir -p</code> to create 
+               the directory and the path to it if it does not already exist:
+            </p>
+            <pre>
+mkdir -p ~/my_fcm_tutorial/fundamentals
+</pre>
+            <p>Checkout the working copy using the FCM command <code>fcm co</code>:</p>
+            <pre>
+fcm co file:///$HOME/fcm_tutorial/repository/fundamentals/trunk ~/my_fcm_tutorial/fundamentals
+</pre>
+            <p>Returns:</p>
+            <pre>
+<span class="outputs">
+Checked out revision 3.
+</span>
+</pre>
+            <br/>
+            <p>We will be using the tutorials repository for the Essential tutorials.
+               This is an example of how we would set-up our own repository.
+            </p>
+         </div>
+      </ul>
+      <h1 id="trepo">Setting-up the tutorial repositories</h1>
+      <ul>
+         <div class="well">
+            <p>Please run the following <a href="./repos/tutorial_repo_setup">tutorial repositories script</a> by running the following command in a terminal 
+               <code>~/kerryday/fcm_tutorial_docs/bootstrap/docs/repos/tutorial_repo_setup</code>
+               this will set-up the repositories that you will need for all of the tutorials.
+               <strong> WARNING: This script adds and creates if required keywords the 
+               file ~/.metomi/fcm/keywords.cfg if the file already exists it copies the 
+               orginal to ~/.metomi/fcm/keywords_orig1.cfg.
+               If you rerun the script it will do the same but re-number older versions of the
+               configuation file keeping all version.
+               Please monitor the number of these that you have and tidy up the folder 
+               periodically keeping only the desired versions.</strong>
+            </p>
+            <p> <strong>If at any stage the repository gets corrupted then we can start again:</strong></p>
+            <pre>
+cd
+# Warning this tears down the whole repository to start from scratch.
+rm -rf ~/fcm_tutorial
+rm -rf ~/my_fcm_tutorial
+# The tutorial repositories script
+tutorial_repo_setup
+</pre>
+            <p>
+               All of the tutorial sections are separate and do not depend on each other
+               therefore it is safe to teardown the repositories.
+               The only issue may be that the revision number do not match, but that is not
+               important for the tutorials.
+            </p>
+         </div>
+      </ul>
+      <ul>
+         <div class="panel-group" id="accordion">
+            <div class="panel panel-default">
+               <div class="panel-heading">
+                  <h4 class="panel-title">
+                     <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+                     <span class="glyphicon"></span>
+                     Fundamentals Quiz Answers 6-8
+                     </a>
+                  </h4>
+               </div>
+               <div id="collapseTwo" class="panel-collapse collapse">
+                  <div class="panel-body">
+                     <div class="row">
+                        <div class="col-md-6">
+                           <table class="table table-bordered">
+                              <thead>
+                                 <tr>
+                                    <th>#</th>
+                                    <th>Answer</th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+                                 <tr>
+                                    <td>6</td>
+                                    <td>C</td>
+                                 </tr>
+                                 <tr>
+                                    <td>7</td>
+                                    <td>B</td>
+                                 </tr>
+                                 <tr>
+                                    <td>8</td>
+                                    <td>D</td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+      </ul>
+      <div class="container">
+      <div class="well">
+      <p>Now lets do the Essentials Quiz to see how much you already know and what we
+      will need to focus on in the next section.
+      Don't worry if you don't know all the answers yet, we will learning more in the next tutorial.</p>
+      </div>
+      <p><a class="btn btn-lg btn-success" href="essentials_quiz.html" role="button">Essentials Quiz</a></p>
+      </div>
+      <hr/>
+      <div class="container-fluid text-center">
+      <div class="row">
+      <div class="col-md-12">
+      <address><small>
+      &copy; British Crown Copyright 2006-16
+      <a href="http://www.metoffice.gov.uk">Met Office</a>.<br />
+      This document is released under the British <a href=
+         "http://www.nationalarchives.gov.uk/doc/open-government-licence/" rel=
+         "license">Open Government Licence</a>.<br />
+      </small>
+      </address>
+      </div>
+      </div>
+      </div>
+      <!-- Bootstrap core JavaScript
+         ================================================== -->
+      <!-- Placed at the end of the document so the pages load faster -->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+      <script>window.jQuery || document.write('<script src="./js/vendor/jquery.min.js"><\/script>')</script>
+      <script src="../etc/bootstrap/js/bootstrap.min.js"></script>
+      <script LANGUAGE="JavaScript">
+         update = new Date(document.lastModified);
+         theMonth = update.getMonth() + 1;
+         theDate = update.getDate();
+         theYear = update.getFullYear();
+         theHour = update.getHours();
+         theMin = update.getMinutes();
+         theSec = update.getSeconds();
+         document.write("<strong> Last Modified:</strong> " + theYear + "-" + theMonth + "-" + theDate + "T" + theHour + ":" + theMin + ":" + theSec + "Z");
+             
+      </script>
+      </div>
+   </body>
+</html>
+

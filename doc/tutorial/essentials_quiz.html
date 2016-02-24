@@ -1,0 +1,536 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>     
+        <script>window.jQuery || document.write('<script src="./js/vendor/jquery.min.js"><\/script>')</script>
+        <script type="text/javascript" src="./js/quiz.js"></script>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+        <meta name="description" content="FCM Tutorial" />
+        <meta name="author" content="FCM team" />
+        <link rel="icon" href="fcm_logo.png" />
+        <title>Essentials Quiz</title>
+        <!-- Bootstrap core CSS -->
+        <link href="../etc/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+        <!-- Bootstrap theme -->
+        <link href="../etc/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet" />
+        <!-- Custom styles for this template -->
+        <link href="general_theme.css" rel="stylesheet" />
+    </head>
+    <body>
+        <!-- Fixed navbar -->
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">Essentials Quiz</a>
+                </div>
+                <div id="navbar" class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <!-- Add link to Homepage to training when created -->
+                        <li class="active"><a href="#">Home</a></li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Other material <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li class="dropdown-header">Quizzes</li>
+                                <li><a href="fundamentals_quiz.html">Fundamentals Quiz</a></li>
+                                <li><a href="specifics_quiz.html">Specifics Quiz</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li class="dropdown-header">Tutorials and practical's</li>
+                                <li><a href="fcm_fundamentals.html">Fundamentals</a></li>
+                                <li><a href="fcm_essentials.html">Essentials</a></li>
+                                <li><a href="fcm_specifics.html">Specifics</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li class="dropdown-header">Help/info</li>
+                                <li><a href="fcm_glossary.html">Glossary List</a></li>
+                                <li><a href="fcm_links.html">Links</a></li>
+                                <li><a href="fcm_mqrg.html">My Quick Reference Guide</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <!--/.nav-collapse -->
+            </div>
+        </nav>
+        <div class="container theme-showcase" role="main">
+            <div class="jumbotron">
+                <h2>FCM Essentials Preparation quiz</h2>
+                <h3>FCM questions</h3>
+                <br/>
+                The aim of this quiz is to start you thinking in "fcm talk" and to help you gauge what you do and do not know and hopefully encourage you that it is not as complicated as you may have once thought.
+                <br/>
+                This quiz can also be used as a revision/reminder tool.
+                <br/>
+                Please try to attempt all aspects of the quiz, you may be able to do none or all, you don't know until you try.
+                <br/>
+                <h3>Essentials quiz</h3>
+                <div class="well">
+                    <div id="results"></div>
+                </div>
+                <div class="well">
+                    <form id="qform" action=".">
+                        <ol>
+                            <li>
+                                <p class="question">Whicj of theses will not provide you with help in fcm?</p>
+                                <div id="1" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">fcm help</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">fcm &lt;command&gt; help</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">fcm &lt;command&gt; --help</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">fcm help &lt;command&gt;</label><br/></li>
+                                    </ol>
+                                    <p class="answers B"><em>B</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">What command would you use to retrieve some code from a repository?</p>
+                                <div id="2" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">fcm checkout</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">fcm retrieve</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">fcm get</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">fcm branch</label><br/></li>
+                                    </ol>
+                                    <p class="answers A"><em>A</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">What command would not checkout code from the repository?</p>
+                                <div id="3" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">fcm co</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">fcm ct</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">fcm checkout</label><br/></li>
+                                    </ol>
+                                    <p class="answers D"><em>B</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">Which commands would commit code to the repository?</p>
+                                <div id="4" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">fcm commit|ct|ci</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">fcm commit|ct</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">fcm commit|ci</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">fcm ct|ci</label><br/></li>
+                                    </ol>
+                                    <p class="answers C"><em>C</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">What is the best command for finding out in what files or directories your working copy are different from the repository, i.e. what has been modified etc?</p>
+                                <div id="5" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">fcm update</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">fcm trunk</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">fcm status</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">fcm info</label><br/></li>
+                                    </ol>
+                                    <p class="answers C"><em>C</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">How would you find out the revision number of your working copy?</p>
+                                <div id="6" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">fcm status</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">fcm info</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">fcm revision</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">fcm query</label><br/></li>
+                                    </ol>
+                                    <p class="answers B"><em>B</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">How would you find out if you are working on the trunk or a branch version and if a branch what it is called?</p>
+                                <div id="7" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">From the Revision number via fcm lookup</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">From the Relative URL via fcm lookup</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">From the Relative URL via fcm info</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">From the Revision number via fcm info</label><br/></li>
+                                    </ol>
+                                    <p class="answers C"><em>C</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">What does "?" mean when you issue the fcm status command?</p>
+                                <div id="8" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">Item is missing</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">Item is not under version control</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">Item is conflicted</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">Item is modified</label><br/></li>
+                                    </ol>
+                                    <p class="answers B"><em>B</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">What does "M" mean when you issue the fcm status command?</p>
+                                <div id="9" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">Item is missing</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">Item is not under version control</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">Item is replaced</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">Item is modified</label><br/></li>
+                                    </ol>
+                                    <p class="answers D"><em>D</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">What does "!" mean when you issue the fcm status command?</p>
+                                <div id="10" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">Item is missing</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">Item is not under version control</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">Item is conflicted</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">Item is modified</label><br/></li>
+                                    </ol>
+                                    <p class="answers A"><em>A</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">What does "A" mean when you issue the fcm status command?</p>
+                                <div id="11" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">Item is added</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">Item is not under version control</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">Item is deleted</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">Item is replaced</label><br/></li>
+                                    </ol>
+                                    <p class="answers A"><em>A</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">What does "D" mean when you issue the fcm status command?</p>
+                                <div id="12" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">Item is added</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">Item is not under version control</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">Item is deleted</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">Item is replaced</label><br/></li>
+                                    </ol>
+                                    <p class="answers C"><em>C</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">Which commands will use fcm to delete a file or directory?</p>
+                                <div id="13" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">fcm delete|remove|cancel</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">fcm delete|del|cancel|cnl</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">fcm delete|del|remove|rm|erase|er</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">fcm delete|del|remove|rm</label><br/></li>
+                                    </ol>
+                                    <p class="answers D"><em>D</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">Where would you use the command "fcm add"?</p>
+                                <div id="14" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">When you have modified a file</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">When you have removed a file</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">When you have created a new file</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">When you have add a new repository</label><br/></li>
+                                    </ol>
+                                    <p class="answers C"><em>C</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">Why would you need to use the command "fcm switch" or "fcm sw"?</p>
+                                <div id="15" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">After creating a branch and then to move to it</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">After checking out a branch</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">Before committing your change</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">Before creating a branch from the trunk when on the trunk</label><br/></li>
+                                    </ol>
+                                    <p class="answers A"><em>A</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">Which of these commands can you use to create a branch?</p>
+                                <div id="16" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">fcm branch-create|bc|create</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">fcm branchcreate|bcreate</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">fcm branchcreate|bc|bcreate</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">fcm branch-create|bc|bcreate</label><br/></li>
+                                    </ol>
+                                    <p class="answers D"><em>D</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">What command would you use to pull your changes from one area in the repository into another?</p>
+                                <div id="17" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">fcm merge</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">fcm import</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">fcm pull</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">fcm fetch</label><br/></li>
+                                    </ol>
+                                    <p class="answers A"><em>A</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">What commands would you use to see the line-by-line or file-by-file differences between two versions or revisions of the repository?</p>
+                                <div id="18" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">fcm diff|di</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">fcm difference|di</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">fcm difference|diff|di</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">fcm difference|di</label><br/></li>
+                                    </ol>
+                                    <p class="answers A"><em>A</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">What option would you add to your fcm "difference" command to use the graphical tool to display the differences?</p>
+                                <div id="19" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">--graphical, --g</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">-graphical, -g</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">--graphical, -g</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">-graphical, --g</label><br/></li>
+                                    </ol>
+                                    <p class="answers C"><em>C</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">How would you difference two branches?</p>
+                                <div id="20" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">fcm branchdifference|bdif</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">fcm branch-diff|bdiff|bdi</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">fcm branch-diff|bdif</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">fcm branchdifference|bdiff|bdi</label><br/></li>
+                                    </ol>
+                                    <p class="answers B"><em>B</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">How would you update your working copy to the one on the trunk?</p>
+                                <div id="21" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">fcm trunk update|up</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">fcm branch update|up</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">fcm update|up</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">Can't be done</label><br/></li>
+                                    </ol>
+                                    <p class="answers A"><em>A</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">fcm log [OPTION] [TARGET] allows the user to do what?</p>
+                                <div id="22" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">Show the log of a committed TARGET only</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">Show the log message of a TARGET of a URL|PATH</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">Show the log message of a TARGET of a working copy</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">Show the log message of a TARGET that can either be working copy or URL|PATH</label><br/></li>
+                                    </ol>
+                                    <p class="answers B"><em>B</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">What does "C" mean when you issue the fcm status command?</p>
+                                <div id="23" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">Item is replaced</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">Item is not under version control</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">Item is conflicted</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">Item is modified</label><br/></li>
+                                    </ol>
+                                    <p class="answers C"><em>C</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">What does "R" mean when you issue the fcm status command?</p>
+                                <div id="24" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">Item is replaced</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">Item is not under version control</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">Item is conflicted</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">Item is modified</label><br/></li>
+                                    </ol>
+                                    <p class="answers A"><em>A</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">How can you find out what branches are available in a repository?</p>
+                                <div id="25" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">fcm branch-list|bls</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">fcm branchlist|bls</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">fcm branchlist|bl</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">fcm branch-list|bl</label><br/></li>
+                                    </ol>
+                                    <p class="answers A"><em>A</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">How many ways are there to delete and branch in fcm and what are they?</p>
+                                <div id="26" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">3, fcm branch-delete|bd|bdelete</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">3, fcm branch-delete|bd|bdel</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">3, fcm branch-delete|bdelete|bdel</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">4, fcm branch-delete|bd|branchd|bdelete</label><br/></li>
+                                    </ol>
+                                    <p class="answers C"><em>C</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">How would you update your branch to match the trunk?</p>
+                                <div id="27" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">fcm sw trunk; fcm update trunk; fcm sw &lt;BRANCHNAME&gt;; fcm merge trunk</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">fcm sw trunk; fcm update trunk; fcm merge trunk</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">fcm merge trunk</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">fcm update trunk; fcm merge trunk</label><br/></li>
+                                    </ol>
+                                    <p class="answers A"><em>A</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">How could you resolve an "!" returned from the "fcm st" command which is because you deleted the file without using fcm?</p>
+                                <div id="28" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">fcm rm &lt;FILENAME&gt;</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">You cannot</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">fcm rm --check|-c &lt;FILENAME&gt;</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">fcm rm -f &lt;FILENAME&gt;</label><br/></li>
+                                    </ol>
+                                    <p class="answers C"><em>C</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">How would you copy a file so that the fcm system can still trace it?</p>
+                                <div id="29" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">cp &lt;FILENAME&gt;</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">copy &lt;FILENAME&gt;</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">fcm copy &lt;FILENAME&gt;</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">fcm copy|cp &lt;FILENAME&gt;</label><br/></li>
+                                    </ol>
+                                    <p class="answers D"><em>D</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">How would you move files within fcm?</p>
+                                <div id="30" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">mv &lt;FILENAME&gt;</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">move &lt;FILENAME&gt;</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">fcm move &lt;FILENAME&gt;</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">fcm move|mv &lt;FILENAME&gt;</label><br/></li>
+                                    </ol>
+                                    <p class="answers D"><em>D</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">How can you reverse your working copy which has not been checked in the last checked in version?</p>
+                                <div id="31" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">fcm revert &lt;PATH&gt;|&lt;FILENAME&gt;</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">fcm reverse &lt;PATH&gt;|&lt;FILENAME&gt;</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">fcm rewind &lt;PATH&gt;|&lt;FILENAME&gt;</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">fcm roleback &lt;PATH&gt;|&lt;FILENAME&gt;</label><br/></li>
+                                    </ol>
+                                    <p class="answers A"><em>A</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">How can you reverse your working copy which has changes checked in?</p>
+                                <div id="32" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">fcm --reverse</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">fcm merge --reverse --revision [M:]N</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">fcm merge --revision [M:]N</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">fcm merge --reverse [M:]N</label><br/></li>
+                                    </ol>
+                                    <p class="answers B"><em>B</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">How would you create a directory in fcm?</p>
+                                <div id="33" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">fcm createdir &lt;DIRECTORYNAME&gt;</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">You cannot</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">fcm makedir &lt;DIRECTORYNAME&gt;</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">fcm mkdir &lt;DIRECTORYNAME&gt;</label><br/></li>
+                                    </ol>
+                                    <p class="answers D"><em>D</em></p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="question">How would you print more information from a command to find out what more details?</p>
+                                <div id="34" class="questions">
+                                    <ol type="A">
+                                        <li><input type="radio" value="A" /><label for="A">--verbose|-v</label><br/></li>
+                                        <li><input type="radio" value="B" /><label for="B">--output|-o</label><br/></li>
+                                        <li><input type="radio" value="C" /><label for="C">--print-statement|-ps</label><br/></li>
+                                        <li><input type="radio" value="D" /><label for="D">--print-info|-pi</label><br/></li>
+                                    </ol>
+                                    <p class="answers A"><em>A</em></p>
+                                </div>
+                            </li>
+                        </ol>
+                    </form>
+                </div>
+                <div class="page-header">
+                    <h3 id="answer">Answers</h3>
+                </div>
+                <div class="well">
+                    <p id="submit-container"><button id="submitbutton">Check
+                        Answers</button>
+                    </p>
+                </div>
+            </div>
+            <div class="container">
+                <p><a class="btn btn-lg btn-success" href="fcm_essentials.html" role="button">Essentials</a></p>
+                <br/>
+            </div>
+            <hr/>
+            <div class="container-fluid text-center">
+                <div class="row">
+                    <div class="col-md-12">
+                        <address><small>
+                            &copy; British Crown Copyright 2006-16
+                            <a href="http://www.metoffice.gov.uk">Met Office</a>.<br />
+                            This document is released under the British <a href=
+                                "http://www.nationalarchives.gov.uk/doc/open-government-licence/" rel=
+                                "license">Open Government Licence</a>.<br />
+                            </small>
+                        </address>
+                    </div>
+                </div>
+            </div>
+            <!-- Bootstrap core JavaScript
+                ================================================== -->
+            <!-- Placed at the end of the document so the pages load faster -->
+            <script src="../etc/bootstrap/js/bootstrap.min.js"></script>
+            <script src="./js/docs.min.js"></script>
+            <script LANGUAGE="JavaScript">
+                update = new Date(document.lastModified);
+                theMonth = update.getMonth() + 1;
+                theDate = update.getDate();
+                theYear = update.getFullYear();
+                theHour = update.getHours();
+                theMin = update.getMinutes();
+                theSec = update.getSeconds();
+                document.write("<strong> Last Modified:</strong> " + theYear + "-" + theMonth + "-" + theDate + "T" + theHour + ":" + theMin + ":" + theSec + "Z");
+            </script>
+        </div>
+    </body>
+</html>
+
