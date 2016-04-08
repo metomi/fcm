@@ -24,6 +24,7 @@ the Contributor Licence Agreement and Certificate of Origin detailed
 below:
 
 * Jim Bolton (Met Office, UK)
+* Andrew Clark (Met Office, UK)
 * Ben Fitzpatrick (Met Office, UK)
 * Dave Matthews (Met Office, UK)
 * Stephen Oxley (Met Office, UK)
