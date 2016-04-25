@@ -25,6 +25,7 @@ below:
 
 * Jim Bolton (Met Office, UK)
 * Andrew Clark (Met Office, UK)
+* Martin Dix (CSIRO, Australia)
 * Ben Fitzpatrick (Met Office, UK)
 * Dave Matthews (Met Office, UK)
 * Stephen Oxley (Met Office, UK)
