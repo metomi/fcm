@@ -102,7 +102,9 @@ sub _ctx_load {
     }
     my $old_m_ctx = eval {
         my $handle = IO::File->new_tmpfile();
-        gunzip($path, $handle) || die($!);
+        # Open the file here to work around permission problems with file ACLs
+        my $path_handle = new IO::File $path || die("Cannot open cache file $path\n");
+        gunzip($path_handle, $handle) || die($!);
         $handle->seek(0, 0);
         fd_retrieve($handle);
     };
