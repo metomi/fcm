@@ -5,6 +5,19 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## Next Release (2016-Q2?)
+
+FCM release 32.
+
+### Noteworthy Changes
+
+[#227](https://github.com/metomi/fcm/pull/227):
+fcm make: on gunzip of the context file, pass a file handle rather than a path
+to the `gunzip` function to work around problems when files are made read-only
+via ACL.
+
+--------------------------------------------------------------------------------
+
 ## 2016.02.0 (2016-02-11)
 
 FCM release 31. Minor bug fix and update.
