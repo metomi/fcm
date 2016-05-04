@@ -44,7 +44,7 @@ our $DELIMITER_INFO
     = '--Change summary (not part of commit message)--'
     . "\n";
 our $EDITOR = 'vi';
-our $GEDITOR = 'gedit';
+our $GEDITOR = 'gvim -f';
 our $SUBVERSION_CONFIG_FILE = catfile((getpwuid($<))[7], qw{.subversion/config});
 
 __PACKAGE__->class({gui => '$', util => '&'},
