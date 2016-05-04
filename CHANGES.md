@@ -11,6 +11,11 @@ FCM release 32.
 
 ### Noteworthy Changes
 
+[#229](https://github.com/metomi/fcm/pull/229):
+fcm commit, branch-create, branch-delete, etc: the default graphical editor for
+commit message is modified from `gedit` to `gvim -f`, as `gedit` is not
+reliable for running in the foreground.
+
 [#227](https://github.com/metomi/fcm/pull/227):
 fcm make: on gunzip of the context file, pass a file handle rather than a path
 to the `gunzip` function to work around problems when files are made read-only
