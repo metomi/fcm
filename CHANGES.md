@@ -5,9 +5,9 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
-## Next Release (2016-Q2?)
+## 2016.05.0 (2016-05-05)
 
-FCM release 32.
+FCM release 33. Minor bug fix and update.
 
 ### Noteworthy Changes
 
@@ -25,7 +25,7 @@ via ACL.
 
 ## 2016.02.0 (2016-02-11)
 
-FCM release 31. Minor bug fix and update.
+FCM release 32. Minor bug fix and update.
 
 ### Noteworthy Changes
 
