@@ -5,6 +5,12 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## 2016.05.1 (2016-05-19)
+
+FCM release 34. Minor update to admin utilities, nothing noteworthy for users.
+
+--------------------------------------------------------------------------------
+
 ## 2016.05.0 (2016-05-05)
 
 FCM release 33. Minor bug fix and update.
