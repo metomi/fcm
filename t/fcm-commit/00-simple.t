@@ -55,7 +55,6 @@ Change summary:
 [Project: ${TEST_PROJECT:-}]
 [Branch : branches/dev/Share/branch_test]
 [Sub-dir: ]
-
 A  +    added_directory
 A  +    added_file
 D       module
@@ -71,10 +70,8 @@ Commit message is as follows:
 --------------------------------------------------------------------------------
 foo
 --------------------------------------------------------------------------------
-
 *** WARNING: YOU ARE COMMITTING TO A Share BRANCH.
 *** Please ensure that you have the owner's permission.
-
 Would you like to commit this change?
 Enter "y" or "n" (or just press <return> for "n"): Adding         added_directory
 Adding         added_file
@@ -83,7 +80,6 @@ Sending        added_directory/hello_constants.f90
 Sending        added_directory/hello_constants.inc
 Sending        added_directory/hello_constants_dummy.inc
 Sending        lib/python/info/poems.py
-Transmitting file data .....
 Committed revision 6.
 Updating '.':
 At revision 6.

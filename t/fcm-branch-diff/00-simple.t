@@ -54,12 +54,14 @@ svn switch -q $ROOT_URL/branches/dev/Share/branch_test
 TEST_KEY=$TEST_KEY_BASE-fcm-branch-diff
 run_pass "$TEST_KEY" fcm branch-diff
 diff_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
+diff_svn_version_filter >"$TEST_DIR/$TEST_KEY.sorted.ctrl" <<__OUT__
 
 Index: added_directory/hello_constants.f90
 ===================================================================
---- added_directory/hello_constants.f90	($ROOT_URL/trunk)	(revision 0)
-+++ added_directory/hello_constants.f90	(revision 6)
+#IF SVN1.8 --- added_directory/hello_constants.f90	($ROOT_URL/trunk)	(revision 0)
+#IF SVN1.8 +++ added_directory/hello_constants.f90	(revision 6)
+#IF SVN1.9 --- added_directory/hello_constants.f90	(.../trunk)	(working copy)
+#IF SVN1.9 +++ added_directory/hello_constants.f90	(.../branches/dev/Share/branch_test)	(revision 6)
 @@ -0,0 +1,5 @@
 +MODULE Hello_Constants
 +
@@ -68,27 +70,35 @@ Index: added_directory/hello_constants.f90
 +END MODULE Hello_Constants
 Index: added_directory/hello_constants.inc
 ===================================================================
---- added_directory/hello_constants.inc	($ROOT_URL/trunk)	(revision 0)
-+++ added_directory/hello_constants.inc	(revision 6)
+#IF SVN1.8 --- added_directory/hello_constants.inc	($ROOT_URL/trunk)	(revision 0)
+#IF SVN1.8 +++ added_directory/hello_constants.inc	(revision 6)
+#IF SVN1.9 --- added_directory/hello_constants.inc	(.../trunk)	(working copy)
+#IF SVN1.9 +++ added_directory/hello_constants.inc	(.../branches/dev/Share/branch_test)	(revision 6)
 @@ -0,0 +1,2 @@
 +CHARACTER (
 +LEN=80), PARAMETER :: hello_strINg = 'Hello Earth!!'
 Index: added_directory/hello_constants_dummy.inc
 ===================================================================
---- added_directory/hello_constants_dummy.inc	($ROOT_URL/trunk)	(revision 0)
-+++ added_directory/hello_constants_dummy.inc	(revision 6)
+#IF SVN1.8 --- added_directory/hello_constants_dummy.inc	($ROOT_URL/trunk)	(revision 0)
+#IF SVN1.8 +++ added_directory/hello_constants_dummy.inc	(revision 6)
+#IF SVN1.9 --- added_directory/hello_constants_dummy.inc	(.../trunk)	(working copy)
+#IF SVN1.9 +++ added_directory/hello_constants_dummy.inc	(.../branches/dev/Share/branch_test)	(revision 6)
 @@ -0,0 +1 @@
 +INCLUDE 'hello_constants.INc'
 Index: added_file
 ===================================================================
---- added_file	($ROOT_URL/trunk)	(revision 0)
-+++ added_file	(revision 6)
+#IF SVN1.8 --- added_file	($ROOT_URL/trunk)	(revision 0)
+#IF SVN1.8 +++ added_file	(revision 6)
+#IF SVN1.9 --- added_file	(.../trunk)	(working copy)
+#IF SVN1.9 +++ added_file	(.../branches/dev/Share/branch_test)	(revision 6)
 @@ -0,0 +1 @@
 +INCLUDE 'hello_constants.INc'
 Index: lib/python/info/poems.py
 ===================================================================
---- lib/python/info/poems.py	($ROOT_URL/trunk)	(revision 1)
-+++ lib/python/info/poems.py	(working copy)
+#IF SVN1.8 --- lib/python/info/poems.py	($ROOT_URL/trunk)	(revision 1)
+#IF SVN1.8 +++ lib/python/info/poems.py	(working copy)
+#IF SVN1.9 --- lib/python/info/poems.py	(.../trunk)	(revision 1)
+#IF SVN1.9 +++ lib/python/info/poems.py	(.../branches/dev/Share/branch_test)	(working copy)
 @@ -1,24 +1,23 @@
 -#!/usr/bin/env python
 -# -*- coding: utf-8 -*-
@@ -125,8 +135,10 @@ Index: lib/python/info/poems.py
 +prINt "\n",  __doc__
 Index: module/hello_constants.f90
 ===================================================================
---- module/hello_constants.f90	($ROOT_URL/trunk)	(revision 1)
-+++ module/hello_constants.f90	(working copy)
+#IF SVN1.8 --- module/hello_constants.f90	($ROOT_URL/trunk)	(revision 1)
+#IF SVN1.8 +++ module/hello_constants.f90	(working copy)
+#IF SVN1.9 --- module/hello_constants.f90	(.../trunk)	(revision 1)
+#IF SVN1.9 +++ module/hello_constants.f90	(.../branches/dev/Share/branch_test)	(working copy)
 @@ -1,5 +0,0 @@
 -MODULE Hello_Constants
 -
@@ -135,29 +147,37 @@ Index: module/hello_constants.f90
 -END MODULE Hello_Constants
 Index: module/hello_constants.inc
 ===================================================================
---- module/hello_constants.inc	($ROOT_URL/trunk)	(revision 1)
-+++ module/hello_constants.inc	(working copy)
+#IF SVN1.8 --- module/hello_constants.inc	($ROOT_URL/trunk)	(revision 1)
+#IF SVN1.8 +++ module/hello_constants.inc	(working copy)
+#IF SVN1.9 --- module/hello_constants.inc	(.../trunk)	(revision 1)
+#IF SVN1.9 +++ module/hello_constants.inc	(.../branches/dev/Share/branch_test)	(working copy)
 @@ -1 +0,0 @@
 -CHARACTER (LEN=80), PARAMETER :: hello_string = 'Hello Earth!'
 Index: module/hello_constants_dummy.inc
 ===================================================================
---- module/hello_constants_dummy.inc	($ROOT_URL/trunk)	(revision 1)
-+++ module/hello_constants_dummy.inc	(working copy)
+#IF SVN1.8 --- module/hello_constants_dummy.inc	($ROOT_URL/trunk)	(revision 1)
+#IF SVN1.8 +++ module/hello_constants_dummy.inc	(working copy)
+#IF SVN1.9 --- module/hello_constants_dummy.inc	(.../trunk)	(revision 1)
+#IF SVN1.9 +++ module/hello_constants_dummy.inc	(.../branches/dev/Share/branch_test)	(working copy)
 @@ -1 +0,0 @@
 -INCLUDE 'hello_constants.inc'
 __OUT__
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" \
+    "$TEST_DIR/$TEST_KEY.sorted.ctrl"
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm bdi
 TEST_KEY=$TEST_KEY_BASE-bdi
 run_pass "$TEST_KEY" fcm bdi
 diff_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
+diff_svn_version_filter >"$TEST_DIR/$TEST_KEY.sorted.ctrl" <<__OUT__
 
 Index: added_directory/hello_constants.f90
 ===================================================================
---- added_directory/hello_constants.f90	($ROOT_URL/trunk)	(revision 0)
-+++ added_directory/hello_constants.f90	(revision 6)
+#IF SVN1.8 --- added_directory/hello_constants.f90	($ROOT_URL/trunk)	(revision 0)
+#IF SVN1.8 +++ added_directory/hello_constants.f90	(revision 6)
+#IF SVN1.9 --- added_directory/hello_constants.f90	(.../trunk)	(working copy)
+#IF SVN1.9 +++ added_directory/hello_constants.f90	(.../branches/dev/Share/branch_test)	(revision 6)
 @@ -0,0 +1,5 @@
 +MODULE Hello_Constants
 +
@@ -166,27 +186,35 @@ Index: added_directory/hello_constants.f90
 +END MODULE Hello_Constants
 Index: added_directory/hello_constants.inc
 ===================================================================
---- added_directory/hello_constants.inc	($ROOT_URL/trunk)	(revision 0)
-+++ added_directory/hello_constants.inc	(revision 6)
+#IF SVN1.8 --- added_directory/hello_constants.inc	($ROOT_URL/trunk)	(revision 0)
+#IF SVN1.8 +++ added_directory/hello_constants.inc	(revision 6)
+#IF SVN1.9 --- added_directory/hello_constants.inc	(.../trunk)	(working copy)
+#IF SVN1.9 +++ added_directory/hello_constants.inc	(.../branches/dev/Share/branch_test)	(revision 6)
 @@ -0,0 +1,2 @@
 +CHARACTER (
 +LEN=80), PARAMETER :: hello_strINg = 'Hello Earth!!'
 Index: added_directory/hello_constants_dummy.inc
 ===================================================================
---- added_directory/hello_constants_dummy.inc	($ROOT_URL/trunk)	(revision 0)
-+++ added_directory/hello_constants_dummy.inc	(revision 6)
+#IF SVN1.8 --- added_directory/hello_constants_dummy.inc	($ROOT_URL/trunk)	(revision 0)
+#IF SVN1.8 +++ added_directory/hello_constants_dummy.inc	(revision 6)
+#IF SVN1.9 --- added_directory/hello_constants_dummy.inc	(.../trunk)	(working copy)
+#IF SVN1.9 +++ added_directory/hello_constants_dummy.inc	(.../branches/dev/Share/branch_test)	(revision 6)
 @@ -0,0 +1 @@
 +INCLUDE 'hello_constants.INc'
 Index: added_file
 ===================================================================
---- added_file	($ROOT_URL/trunk)	(revision 0)
-+++ added_file	(revision 6)
+#IF SVN1.8 --- added_file	($ROOT_URL/trunk)	(revision 0)
+#IF SVN1.8 +++ added_file	(revision 6)
+#IF SVN1.9 --- added_file	(.../trunk)	(working copy)
+#IF SVN1.9 +++ added_file	(.../branches/dev/Share/branch_test)	(revision 6)
 @@ -0,0 +1 @@
 +INCLUDE 'hello_constants.INc'
 Index: lib/python/info/poems.py
 ===================================================================
---- lib/python/info/poems.py	($ROOT_URL/trunk)	(revision 1)
-+++ lib/python/info/poems.py	(working copy)
+#IF SVN1.8 --- lib/python/info/poems.py	($ROOT_URL/trunk)	(revision 1)
+#IF SVN1.8 +++ lib/python/info/poems.py	(working copy)
+#IF SVN1.9 --- lib/python/info/poems.py	(.../trunk)	(revision 1)
+#IF SVN1.9 +++ lib/python/info/poems.py	(.../branches/dev/Share/branch_test)	(working copy)
 @@ -1,24 +1,23 @@
 -#!/usr/bin/env python
 -# -*- coding: utf-8 -*-
@@ -223,8 +251,10 @@ Index: lib/python/info/poems.py
 +prINt "\n",  __doc__
 Index: module/hello_constants.f90
 ===================================================================
---- module/hello_constants.f90	($ROOT_URL/trunk)	(revision 1)
-+++ module/hello_constants.f90	(working copy)
+#IF SVN1.8 --- module/hello_constants.f90	($ROOT_URL/trunk)	(revision 1)
+#IF SVN1.8 +++ module/hello_constants.f90	(working copy)
+#IF SVN1.9 --- module/hello_constants.f90	(.../trunk)	(revision 1)
+#IF SVN1.9 +++ module/hello_constants.f90	(.../branches/dev/Share/branch_test)	(working copy)
 @@ -1,5 +0,0 @@
 -MODULE Hello_Constants
 -
@@ -233,17 +263,23 @@ Index: module/hello_constants.f90
 -END MODULE Hello_Constants
 Index: module/hello_constants.inc
 ===================================================================
---- module/hello_constants.inc	($ROOT_URL/trunk)	(revision 1)
-+++ module/hello_constants.inc	(working copy)
+#IF SVN1.8 --- module/hello_constants.inc	($ROOT_URL/trunk)	(revision 1)
+#IF SVN1.8 +++ module/hello_constants.inc	(working copy)
+#IF SVN1.9 --- module/hello_constants.inc	(.../trunk)	(revision 1)
+#IF SVN1.9 +++ module/hello_constants.inc	(.../branches/dev/Share/branch_test)	(working copy)
 @@ -1 +0,0 @@
 -CHARACTER (LEN=80), PARAMETER :: hello_string = 'Hello Earth!'
 Index: module/hello_constants_dummy.inc
 ===================================================================
---- module/hello_constants_dummy.inc	($ROOT_URL/trunk)	(revision 1)
-+++ module/hello_constants_dummy.inc	(working copy)
+#IF SVN1.8 --- module/hello_constants_dummy.inc	($ROOT_URL/trunk)	(revision 1)
+#IF SVN1.8 +++ module/hello_constants_dummy.inc	(working copy)
+#IF SVN1.9 --- module/hello_constants_dummy.inc	(.../trunk)	(revision 1)
+#IF SVN1.9 +++ module/hello_constants_dummy.inc	(.../branches/dev/Share/branch_test)	(working copy)
 @@ -1 +0,0 @@
 -INCLUDE 'hello_constants.inc'
 __OUT__
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" \
+    "$TEST_DIR/$TEST_KEY.sorted.ctrl"
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm branch-diff --wiki
@@ -280,18 +316,22 @@ svn add -q added_directory/foo$TEST_KEY
 echo "bar" > added_directory/bar$TEST_KEY
 run_pass "$TEST_KEY" fcm bdi
 diff_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
+diff_svn_version_filter >"$TEST_DIR/$TEST_KEY.sorted.ctrl" <<__OUT__
 
 Index: added_directory/foo00-simple-bdi-wc-changes
 ===================================================================
---- added_directory/foo00-simple-bdi-wc-changes	($ROOT_URL/trunk)	(revision 0)
-+++ added_directory/foo00-simple-bdi-wc-changes	(working copy)
+#IF SVN1.8 --- added_directory/foo00-simple-bdi-wc-changes	($ROOT_URL/trunk)	(revision 0)
+#IF SVN1.8 +++ added_directory/foo00-simple-bdi-wc-changes	(working copy)
+#IF SVN1.9 --- added_directory/foo00-simple-bdi-wc-changes	(.../trunk)	(working copy)
+#IF SVN1.9 +++ added_directory/foo00-simple-bdi-wc-changes	(.../branches/dev/Share/branch_test)	(working copy)
 @@ -0,0 +1 @@
 +foo
 Index: added_directory/hello_constants.f90
 ===================================================================
---- added_directory/hello_constants.f90	($ROOT_URL/trunk)	(revision 0)
-+++ added_directory/hello_constants.f90	(revision 6)
+#IF SVN1.8 --- added_directory/hello_constants.f90	($ROOT_URL/trunk)	(revision 0)
+#IF SVN1.8 +++ added_directory/hello_constants.f90	(revision 6)
+#IF SVN1.9 --- added_directory/hello_constants.f90	(.../trunk)	(working copy)
+#IF SVN1.9 +++ added_directory/hello_constants.f90	(.../branches/dev/Share/branch_test)	(revision 6)
 @@ -0,0 +1,5 @@
 +MODULE Hello_Constants
 +
@@ -300,27 +340,35 @@ Index: added_directory/hello_constants.f90
 +END MODULE Hello_Constants
 Index: added_directory/hello_constants.inc
 ===================================================================
---- added_directory/hello_constants.inc	($ROOT_URL/trunk)	(revision 0)
-+++ added_directory/hello_constants.inc	(revision 6)
+#IF SVN1.8 --- added_directory/hello_constants.inc	($ROOT_URL/trunk)	(revision 0)
+#IF SVN1.8 +++ added_directory/hello_constants.inc	(revision 6)
+#IF SVN1.9 --- added_directory/hello_constants.inc	(.../trunk)	(working copy)
+#IF SVN1.9 +++ added_directory/hello_constants.inc	(.../branches/dev/Share/branch_test)	(revision 6)
 @@ -0,0 +1,2 @@
 +CHARACTER (
 +LEN=80), PARAMETER :: hello_strINg = 'Hello Earth!!'
 Index: added_directory/hello_constants_dummy.inc
 ===================================================================
---- added_directory/hello_constants_dummy.inc	($ROOT_URL/trunk)	(revision 0)
-+++ added_directory/hello_constants_dummy.inc	(revision 6)
+#IF SVN1.8 --- added_directory/hello_constants_dummy.inc	($ROOT_URL/trunk)	(revision 0)
+#IF SVN1.8 +++ added_directory/hello_constants_dummy.inc	(revision 6)
+#IF SVN1.9 --- added_directory/hello_constants_dummy.inc	(.../trunk)	(working copy)
+#IF SVN1.9 +++ added_directory/hello_constants_dummy.inc	(.../branches/dev/Share/branch_test)	(revision 6)
 @@ -0,0 +1 @@
 +INCLUDE 'hello_constants.INc'
 Index: added_file
 ===================================================================
---- added_file	($ROOT_URL/trunk)	(revision 0)
-+++ added_file	(revision 6)
+#IF SVN1.8 --- added_file	($ROOT_URL/trunk)	(revision 0)
+#IF SVN1.8 +++ added_file	(revision 6)
+#IF SVN1.9 --- added_file	(.../trunk)	(working copy)
+#IF SVN1.9 +++ added_file	(.../branches/dev/Share/branch_test)	(revision 6)
 @@ -0,0 +1 @@
 +INCLUDE 'hello_constants.INc'
 Index: lib/python/info/poems.py
 ===================================================================
---- lib/python/info/poems.py	($ROOT_URL/trunk)	(revision 1)
-+++ lib/python/info/poems.py	(working copy)
+#IF SVN1.8 --- lib/python/info/poems.py	($ROOT_URL/trunk)	(revision 1)
+#IF SVN1.8 +++ lib/python/info/poems.py	(working copy)
+#IF SVN1.9 --- lib/python/info/poems.py	(.../trunk)	(revision 1)
+#IF SVN1.9 +++ lib/python/info/poems.py	(.../branches/dev/Share/branch_test)	(working copy)
 @@ -1,24 +1,23 @@
 -#!/usr/bin/env python
 -# -*- coding: utf-8 -*-
@@ -357,8 +405,10 @@ Index: lib/python/info/poems.py
 +prINt "\n",  __doc__
 Index: module/hello_constants.f90
 ===================================================================
---- module/hello_constants.f90	($ROOT_URL/trunk)	(revision 1)
-+++ module/hello_constants.f90	(working copy)
+#IF SVN1.8 --- module/hello_constants.f90	($ROOT_URL/trunk)	(revision 1)
+#IF SVN1.8 +++ module/hello_constants.f90	(working copy)
+#IF SVN1.9 --- module/hello_constants.f90	(.../trunk)	(revision 1)
+#IF SVN1.9 +++ module/hello_constants.f90	(.../branches/dev/Share/branch_test)	(working copy)
 @@ -1,5 +0,0 @@
 -MODULE Hello_Constants
 -
@@ -367,17 +417,23 @@ Index: module/hello_constants.f90
 -END MODULE Hello_Constants
 Index: module/hello_constants.inc
 ===================================================================
---- module/hello_constants.inc	($ROOT_URL/trunk)	(revision 1)
-+++ module/hello_constants.inc	(working copy)
+#IF SVN1.8 --- module/hello_constants.inc	($ROOT_URL/trunk)	(revision 1)
+#IF SVN1.8 +++ module/hello_constants.inc	(working copy)
+#IF SVN1.9 --- module/hello_constants.inc	(.../trunk)	(revision 1)
+#IF SVN1.9 +++ module/hello_constants.inc	(.../branches/dev/Share/branch_test)	(working copy)
 @@ -1 +0,0 @@
 -CHARACTER (LEN=80), PARAMETER :: hello_string = 'Hello Earth!'
 Index: module/hello_constants_dummy.inc
 ===================================================================
---- module/hello_constants_dummy.inc	($ROOT_URL/trunk)	(revision 1)
-+++ module/hello_constants_dummy.inc	(working copy)
+#IF SVN1.8 --- module/hello_constants_dummy.inc	($ROOT_URL/trunk)	(revision 1)
+#IF SVN1.8 +++ module/hello_constants_dummy.inc	(working copy)
+#IF SVN1.9 --- module/hello_constants_dummy.inc	(.../trunk)	(revision 1)
+#IF SVN1.9 +++ module/hello_constants_dummy.inc	(.../branches/dev/Share/branch_test)	(working copy)
 @@ -1 +0,0 @@
 -INCLUDE 'hello_constants.inc'
 __OUT__
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" \
+    "$TEST_DIR/$TEST_KEY.sorted.ctrl"
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 teardown
 #-------------------------------------------------------------------------------

@@ -34,6 +34,7 @@ TEST_KEY=$TEST_KEY_BASE-fcm-bc
 run_pass "$TEST_KEY" fcm branch-create -t SHARE --rev-flag=NONE \
                                         --non-interactive \
                                         my_branch_test
+branch_tidy "$TEST_KEY.out"
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] Source: $ROOT_URL/trunk@1 (4)
 Change summary:
@@ -44,7 +45,6 @@ Commit message is as follows:
 --------------------------------------------------------------------------------
 Created /${PROJECT}branches/dev/Share/my_branch_test from /${PROJECT}trunk@1.
 --------------------------------------------------------------------------------
-
 Committed revision 5.
 [info] Created: $ROOT_URL/branches/dev/Share/my_branch_test
 __OUT__
@@ -69,6 +69,7 @@ TEST_KEY=$TEST_KEY_BASE-fcm-bc-branch-of-branch
 run_pass "$TEST_KEY" fcm branch-create -t SHARE --rev-flag=NONE \
                                        --non-interactive \
                                        --branch-of-branch my_branch_test
+branch_tidy "$TEST_KEY.out"
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] Source: $ROOT_URL/branches/dev/Share/branch_test@4 (4)
 Change summary:
@@ -79,7 +80,6 @@ Commit message is as follows:
 --------------------------------------------------------------------------------
 Created /${PROJECT}branches/dev/Share/my_branch_test from /${PROJECT}branches/dev/Share/branch_test@4.
 --------------------------------------------------------------------------------
-
 Committed revision 5.
 [info] Created: $ROOT_URL/branches/dev/Share/my_branch_test
 __OUT__

@@ -33,7 +33,7 @@ svn switch -q $ROOT_URL/branches/dev/Share/merge1
 #-------------------------------------------------------------------------------
 # Test the various mergeinfo output before merging.
 test_mergeinfo "$TEST_KEY_BASE-trunk-into-branch-1-pre" \
-    $ROOT_URL/trunk <<__RESULTS__
+    $ROOT_URL/trunk - 9 <<__RESULTS__
 begin-prop
 end-prop
 begin-info
@@ -49,7 +49,7 @@ begin-info
       \                        
        --| |------------         branches/dev/Share/merge1
                        |       
-                       9       
+                       WC      
 end-info
 begin-eligible
 r8
@@ -95,14 +95,8 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 TEST_KEY=$TEST_KEY_BASE-trunk-into-branch-1-diff
 run_pass "$TEST_KEY" svn diff
 diff_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-Index: lib/python/info/__init__.py
-===================================================================
---- lib/python/info/__init__.py	(revision 9)
-+++ lib/python/info/__init__.py	(working copy)
-@@ -0,0 +1,2 @@
-+trunk change
-+another trunk change
+diff_svn_version_filter >"$TEST_DIR/$TEST_KEY.sorted.ctrl" <<__OUT__
+
 Index: .
 ===================================================================
 --- .	(revision 9)
@@ -111,8 +105,18 @@ Index: .
 Property changes on: .
 ___________________________________________________________________
 Added: svn:mergeinfo
+#IF SVN1.9 ## -0,0 +0,1 ##
    Merged /${PROJECT}trunk:r2-9
+Index: lib/python/info/__init__.py
+===================================================================
+--- lib/python/info/__init__.py	(revision 9)
++++ lib/python/info/__init__.py	(working copy)
+@@ -0,0 +1,2 @@
++trunk change
++another trunk change
 __OUT__
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" \
+    "$TEST_DIR/$TEST_KEY.sorted.ctrl" 
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm commit of fcm merge (1)
@@ -120,7 +124,8 @@ TEST_KEY=$TEST_KEY_BASE-trunk-into-branch-1-commit
 run_pass "$TEST_KEY" fcm commit <<__IN__
 y
 __IN__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+commit_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 [info] sed -i 1i\foo: starting commit message editor...
 Change summary:
 --------------------------------------------------------------------------------
@@ -128,7 +133,6 @@ Change summary:
 [Project: ${TEST_PROJECT:-}]
 [Branch : branches/dev/Share/merge1]
 [Sub-dir: ]
-
  M      .
 M       lib/python/info/__init__.py
 --------------------------------------------------------------------------------
@@ -137,14 +141,11 @@ Commit message is as follows:
 foo
 Merged into /${PROJECT}branches/dev/Share/merge1: /${PROJECT}trunk@9 cf. /${PROJECT}trunk@1
 --------------------------------------------------------------------------------
-
 *** WARNING: YOU ARE COMMITTING TO A Share BRANCH.
 *** Please ensure that you have the owner's permission.
-
 Would you like to commit this change?
 Enter "y" or "n" (or just press <return> for "n"): Sending        .
 Sending        lib/python/info/__init__.py
-Transmitting file data .
 Committed revision 10.
 Updating '.':
 At revision 10.
@@ -180,7 +181,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Test the various mergeinfo output after merging.
 test_mergeinfo "$TEST_KEY_BASE-trunk-into-branch-1-post" \
-    $ROOT_URL/trunk <<__RESULTS__
+    $ROOT_URL/trunk - 10 <<__RESULTS__
 begin-prop
 /trunk:2-9
 end-prop
@@ -197,7 +198,7 @@ begin-info
       \         \              
        --| |------------         branches/dev/Share/merge1
                        |       
-                       10      
+                       WC      
 end-info
 begin-eligible
 end-eligible
@@ -221,7 +222,7 @@ cd $TEST_DIR/wc
 #-------------------------------------------------------------------------------
 # Test the various mergeinfo output before merging.
 test_mergeinfo "$TEST_KEY_BASE-branch-into-trunk-1-pre" \
-    $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
+    $ROOT_URL/branches/dev/Share/merge1 - 11 <<__RESULTS__
 begin-prop
 end-prop
 begin-info
@@ -237,7 +238,7 @@ begin-info
      /         /               
   -------| |------------         trunk
               |        |       
-              9        11      
+              9        WC      
 end-info
 begin-eligible
 r5
@@ -297,7 +298,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-1-diff
 run_pass "$TEST_KEY" svn diff
 diff_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
+diff_svn_version_filter >"$TEST_DIR/$TEST_KEY.sorted.ctrl" <<__OUT__
 
 Index: .
 ===================================================================
@@ -307,7 +308,16 @@ Index: .
 Property changes on: .
 ___________________________________________________________________
 Added: svn:mergeinfo
+#IF SVN1.9 ## -0,0 +0,1 ##
    Merged /${PROJECT}branches/dev/Share/merge1:r4-11
+#IF SVN1.9 Index: added_directory/hello_constants.f90
+#IF SVN1.9 ===================================================================
+#IF SVN1.9 Index: added_directory/hello_constants.inc
+#IF SVN1.9 ===================================================================
+#IF SVN1.9 Index: added_directory/hello_constants_dummy.inc
+#IF SVN1.9 ===================================================================
+#IF SVN1.9 Index: added_file
+#IF SVN1.9 ===================================================================
 Index: lib/python/info/poems.py
 ===================================================================
 --- lib/python/info/poems.py	(revision 11)
@@ -372,6 +382,8 @@ Index: module/hello_constants_dummy.inc
 @@ -1 +1 @@
 -INCLUDE 'hello_constants.inc'
 +INCLUDE 'hello_constants.INc'
+#IF SVN1.9 Index: module/tree_conflict_file
+#IF SVN1.9 ===================================================================
 Index: subroutine/hello_sub_dummy.h
 ===================================================================
 --- subroutine/hello_sub_dummy.h	(revision 11)
@@ -380,6 +392,8 @@ Index: subroutine/hello_sub_dummy.h
  #include "hello_sub.h"
 +Modified a line
 __OUT__
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" \
+    "$TEST_DIR/$TEST_KEY.sorted.ctrl"
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm commit of fcm merge (1)
@@ -396,7 +410,6 @@ Change summary:
 [Project: ${TEST_PROJECT:-}]
 [Branch : trunk]
 [Sub-dir: ]
-
  M      .
 A  +    added_directory
 A  +    added_file
@@ -412,10 +425,8 @@ Commit message is as follows:
 foo
 Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@11 cf. /${PROJECT}trunk@9
 --------------------------------------------------------------------------------
-
 *** WARNING: YOU ARE COMMITTING TO THE TRUNK.
 *** Please ensure that your change conforms to your project's working practices.
-
 Would you like to commit this change?
 Enter "y" or "n" (or just press <return> for "n"): Sending        .
 Adding         added_directory
@@ -426,7 +437,6 @@ Sending        module/hello_constants.f90
 Sending        module/hello_constants.inc
 Sending        module/hello_constants_dummy.inc
 Sending        subroutine/hello_sub_dummy.h
-Transmitting file data .....
 Committed revision 12.
 Updating '.':
 At revision 12.
@@ -462,7 +472,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Test the various mergeinfo output after merging.
 test_mergeinfo "$TEST_KEY_BASE-branch-into-trunk-1-post" \
-    $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
+    $ROOT_URL/branches/dev/Share/merge1 - 12 <<__RESULTS__
 begin-prop
 /branches/dev/Share/merge1:4-11
 end-prop
@@ -479,7 +489,7 @@ begin-info
      /          \              
   -------| |------------         trunk
                        |       
-                       12      
+                       WC      
 end-info
 begin-eligible
 end-eligible
@@ -504,7 +514,7 @@ svn switch -q $ROOT_URL/trunk
 #-------------------------------------------------------------------------------
 # Test the various mergeinfo output before merging.
 test_mergeinfo "$TEST_KEY_BASE-branch-into-trunk-2-pre" \
-    $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
+    $ROOT_URL/branches/dev/Share/merge1 - 14 <<__RESULTS__
 begin-prop
 /branches/dev/Share/merge1:4-11
 end-prop
@@ -521,7 +531,7 @@ begin-info
      /          \              
   -------| |------------         trunk
                        |       
-                       14      
+                       WC      
 end-info
 begin-eligible
 r13
@@ -564,7 +574,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-2-diff
 run_pass "$TEST_KEY" svn diff
 diff_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
+diff_svn_version_filter >"$TEST_DIR/$TEST_KEY.sorted.ctrl" <<__OUT__
 
 Index: .
 ===================================================================
@@ -574,6 +584,7 @@ Index: .
 Property changes on: .
 ___________________________________________________________________
 Modified: svn:mergeinfo
+#IF SVN1.9 ## -0,0 +0,1 ##
    Merged /${PROJECT}branches/dev/Share/merge1:r12-13
 Index: added_file
 ===================================================================
@@ -583,6 +594,8 @@ Index: added_file
  INCLUDE 'hello_constants.INc'
 +call_extra_feature()
 __OUT__
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" \
+    "$TEST_DIR/$TEST_KEY.sorted.ctrl"
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm commit of fcm merge branch-into-trunk (2)
@@ -590,8 +603,9 @@ TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-2-commit
 run_pass "$TEST_KEY" fcm commit <<__IN__
 y
 __IN__
-sed -i "/^Updating '.':$/d" $TEST_DIR/"$TEST_KEY.out"
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+sed -i "/^Updating '.':$/d" "$TEST_DIR/$TEST_KEY.out"
+commit_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 [info] sed -i 1i\foo: starting commit message editor...
 Change summary:
 --------------------------------------------------------------------------------
@@ -599,7 +613,6 @@ Change summary:
 [Project: ${TEST_PROJECT:-}]
 [Branch : trunk]
 [Sub-dir: ]
-
  M      .
 M       added_file
 --------------------------------------------------------------------------------
@@ -608,14 +621,11 @@ Commit message is as follows:
 foo
 Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@13 cf. /${PROJECT}branches/dev/Share/merge1@11
 --------------------------------------------------------------------------------
-
 *** WARNING: YOU ARE COMMITTING TO THE TRUNK.
 *** Please ensure that your change conforms to your project's working practices.
-
 Would you like to commit this change?
 Enter "y" or "n" (or just press <return> for "n"): Sending        .
 Sending        added_file
-Transmitting file data .
 Committed revision 15.
 At revision 15.
 __OUT__
@@ -656,7 +666,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Test the various mergeinfo output after merging.
 test_mergeinfo "$TEST_KEY_BASE-branch-into-trunk-2-post" \
-    $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
+    $ROOT_URL/branches/dev/Share/merge1 - 15 <<__RESULTS__
 begin-prop
 /branches/dev/Share/merge1:4-13
 end-prop
@@ -673,7 +683,7 @@ begin-info
      /          \              
   -------| |------------         trunk
                        |       
-                       15      
+                       WC      
 end-info
 begin-eligible
 end-eligible
@@ -698,7 +708,7 @@ svn update -q
 #------------------------------------------------------------------------------
 # Test the various mergeinfo output before merging.
 test_mergeinfo "$TEST_KEY_BASE-trunk-into-branch-2-pre" \
-    $ROOT_URL/trunk <<__RESULTS__
+    $ROOT_URL/trunk - 17 <<__RESULTS__
 begin-prop
 /trunk:2-9
 end-prop
@@ -715,7 +725,7 @@ begin-info
       \        /               
        --| |------------         branches/dev/Share/merge1
               |        |       
-              13       17      
+              13       WC      
 end-info
 begin-eligible
 r12
@@ -758,7 +768,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 TEST_KEY=$TEST_KEY_BASE-trunk-into-branch-2-diff
 run_pass "$TEST_KEY" svn diff
 diff_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
+diff_svn_version_filter >"$TEST_DIR/$TEST_KEY.sorted.ctrl" <<__OUT__
 
 Index: .
 ===================================================================
@@ -768,6 +778,7 @@ Index: .
 Property changes on: .
 ___________________________________________________________________
 Modified: svn:mergeinfo
+#IF SVN1.9 ## -0,0 +0,1 ##
    Merged /${PROJECT}trunk:r10-16
 Index: added_file
 ===================================================================
@@ -778,6 +789,8 @@ Index: added_file
  call_extra_feature()
 +# trunk modification
 __OUT__
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" \
+    "$TEST_DIR/$TEST_KEY.sorted.ctrl"
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm commit of fcm merge trunk-into-branch (2)
@@ -785,8 +798,9 @@ TEST_KEY=$TEST_KEY_BASE-trunk-into-branch-2-commit
 run_pass "$TEST_KEY" fcm commit <<__IN__
 y
 __IN__
-sed -i "/^Updating '.':$/d" $TEST_DIR/"$TEST_KEY.out"
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+sed -i "/^Updating '.':$/d" "$TEST_DIR/$TEST_KEY.out"
+commit_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 [info] sed -i 1i\foo: starting commit message editor...
 Change summary:
 --------------------------------------------------------------------------------
@@ -794,7 +808,6 @@ Change summary:
 [Project: ${TEST_PROJECT:-}]
 [Branch : branches/dev/Share/merge1]
 [Sub-dir: ]
-
  M      .
 M       added_file
 --------------------------------------------------------------------------------
@@ -803,14 +816,11 @@ Commit message is as follows:
 foo
 Merged into /${PROJECT}branches/dev/Share/merge1: /${PROJECT}trunk@16 cf. /${PROJECT}branches/dev/Share/merge1@13
 --------------------------------------------------------------------------------
-
 *** WARNING: YOU ARE COMMITTING TO A Share BRANCH.
 *** Please ensure that you have the owner's permission.
-
 Would you like to commit this change?
 Enter "y" or "n" (or just press <return> for "n"): Sending        .
 Sending        added_file
-Transmitting file data .
 Committed revision 18.
 At revision 18.
 __OUT__
@@ -863,7 +873,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Test the various mergeinfo output after merging.
 test_mergeinfo "$TEST_KEY_BASE-trunk-into-branch-2-post" \
-    $ROOT_URL/trunk <<__RESULTS__
+    $ROOT_URL/trunk - 18 <<__RESULTS__
 begin-prop
 /trunk:2-16
 end-prop
@@ -880,7 +890,7 @@ begin-info
       \         \              
        --| |------------         branches/dev/Share/merge1
                        |       
-                       18      
+                       WC      
 end-info
 begin-eligible
 end-eligible
@@ -902,7 +912,7 @@ svn switch -q $ROOT_URL/trunk
 #-------------------------------------------------------------------------------
 # Test the various mergeinfo output before merging.
 test_mergeinfo "$TEST_KEY_BASE-branch-into-trunk-3-pre" \
-    $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
+    $ROOT_URL/branches/dev/Share/merge1 - 19 <<__RESULTS__
 begin-prop
 /branches/dev/Share/merge1:4-13
 end-prop
@@ -919,7 +929,7 @@ begin-info
      /         /               
   -------| |------------         trunk
               |        |       
-              16       19      
+              16       WC      
 end-info
 begin-eligible
 r17
@@ -967,7 +977,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-3-diff
 run_pass "$TEST_KEY" svn diff
 diff_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
+diff_svn_version_filter >"$TEST_DIR/$TEST_KEY.sorted.ctrl" <<__OUT__
 
 Index: .
 ===================================================================
@@ -977,6 +987,7 @@ Index: .
 Property changes on: .
 ___________________________________________________________________
 Modified: svn:mergeinfo
+#IF SVN1.9 ## -0,0 +0,1 ##
    Merged /${PROJECT}branches/dev/Share/merge1:r14-19
 Index: added_directory/hello_constants_dummy.inc
 ===================================================================
@@ -985,7 +996,11 @@ Index: added_directory/hello_constants_dummy.inc
 @@ -1,2 +0,0 @@
 -INCLUDE 'hello_constants.INc'
 -# added this line for simple repeat testing
+#IF SVN1.9 Index: added_file.add
+#IF SVN1.9 ===================================================================
 __OUT__
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" \
+    "$TEST_DIR/$TEST_KEY.sorted.ctrl"
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm commit of fcm merge branch-into-trunk (3)
@@ -1003,7 +1018,6 @@ Change summary:
 [Project: ${TEST_PROJECT:-}]
 [Branch : trunk]
 [Sub-dir: ]
-
  M      .
 A  +    added_file.add
 D       added_directory/hello_constants_dummy.inc
@@ -1013,15 +1027,12 @@ Commit message is as follows:
 foo
 Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@19 cf. /${PROJECT}trunk@16
 --------------------------------------------------------------------------------
-
 *** WARNING: YOU ARE COMMITTING TO THE TRUNK.
 *** Please ensure that your change conforms to your project's working practices.
-
 Would you like to commit this change?
 Enter "y" or "n" (or just press <return> for "n"): Sending        .
 Adding         added_file.add
 Deleting       added_directory/hello_constants_dummy.inc
-
 Committed revision 20.
 At revision 20.
 __OUT__
@@ -1128,7 +1139,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Test the various mergeinfo output after merging.
 test_mergeinfo "$TEST_KEY_BASE-branch-into-trunk-3-post" \
-    $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
+    $ROOT_URL/branches/dev/Share/merge1 - 20 <<__RESULTS__
 begin-prop
 /branches/dev/Share/merge1:4-19
 end-prop
@@ -1145,7 +1156,7 @@ begin-info
      /          \              
   -------| |------------         trunk
                        |       
-                       20      
+                       WC      
 end-info
 begin-eligible
 end-eligible
@@ -1174,7 +1185,7 @@ svn update -q
 #------------------------------------------------------------------------------
 # Test the various mergeinfo output before merging.
 test_mergeinfo "$TEST_KEY_BASE-branch-into-branch-1-pre" \
-    $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
+    $ROOT_URL/branches/dev/Share/merge1 - 21 <<__RESULTS__
 begin-prop
 end-prop
 begin-info
@@ -1190,7 +1201,7 @@ begin-info
       \                        
        --| |------------         branches/dev/Share/merge2
                        |       
-                       21      
+                       WC      
 end-info
 begin-eligible
 r5
@@ -1278,7 +1289,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 TEST_KEY=$TEST_KEY_BASE-branch-into-branch-1-diff
 run_pass "$TEST_KEY" svn diff
 diff_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
+diff_svn_version_filter >"$TEST_DIR/$TEST_KEY.sorted.ctrl" <<__OUT__
 
 Index: .
 ===================================================================
@@ -1288,8 +1299,17 @@ Index: .
 Property changes on: .
 ___________________________________________________________________
 Added: svn:mergeinfo
+#IF SVN1.9 ## -0,0 +0,2 ##
    Merged /${PROJECT}trunk:r2-9
    Merged /${PROJECT}branches/dev/Share/merge1:r4-13
+#IF SVN1.9 Index: added_directory/hello_constants.f90
+#IF SVN1.9 ===================================================================
+#IF SVN1.9 Index: added_directory/hello_constants.inc
+#IF SVN1.9 ===================================================================
+#IF SVN1.9 Index: added_directory/hello_constants_dummy.inc
+#IF SVN1.9 ===================================================================
+#IF SVN1.9 Index: added_file
+#IF SVN1.9 ===================================================================
 Index: lib/python/info/__init__.py
 ===================================================================
 --- lib/python/info/__init__.py	(revision 21)
@@ -1362,6 +1382,8 @@ Index: module/hello_constants_dummy.inc
 @@ -1 +1 @@
 -INCLUDE 'hello_constants.inc'
 +INCLUDE 'hello_constants.INc'
+#IF SVN1.9 Index: module/tree_conflict_file
+#IF SVN1.9 ===================================================================
 Index: subroutine/hello_sub_dummy.h
 ===================================================================
 --- subroutine/hello_sub_dummy.h	(revision 21)
@@ -1370,6 +1392,8 @@ Index: subroutine/hello_sub_dummy.h
  #include "hello_sub.h"
 +Modified a line
 __OUT__
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" \
+    "$TEST_DIR/$TEST_KEY.sorted.ctrl"
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm commit of fcm merge branch-into-branch (1)
@@ -1386,7 +1410,6 @@ Change summary:
 [Project: ${TEST_PROJECT:-}]
 [Branch : branches/dev/Share/merge2]
 [Sub-dir: ]
-
  M      .
 A  +    added_directory
 A  +    added_file
@@ -1403,10 +1426,8 @@ Commit message is as follows:
 foo
 Merged into /${PROJECT}branches/dev/Share/merge2: /${PROJECT}branches/dev/Share/merge1@13 cf. /${PROJECT}trunk@1
 --------------------------------------------------------------------------------
-
 *** WARNING: YOU ARE COMMITTING TO A Share BRANCH.
 *** Please ensure that you have the owner's permission.
-
 Would you like to commit this change?
 Enter "y" or "n" (or just press <return> for "n"): Sending        .
 Adding         added_directory
@@ -1418,7 +1439,6 @@ Sending        module/hello_constants.f90
 Sending        module/hello_constants.inc
 Sending        module/hello_constants_dummy.inc
 Sending        subroutine/hello_sub_dummy.h
-Transmitting file data ......
 Committed revision 22.
 Updating '.':
 At revision 22.
@@ -1536,7 +1556,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #------------------------------------------------------------------------------
 # Test the various mergeinfo output after merging.
 test_mergeinfo "$TEST_KEY_BASE-branch-into-branch-1-post" \
-    $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
+    $ROOT_URL/branches/dev/Share/merge1 - 22 <<__RESULTS__
 begin-prop
 /branches/dev/Share/merge1:4-13
 /trunk:2-9
@@ -1554,7 +1574,7 @@ begin-info
       \         \              
        --| |------------         branches/dev/Share/merge2
                        |       
-                       22      
+                       WC      
 end-info
 begin-eligible
 r17

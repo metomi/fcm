@@ -71,7 +71,7 @@ function file_xxdiff() {
 function init_repos() {
     if [[ -n ${TEST_REMOTE_HOST:-} ]]; then
         TEST_REMOTE_DIR=$(ssh $TEST_REMOTE_HOST "mktemp -d")
-        ssh $TEST_REMOTE_HOST "svnadmin create --fs-type fsfs $TEST_REMOTE_DIR"
+        ssh $TEST_REMOTE_HOST bash -l -c "svnadmin create --fs-type fsfs $TEST_REMOTE_DIR"
         REPOS_URL="svn+ssh://${TEST_REMOTE_HOST}$TEST_REMOTE_DIR"
     else
         svnadmin create --fs-type fsfs $TEST_DIR/test_repos
@@ -224,13 +224,26 @@ function test_mergeinfo() {
     local TEST_INFO_NAME="$1-svn-mergeinfo"
     local DIFF_BRANCH=$2
     local INPUT_RESULTS_FILE=${3:--}
+    local WC_REVISION=${4:-WC}
+    if "$SVN_VERSION_IS_19"; then
+        WC_REVISION=WC
+    elif (( WC_REVISION < 10 )); then
+        WC_REVISION="$WC_REVISION "
+    fi
     local RESULTS_FILE=$(mktemp)
-    cat "$INPUT_RESULTS_FILE" > "$RESULTS_FILE"
+    cat "$INPUT_RESULTS_FILE" >"$RESULTS_FILE"
+    sed -i "s/^\(.\{23\}\)WC/\1$WC_REVISION/" "$RESULTS_FILE"
     # Test svn:mergeinfo property.
     TEST_KEY=$TEST_INFO_NAME-prop
-    run_pass "$TEST_KEY" svn propget svn:mergeinfo .
-    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <$(get_results prop $RESULTS_FILE)
-    file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+    PROP_RESULT=$(cat <$(get_results prop $RESULTS_FILE))
+    if [[ -n "$PROP_RESULT" ]]; then
+        run_pass "$TEST_KEY" svn propget svn:mergeinfo .
+        file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <$(get_results prop $RESULTS_FILE)
+        file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+    else
+        # Subversion 1.9 won't set null mergeinfo.
+        skip 3
+    fi
     # Test svn mergeinfo output.
     TEST_KEY=$TEST_INFO_NAME-info
     run_pass "$TEST_KEY" svn mergeinfo $DIFF_BRANCH
