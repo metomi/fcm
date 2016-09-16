@@ -275,7 +275,7 @@ sub backup_svn_repository {
     }
     my $base_name = $project->get_svn_base_name();
     run_mkpath($CONFIG->get_svn_backup_dir());
-    my $work_dir = tempdir("$base_name.backup.XXXXXX", CLEANUP => 1);
+    my $work_dir = tempdir("$base_name.backup.XXXXXX", CLEANUP => 1, TMPDIR => 1);
     my $work_path = catfile($work_dir, $base_name);
     $RUN->(
         sprintf(
@@ -353,7 +353,7 @@ sub backup_trac_environment {
     my $trac_live_path = $project->get_trac_live_path();
     my $base_name = $project->get_name();
     run_mkpath($CONFIG->get_trac_backup_dir());
-    my $work_dir = tempdir("$base_name.backup.XXXXXX", CLEANUP => 1);
+    my $work_dir = tempdir("$base_name.backup.XXXXXX", CLEANUP => 1, TMPDIR => 1);
     my $work_path = catfile($work_dir, $base_name);
     $RUNNER->run_with_retries(
         sprintf(
