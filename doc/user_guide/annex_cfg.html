@@ -435,6 +435,113 @@ rsync.flags = -a --exclude=.* --delete-excluded --timeout=900 --rsh=ssh\ -oBatch
     </dd>
   </dl>
 
+  <h2 id="commit">Repository Access and Commit Notification Configuration</h2>
+
+  <p>A <code>commit.cfg</code> can be added to a Subversion repository with
+  standard FCM <code>pre-commit</code> and <code>post-commit</code> hooks to
+  control access and notify owners (or subscribers) of commits to different
+  parts of the repository.</p>
+
+  <p>The following are declarations recognised by the commit configuration
+  files:</p>
+
+  <dl>
+    <dt id="commit.notification-modes">notification-modes=ITEM ...</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: </p>
+
+      <p><dfn>example</dfn>: A list of items that requires commit notifications.
+      An <var>ITEM</var> can be <code>repository</code>, <code>project</code> or
+      <code>branch</code>.</p>
+
+      <pre>
+notification-modes = repository, project, branch
+</pre>
+    </dd>
+
+    <dt id="commit.owner">owner=USER1 ...</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: specify the user IDs of the owners of the
+      repository in a space delimited list. This setting is compulsory if
+      <code>repository</code> or <code>project</code> is in
+      <code>permission-modes</code>. Owners of the repository can change any
+      path in the repository. If <code>repository</code> is in
+      <code>notification-modes</code>, owners will be informed of all changes
+      that are outside of a project. Note: The change authors will not get
+      notification from their own changes.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+owner = daisy holly
+</pre>
+    </dd>
+
+    <dt id="commit.owner-ns">owner[PROJECT]=USER1 ...<br/>
+    owner[PROJECT/branches/dev/Share/NAME]=USER1 ...<br/>
+    owner[PROJECT/branches/test/Share/NAME]=USER1 ...<br/>
+    owner[PROJECT/branches/pkg/Share/NAME]=USER1 ...<br/>
+    owner[PROJECT/branches/pkg/Config/NAME]=USER1 ...<br/>
+    owner[PROJECT/branches/pkg/Rel/NAME]=USER1 ...</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: specify the user IDs of the owners of a project
+      (or a shared topic branches of). The owners of a project can make changes
+      to the trunk and any branches in the project. The owners of a named shared
+      branch can make changes to the shared branch. (If no owners are defined
+      for a shared branch, the creator of the branch is the default owner.) If
+      <code>project</code> is in <code>notification-modes</code>, project owners
+      will be informed of all changes that are within a project but outside of
+      its topic branches. If <code>branch</code> is in
+      <code>notification-modes</code>, branch owners will be informed of all
+      changes that are within the branch. Note: The change authors will not get
+      notification from their own changes.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+owner[foo] = daisy fern
+owner[foo/branches/pkg/Share/flower] = rosie
+owner[bar] = holly ivy
+</pre>
+    </dd>
+
+    <dt id="commit.permission-modes">permission-modes=ITEM ...</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: A list of items that require permission
+      checking.  An <var>ITEM</var> can be <code>repository</code>,
+      <code>project</code> or <code>branch</code>.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+permission-modes = repository, project, branch
+</pre>
+    </dd>
+
+    <dt id="commit.subscriber">subscriber=USER1 ...<br/>
+    subscriber[PROJECT]=USER1 ...<br/>
+    subscriber[PROJECT/branches/dev/Share/NAME]=USER1 ...<br/>
+    subscriber[PROJECT/branches/test/Share/NAME]=USER1 ...<br/>
+    subscriber[PROJECT/branches/pkg/Share/NAME]=USER1 ...<br/>
+    subscriber[PROJECT/branches/pkg/Config/NAME]=USER1 ...<br/>
+    subscriber[PROJECT/branches/pkg/Rel/NAME]=USER1 ...</dt>
+
+    <dd>
+      <p><dfn>description</dfn>: A space delimited list of user IDs of the
+      notification subscribers of the repository, a project or a shared topic
+      branch. If not specified, the owners of a given level are the notification
+      subscribers. If an empty list is specified for a given level, then there
+      will be no notification email for changes under that.</p>
+
+      <p><dfn>example</dfn>:</p>
+      <pre>
+subscriber[foo] = daisy fern
+subscriber[foo/branches/pkg/Share/flower] = rosie
+</pre>
+    </dd>
+  </dl>
+
   <h2 id="make">FCM Make Configuration</h2>
 
   <p>A typical FCM make configuration consists of some top level declarations

@@ -247,9 +247,10 @@ template-tag =
   directory tree is located at <samp>$HOME/foo</samp>, you will do the following
   to import it to a new repository:</p>
   <pre>
-(SHELL PROMPT)$ svnadmin create FOO_svn
-(SHELL PROMPT)$ fcm project-create FOO file://$PWD/FOO_svn
-(SHELL PROMPT)$ fcm checkout file://$PWD/FOO_svn/FOO $HOME/svn-wc/foo
+(SHELL PROMPT)$ cd /srv/svn  # or other suitable locations
+(SHELL PROMPT)$ ${FCM_HOME}/sbin/fcm-add-svn-repos --svn-live-dir=$PWD bar
+(SHELL PROMPT)$ fcm project-create foo file:///srv/svn/bar
+(SHELL PROMPT)$ fcm checkout file:///srv/svn/bar/foo $HOME/svn-wc/foo
 (SHELL PROMPT)$ cd $HOME/svn-wc/foo
 (SHELL PROMPT)$ cp -r $HOME/foo/* .
 (SHELL PROMPT)$ fcm add *
@@ -264,11 +265,19 @@ template-tag =
   "http://svnbook.red-bean.com/en/1.8/svn.reposadmin.planning.html#svn.reposadmin.projects.chooselayout">
   Planning Your Repository Organization</a> from the Subversion book.</p>
 
-  <h3 id="svn_access">Access Control</h3>
+  <h3 id="svn_access">Access Control and Commit Notification</h3>
 
-  <p>Restrictions such as preventing anonymous read access or restricting write
-  access to the trunk to a limited set of users can be arranged if
-  necessary.</p>
+  <p>Access control and commit notification can be set up on a Subversion
+  repository with standard FCM <code>pre-commit</code> and
+  <code>post-commit</code> hooks. If a file named <code>commit.cfg</code> is
+  added to the root of the repository, it will be used by the FCM
+  <code>pre-commit</code> and <code>post-commit</code> hooks to control access
+  and notify owners (or subscribers) of commits to different parts of the
+  repository.</p>
+
+  <p>See <a href="annex_cfg.html#commit">Annex: FCM Configuration File &gt;
+  Repository Access and Commit Notification Configuration</a> for syntax and
+  settings of the <code>commit.cfg</code> file.</p>
 
   <h3 id="svn_hosting">Repository Hosting</h3>
 
