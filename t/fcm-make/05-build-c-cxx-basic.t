@@ -33,7 +33,7 @@ TEST_KEY="$TEST_KEY_BASE"
 run_pass "$TEST_KEY" fcm make
 find .fcm-make build -type f | sed 's/^\(\.fcm-make\/log\).*$/\1/' \
     | sort >"$TEST_KEY.find"
-file_cmp "$TEST_KEY.find" "$TEST_KEY.find" <<'__OUT__'
+sort >"${TEST_KEY}.find.expected" <<'__OUT__'
 .fcm-make/config-as-parsed.cfg
 .fcm-make/config-on-success.cfg
 .fcm-make/ctx.gz
@@ -43,6 +43,7 @@ build/bin/cxxhello
 build/o/chello.o
 build/o/cxxhello.o
 __OUT__
+file_cmp "$TEST_KEY.find" "$TEST_KEY.find" "${TEST_KEY}.find.expected"
 run_pass "$TEST_KEY.chello" $PWD/build/bin/chello
 file_cmp "$TEST_KEY.chello.out" "$TEST_KEY.chello.out" <<<'Hello C'
 run_pass "$TEST_KEY.cxxhello" $PWD/build/bin/cxxhello

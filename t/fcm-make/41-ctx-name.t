@@ -21,6 +21,11 @@
 #-------------------------------------------------------------------------------
 . "$(dirname "$0")/test_header"
 
+file_cmp_sorted() {
+    sort - >"${1}.expected"
+    file_cmp "$1" "${2}" "${1}.expected"
+}
+
 find_fcm_make_files() {
     find . "$@" -type f \
         '(' -path '*/build/*' -o \
@@ -58,7 +63,8 @@ __CFG__
 #-------------------------------------------------------------------------------
 run_pass "${TEST_KEY_BASE}-1" fcm make
 find_fcm_make_files >"${TEST_KEY_BASE}-1.find.new"
-file_cmp "${TEST_KEY_BASE}-1.find.new" "${TEST_KEY_BASE}-1.find.new" <<'__FIND__'
+file_cmp_sorted \
+    "${TEST_KEY_BASE}-1.find.new" "${TEST_KEY_BASE}-1.find.new" <<'__FIND__'
 ./.fcm-make/config-as-parsed.cfg
 ./.fcm-make/config-on-success.cfg
 ./.fcm-make/ctx.gz
@@ -72,7 +78,8 @@ find_fcm_make_files '!' -newer 'marker' >"${TEST_KEY_BASE}-2.find.old"
 file_cmp "${TEST_KEY_BASE}-2.find.old" \
     "${TEST_KEY_BASE}-2.find.old" "${TEST_KEY_BASE}-1.find.new"
 find_fcm_make_files -newer 'marker' >"${TEST_KEY_BASE}-2.find.new"
-file_cmp "${TEST_KEY_BASE}-2.find.new" "${TEST_KEY_BASE}-2.find.new" <<'__FIND__'
+file_cmp_sorted \
+    "${TEST_KEY_BASE}-2.find.new" "${TEST_KEY_BASE}-2.find.new" <<'__FIND__'
 ./.fcm-make2/config-as-parsed.cfg
 ./.fcm-make2/config-on-success.cfg
 ./.fcm-make2/ctx.gz
@@ -86,7 +93,7 @@ touch 'marker'
 sleep 1
 run_pass "${TEST_KEY_BASE}-1-incr" fcm make
 find_fcm_make_files '!' -newer 'marker' >"${TEST_KEY_BASE}-1-incr.find.old"
-file_cmp "${TEST_KEY_BASE}-1-incr.find.old" \
+file_cmp_sorted "${TEST_KEY_BASE}-1-incr.find.old" \
     "${TEST_KEY_BASE}-1-incr.find.old" <<'__FIND__'
 ./.fcm-make2/config-as-parsed.cfg
 ./.fcm-make2/config-on-success.cfg
@@ -98,7 +105,7 @@ file_cmp "${TEST_KEY_BASE}-1-incr.find.old" \
 ./extract/a/a.f90
 __FIND__
 find_fcm_make_files -newer 'marker' >"${TEST_KEY_BASE}-1-incr.find.new"
-file_cmp "${TEST_KEY_BASE}-1-incr.find.new" \
+file_cmp_sorted "${TEST_KEY_BASE}-1-incr.find.new" \
     "${TEST_KEY_BASE}-1-incr.find.new" <<'__FIND__'
 ./.fcm-make/config-as-parsed.cfg
 ./.fcm-make/config-on-success.cfg
@@ -109,7 +116,7 @@ touch 'marker'
 sleep 1
 run_pass "${TEST_KEY_BASE}-2-incr" fcm make --name=2
 find_fcm_make_files '!' -newer 'marker' >"${TEST_KEY_BASE}-2-incr.find.old"
-file_cmp "${TEST_KEY_BASE}-2-incr.find.old" \
+file_cmp_sorted "${TEST_KEY_BASE}-2-incr.find.old" \
     "${TEST_KEY_BASE}-2-incr.find.old" <<'__FIND__'
 ./.fcm-make/config-as-parsed.cfg
 ./.fcm-make/config-on-success.cfg
@@ -121,7 +128,7 @@ file_cmp "${TEST_KEY_BASE}-2-incr.find.old" \
 ./extract/a/a.f90
 __FIND__
 find_fcm_make_files -newer 'marker' >"${TEST_KEY_BASE}-2-incr.find.new"
-file_cmp "${TEST_KEY_BASE}-2-incr.find.new" \
+file_cmp_sorted "${TEST_KEY_BASE}-2-incr.find.new" \
     "${TEST_KEY_BASE}-2-incr.find.new" <<'__FIND__'
 ./.fcm-make2/config-as-parsed.cfg
 ./.fcm-make2/config-on-success.cfg
@@ -132,7 +139,7 @@ touch 'marker'
 sleep 1
 run_pass "${TEST_KEY_BASE}-1-new" fcm make --new
 find_fcm_make_files '!' -newer 'marker' >"${TEST_KEY_BASE}-1-new.find.old"
-file_cmp "${TEST_KEY_BASE}-1-new.find.old" \
+file_cmp_sorted "${TEST_KEY_BASE}-1-new.find.old" \
     "${TEST_KEY_BASE}-1-new.find.old" <<'__FIND__'
 ./.fcm-make2/config-as-parsed.cfg
 ./.fcm-make2/config-on-success.cfg
@@ -143,7 +150,7 @@ file_cmp "${TEST_KEY_BASE}-1-new.find.old" \
 ./build/o/b.o
 __FIND__
 find_fcm_make_files -newer 'marker' >"${TEST_KEY_BASE}-1-new.find.new"
-file_cmp "${TEST_KEY_BASE}-1-new.find.new" \
+file_cmp_sorted "${TEST_KEY_BASE}-1-new.find.new" \
     "${TEST_KEY_BASE}-1-new.find.new" <<'__FIND__'
 ./.fcm-make/config-as-parsed.cfg
 ./.fcm-make/config-on-success.cfg
@@ -155,7 +162,7 @@ touch 'marker'
 sleep 1
 run_pass "${TEST_KEY_BASE}-2-new" fcm make --name=2 --new
 find_fcm_make_files '!' -newer 'marker' >"${TEST_KEY_BASE}-2-new.find.old"
-file_cmp "${TEST_KEY_BASE}-2-new.find.old" \
+file_cmp_sorted "${TEST_KEY_BASE}-2-new.find.old" \
     "${TEST_KEY_BASE}-2-new.find.old" <<'__FIND__'
 ./.fcm-make/config-as-parsed.cfg
 ./.fcm-make/config-on-success.cfg
@@ -163,7 +170,7 @@ file_cmp "${TEST_KEY_BASE}-2-new.find.old" \
 ./extract/a/a.f90
 __FIND__
 find_fcm_make_files -newer 'marker' >"${TEST_KEY_BASE}-2-new.find.new"
-file_cmp "${TEST_KEY_BASE}-2-new.find.new" \
+file_cmp_sorted "${TEST_KEY_BASE}-2-new.find.new" \
     "${TEST_KEY_BASE}-2-new.find.new" <<'__FIND__'
 ./.fcm-make2/config-as-parsed.cfg
 ./.fcm-make2/config-on-success.cfg
