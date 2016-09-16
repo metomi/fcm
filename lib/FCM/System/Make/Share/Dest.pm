@@ -268,9 +268,13 @@ sub _path {
         ? %{$m_ctx} : ('dest' => $m_ctx, 'name' => q{});
     $ctx{'dest'} ||= q{};
     $ctx{'name'} ||= q{};
+    my $path_of_key = $attrib_ref->{path_of}{$key};
     catfile(
         ($ctx{'dest'} ? $ctx{'dest'} : ()),
-        split(q{/}, sprintf($attrib_ref->{path_of}{$key}, $ctx{'name'})),
+        split(
+            q{/},
+            ($path_of_key ? sprintf($path_of_key, $ctx{'name'}) : $path_of_key),
+        ),
         @paths,
     );
 }
