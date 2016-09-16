@@ -427,6 +427,7 @@ svn co -q "${REPOS_URL}/hello/trunk" 'hello'
 echo 'Hello' >'hello/file'
 svn ci -q -m 'hello whatever' '--no-auth-cache' '--username=root' 'hello'
 poll 10 grep -q '^RET_CODE=' "${REPOS_PATH}/log/post-commit.log"
+poll 10 test -e 'mail.out'
 REV="$(<rev)"
 file_grep "${TEST_KEY}.mail.out.1" \
     "^-rnotifications@localhost -sfoo@${REV} by root" 'mail.out'

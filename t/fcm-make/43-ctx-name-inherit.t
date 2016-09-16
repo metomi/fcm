@@ -21,6 +21,11 @@
 #-------------------------------------------------------------------------------
 . "$(dirname "$0")/test_header"
 
+file_cmp_sorted() {
+    sort - >"${1}.expected"
+    file_cmp "$1" "${2}" "${1}.expected"
+}
+
 find_fcm_make_files() {
     find . "$@" -type f \
         '(' -path '*/build/*' -o \
@@ -70,7 +75,8 @@ __FORTRAN__
 
 run_pass "${TEST_KEY_BASE}-greet" fcm make -C "${PWD}/greet" -n '-friend'
 (cd 'greet' && find_fcm_make_files) >"${TEST_KEY_BASE}-greet.find"
-file_cmp "${TEST_KEY_BASE}-greet.find" "${TEST_KEY_BASE}-greet.find" <<'__FIND__'
+file_cmp_sorted \
+    "${TEST_KEY_BASE}-greet.find" "${TEST_KEY_BASE}-greet.find" <<'__FIND__'
 ./.fcm-make-friend/config-as-parsed.cfg
 ./.fcm-make-friend/config-on-success.cfg
 ./.fcm-make-friend/ctx.gz

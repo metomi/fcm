@@ -28,7 +28,7 @@ TEST_KEY="$TEST_KEY_BASE"
 run_pass "$TEST_KEY" fcm make
 find .fcm-make build -type f | sed 's/^\(\.fcm-make\/log\).*$/\1/' \
     | sort >"$TEST_KEY.find"
-file_cmp "$TEST_KEY.find" "$TEST_KEY.find" <<'__OUT__'
+sort >"${TEST_KEY}.find.expected" <<'__OUT__'
 .fcm-make/config-as-parsed.cfg
 .fcm-make/config-on-success.cfg
 .fcm-make/ctx.gz
@@ -38,6 +38,7 @@ build/include/world.mod
 build/o/hello.o
 build/o/world.o
 __OUT__
+file_cmp "$TEST_KEY.find" "$TEST_KEY.find" "${TEST_KEY}.find.expected"
 file_test "$TEST_KEY.log" fcm-make.log
 file_test "$TEST_KEY.fcm-make-as-parsed.cfg" fcm-make-as-parsed.cfg
 file_test "$TEST_KEY.fcm-make-on-success.cfg" fcm-make-on-success.cfg

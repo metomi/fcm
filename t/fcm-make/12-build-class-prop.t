@@ -28,7 +28,7 @@ PATH=$PWD/bin:$PATH
 TEST_KEY="$TEST_KEY_BASE"
 run_pass "$TEST_KEY" fcm make
 find build* -type f | sort >"$TEST_KEY.find"
-file_cmp "$TEST_KEY.find" "$TEST_KEY.find" <<'__FIND__'
+sort >"${TEST_KEY}.find.expected" <<'__FIND__'
 build/bin/hello.bin
 build/o/hello.o
 build_house/bin/hello_house
@@ -38,6 +38,7 @@ build_office/o/hello_office.o
 build_road/bin/hello_road
 build_road/o/hello_road.o
 __FIND__
+file_cmp "$TEST_KEY.find" "$TEST_KEY.find" "${TEST_KEY}.find.expected"
 sed '/^\[info\] shell(0.*) \(my-fc\|gfortran\)/!d; s/^\[info\] shell(0.*) //' \
     .fcm-make/log >"$TEST_KEY.log"
 file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<__LOG__

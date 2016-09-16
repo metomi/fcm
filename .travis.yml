@@ -1,0 +1,24 @@
+# Configuration for running FCM test battery on Travis CI
+# See https://travis-ci.org/ for more info.
+
+---
+language: perl
+
+before_install:
+    - cat >"${HOME}/.bashrc" <<<"export PATH=${PWD}/bin:\$PATH"
+    - source "${HOME}/.bashrc"
+
+install: 
+    - sudo apt-get install -y build-essential gfortran
+    - sudo apt-get install -y libxml-parser-perl libconfig-inifiles-perl
+    # For some reason XML::Parser needs to be installed this way
+    - cpanm 'Config::IniFiles' 'XML::Parser'
+    # Latest Subversion
+    - sudo sh -c 'echo "deb http://opensource.wandisco.com/ubuntu `lsb_release -cs` svn19" >> /etc/apt/sources.list.d/subversion19.list'
+    - sudo wget -q http://opensource.wandisco.com/wandisco-debian.gpg -O- | sudo apt-key add -
+    - sudo apt-get update
+    - sudo apt-get install -y subversion libsvn-perl
+    - sudo apt-get install -y heirloom-mailx
+
+script: 
+    - fcm test-battery -j 5

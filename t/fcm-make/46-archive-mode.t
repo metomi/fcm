@@ -20,6 +20,12 @@
 # Tests for "fcm make --archive"
 #-------------------------------------------------------------------------------
 . "$(dirname "$0")/test_header"
+
+file_cmp_sorted() {
+    sort - >"${1}.expected"
+    file_cmp "$1" "${2}" "${1}.expected"
+}
+
 tests 11
 #-------------------------------------------------------------------------------
 # Create a repository to extract
@@ -52,7 +58,7 @@ __CFG__
 TEST_KEY="${TEST_KEY_BASE}-on-new"
 run_pass "${TEST_KEY}" fcm make -a
 find '.fcm-make/cache' 'build' -type f | sort >"${TEST_KEY}.find"
-file_cmp "${TEST_KEY}.find" "${TEST_KEY}.find" <<'__FIND__'
+file_cmp_sorted "${TEST_KEY}.find" "${TEST_KEY}.find" <<'__FIND__'
 .fcm-make/cache/extract.tar.gz
 build/bin/hello
 build/include.tar.gz
@@ -66,14 +72,14 @@ TEST_KEY="${TEST_KEY_BASE}-on-incr"
 run_pass "${TEST_KEY}" fcm make -a
 find '.fcm-make/cache' 'build' -type f -newer 'new' \
     | sort >"${TEST_KEY}.find.new"
-file_cmp "${TEST_KEY}.find.new" "${TEST_KEY}.find.new" <<'__FIND__'
+file_cmp_sorted "${TEST_KEY}.find.new" "${TEST_KEY}.find.new" <<'__FIND__'
 .fcm-make/cache/extract.tar.gz
 build/include.tar.gz
 build/o.tar.gz
 __FIND__
 find '.fcm-make/cache' 'build' -type f '!' -newer 'new' \
     | sort >"${TEST_KEY}.find.old"
-file_cmp "${TEST_KEY}.find.old" "${TEST_KEY}.find.old" <<'__FIND__'
+file_cmp_sorted "${TEST_KEY}.find.old" "${TEST_KEY}.find.old" <<'__FIND__'
 build/bin/hello
 __FIND__
 
@@ -82,13 +88,13 @@ run_pass "${TEST_KEY}" \
     fcm make -a 'build.prop{archive-ok-target-category}=o'
 find '.fcm-make/cache' 'build' -type f -newer 'new' \
     | sort >"${TEST_KEY}.find.new"
-file_cmp "${TEST_KEY}.find.new" "${TEST_KEY}.find.new" <<'__FIND__'
+file_cmp_sorted "${TEST_KEY}.find.new" "${TEST_KEY}.find.new" <<'__FIND__'
 .fcm-make/cache/extract.tar.gz
 build/o.tar.gz
 __FIND__
 find '.fcm-make/cache' 'build' -type f '!' -newer 'new' \
     | sort >"${TEST_KEY}.find.old"
-file_cmp "${TEST_KEY}.find.old" "${TEST_KEY}.find.old" <<'__FIND__'
+file_cmp_sorted "${TEST_KEY}.find.old" "${TEST_KEY}.find.old" <<'__FIND__'
 build/bin/hello
 build/include/world_mod.mod
 __FIND__
@@ -96,10 +102,10 @@ __FIND__
 run_pass "${TEST_KEY_BASE}-off" fcm make
 find '.fcm-make/cache' 'build' -type f -newer 'new' \
     | sort >"${TEST_KEY}.find.new"
-file_cmp "${TEST_KEY}.find.new" "${TEST_KEY}.find.new" <'/dev/null'
+file_cmp_sorted "${TEST_KEY}.find.new" "${TEST_KEY}.find.new" <'/dev/null'
 find '.fcm-make/cache' 'build' -type f '!' -newer 'new' \
     | sort >"${TEST_KEY}.find.old"
-file_cmp "${TEST_KEY}.find.old" "${TEST_KEY}.find.old" <<'__FIND__'
+file_cmp_sorted "${TEST_KEY}.find.old" "${TEST_KEY}.find.old" <<'__FIND__'
 .fcm-make/cache/extract/hello/0/hello.f90
 .fcm-make/cache/extract/hello/0/world_mod.f90
 build/bin/hello
