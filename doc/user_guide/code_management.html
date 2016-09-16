@@ -568,7 +568,7 @@ Starting editor to create commit message ...
 Change summary:
 ------------------------------------------------------------------------
 [Project: GEN]
-[Branch : branches/test/frsn/r123_foo_bar]
+[Branch : branches/test/daisy/r123_foo_bar]
 [Sub-dir: &lt;top&gt;]
 
 M      src/code/GenMod_Control/GenMod_Control.f90
@@ -736,16 +736,16 @@ At revision 170.
 Starting nedit to create commit message ...
 Change summary:
 ------------------------------------------------------------------------
-A    svn://fcm1/repos/OPS/branches/dev/frsn/r118_my_test_branch
+A    svn://fcm1/repos/OPS/branches/dev/daisy/r118_my_test_branch
 ------------------------------------------------------------------------
 Commit message is as follows:
 ------------------------------------------------------------------------
 Create an example branch to demonstrate branch creation for the user guide.
-#23: Created /OPS/branches/dev/frsn/r118_my_test_branch from /OPS/trunk@118.
+#23: Created /OPS/branches/dev/daisy/r118_my_test_branch from /OPS/trunk@118.
 ------------------------------------------------------------------------
 Would you like to go ahead and create this branch?
 Enter "y" or "n" (or just press &lt;return&gt; for "n"): y
-Creating branch svn://fcm1/repos/OPS/branches/dev/frsn/r118_my_test_branch ...
+Creating branch svn://fcm1/repos/OPS/branches/dev/daisy/r118_my_test_branch ...
 
 Committed revision 169.
 </pre>
@@ -767,14 +767,14 @@ Committed revision 169.
   or 1 (failure) if no branch is found.</p>
   <pre>
 (SHELL PROMPT)$ fcm branch-list fcm:gen
-1 branch found for frsn in svn://fcm1/GEN_svn/GEN
-fcm:GEN-br/dev/frsn/r1191_clean_up/
+1 branch found for daisy in svn://fcm1/GEN_svn/GEN
+fcm:GEN-br/dev/daisy/r1191_clean_up/
 (SHELL PROMPT)$ echo $?
 0
-(SHELL PROMPT)$ fcm branch-list --user frbj --user frsn fcm:gen
-2 branches found for frbj, frsn in svn://fcm1/GEN_svn/GEN
+(SHELL PROMPT)$ fcm branch-list --user frbj --user daisy fcm:gen
+2 branches found for frbj, daisy in svn://fcm1/GEN_svn/GEN
 fcm:GEN-br/dev/frbj/r1177_gen_ui_for_scs/
-fcm:GEN-br/dev/frsn/r1191_clean_up/
+fcm:GEN-br/dev/daisy/r1191_clean_up/
 (SHELL PROMPT)$ echo $?
 0
 (SHELL PROMPT)$ fcm branch-list --user frva fcm:gen
@@ -791,14 +791,14 @@ fcm:GEN-br/dev/frsn/r1191_clean_up/
   its parent.</p>
   <pre>
 (SHELL PROMPT)$ fcm branch-info
-URL: svn://fcm1/FCM_svn/FCM/branches/dev/frsn/r1346_merge
+URL: svn://fcm1/FCM_svn/FCM/branches/dev/daisy/r1346_merge
 Repository Root: svn://fcm1/FCM_svn
 Revision: 1385
-Last Changed Author: frsn
+Last Changed Author: daisy
 Last Changed Rev: 1385
 Last Changed Date: 2006-04-20 11:08:45 +0100 (Thu, 20 Apr 2006)
 --------------------------------------------------------------------------------
-Branch Create Author: frsn
+Branch Create Author: daisy
 Branch Create Rev: 1354
 Branch Create Date: 2006-04-04 14:27:47 +0100 (Tue, 04 Apr 2006)
 Branch Parent: svn://fcm1/FCM_svn/FCM/trunk@1346
@@ -851,8 +851,8 @@ Merges Avail Into Parent: 1453 1452 1449 1446 1444 1443 1441 1434 1397 1396 ...
   working copy to point to another branch of same project:</p>
   <pre>
 (Shell prompt)$ cd $HOME/work
-(Shell prompt)$ fcm sw dev/frsn/r959_blockdata
--&gt; svn switch --revision HEAD svn://fcm1/FCM_svn/FCM/branches/dev/frsn/r959_blockdata
+(Shell prompt)$ fcm sw dev/daisy/r959_blockdata
+-&gt; svn switch --revision HEAD svn://fcm1/FCM_svn/FCM/branches/dev/daisy/r959_blockdata
 U    doc/user_guide/getting_started.html
 U    doc/user_guide/code_management.html
 U    doc/user_guide/command_ref.html

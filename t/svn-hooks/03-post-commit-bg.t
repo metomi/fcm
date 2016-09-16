@@ -313,6 +313,7 @@ svn import --no-auth-cache -q -m"$TEST_KEY" file5 "$REPOS_URL/file5"
 REV=$(<rev)
 TXN=$(<txn)
 poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
+poll 10 test -e 'mail.out'
 date2datefmt "$REPOS_PATH/log/post-commit.log" \
     | sed '/^trac-admin/d; s/^\(REV_FILE_SIZE=\).*\( #\)/\1???\2/' \
     >"$TEST_KEY.log"
@@ -353,6 +354,7 @@ svn cp -q -m '' --parents \
     "$REPOS_URL/hello/branches/test/$USER/whatever"
 REV=$(<rev)
 poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
+poll 10 test -e 'mail.out'
 file_grep "$TEST_KEY.mail.out.1" \
     "^-rnotifications@localhost -sfoo@${REV} by root" mail.out
 file_grep "$TEST_KEY.mail.out.2" "^r${REV} | root" mail.out
@@ -383,6 +385,7 @@ echo 'notification-modes=branch' >"${REPOS_PATH}/hooks/commit.cfg"
 echo 'Hello Alien' >hello/file
 svn ci -q -m'Hello Earth' --username=root --no-auth-cache hello/file
 poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
+poll 10 test -e 'mail.out'
 REV=$(<rev)
 file_grep "$TEST_KEY.mail.out.1" \
     "^-rnotifications@localhost -sfoo@${REV} by root" mail.out
@@ -410,6 +413,7 @@ echo 'Hail Alien' >'hail.txt'
 svn import -q -m '' --username=root --no-auth-cache 'hail.txt' \
     "$REPOS_URL/hello/branches/dev/Share/whatever/hail.txt"
 poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
+poll 10 test -e 'mail.out'
 REV=$(<rev)
 file_grep "$TEST_KEY.mail.out.1" \
     "^-rnotifications@localhost -sfoo@${REV} by root" 'mail.out'
@@ -428,6 +432,7 @@ echo 'notification-modes=branch' >"${REPOS_PATH}/hooks/commit.cfg"
 svn rm -q -m'No Hello' --username=root --no-auth-cache \
     "$REPOS_URL/hello/branches/test/$USER/whatever"
 poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
+poll 10 test -e 'mail.out'
 REV=$(<rev)
 file_grep "$TEST_KEY.mail.out.1" \
     "^-rnotifications@localhost -sfoo@${REV} by root" mail.out
@@ -463,6 +468,7 @@ svn co -q "${REPOS_URL}/hello/trunk" 'hello'
 echo 'Hello Hello' >'hello/file'
 svn ci -q -m 'hello 2 whatever' '--no-auth-cache' '--username=root' 'hello'
 poll 10 grep -q '^RET_CODE=' "${REPOS_PATH}/log/post-commit.log"
+poll 10 test -e 'mail.out'
 REV="$(<rev)"
 file_grep "${TEST_KEY}.mail.out.1" \
     "^-rnotifications@localhost -sfoo@${REV} by root" 'mail.out'
@@ -514,6 +520,7 @@ svn co -q "${REPOS_URL}/hello/trunk" 'hello'
 echo 'Hello Hello Hello' >'hello/file'
 svn ci -q -m 'hello 2 whatever' '--no-auth-cache' '--username=root' 'hello'
 poll 10 grep -q '^RET_CODE=' "${REPOS_PATH}/log/post-commit.log"
+poll 10 test -e 'mail.out'
 REV="$(<rev)"
 file_grep "${TEST_KEY}.mail.out.1" \
     "^-rnotifications@localhost -sfoo@${REV} by root" 'mail.out'

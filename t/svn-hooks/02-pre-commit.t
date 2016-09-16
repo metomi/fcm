@@ -434,9 +434,9 @@ A   hail/branches/dev/${USER}/whatever/README
 PERMISSION DENIED: A   hail/
 PERMISSION DENIED: A   hail/branches/
 PERMISSION DENIED: A   hail/branches/dev/
-PERMISSION DENIED: A   hail/branches/dev/frsn/
-PERMISSION DENIED: A   hail/branches/dev/frsn/whatever/
-PERMISSION DENIED: A   hail/branches/dev/frsn/whatever/README
+PERMISSION DENIED: A   hail/branches/dev/${USER}/
+PERMISSION DENIED: A   hail/branches/dev/${USER}/whatever/
+PERMISSION DENIED: A   hail/branches/dev/${USER}/whatever/README
 __LOG__
 
 # Create, bad 3, branch create on root with non-owner user
