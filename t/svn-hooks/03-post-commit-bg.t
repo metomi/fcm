@@ -228,6 +228,7 @@ perl -e 'map {print(rand())} 1..2097152' >'file3' # compress should be >10MB
 svn import --no-auth-cache -q -m"${TEST_KEY}" 'file3' "${REPOS_URL}/file3"
 REV="$(<'rev')"
 poll 10 grep -q '^RET_CODE=' "${REPOS_PATH}/log/post-commit.log"
+poll 10 test -e 'mail.out'
 date2datefmt "${REPOS_PATH}/log/post-commit.log" \
     | sed '/^trac-admin/d; s/^\(REV_FILE_SIZE=\).*\( #\)/\1???\2/' \
     >"${TEST_KEY}.log"

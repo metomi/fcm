@@ -140,6 +140,11 @@ sub add_trac_environment {
         my @command = (q{trac-admin}, $project->get_trac_live_path(), @args);
         $RUN->($log, sub {!system(@command)});
     };
+    my $TRAC_ADMIN_CONT = sub {
+        my ($log, @args) = @_;
+        my @command = (q{trac-admin}, $project->get_trac_live_path(), @args);
+        $RUNNER->run_continue($log, sub {!system(@command)});
+    };
     $TRAC_ADMIN->(
         "initialising Trac environment",
         q{initenv},
@@ -152,18 +157,22 @@ sub add_trac_environment {
     if ($group) {
         _chgrp_and_chmod($project->get_trac_live_path(), $group);
     }
+    # Note: For some reason, the commands to remove example components,
+    # versions, milestones, priorities fail using the "pip install trac" version
+    # on Travis CI. It is safe to allow the logic to continue after a failure
+    # here as they are really unimportant and can easily be configured later.
     for my $item (qw{component1 component2}) {
-        $TRAC_ADMIN->(
+        $TRAC_ADMIN_CONT->(
             "removing example component $item", q{component remove}, $item,
         );
     }
     for my $item (qw{1.0 2.0}) {
-        $TRAC_ADMIN->(
+        $TRAC_ADMIN_CONT->(
             "removing example version $item", q{version remove}, $item,
         );
     }
     for my $item (qw{milestone1 milestone2 milestone3 milestone4}) {
-        $TRAC_ADMIN->(
+        $TRAC_ADMIN_CONT->(
             "removing example milestone $item", q{milestone remove}, $item,
         );
     }
@@ -173,12 +182,15 @@ sub add_trac_environment {
         ['blocker'  => 'critical'],
     ) {
         my ($old, $new) = @{$item};
-        $TRAC_ADMIN->(
+        $TRAC_ADMIN_CONT->(
             "changing priority $old to $new", qw{priority change}, $old, $new,
         );
     }
     $TRAC_ADMIN->(
         "adding admin permission", qw{permission add admin TRAC_ADMIN},
+    );
+    $TRAC_ADMIN->(
+        "adding admin permission", qw{permission add owner TRAC_ADMIN},
     );
     my @admin_users = shellwords($CONFIG->get_trac_admin_users());
     for my $item (@admin_users) {
