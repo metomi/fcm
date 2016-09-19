@@ -61,7 +61,7 @@ TEST_KEY=$TEST_KEY_BASE-normal
 run_pass "$TEST_KEY" fcm update <<__IN__
 y
 __IN__
-sed -n "/^  *\*/p" "$TEST_DIR/$TEST_KEY.out" | LANG=C sort -o \
+sed -n "/^  *\*/p" "$TEST_DIR/$TEST_KEY.out" | LANG=C sort -k 3 -o \
     "$TEST_DIR/$TEST_KEY.update-status.sorted.out"
 file_cmp "$TEST_KEY.update-status.sorted.out" \
          "$TEST_KEY.update-status.sorted.out" <<__OUT__
