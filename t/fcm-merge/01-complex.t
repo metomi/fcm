@@ -210,7 +210,7 @@ __RESULTS__
 #-------------------------------------------------------------------------------
 # Tests fcm merge of branch-into-trunk (1)
 TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-1
-BRANCH_MOD_FILE=$(find . -type f | sed "/\.svn/d" | sort | head -3| tail -1)
+BRANCH_MOD_FILE="added_directory/hello_constants_dummy.inc"
 echo "# added this line for simple repeat testing" >>$BRANCH_MOD_FILE
 svn commit -q -m "edit on branch for merge repeat test"
 svn update -q
@@ -503,7 +503,7 @@ __RESULTS__
 #-------------------------------------------------------------------------------
 # Tests fcm merge of branch-into-trunk (2)
 svn switch -q $ROOT_URL/branches/dev/Share/merge1
-MOD_FILE=$(find . -type f | sed "/\.svn/d" | sort | head -4 | tail -1)
+MOD_FILE="added_file"
 echo "call_extra_feature()" >>$MOD_FILE
 svn commit -q -m "Made branch change to add extra feature"
 svn update -q
@@ -1052,7 +1052,7 @@ Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@19 cf. /${PRO
 ------------------------------------------------------------------------
 r19 | $LOGNAME | date | 1 line
 
-Made branch change - deleted ./added_directory/hello_constants_dummy.inc, copied ./added_file
+Made branch change - deleted added_directory/hello_constants_dummy.inc, copied added_file
 ------------------------------------------------------------------------
 r18 | $LOGNAME | date | 3 lines
 
@@ -1066,7 +1066,7 @@ Made branch change for merge repeat test
 ------------------------------------------------------------------------
 r16 | $LOGNAME | date | 1 line
 
-Made trunk change - a simple edit of ./added_file
+Made trunk change - a simple edit of added_file
 ------------------------------------------------------------------------
 r15 | $LOGNAME | date | 3 lines
 
@@ -1178,7 +1178,7 @@ rm -rf $TEST_DIR/wc
 mkdir $TEST_DIR/wc
 svn checkout -q $ROOT_URL/branches/dev/Share/merge2 $TEST_DIR/wc
 cd $TEST_DIR/wc
-BRANCH_2_MOD_FILE=$(find . -type f | sed "/\.svn/d" | sort | head -3| tail -1)
+BRANCH_2_MOD_FILE="module/hello_constants.f90"
 echo "Second branch change" >>$BRANCH_2_MOD_FILE
 svn commit -q -m "Made branch change - added to $BRANCH_2_MOD_FILE"
 svn update -q
@@ -1459,7 +1459,7 @@ Merged into /${PROJECT}branches/dev/Share/merge2: /${PROJECT}branches/dev/Share/
 ------------------------------------------------------------------------
 r21 | $LOGNAME | date | 1 line
 
-Made branch change - added to ./module/hello_constants.f90
+Made branch change - added to module/hello_constants.f90
 ------------------------------------------------------------------------
 r20 | $LOGNAME | date | 3 lines
 
@@ -1469,7 +1469,7 @@ Merged into /${PROJECT}trunk: /${PROJECT}branches/dev/Share/merge1@19 cf. /${PRO
 ------------------------------------------------------------------------
 r19 | $LOGNAME | date | 1 line
 
-Made branch change - deleted ./added_directory/hello_constants_dummy.inc, copied ./added_file
+Made branch change - deleted added_directory/hello_constants_dummy.inc, copied added_file
 ------------------------------------------------------------------------
 r18 | $LOGNAME | date | 3 lines
 
@@ -1483,7 +1483,7 @@ Made branch change for merge repeat test
 ------------------------------------------------------------------------
 r16 | $LOGNAME | date | 1 line
 
-Made trunk change - a simple edit of ./added_file
+Made trunk change - a simple edit of added_file
 ------------------------------------------------------------------------
 r15 | $LOGNAME | date | 3 lines
 

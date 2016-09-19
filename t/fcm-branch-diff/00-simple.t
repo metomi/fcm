@@ -28,7 +28,9 @@ setup
 init_repos
 init_branch_wc branch_test $REPOS_URL
 cd $TEST_DIR/wc
-FILE_LIST=$(find . -type f | sed "/\.svn/d" | sort | head -5)
+FILE_LIST="lib/python/info/__init__.py lib/python/info/poems.py \
+module/hello_constants.f90 module/hello_constants.inc \
+module/hello_constants_dummy.inc"
 for FILE in $FILE_LIST; do 
     sed -i "s/for/FOR/g; s/fi/end if/g; s/in/IN/g;" $FILE
     sed -i "/#/d; /^ *!/d" $FILE
