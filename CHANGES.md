@@ -5,6 +5,17 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## 2016.09.0 (2016-09-19)
+
+FCM release 34. Minor bug fix, and minor update to admin utilities.
+
+### Noteworthy Changes
+
+[#235](https://github.com/metomi/fcm/pull/235):
+fcm make: build: fix `sprintf` redundant argument warning on Perl 5.22+.
+
+--------------------------------------------------------------------------------
+
 ## 2016.05.1 (2016-05-19)
 
 FCM release 34. Minor update to admin utilities, nothing noteworthy for users.
