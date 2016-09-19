@@ -24,14 +24,14 @@
 if ! which trac-admin 1>/dev/null 2>/dev/null; then
     skip_all 'trac-admin not available'
 fi
-tests 20
+tests 28
 #-------------------------------------------------------------------------------
 set -e
 mkdir -p etc srv/{svn,trac}
 # Configuration
 export FCM_CONF_PATH="$PWD/etc"
 ADMIN_USERS='holly ivy'
-cat >etc/admin.cfg <<__CONF__
+cat >'etc/admin.cfg' <<__CONF__
 svn_live_dir=$PWD/srv/svn
 trac_admin_users=$ADMIN_USERS
 trac_live_dir=$PWD/srv/trac
@@ -49,12 +49,16 @@ for NAME in bus car lorry taxi; do
     # Trac environment directory exists
     run_pass "$TEST_KEY-d" test -d "$PWD/srv/trac/$NAME"
     # Admin users are set
+    trac-admin "$PWD/srv/trac/$NAME" 'permission' 'export' "$TEST_KEY-d-perms"
+    # For some reason, the "echo" for the next test is lost in the ether unless
+    # we have an "echo" here.
+    echo
     for ADMIN_USER in $ADMIN_USERS; do
-        trac-admin "$PWD/srv/trac/$NAME" permission list "$ADMIN_USER" \
-            >"$TEST_KEY.perm.out"
-        file_grep "$TEST_KEY.perm.out" \
-            "$ADMIN_USER  *TRAC_ADMIN" "$TEST_KEY.perm.out"
+        file_grep "$TEST_KEY-d-perms-$ADMIN_USER" \
+            "$ADMIN_USER,admin" "$TEST_KEY-d-perms"
     done
+    file_grep "$TEST_KEY-d-perms-owner" "owner,TRAC_ADMIN" "$TEST_KEY-d-perms"
+    file_grep "$TEST_KEY-d-perms-admin" "admin,TRAC_ADMIN" "$TEST_KEY-d-perms"
     # Subversion repository paths in place
     if [[ -d "srv/svn/$NAME" ]]; then
         file_grep "$TEST_KEY-repository_dir" \
