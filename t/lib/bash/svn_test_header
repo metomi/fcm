@@ -18,6 +18,7 @@
 # along with FCM. If not, see <http://www.gnu.org/licenses/>.
 # ------------------------------------------------------------------------------
 # Optional enviroment variables:
+#   TEST_PROJECT (tests using given project name)
 #   TEST_REMOTE_HOST (tests using svn+ssh repositories located on given host)
 # ------------------------------------------------------------------------------
 
@@ -27,7 +28,7 @@ function file_cmp() {
     local TEST_KEY=$1
     local FILE_ACTUAL=$2
     local FILE_EXPECT=${3:--}
-    if cmp $TEST_DIR/$FILE_ACTUAL $FILE_EXPECT; then
+    if diff -u $TEST_DIR/$FILE_ACTUAL $FILE_EXPECT >&2; then
         pass $TEST_KEY
         return
     fi
@@ -70,7 +71,8 @@ function file_xxdiff() {
 function init_repos() {
     if [[ -n ${TEST_REMOTE_HOST:-} ]]; then
         TEST_REMOTE_DIR=$(ssh $TEST_REMOTE_HOST "mktemp -d")
-        ssh $TEST_REMOTE_HOST "svnadmin create --fs-type fsfs $TEST_REMOTE_DIR"
+        ssh $TEST_REMOTE_HOST bash -l -c "svnadmin create --fs-type fsfs\
+            $TEST_REMOTE_DIR"
         REPOS_URL="svn+ssh://${TEST_REMOTE_HOST}$TEST_REMOTE_DIR"
     else
         svnadmin create --fs-type fsfs $TEST_DIR/test_repos
@@ -212,6 +214,57 @@ function run_fail() {
         return
     fi
     pass $TEST_KEY
+}
+
+function get_results() {
+    local RESULT_KEY=$1
+    local RESULTS_FILE=$2
+    local BEGIN="^begin-$RESULT_KEY$"
+    local END="^end-$RESULT_KEY$"
+    local RESULTS_TEMP=$(mktemp)
+    sed -n "/$BEGIN/,/$END/{/$BEGIN\|$END/d; p;}" $RESULTS_FILE >$RESULTS_TEMP
+    echo $RESULTS_TEMP
+}
+
+function test_mergeinfo() {
+    local TEST_INFO_NAME="$1-svn-mergeinfo"
+    local DIFF_BRANCH=$2
+    local INPUT_RESULTS_FILE=${3:--}
+    local WC_REVISION=${4:-WC}
+    if "$SVN_VERSION_IS_19"; then
+        WC_REVISION=WC
+    elif (( WC_REVISION < 10 )); then
+        WC_REVISION="$WC_REVISION "
+    fi
+    local RESULTS_FILE=$(mktemp)
+    sed "s/^\(.\{23\}\)WC/\1$WC_REVISION/" "$INPUT_RESULTS_FILE" \
+        >"$RESULTS_FILE"
+    # Test svn:mergeinfo property.
+    TEST_KEY=$TEST_INFO_NAME-prop
+    PROP_RESULT_TEXT=$(cat <$(get_results prop $RESULTS_FILE))
+    if [[ -n "$PROP_RESULT_TEXT" ]]; then
+        run_pass "$TEST_KEY" svn propget svn:mergeinfo .
+        file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <$(get_results prop $RESULTS_FILE)
+        file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+    else
+        # Subversion 1.9 won't set null mergeinfo.
+        skip 3
+    fi
+    # Test svn mergeinfo output.
+    TEST_KEY=$TEST_INFO_NAME-info
+    run_pass "$TEST_KEY" svn mergeinfo $DIFF_BRANCH
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <$(get_results info $RESULTS_FILE)    
+    file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+    # Test svn mergeinfo show-revs eligible before merge.
+    TEST_KEY=$TEST_INFO_NAME-show-revs-eligible
+    run_pass "$TEST_KEY" svn mergeinfo --show-revs eligible $DIFF_BRANCH
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <$(get_results eligible $RESULTS_FILE)        
+    file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+    # Test svn mergeinfo show-revs merged before merge.
+    TEST_KEY=$TEST_INFO_NAME-show-revs-merged
+    run_pass "$TEST_KEY" svn mergeinfo --show-revs merged $DIFF_BRANCH
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <$(get_results merged $RESULTS_FILE)            
+    file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 }
 
 function setup() {

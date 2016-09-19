@@ -41,7 +41,9 @@ MESSAGE=$(echo -e "Created $ROOT_PATH/branches/dev/fred/donuts from /trunk@1.")
 svn mkdir -q -m "Dr Fooeybar branch" $ROOT_URL/branches/dev/drfooeybar/
 svn copy -q -r1 $ROOT_URL/trunk $ROOT_URL/branches/dev/drfooeybar/donuts \
             -m "Made a branch $MESSAGE" --non-interactive
-FILE_LIST=$(find . -type f | sed "/\.svn/d" | sort | head -5)
+FILE_LIST="lib/python/info/__init__.py lib/python/info/poems.py \
+module/hello_constants.f90 module/hello_constants.inc \
+module/hello_constants_dummy.inc"
 for FILE in $FILE_LIST; do 
     sed -i "s/for/FOR/g; s/fi/end if/g; s/in/IN/g;" $FILE
     sed -i "/#/d; /^ *!/d" $FILE

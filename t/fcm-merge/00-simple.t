@@ -31,7 +31,7 @@ cd $TEST_DIR/wc
 #-------------------------------------------------------------------------------
 # Test the various mergeinfo output before merging.
 test_mergeinfo "$TEST_KEY_BASE-pre" \
-    $ROOT_URL/branches/dev/Share/merge1 <<__RESULTS__
+    $ROOT_URL/branches/dev/Share/merge1 - 9 <<__RESULTS__
 begin-prop
 end-prop
 begin-info
@@ -47,7 +47,7 @@ begin-info
      /                         
   -------| |------------         trunk
                        |       
-                       9       
+                       WC      
 end-info
 begin-eligible
 r5
@@ -150,7 +150,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 TEST_KEY=$TEST_KEY_BASE-non-interactive-diff
 run_pass "$TEST_KEY" svn diff
 diff_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
+diff_svn_version_filter >"$TEST_DIR/$TEST_KEY.sorted.ctrl" <<__OUT__
 
 Index: .
 ===================================================================
@@ -160,7 +160,16 @@ Index: .
 Property changes on: .
 ___________________________________________________________________
 Added: svn:mergeinfo
+#IF SVN1.9 ## -0,0 +0,1 ##
    Merged /branches/dev/Share/merge1:r4-5
+#IF SVN1.9 Index: added_directory/hello_constants.f90
+#IF SVN1.9 ===================================================================
+#IF SVN1.9 Index: added_directory/hello_constants.inc
+#IF SVN1.9 ===================================================================
+#IF SVN1.9 Index: added_directory/hello_constants_dummy.inc
+#IF SVN1.9 ===================================================================
+#IF SVN1.9 Index: added_file
+#IF SVN1.9 ===================================================================
 Index: lib/python/info/poems.py
 ===================================================================
 --- lib/python/info/poems.py	(revision 9)
@@ -225,6 +234,8 @@ Index: module/hello_constants_dummy.inc
 @@ -1 +1 @@
 -INCLUDE 'hello_constants.inc'
 +INCLUDE 'hello_constants.INc'
+#IF SVN1.9 Index: module/tree_conflict_file
+#IF SVN1.9 ===================================================================
 Index: subroutine/hello_sub_dummy.h
 ===================================================================
 --- subroutine/hello_sub_dummy.h	(revision 9)
@@ -233,11 +244,12 @@ Index: subroutine/hello_sub_dummy.h
  #include "hello_sub.h"
 +Modified a line
 __OUT__
+file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" "$TEST_DIR/$TEST_KEY.sorted.ctrl"
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Test the various mergeinfo output after merging.
 test_mergeinfo "$TEST_KEY_BASE-post" \
-    $ROOT_URL/branches/dev/Share/merge1 - <<__RESULTS__
+    $ROOT_URL/branches/dev/Share/merge1 - 9 <<__RESULTS__
 begin-prop
 /branches/dev/Share/merge1:4-5
 end-prop
@@ -254,7 +266,7 @@ begin-info
      /                         
   -------| |------------         trunk
                        |       
-                       9       
+                       WC      
 end-info
 begin-eligible
 end-eligible

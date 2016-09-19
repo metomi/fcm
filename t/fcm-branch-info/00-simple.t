@@ -33,7 +33,9 @@ fcm branch-create -t SHARE --rev-flag=NONE \
                            --non-interactive \
                            --branch-of-branch my_branch_test >/dev/null
 svn switch -q $ROOT_URL/trunk
-FILE_LIST=$(find . -type f | sed "/\.svn/d" | sort | head -5)
+FILE_LIST="lib/python/info/__init__.py lib/python/info/poems.py \
+module/hello_constants.f90 module/hello_constants.inc \
+module/hello_constants_dummy.inc"
 for FILE in $FILE_LIST; do 
     sed -i "s/for/FOR/g; s/fi/end if/g; s/in/IN/g;" $FILE
     sed -i "/#/d; /^ *!/d" $FILE
@@ -123,7 +125,6 @@ svn switch -q $ROOT_URL/branches/dev/Share/branch_test
 svn merge -q $ROOT_URL/branches/dev/Share/sibling_branch_test
 svn commit -q -m "Merged sibling into test branch"
 svn switch -q $ROOT_URL/branches/dev/Share/sibling_branch_test
-FILE_LIST=$(find . -type f | sed "/\.svn/d" | sort | head -5)
 TMPFILE=$(mktemp)
 for FILE in $FILE_LIST; do 
     cut -f 1 $FILE > $TMPFILE

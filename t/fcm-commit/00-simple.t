@@ -29,7 +29,12 @@ init_repos
 init_branch sibling_branch_test $REPOS_URL
 init_branch_wc branch_test $REPOS_URL
 cd $TEST_DIR/wc
-FILE_LIST=$(find . -type f | sed "/\.svn/d" | sort | head -5)
+FILE_LIST="./lib/python/info/__init__.py
+./lib/python/info/poems.py
+./module/hello_constants.f90
+./module/hello_constants.inc
+./module/hello_constants_dummy.inc
+"
 for FILE in $FILE_LIST; do
     sed -i "s/for/FOR/g; s/fi/end if/g; s/in/IN/g;" $FILE
     sed -i "/#/d; /^ *!/d" $FILE
@@ -55,7 +60,6 @@ Change summary:
 [Project: ${TEST_PROJECT:-}]
 [Branch : branches/dev/Share/branch_test]
 [Sub-dir: ]
-
 A  +    added_directory
 A  +    added_file
 D       module
@@ -71,10 +75,8 @@ Commit message is as follows:
 --------------------------------------------------------------------------------
 foo
 --------------------------------------------------------------------------------
-
 *** WARNING: YOU ARE COMMITTING TO A Share BRANCH.
 *** Please ensure that you have the owner's permission.
-
 Would you like to commit this change?
 Enter "y" or "n" (or just press <return> for "n"): Adding         added_directory
 Adding         added_file
@@ -83,7 +85,6 @@ Sending        added_directory/hello_constants.f90
 Sending        added_directory/hello_constants.inc
 Sending        added_directory/hello_constants_dummy.inc
 Sending        lib/python/info/poems.py
-Transmitting file data .....
 Committed revision 6.
 Updating '.':
 At revision 6.
