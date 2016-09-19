@@ -1,0 +1,289 @@
+#!/bin/bash
+# ------------------------------------------------------------------------------
+# (C) British Crown Copyright 2006-16 Met Office.
+#
+# This file is part of FCM, tools for managing and building source code.
+#
+# FCM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FCM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FCM. If not, see <http://www.gnu.org/licenses/>.
+# ------------------------------------------------------------------------------
+# Optional enviroment variables:
+#   TEST_PROJECT (tests using given project name)
+#   TEST_REMOTE_HOST (tests using svn+ssh repositories located on given host)
+# ------------------------------------------------------------------------------
+
+. $(dirname $0)/../lib/bash/test_header
+
+function file_cmp() {
+    local TEST_KEY=$1
+    local FILE_ACTUAL=$2
+    local FILE_EXPECT=${3:--}
+    if diff -u $TEST_DIR/$FILE_ACTUAL $FILE_EXPECT >&2; then
+        pass $TEST_KEY
+        return
+    fi
+    fail $TEST_KEY
+}
+
+function file_grep() {
+    local TEST_KEY=$1
+    local PATTERN=$2
+    local FILE=$3
+    if grep -q -e "$PATTERN" $TEST_DIR/$FILE; then
+        pass $TEST_KEY
+        return
+    fi
+    fail $TEST_KEY
+}
+
+function file_test() {
+    local TEST_KEY=$1
+    local FILE=$2
+    local OPTION=${3:--e}
+    if test $OPTION $TEST_DIR/$FILE; then
+        pass $TEST_KEY
+    else
+        fail $TEST_KEY
+    fi
+}
+
+function file_xxdiff() {
+    local TEST_KEY=$1
+    local FILE_ACTUAL=$2
+    local FILE_EXPECT=${3:--}
+    if xxdiff -D $TEST_DIR/$FILE_ACTUAL $FILE_EXPECT; then
+        pass $TEST_KEY
+        return
+    fi
+    fail $TEST_KEY
+}
+
+function init_repos() {
+    if [[ -n ${TEST_REMOTE_HOST:-} ]]; then
+        TEST_REMOTE_DIR=$(ssh $TEST_REMOTE_HOST "mktemp -d")
+        ssh $TEST_REMOTE_HOST bash -l -c "svnadmin create --fs-type fsfs\
+            $TEST_REMOTE_DIR"
+        REPOS_URL="svn+ssh://${TEST_REMOTE_HOST}$TEST_REMOTE_DIR"
+    else
+        svnadmin create --fs-type fsfs $TEST_DIR/test_repos
+        REPOS_URL="file://$TEST_DIR/test_repos"
+    fi
+    ROOT_URL=$REPOS_URL
+    PROJECT=
+    if [[ -n ${TEST_PROJECT:-} ]]; then
+        ROOT_URL=$REPOS_URL/$TEST_PROJECT
+        PROJECT=$TEST_PROJECT"/"
+    fi
+    svn import -q $TEST_SOURCE_DIR/../etc/repo_files \
+        $REPOS_URL/$PROJECT/trunk -m "initial trunk import"
+    svn mkdir -q $REPOS_URL/$PROJECT/tags -m "make tags"
+    svn mkdir -q --parents $REPOS_URL/$PROJECT/branches/dev/Share -m " "
+}
+
+function init_repos_layout_roses() {
+    if [[ -n ${TEST_REMOTE_HOST:-} ]]; then
+        TEST_REMOTE_DIR=$(ssh $TEST_REMOTE_HOST "mktemp -d")
+        ssh $TEST_REMOTE_HOST "svnadmin create --fs-type fsfs $TEST_REMOTE_DIR"
+        REPOS_URL="svn+ssh://${TEST_REMOTE_HOST}$TEST_REMOTE_DIR"
+    else
+        svnadmin create --fs-type fsfs $TEST_DIR/test_repos
+        REPOS_URL="file://$TEST_DIR/test_repos"
+    fi
+    svn mkdir -q --parents $REPOS_URL/a/a/0/0/0/trunk
+    svn import -q $TEST_SOURCE_DIR/../etc/repo_files \
+        $REPOS_URL/a/a/0/0/0/trunk -m "initial trunk import"
+    TMPFILE=$(mktemp)
+    cat >$TMPFILE <<__LAYOUT__
+depth-project = 5
+depth-branch = 1
+depth-tag = 1
+dir-trunk = trunk
+dir-branch =
+dir-tag =
+level-owner-branch =
+level-owner-tag =
+template-branch =
+template-tag =
+__LAYOUT__
+    TMPDIR=$(mktemp -d)
+    svn checkout -q $REPOS_URL $TMPDIR
+    svn propset -q --file=$TMPFILE fcm:layout $TMPDIR
+    svn commit -q -m " " $TMPDIR
+    rm -f $TMPFILE
+    rm -rf $TMPDIR
+    ROOT_URL=$REPOS_URL
+}
+
+function init_branch() {
+    local BRANCH_NAME=$1
+    local REPOS_URL=$2
+    local ROOT_URL=$REPOS_URL
+    local ROOT_PATH=
+    if [[ -n ${TEST_PROJECT:-} ]]; then
+        ROOT_URL=$REPOS_URL/$TEST_PROJECT
+        ROOT_PATH=$ROOT_PATH/$TEST_PROJECT
+    fi
+    MESSAGE=$(echo -e "Created $ROOT_PATH/branches/dev/Share/$BRANCH_NAME from /trunk@1.")
+    svn copy -q -r1 $ROOT_URL/trunk $ROOT_URL/branches/dev/Share/$BRANCH_NAME \
+                    -m "Made a branch $MESSAGE"
+}
+
+function init_branch_wc() {
+    local BRANCH_NAME=$1
+    local REPOS_URL=$2
+    local ROOT_URL=$REPOS_URL
+    if [[ -n ${TEST_PROJECT:-} ]]; then
+        ROOT_URL=$REPOS_URL/$TEST_PROJECT
+    fi
+    init_branch $BRANCH_NAME $REPOS_URL
+    svn checkout -q $ROOT_URL/branches/dev/Share/$BRANCH_NAME $TEST_DIR/wc
+}
+
+function init_merge_branches() {
+    local BRANCH_NAME=$1
+    local OTHER_BRANCH_NAME=$2
+    local REPOS_URL=$3
+    local ROOT_URL=$REPOS_URL
+    if [[ -n ${TEST_PROJECT:-} ]]; then
+        ROOT_URL=$REPOS_URL/$TEST_PROJECT
+    fi
+    init_branch_wc $BRANCH_NAME $REPOS_URL
+    cd $TEST_DIR/wc
+    modify_files="lib/python/info/__init__.py lib/python/info/poems.py \
+                  module/hello_constants.f90 module/hello_constants.inc \
+                  module/hello_constants_dummy.inc"
+    for file in $modify_files; do
+        sed -i "s/for/FOR/g; s/fi/end if/g; s/in/IN/g;" "$file"
+        sed -i "/#/d; /^ *!/d" "$file"
+        sed -i "s/!/!!/g; s/q/\nq/g; s/[(]/(\n/g" "$file"
+    done
+    copy_file="module/hello_constants_dummy.inc"    
+    copy_file_dir=$(dirname "$copy_file")
+    svn copy -q "$copy_file" "./added_file"
+    svn copy -q "$copy_file_dir" "added_directory"
+    touch "$copy_file_dir/tree_conflict_file"
+    append_line_file="subroutine/hello_sub_dummy.h"    
+    svn add -q "$copy_file_dir/tree_conflict_file"
+    echo "Modified a line" >>$append_line_file
+    svn commit -q -m "Made changes for future merge of this branch"
+    svn update -q
+    init_branch $OTHER_BRANCH_NAME $REPOS_URL
+    svn switch -q $ROOT_URL/branches/dev/Share/$OTHER_BRANCH_NAME
+    echo " " > unversioned_file
+    properties_file="subroutine/hello_sub.h"
+    svn propset -q svn:executable "executable" $properties_file
+    other_copy_file="module/hello_constants_dummy.inc"
+    svn copy -q "$other_copy_file" "renamed_added_file"
+    svn commit -q -m "Made changes for future merge"
+    svn update -q
+    svn switch -q $ROOT_URL/trunk
+    trunk_change_file="lib/python/info/__init__.py"
+    echo "trunk change" >>"$trunk_change_file"
+    svn commit -q -m "Made trunk change"
+    svn update -q
+    echo "another trunk change" >>"$trunk_change_file"
+    svn commit -q -m "Made another trunk change"
+    svn update -q
+}
+
+function run_pass() {
+    local TEST_KEY=$1
+    shift 1
+    if ! "$@" 1>$TEST_DIR/$TEST_KEY.out 2>$TEST_DIR/$TEST_KEY.err; then
+        fail $TEST_KEY
+        return
+    fi
+    pass $TEST_KEY
+}
+
+function run_fail() {
+    local TEST_KEY=$1
+    shift 1
+    if "$@" 1>$TEST_DIR/$TEST_KEY.out 2>$TEST_DIR/$TEST_KEY.err; then
+        fail $TEST_KEY
+        return
+    fi
+    pass $TEST_KEY
+}
+
+function get_results() {
+    local RESULT_KEY=$1
+    local RESULTS_FILE=$2
+    local BEGIN="^begin-$RESULT_KEY$"
+    local END="^end-$RESULT_KEY$"
+    local RESULTS_TEMP=$(mktemp)
+    sed -n "/$BEGIN/,/$END/{/$BEGIN\|$END/d; p;}" $RESULTS_FILE >$RESULTS_TEMP
+    echo $RESULTS_TEMP
+}
+
+function test_mergeinfo() {
+    local TEST_INFO_NAME="$1-svn-mergeinfo"
+    local DIFF_BRANCH=$2
+    local INPUT_RESULTS_FILE=${3:--}
+    local WC_REVISION=${4:-WC}
+    if "$SVN_VERSION_IS_19"; then
+        WC_REVISION=WC
+    elif (( WC_REVISION < 10 )); then
+        WC_REVISION="$WC_REVISION "
+    fi
+    local RESULTS_FILE=$(mktemp)
+    sed "s/^\(.\{23\}\)WC/\1$WC_REVISION/" "$INPUT_RESULTS_FILE" \
+        >"$RESULTS_FILE"
+    # Test svn:mergeinfo property.
+    TEST_KEY=$TEST_INFO_NAME-prop
+    PROP_RESULT_TEXT=$(cat <$(get_results prop $RESULTS_FILE))
+    if [[ -n "$PROP_RESULT_TEXT" ]]; then
+        run_pass "$TEST_KEY" svn propget svn:mergeinfo .
+        file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <$(get_results prop $RESULTS_FILE)
+        file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+    else
+        # Subversion 1.9 won't set null mergeinfo.
+        skip 3
+    fi
+    # Test svn mergeinfo output.
+    TEST_KEY=$TEST_INFO_NAME-info
+    run_pass "$TEST_KEY" svn mergeinfo $DIFF_BRANCH
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <$(get_results info $RESULTS_FILE)    
+    file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+    # Test svn mergeinfo show-revs eligible before merge.
+    TEST_KEY=$TEST_INFO_NAME-show-revs-eligible
+    run_pass "$TEST_KEY" svn mergeinfo --show-revs eligible $DIFF_BRANCH
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <$(get_results eligible $RESULTS_FILE)        
+    file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+    # Test svn mergeinfo show-revs merged before merge.
+    TEST_KEY=$TEST_INFO_NAME-show-revs-merged
+    run_pass "$TEST_KEY" svn mergeinfo --show-revs merged $DIFF_BRANCH
+    file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <$(get_results merged $RESULTS_FILE)            
+    file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
+}
+
+function setup() {
+    mkdir -p $TEST_DIR/.subversion
+    mkdir -p $TEST_DIR/run
+    cd $TEST_DIR/run
+}
+
+function teardown() {
+    cd $TEST_DIR
+    rm -rf $TEST_DIR/test_repos
+    rm -rf $TEST_DIR/wc
+    rm -rf $TEST_DIR/run
+    rm -rf $TEST_DIR/.subversion
+    if [[ -n ${TEST_REMOTE_HOST:-} ]]; then
+        ssh $TEST_REMOTE_HOST "rm -rf $TEST_REMOTE_DIR"
+    fi
+}
+
+REPOS_URL=
+ROOT_URL=
+PROJECT=
