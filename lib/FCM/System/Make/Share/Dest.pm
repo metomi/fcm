@@ -29,7 +29,7 @@ use FCM::System::Exception;
 use File::Basename qw{dirname};
 use File::Path qw{mkpath rmtree};
 use File::Spec::Functions qw{catfile rel2abs};
-use IO::File;
+use File::Temp;
 use IO::Uncompress::Gunzip qw{gunzip};
 use IO::Compress::Gzip qw{gzip};
 use Scalar::Util qw{blessed reftype};
@@ -101,9 +101,9 @@ sub _ctx_load {
         $dest = $m_ctx->get_dest();
     }
     my $old_m_ctx = eval {
-        my $handle = IO::File->new_tmpfile();
+        my $handle = File::Temp->new('TMPDIR' => 1);
         # Open the file here to work around permission problems with file ACLs
-        my $path_handle = new IO::File $path || die("Cannot open cache file $path\n");
+        open(my $path_handle, '<', $path) || die($!);
         gunzip($path_handle, $handle) || die($!);
         $handle->seek(0, 0);
         fd_retrieve($handle);
@@ -161,7 +161,7 @@ sub _dest_done {
     $m_ctx->set_dest_lock(undef);
     if (-d $dest_parent) {
         eval {
-            my $handle = IO::File->new_tmpfile();
+            my $handle = File::Temp->new('TMPDIR' => 1);
             nstore_fd($m_ctx, $handle) || die($!);
             $handle->seek(0, 0) || die($!);
             gzip($handle, _path($attrib_ref, $m_ctx, 'sys-ctx')) || die($!);
