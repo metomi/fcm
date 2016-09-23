@@ -173,6 +173,21 @@ A   +   FILENAME
       old file and runs <code>fcm resolve</code>.</p>
     </dd>
 
+    <dt id="edit:replace"><samp>local edit, incoming replace upon
+    merge</samp></dt>
+
+    <dd>
+      <p><dfn>meaning</dfn>: file modified on branch locally, but replaced
+      (deleted, and new file added) on merge branch</p>
+
+      <p><dfn>what keep local does</dfn>: just runs <code>fcm
+      resolve</code>.</p>
+
+      <p><dfn>what discarding local does</dfn>: <code>svn delete</code> local
+      file, and <code>svn copy</code> the incoming file into it. It then runs
+      <code>fcm resolve</code>.</p>
+    </dd>
+
     <dt id="delete:delete:no_rename"><samp>local delete, incoming delete upon
     merge (no renaming)</samp></dt>
 

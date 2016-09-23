@@ -48,6 +48,7 @@ my %S = (
     'TC_ST_ADD'         => 'added',
     'TC_ST_DELETE'      => 'deleted',
     'TC_ST_EDIT'        => 'edited',
+    'TC_ST_REPLACE'     => 'replaced',
     'TC_ST_RENAME'      => 'renamed to %s',
 );
 
@@ -64,9 +65,10 @@ my %Q_CONF = (
     # D => delete,
     # E => edit,
     # M => missing,
+    # P => replace,
     # R => rename
     (   map {('TC_' . $_ => {'format' => \&_q_tree_conflict, 'type' => $TYPE_YN})}
-            qw(LAIA LDID LDIE LDIR LEID LEIR LRID LRIE LRIR)
+            qw(LAIA LDID LDIE LDIR LEID LEIP LEIR LRID LRIE LRIR)
     ),
 );
 
