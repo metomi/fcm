@@ -38,6 +38,7 @@ use File::Temp;
 # D => delete,
 # E => edit,
 # M => missing,
+# P => replace,
 # R => rename,
 # although the 'rename' has to be detected by our code below.
 
@@ -55,6 +56,7 @@ our %TREE_CONFLICT_GET_FINAL_ACTIONS_FUNC_FOR = (
     LDIR => \&_cm_tree_conflict_get_actions_for_ldir,
     LEID => \&_cm_tree_conflict_get_actions_for_leid,
     LEIR => \&_cm_tree_conflict_get_actions_for_leir,
+    LEIP => \&_cm_tree_conflict_get_actions_for_leip,
     LRID => \&_cm_tree_conflict_get_actions_for_lrid,
     LRIE => \&_cm_tree_conflict_get_actions_for_lrie,
     LRIR => \&_cm_tree_conflict_get_actions_for_lrir,
@@ -577,6 +579,20 @@ sub _cm_tree_conflict_get_actions_for_leid {
     };
 }
 
+# Return the actions needed to resolve 'local edit, incoming replace'
+sub _cm_tree_conflict_get_actions_for_leip {
+    my ($attrib_ref, $keep_local, $files_ref) = @_;
+    my ($cfile) = @{$files_ref};
+    my ($url, $url_peg) = _cm_tree_conflict_source($attrib_ref, 'right', $cfile);
+    my $cdir = dirname($cfile);
+    sub {
+        if (!$keep_local) {
+            $attrib_ref->{svn}->call('delete', $cfile);
+            $attrib_ref->{svn}->call('copy', $url, "$cdir/");
+        }
+    };
+}
+
 # Return the actions needed to resolve 'local edit, incoming rename'
 sub _cm_tree_conflict_get_actions_for_leir {
     my ($attrib_ref, $keep_local, $files_ref) = @_;
@@ -644,11 +660,11 @@ __PACKAGE__->class({'local' => '$', 'incoming' => '$', 'type' => '$'});
 # incoming delete.
 sub as_string {
     my ($self) = shift();
-    sprintf(
-        'L%sI%s',
-        uc(substr($self->get_local(), 0, 1)),
-        uc(substr($self->get_incoming(), 0, 1)),
-    );
+    my $local = $self->get_local() eq 'replace'
+        ? 'P' : uc(substr($self->get_local(), 0, 1));
+    my $incoming = $self->get_incoming() eq 'replace'
+        ? 'P' : uc(substr($self->get_incoming(), 0, 1));
+    sprintf('L%sI%s', $local, $incoming);
 }
 
 1;

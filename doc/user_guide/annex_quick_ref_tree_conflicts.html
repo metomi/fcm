@@ -126,7 +126,7 @@ A   +   FILENAME
     <dt id="add:add"><samp>local add, incoming add upon merge</samp></dt>
 
     <dd>
-      <p><dfn>what it means:</dfn>: files or directories added with the same
+      <p><dfn>what it means</dfn>: files or directories added with the same
       name independently</p>
 
       <p><dfn>what keep local does</dfn>: uses rename to shuffle the old file
@@ -148,10 +148,10 @@ A   +   FILENAME
       <p><dfn>meaning</dfn>: file or directory modified on the branch locally,
       but deleted on the merge branch</p>
 
-      <p><dfn>what keep local does</dfn>:just runs <code>fcm
+      <p><dfn>what keep local does</dfn>: just runs <code>fcm
       resolve</code>.</p>
 
-      <p><dfn>what discarding local does</dfn>:deletes the file or directory
+      <p><dfn>what discarding local does</dfn>: deletes the file or directory
       and runs <code>fcm resolve</code>.</p>
     </dd>
 
@@ -171,6 +171,21 @@ A   +   FILENAME
       and the common ancestor of the file on the branches, and uses them for a
       text conflict style merge into the new renamed file. It then deletes the
       old file and runs <code>fcm resolve</code>.</p>
+    </dd>
+
+    <dt id="edit:replace"><samp>local edit, incoming replace upon
+    merge</samp></dt>
+
+    <dd>
+      <p><dfn>meaning</dfn>: file modified on branch locally, but replaced
+      (deleted, and new file added) on merge branch</p>
+
+      <p><dfn>what keep local does</dfn>: just runs <code>fcm
+      resolve</code>.</p>
+
+      <p><dfn>what discarding local does</dfn>: <code>svn delete</code> local
+      file, and <code>svn copy</code> the incoming file into it. It then runs
+      <code>fcm resolve</code>.</p>
     </dd>
 
     <dt id="delete:delete:no_rename"><samp>local delete, incoming delete upon
