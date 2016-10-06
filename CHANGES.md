@@ -5,6 +5,22 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## Next Release (2016-Q4?)
+
+FCM release 35.
+
+### Noteworthy Changes
+
+[#239](https://github.com/metomi/fcm/pull/239):
+fcm conflicts: handle tree conflict:
+*local file edit, incoming file replace upon merge*.
+
+[#238](https://github.com/metomi/fcm/pull/238):
+fcm make: use `TMPDIR` (if defined in the environment) for temporary files on
+load/dump of `ctx.gz`, instead of `/tmp/`.
+
+--------------------------------------------------------------------------------
+
 ## 2016.09.0 (2016-09-19)
 
 FCM release 34. Minor bug fix, and minor update to admin utilities.
