@@ -5,9 +5,9 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
-## 2016.10.07 (2016-10-07)
+## 2016.10.0 (2016-10-07)
 
-FCM release 35.
+FCM release 36.
 
 ### Noteworthy Changes
 
@@ -23,7 +23,7 @@ load/dump of `ctx.gz`, instead of `/tmp/`.
 
 ## 2016.09.0 (2016-09-19)
 
-FCM release 34. Minor bug fix, and minor update to admin utilities.
+FCM release 35. Minor bug fix, and minor update to admin utilities.
 
 ### Noteworthy Changes
 
