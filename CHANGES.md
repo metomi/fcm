@@ -5,7 +5,7 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
-## Next Release (2016-Q4?)
+## 2016.10.07 (2016-10-07)
 
 FCM release 35.
 
