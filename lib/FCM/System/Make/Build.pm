@@ -1300,14 +1300,15 @@ sub _targets_select {
     if (keys(%dup_in)) {
         return $E->throw($E->BUILD_TARGET_DUP, \%dup_in);
     }
-    my @ignore_missing_dep_ns_list
-        = _props($attrib_ref, 'ignore-missing-dep-ns', $ctx);
+    my @ignore_missing_dep_ns_list = map {$_ eq q{/} ? q{} : $_} (
+        _props($attrib_ref, 'ignore-missing-dep-ns', $ctx)
+    );
     KEY:
     for my $key (sort(keys(%missing_deps_in))) {
         my $target = $target_of{$key};
         for my $ns (@ignore_missing_dep_ns_list) {
             if ($UTIL->ns_common($ns, $target->get_ns()) eq $ns) { # target in ns
-                my $hash_ref = @{delete($missing_deps_in{$key})};
+                my $hash_ref = delete($missing_deps_in{$key});
                 my @deps = @{$hash_ref->{"values"}};
                 for my $dep (@deps) {
                     $EVENT->(
