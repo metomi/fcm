@@ -675,14 +675,14 @@ sub del {
 
   # Create a temporary file for the commit log message
   my $temp_handle = $self->_commit_message(
-      sprintf("Deleted %s.\n", $self->branch_path()), 'D', $non_interactive,
+    sprintf("Deleted %s.\n", $self->branch_path()), 'D', $non_interactive,
   );
 
   # Check with the user to see if he/she wants to go ahead
   # ----------------------------------------------------------------------------
-  if (not $non_interactive) {
+  if (!$non_interactive) {
     my $mesg = '';
-    if (!$self->layout()->is_owned_by_user()) {
+    if ($self->branch_owner() && !$self->layout()->is_owned_by_user()) {
       $mesg .= "\n";
 
       if (exists $FCM1::CmUrl::owner_keywords{$self->branch_owner()}) {
