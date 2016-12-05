@@ -62,7 +62,7 @@ for NAME in bus car lorry taxi; do
     # Subversion repository paths in place
     if [[ -d "srv/svn/$NAME" ]]; then
         file_grep "$TEST_KEY-repository_dir" \
-            "repository_dir=$PWD/srv/svn/$NAME" \
+            "dir=$PWD/srv/svn/$NAME" \
             "$PWD/srv/trac/$NAME/conf/trac.ini"
     fi
 done

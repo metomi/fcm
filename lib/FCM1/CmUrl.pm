@@ -246,20 +246,26 @@ sub svnlog {
 
   # Check whether a "svn log" run is necessary
   # ----------------------------------------------------------------------------
-  my $need_update = ! ($revs [0] == $revs [1] and exists $self->{LOG}{$revs [0]});
-  my @ranges      = @revs;
-  if ($need_update and $self->{LOG_RANGE}) {
-    my %log_range = %{ $self->{LOG_RANGE} };
+  my $need_update = !($revs[0] == $revs[1] && exists($self->{LOG}{$revs [0]}));
+  my @ranges = @revs;
+  if ($need_update && $self->{LOG_RANGE}) {
+    my %log_range = %{$self->{LOG_RANGE}};
+    $log_range{LOWER_SOC} ||= 0;
+    $log_range{LOWER} ||= 0;
 
-    if ($stop_on_copy) {
-      $ranges [1] = $log_range{UPPER} if $ranges [1] >= $log_range{LOWER_SOC};
-
-    } else {
-      $ranges [1] = $log_range{UPPER} if $ranges [1] >= $log_range{LOWER};
+    if ($stop_on_copy && $ranges[1] >= $log_range{LOWER_SOC}) {
+      if ($ranges[1] >= $log_range{LOWER_SOC}) {
+        $ranges[1] = $log_range{UPPER};
+      }
+    }
+    else {
+      if ($ranges[1] >= $log_range{LOWER}) {
+        $ranges[1] = $log_range{UPPER};
+      }
     }
   }
 
-  $need_update = 0 if $ranges [0] < $ranges [1];
+  $need_update = 0 if $ranges[0] < $ranges[1];
 
   if ($need_update) {
     my @entries = @{$SVN->get_log(
