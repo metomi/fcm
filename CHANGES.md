@@ -5,6 +5,20 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## 2016.12.0 (2016-12-06)
+
+FCM release 37.
+
+### Noteworthy Changes
+
+[#241](https://github.com/metomi/fcm/pull/241):
+fcm branch-delete: fix Perl warning on branches in a Rosie repository.
+
+[#240](https://github.com/metomi/fcm/pull/240):
+fcm make: fix implementation of `build.prop{ignore-missing-dep-ns}`.
+
+--------------------------------------------------------------------------------
+
 ## 2016.10.0 (2016-10-07)
 
 FCM release 36.
