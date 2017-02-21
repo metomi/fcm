@@ -1794,7 +1794,9 @@ sub _cm_get_source {
         return _cm_err(FCM1::Cm::Exception->INVALID_BRANCH, $source_url);
     }
     $source->url_peg(
-      $source->branch_url() . '/' . $target->subdir() . '@' . $source->pegrev()
+        $source->branch_url()
+        . ($target->subdir() ? '/' . $target->subdir() : q{})
+        . ('@' . $source->pegrev())
     );
     # Ensure that the source and target URLs are in the same project
     if ($source->project_url() ne $target->project_url()) {
