@@ -58,7 +58,7 @@ sub _get_users_info {
         ) {
             next USER;
         }
-        my $email = _guess_email_from_gecos($attrib_ref, $gecos);
+        my $email = _guess_email_from_gecos($attrib_ref, $name, $gecos);
         if (!$email) {
             next USER;
         }
@@ -83,7 +83,9 @@ sub _get_only_users_info {
             $user_of{$name} = FCM::Admin::User->new({
                 name         => $name,
                 display_name => (split(q{,}, $gecos))[0],
-                email        => _guess_email_from_gecos($attrib_ref, $gecos),
+                email        => _guess_email_from_gecos(
+                    $attrib_ref, $name, $gecos,
+                ),
             });
         }
     }
@@ -92,17 +94,18 @@ sub _get_only_users_info {
 
 # Guess a user's email from gecos information
 sub _guess_email_from_gecos {
-    my ($attrib_ref, $gecos) = @_;
+    my ($attrib_ref, $name, $gecos) = @_;
     my $domain = $CONFIG->get_passwd_email_domain();
-    my $name = index($gecos, q{,}) > 0 ? (split(q{,}, $gecos))[0] : $gecos;
-    return ($name =~ qr{\s}msx)
-        ? undef : lc($name) . ($domain ? '@' . $domain : q{});
+    my $disp_name = index($gecos, q{,}) > 0 ? (split(q{,}, $gecos))[0] : $gecos;
+    return
+        lc(($disp_name =~ qr{\s}msx) ? $name : $disp_name)
+        . ($domain ? '@' . $domain : q{});
 }
 
 # Return a list of bad users in @users.
 sub _verify_users {
     my ($attrib_ref, @users) = @_;
-    grep {!getpwnam($_)} @users;
+    grep {!defined(getpwnam($_))} @users;
 }
 
 1;

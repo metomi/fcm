@@ -6,7 +6,10 @@ language: perl
 
 before_install:
     - cat >"${HOME}/.bashrc" <<<"export PATH=${PWD}/bin:\$PATH"
+    - (echo 'passwd_gid_min=100' && echo 'passwd_uid_min=100') >'etc/fcm/admin.cfg'
     - source "${HOME}/.bashrc"
+    # Ensure current user ID is not discarded by our email guess logic
+    - sudo chfn -f "${USER}" "${USER}"
 
 install: 
     - sudo apt-get install -y build-essential gfortran

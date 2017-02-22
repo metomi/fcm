@@ -23,6 +23,8 @@ use warnings;
 package FCM::System::CM::SVN;
 use base qw{FCM::Class::CODE};
 
+use constant IS_LOCAL => 1;
+
 use Cwd qw{cwd};
 use FCM::Context::Event;
 use FCM::Context::Locator;
@@ -234,7 +236,15 @@ sub _get_layout_common {
             }
             push(@head, $name);
         }
-        if (!defined($project)) {
+        if (defined($project) && $layout_config{'dir-trunk'}) {
+            # Check that trunk exists for $project
+            my $target = $project . '/' . $layout_config{'dir-trunk'};
+            if (!_verify_path($attrib_ref, $root, $rev, $target, $is_local)) {
+                $project = undef;
+                @names = ();
+            }
+        }
+        elsif (!defined($project)) {
             # $path does not contain the specific sub-directories that
             # contain the trunk, branches and tags, but $path itself may be
             # the project
@@ -694,8 +704,8 @@ sub is_owned_by_user {
 
 sub is_shared {
     my ($self) = @_;
-    $self->{branch_owner}
-        && grep {$_ eq $self->{branch_owner}} qw{Share Config Rel};
+    !$self->{branch_owner}
+        || grep {$_ eq $self->{branch_owner}} qw{Share Config Rel};
 }
 
 sub as_string {

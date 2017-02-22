@@ -27,7 +27,7 @@ test_tidy() {
     rm -f \
         "$REPOS_PATH/hooks/post-commit-bg-custom" \
         "$REPOS_PATH/hooks/post-commit-background-custom" \
-        "$REPOS_PATH/hooks/commit.conf" \
+        "$REPOS_PATH/hooks/commit.cfg" \
         "$REPOS_PATH/log/post-commit.log" \
         'file1' \
         'file2' \
@@ -38,7 +38,7 @@ test_tidy() {
         'mail.out'
 }
 #-------------------------------------------------------------------------------
-tests 44
+tests 50
 #-------------------------------------------------------------------------------
 cp -p "$FCM_HOME/etc/svn-hooks/post-commit" "$REPOS_PATH/hooks/"
 sed -i "/set -eu/a\
@@ -75,20 +75,29 @@ run_pass "$TEST_KEY.dump" test -s "$PWD/svn-dumps/foo-$REV.gz"
 run_fail "$TEST_KEY.mail.out" test -e mail.out
 #-------------------------------------------------------------------------------
 # Install and remove commit.conf, svnperms.conf
-for NAME in 'commit.conf' 'svnperms.conf'; do
+for NAME in 'commit.cfg' 'svnperms.conf'; do
     TEST_KEY="$TEST_KEY_BASE-no-add-${NAME}"
     test_tidy
-    # (Use "svnperms.conf" syntax. Doesn't matter for the purpose of this test.)
-    cat >"${NAME}" <<'__CONF__'
+    if [[ "${NAME}" == 'svnperms.conf' ]]; then
+        cat >"${NAME}" <<'__CONF__'
 [foo]
 .*=*(add,remove,update)
 __CONF__
+    else
+        touch "${NAME}"
+    fi
     mkdir -p "svn-hooks/foo"
-    cat >"svn-hooks/foo/${NAME}" <<'__CONF__'
+    if [[ "${NAME}" == 'svnperms.conf' ]]; then
+        cat >"svn-hooks/foo/${NAME}" <<'__CONF__'
 # This is the site override
 [foo]
 .*=*(add,remove,update)
 __CONF__
+    else
+        cat >"svn-hooks/foo/${NAME}" <<'__CONF__'
+# This is the site override
+__CONF__
+    fi
     cp -p "svn-hooks/foo/${NAME}" "$REPOS_PATH/hooks/${NAME}"
     svn import --no-auth-cache -q -m"${TEST_KEY}" "${NAME}" \
         "${REPOS_URL}/${NAME}"
@@ -115,11 +124,14 @@ __LOG__
 
     TEST_KEY="$TEST_KEY_BASE-add-${NAME}"
     test_tidy
-    # (Use "svnperms.conf" syntax. Doesn't matter for the purpose of this test.)
-    cat >${NAME} <<'__CONF__'
+    if [[ "${NAME}" == 'svnperms.conf' ]]; then
+        cat >"${NAME}" <<'__CONF__'
 [foo]
 .*=*(add,remove,update)
 __CONF__
+    else
+        touch "${NAME}"
+    fi
     svn import --no-auth-cache -q -m"$TEST_KEY" ${NAME} \
         "$REPOS_URL/${NAME}"
     REV=$(<rev)
@@ -142,13 +154,18 @@ __LOG__
     TEST_KEY="$TEST_KEY_BASE-modify-${NAME}"
     test_tidy
     svn co -q "$REPOS_URL" work
-    # (Use "svnperms.conf" syntax. Doesn't matter for the purpose of this test.)
-    cat >work/${NAME} <<'__CONF__'
+    if [[ "${NAME}" == 'svnperms.conf' ]]; then
+        cat >"work/${NAME}" <<'__CONF__'
 [foo]
 .*=*(add,remove,update)
 
 [bar]
 __CONF__
+    elif [[ "${NAME}" == 'commit.cfg' ]]; then
+        cat >"work/${NAME}" <<'__CONF__'
+permission-modes=branch
+__CONF__
+    fi
     svn commit --no-auth-cache -q -m"$TEST_KEY" work
     REV=$(<rev)
     poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
@@ -296,6 +313,7 @@ svn import --no-auth-cache -q -m"$TEST_KEY" file5 "$REPOS_URL/file5"
 REV=$(<rev)
 TXN=$(<txn)
 poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
+poll 10 test -e 'mail.out'
 date2datefmt "$REPOS_PATH/log/post-commit.log" \
     | sed '/^trac-admin/d; s/^\(REV_FILE_SIZE=\).*\( #\)/\1???\2/' \
     >"$TEST_KEY.log"
@@ -319,7 +337,7 @@ poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
 
 TEST_KEY="$TEST_KEY_BASE-branch-create-owner-1" # create author is owner
 test_tidy
-echo 'notify-owner' >"${REPOS_PATH}/hooks/commit.conf"
+echo 'notification-modes=branch' >"${REPOS_PATH}/hooks/commit.cfg"
 svn cp -q -m '' --parents \
     "$REPOS_URL/hello/trunk" \
     "$REPOS_URL/hello/branches/dev/$USER/whatever"
@@ -328,7 +346,7 @@ run_fail "$TEST_KEY.mail.out" test -s mail.out
 
 TEST_KEY="$TEST_KEY_BASE-branch-create-owner-2" # create author not owner
 test_tidy
-echo 'notify-owner' >"${REPOS_PATH}/hooks/commit.conf"
+echo 'notification-modes=branch' >"${REPOS_PATH}/hooks/commit.cfg"
 svn cp -q -m '' --parents \
     --username=root \
     --no-auth-cache \
@@ -336,6 +354,7 @@ svn cp -q -m '' --parents \
     "$REPOS_URL/hello/branches/test/$USER/whatever"
 REV=$(<rev)
 poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
+poll 10 test -e 'mail.out'
 file_grep "$TEST_KEY.mail.out.1" \
     "^-rnotifications@localhost -sfoo@${REV} by root" mail.out
 file_grep "$TEST_KEY.mail.out.2" "^r${REV} | root" mail.out
@@ -352,7 +371,7 @@ run_fail "$TEST_KEY.mail.out" test -s mail.out
 
 TEST_KEY="$TEST_KEY_BASE-branch-modify-owner-1" # modify author is owner
 test_tidy
-echo 'notify-owner' >"${REPOS_PATH}/hooks/commit.conf"
+echo 'notification-modes=branch' >"${REPOS_PATH}/hooks/commit.cfg"
 svn co -q "$REPOS_URL/hello/branches/dev/$USER/whatever" hello
 echo 'Hello Earth' >hello/file
 svn ci -q -m'Hello Earth' hello/file
@@ -361,11 +380,12 @@ run_fail "$TEST_KEY.mail.out" test -s mail.out
 
 TEST_KEY="$TEST_KEY_BASE-branch-modify-owner-2" # modify author not owner
 test_tidy
-echo 'notify-owner' >"${REPOS_PATH}/hooks/commit.conf"
+echo 'notification-modes=branch' >"${REPOS_PATH}/hooks/commit.cfg"
 #svn co -q "$REPOS_URL/hello/branches/dev/$USER/whatever" hello
 echo 'Hello Alien' >hello/file
 svn ci -q -m'Hello Earth' --username=root --no-auth-cache hello/file
 poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
+poll 10 test -e 'mail.out'
 REV=$(<rev)
 file_grep "$TEST_KEY.mail.out.1" \
     "^-rnotifications@localhost -sfoo@${REV} by root" mail.out
@@ -373,7 +393,7 @@ file_grep "$TEST_KEY.mail.out.2" "^r${REV} | root" mail.out
 
 TEST_KEY="$TEST_KEY_BASE-share-branch-owner-1" # modify share author is owner
 test_tidy
-echo 'notify-owner' >"${REPOS_PATH}/hooks/commit.conf"
+echo 'notification-modes=branch' >"${REPOS_PATH}/hooks/commit.cfg"
 svn cp -q -m '' --parents \
     "$REPOS_URL/hello/trunk" \
     "$REPOS_URL/hello/branches/dev/Share/whatever"
@@ -388,11 +408,12 @@ run_fail "$TEST_KEY.modify.mail.out" test -s mail.out
 
 TEST_KEY="$TEST_KEY_BASE-share-branch-owner-2" # modify share author not owner
 test_tidy
-echo 'notify-owner' >"${REPOS_PATH}/hooks/commit.conf"
+echo 'notification-modes=branch' >"${REPOS_PATH}/hooks/commit.cfg"
 echo 'Hail Alien' >'hail.txt'
 svn import -q -m '' --username=root --no-auth-cache 'hail.txt' \
     "$REPOS_URL/hello/branches/dev/Share/whatever/hail.txt"
 poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
+poll 10 test -e 'mail.out'
 REV=$(<rev)
 file_grep "$TEST_KEY.mail.out.1" \
     "^-rnotifications@localhost -sfoo@${REV} by root" 'mail.out'
@@ -400,33 +421,104 @@ file_grep "$TEST_KEY.mail.out.2" "^r${REV} | root" 'mail.out'
 
 TEST_KEY="$TEST_KEY_BASE-branch-delete-owner-1" # delete author is owner
 test_tidy
-echo 'notify-owner' >"${REPOS_PATH}/hooks/commit.conf"
+echo 'notification-modes=branch' >"${REPOS_PATH}/hooks/commit.cfg"
 svn rm -q -m'No Hello' "$REPOS_URL/hello/branches/dev/$USER/whatever"
 poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
 run_fail "$TEST_KEY.mail.out" test -s mail.out
 
 TEST_KEY="$TEST_KEY_BASE-branch-delete-owner-2" # delete author not owner
 test_tidy
-echo 'notify-owner' >"${REPOS_PATH}/hooks/commit.conf"
+echo 'notification-modes=branch' >"${REPOS_PATH}/hooks/commit.cfg"
 svn rm -q -m'No Hello' --username=root --no-auth-cache \
     "$REPOS_URL/hello/branches/test/$USER/whatever"
 poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
+poll 10 test -e 'mail.out'
 REV=$(<rev)
 file_grep "$TEST_KEY.mail.out.1" \
     "^-rnotifications@localhost -sfoo@${REV} by root" mail.out
 file_grep "$TEST_KEY.mail.out.2" "^r${REV} | root" mail.out
 #-------------------------------------------------------------------------------
-# Test owner notification
-TEST_KEY="${TEST_KEY_BASE}-owner-1" # trunk author is not owner
+# Test owner notification, repository
+TEST_KEY="${TEST_KEY_BASE}-owner-1"
 test_tidy
-cat >"${REPOS_PATH}/hooks/commit.conf" <<__CONF__
-notify-owner
-owner = $USER
+cat >"${REPOS_PATH}/hooks/commit.cfg" <<__CONF__
+notification-modes=repository
+owner=${USER}
 __CONF__
 rm -fr 'hello'
 svn co -q "${REPOS_URL}/hello/trunk" 'hello'
 echo 'Hello' >'hello/file'
 svn ci -q -m 'hello whatever' '--no-auth-cache' '--username=root' 'hello'
+poll 10 grep -q '^RET_CODE=' "${REPOS_PATH}/log/post-commit.log"
+poll 10 test -e 'mail.out'
+REV="$(<rev)"
+file_grep "${TEST_KEY}.mail.out.1" \
+    "^-rnotifications@localhost -sfoo@${REV} by root" 'mail.out'
+file_grep "${TEST_KEY}.mail.out.2" "^r${REV} | root" 'mail.out'
+#-------------------------------------------------------------------------------
+# Test owner notification, project
+TEST_KEY="${TEST_KEY_BASE}-owner-2"
+test_tidy
+cat >"${REPOS_PATH}/hooks/commit.cfg" <<__CONF__
+notification-modes=project
+owner[hello/]=${USER}
+__CONF__
+rm -fr 'hello'
+svn co -q "${REPOS_URL}/hello/trunk" 'hello'
+echo 'Hello Hello' >'hello/file'
+svn ci -q -m 'hello 2 whatever' '--no-auth-cache' '--username=root' 'hello'
+poll 10 grep -q '^RET_CODE=' "${REPOS_PATH}/log/post-commit.log"
+poll 10 test -e 'mail.out'
+REV="$(<rev)"
+file_grep "${TEST_KEY}.mail.out.1" \
+    "^-rnotifications@localhost -sfoo@${REV} by root" 'mail.out'
+file_grep "${TEST_KEY}.mail.out.2" "^r${REV} | root" 'mail.out'
+#-------------------------------------------------------------------------------
+# Test owner notification, project mode, repository level owner only
+# No notification
+TEST_KEY="${TEST_KEY_BASE}-owner-3"
+test_tidy
+cat >"${REPOS_PATH}/hooks/commit.cfg" <<__CONF__
+notification-modes=project
+owner=${USER}
+__CONF__
+rm -fr 'hello'
+svn co -q "${REPOS_URL}/hello/trunk" 'hello'
+echo 'Hello Hello Hello' >'hello/file'
+svn ci -q -m 'hello 2 whatever' '--no-auth-cache' '--username=root' 'hello'
+poll 10 grep -q '^RET_CODE=' "${REPOS_PATH}/log/post-commit.log"
+run_fail "${TEST_KEY}.mail.out" test -s 'mail.out'
+#-------------------------------------------------------------------------------
+# Test subscriber notification, configuration as in "owner-2" test, but
+# subscriber set to empty.
+# No notification
+TEST_KEY="${TEST_KEY_BASE}-subscriber-1"
+test_tidy
+cat >"${REPOS_PATH}/hooks/commit.cfg" <<__CONF__
+notification-modes=project
+owner[hello/]=${USER}
+subscriber[hello/]=
+__CONF__
+rm -fr 'hello'
+svn co -q "${REPOS_URL}/hello/trunk" 'hello'
+echo 'Hello Hello' >'hello/file'
+svn ci -q -m 'hello 2 whatever' '--no-auth-cache' '--username=root' 'hello'
+poll 10 grep -q '^RET_CODE=' "${REPOS_PATH}/log/post-commit.log"
+run_fail "${TEST_KEY}.mail.out" test -s 'mail.out'
+#-------------------------------------------------------------------------------
+# Test subscriber notification, configuration as in "owner-2" test, but
+# owner unset, and subscriber set to $USER.
+# No notification
+TEST_KEY="${TEST_KEY_BASE}-subscriber-2"
+test_tidy
+cat >"${REPOS_PATH}/hooks/commit.cfg" <<__CONF__
+notification-modes=project
+subscriber[hello/]=${USER}
+__CONF__
+rm -fr 'hello'
+svn co -q "${REPOS_URL}/hello/trunk" 'hello'
+echo 'Hello Hello Hello' >'hello/file'
+svn ci -q -m 'hello 2 whatever' '--no-auth-cache' '--username=root' 'hello'
 poll 10 grep -q '^RET_CODE=' "${REPOS_PATH}/log/post-commit.log"
 poll 10 test -e 'mail.out'
 REV="$(<rev)"

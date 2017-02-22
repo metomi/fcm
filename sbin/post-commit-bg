@@ -120,14 +120,14 @@ main() {
         echo "REV_FILE_SIZE=${REV_FILE_SIZE} # <1MB"
     fi
 
-    # Install commit.conf and svnperms.conf, if necessary
+    # Install commit.cfg and svnperms.conf, if necessary
     local NAME=$(basename "${REPOS}")
     if [[ -n "${FCM_SVN_HOOK_REPOS_SUFFIX:-}" ]]; then
         NAME="${NAME%${FCM_SVN_HOOK_REPOS_SUFFIX}}"
     fi
     local CHANGED=$(svnlook changed -r "${REV}" "${REPOS}")
     local FILE=
-    for FILE in 'commit.conf' 'svnperms.conf'; do
+    for FILE in 'commit.cfg' 'svnperms.conf'; do
         # Ignore if there is a site override
         if [[ -n "${FCM_SITE_HOME:-}" \
             && -e "${FCM_SITE_HOME:-}/svn-hooks/${NAME}/${FILE}" ]]
@@ -147,8 +147,8 @@ main() {
     done
 
     # If relevant, notify owners
-    local COMMIT_CONFIG="${REPOS}/hooks/commit.conf"
-    if grep -q 'notify-owner' "$COMMIT_CONFIG" 2>/dev/null; then
+    local COMMIT_CONFIG="${REPOS}/hooks/commit.cfg"
+    if [[ -f "${COMMIT_CONFIG}" ]]; then
         local ADDRS=$('post-commit-bg-notify-who' "$REPOS" "$REV" "$TXN")
         if [[ -n $ADDRS ]]; then
             SUBJECT="-s$(basename $REPOS)@$REV by $AUTHOR"

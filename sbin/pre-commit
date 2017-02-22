@@ -33,7 +33,8 @@
 #      "$REPOS/hooks/svnperms.conf" exists.
 #   2. Size check. Transaction should occupy less than 10MB, or the number of
 #      MB specified in "$REPOS/hooks/pre-commit-size-threshold.conf".
-#   3. Runs "$REPOS/hooks/pre-commit-custom" if it exists.
+#   3. Owner verification.
+#   4. Runs "$REPOS/hooks/pre-commit-custom" if it exists.
 #
 # ENVIRONMENT VARIABLES
 #   FCM_SVN_HOOK_ADMIN_EMAIL
@@ -80,7 +81,7 @@ main() {
         echo "$NAME@$TXN: changeset size ${SIZE}B exceeds 1MB." >&2
     fi
 
-    # Check permission.
+    # Check permission with svnperms, deprecated
     local PERM_CONFIG="$REPOS/hooks/svnperms.conf"
     if [[ -r "$PERM_CONFIG" && -s "$PERM_CONFIG" ]]; then
         svnperms.py -r "$REPOS" -t "$TXN" -f "$PERM_CONFIG" || return $?
@@ -90,11 +91,9 @@ main() {
         return 1
     fi
 
-    # Verify owner of any new branches, if relevant
-    local COMMIT_CONFIG="${REPOS}/hooks/commit.conf"
-    if grep -q 'verify-branch-owner' "$COMMIT_CONFIG" 2>/dev/null; then
-        pre-commit-verify-branch-owner "$REPOS" "$TXN" || return $?
-    fi
+    # Check author permission, rules based on normal usage pattern
+    local COMMIT_CONFIG="${REPOS}/hooks/commit.cfg"
+    pre-commit-perm "$REPOS" "$TXN" || return $?
 
     # Custom checking, if required
     local CUSTOM_HOOK="$REPOS/hooks/$THIS-custom"

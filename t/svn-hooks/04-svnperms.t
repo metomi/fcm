@@ -32,7 +32,7 @@ test_tidy() {
     rm -f \
         "$REPOS_PATH/hooks/pre-commit-custom" \
         "$REPOS_PATH/hooks/pre-commit-size-threshold.conf" \
-        "$REPOS_PATH/hooks/commit.conf" \
+        "$REPOS_PATH/hooks/commit.cfg" \
         "$REPOS_PATH/hooks/svnperms.conf" \
         "$REPOS_PATH/log/pre-commit.log" \
         README \

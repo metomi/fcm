@@ -133,30 +133,30 @@ NAME='svnperms-conf' run_tests
 file_cmp "$TEST_KEY-cmp" \
     'svn-repos/foo/hooks/svnperms.conf' 'svn-import/svnperms.conf'
 
-# New install, single repository, with commit.conf
-TEST_KEY="$TEST_KEY_BASE-commit.conf"
+# New install, single repository, with commit.cfg
+TEST_KEY="$TEST_KEY_BASE-commit.cfg"
 {
-    echo 'notify-branch-owner'
-    echo 'verify-branch-owner'
-} >'svn-import/commit.conf'
+    echo "owner=$USER"
+    echo 'notification-modes=repository project branch'
+} >'svn-import/commit.cfg'
 NAME='commit-conf' run_tests
 file_cmp "$TEST_KEY-cmp" \
-    'svn-repos/foo/hooks/commit.conf' 'svn-import/commit.conf'
+    'svn-repos/foo/hooks/commit.cfg' 'svn-import/commit.cfg'
 
-# New install, single repository, with commit.conf and site override
-TEST_KEY="$TEST_KEY_BASE-commit.conf-site-override"
+# New install, single repository, with commit.cfg and site override
+TEST_KEY="$TEST_KEY_BASE-commit.cfg-site-override"
 {
     echo 'notify-branch-owner'
     echo 'verify-branch-owner'
-} >'svn-import/commit.conf'
+} >'svn-import/commit.cfg'
 mkdir -p 'svn-hooks/foo'
 {
     echo '# This is the override'
     echo '# It is actually empty'
-} >'svn-hooks/foo/commit.conf'
+} >'svn-hooks/foo/commit.cfg'
 NAME='commit-conf-site-override' run_tests
 file_cmp "$TEST_KEY-cmp" \
-    'svn-repos/foo/hooks/commit.conf' 'svn-hooks/foo/commit.conf'
+    'svn-repos/foo/hooks/commit.cfg' 'svn-hooks/foo/commit.cfg'
 rm -fr 'svn-hooks'
 #-------------------------------------------------------------------------------
 exit

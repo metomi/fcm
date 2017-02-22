@@ -608,7 +608,7 @@ should be an instance of L<FCM::Context::Locator|FCM::Context::Locator>.
 
 The iterator returns the next useful entry of the configuration file as an
 object of L<FCM::Context::ConfigEntry|FCM::Context::ConfigEntry>. It returns
-under if there is no more useful entry to return.
+undef if there is no more useful entry to return.
 
 The %reader_attrib may be used to override the default attributes. The HASH
 should contain a {parser} and a {processor}. The {parser} is a CODE reference to
