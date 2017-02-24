@@ -11,7 +11,7 @@ and wrappers to Subversion for scientific software development
 
 ## Copyright and Terms of Use
 
-(C) British Crown Copyright 2006-16 Met Office.
+(C) British Crown Copyright 2006-17 Met Office.
 
 FCM is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

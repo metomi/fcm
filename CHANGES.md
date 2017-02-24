@@ -5,6 +5,19 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## 2017.02.0 (2017-02-24)
+
+FCM release 38.
+
+### Noteworthy Changes
+
+[#243](https://github.com/metomi/fcm/pull/243):
+fcm switch: fix Perl warning. This happened on an unexpected usage. A user has
+checked out an entire project tree, and then run `fcm switch trunk` on it.
+Clearly it did not work, but the added Perl warning was not helpful either.
+
+--------------------------------------------------------------------------------
+
 ## 2016.12.0 (2016-12-06)
 
 FCM release 37.
