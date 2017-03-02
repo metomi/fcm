@@ -1,0 +1,511 @@
+#!/bin/bash
+# ------------------------------------------------------------------------------
+# (C) British Crown Copyright 2006-16 Met Office.
+#
+# This file is part of FCM, tools for managing and building source code.
+#
+# FCM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FCM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FCM. If not, see <http://www.gnu.org/licenses/>.
+# ------------------------------------------------------------------------------
+#
+# Setup the respositories
+#
+# ------------------------------------------------------------------------------
+
+set -eu
+
+function setup() {
+    cd
+    mkdir ${HOME}/fcm_tutorial
+    cd ${HOME}/fcm_tutorial
+    svnadmin create repository
+}
+
+function setup_repos_fundamentals() {
+    fcm project-create fundamentals ${REPO_DIR} --non-interactive
+    svn co ${REPO_DIR}fundamentals/trunk ~/my_fcm_tutorial/fundamentals --non-interactive -q
+}
+
+
+function setup_repos_essentialsI() {
+    fcm project-create essentialsI ${REPO_DIR} --non-interactive 
+}
+
+function setup_repos_essentialsII() {
+    fcm project-create essentialsII ${REPO_DIR} --non-interactive
+    mkdir -p ~/my_fcm_tutorial/essentialsII
+    svn co ${REPO_DIR}essentialsII/trunk ~/my_fcm_tutorial/essentialsII --non-interactive -q
+}
+
+function setup_repos_essentialsIII() {
+    fcm project-create essentialsIII ${REPO_DIR} --non-interactive
+    mkdir -p ~/my_fcm_tutorial/essentialsIII
+    svn co ${REPO_DIR}essentialsIII/trunk ~/my_fcm_tutorial/essentialsIII --non-interactive -q
+}
+
+function setup_repos_specifics() {
+    fcm project-create specifics ${REPO_DIR} --non-interactive 
+    mkdir -p ~/my_fcm_tutorial/specifics
+    svn co ${REPO_DIR}/specifics/trunk ~/my_fcm_tutorial/specifics --non-interactive -q
+}
+
+function branch-create-co() {
+    fcm bc ${BRANCH_NAME} fcm:${REPO_NAME}_tr --non-interactive
+}
+
+function keywords() {
+#REPO_NAME, REPO_DIR, PROJECT) {
+  if [[ ${PROJECT} == "essentialsIII" ]]; then 
+
+    echo If you do not have a "~/.metomi/fcm/" directory it will now be created.
+    if [[ ! -e ~/.metomi/fcm/ ]]; then
+        mkdir -p ~/.metomi/fcm
+    fi
+
+    if [[ -e ~/.metomi/fcm/keyword.cfg ]]; then
+         echo Copying your original ~/.metomi/fcm/keyword.cfg file to ~/.metomi/fcm/keyword_orig_*.cfg
+         if [[ -e ~/.metomi/fcm/keyword_orig*.cfg ]]; then
+             LAST=$( ls -t ~/.metomi/fcm/keyword_orig* | head -1 | sed -e 's/keyword_orig_ *\([0-9]*\)/\1/' | sed -e 's/\(\.cfg\)*$//g')
+             NEW_LAST=$((${LAST}+1))
+             mv  ~/.metomi/fcm/keyword.cfg  ~/.metomi/fcm/keyword_orig${NEW_LAST}.cfg
+             echo Your original keyword.cfg has been moved to keyword_orig${NEW_LAST}.cfg as a backup.
+         else
+             mv  ~/.metomi/fcm/keyword.cfg  ~/.metomi/fcm/keyword_orig1.cfg
+             echo Your original keyword.cfg has been moved to keyword_orig1.cfg as a backup.
+         fi
+    fi
+
+    echo If you do not have a "~/.metomi/fcm/keyword.cfg" file it will now be created.
+    if [[ ! -e ~/.metomi/fcm/keyword.cfg ]]; then
+         touch ~/.metomi/fcm/keyword.cfg
+    fi
+  fi
+    if grep -Fq "[${REPO_NAME}]" ~/.metomi/fcm/keyword.cfg ; then
+        echo keyword exists
+    else
+        echo "location{primary}[${REPO_NAME}] = ${REPO_DIR}${PROJECT}" >> ~/.metomi/fcm/keyword.cfg
+    fi
+}
+
+# ------------------------------------------------------------------------------
+#
+# Test to see if the user has set up the fcm_tutorial/repository/fundamentals
+#  if so then remove and start again.
+#
+# ------------------------------------------------------------------------------
+
+REPO_DIR=file:///${HOME}/fcm_tutorial/repository/
+REPO_DIR2=${HOME}/fcm_tutorial/repository/
+
+if [[ ! -e ${REPO_DIR2} ]]; then
+    setup
+fi
+
+if [[ ! -e ~/my_fcm_tutorial/fundamentals ]];then
+    setup_repos_fundamentals ${REPO_DIR}
+fi
+
+
+# ------------------------------------------------------------------------------
+#
+# Populate the project Essentials I
+#
+# ------------------------------------------------------------------------------
+
+if [[ -e ~/my_fcm_tutorial/essentialsI ]];then
+    rm -rf ~/my_fcm_tutorial/essentialsI
+fi
+
+if svn ls file://${HOME}/fcm_tutorial/repository/essentialsI > /dev/null 2>&1; then
+    svn delete -q -m "delete" file://${HOME}/fcm_tutorial/repository/essentialsI
+fi
+
+setup_repos_essentialsI ${REPO_DIR}
+
+
+# ------------------------------------------------------------------------------
+#
+# Populate the project Essentials II
+#
+# ------------------------------------------------------------------------------
+
+if [[ -e ~/my_fcm_tutorial/essentialsII ]];then
+    rm -rf ~/my_fcm_tutorial/essentialsII
+fi
+
+if svn ls file://${HOME}/fcm_tutorial/repository/essentialsII > /dev/null 2>&1; then
+    svn delete -q -m "delete" file://${HOME}/fcm_tutorial/repository/essentialsII
+fi
+
+setup_repos_essentialsII ${REPO_DIR}
+
+
+# ------------------------------------------------------------------------------
+#
+# Populate the project Essentials III
+#
+# ------------------------------------------------------------------------------
+
+if [[ -e ~/my_fcm_tutorial/essentialsIII ]];then
+    rm -rf ~/my_fcm_tutorial/essentialsIII
+fi
+
+if svn ls file://${HOME}/fcm_tutorial/repository/essentialsIII > /dev/null 2>&1; then
+    svn delete -q -m "delete" file://${HOME}/fcm_tutorial/repository/essentialsIII
+fi
+
+setup_repos_essentialsIII ${REPO_DIR}
+
+# Now populate the trunk copy with some files and directories
+
+PROJECT=essentialsIII
+REPO_NAME=fcm_esiii
+TEST_DIR=${HOME}/fcm_tutorial/repository/${PROJECT}
+REPOS_URL="file://${TEST_DIR}"
+ROOT_URL=${REPOS_URL}
+ROOT_PATH=${REPOS_URL}
+
+cd ~/my_fcm_tutorial/${PROJECT}
+
+svn mkdir etc lib
+cat > etc/my_test_text.txt << EOF
+Some text to test that this works
+and some more to try to figure out what
+I can really do!
+EOF
+
+cat > etc/fcm_stuff.txt << EOF
+This part of the fcm tutorial will
+discuss the commands bls, bdel, up, 
+revert, merge --reverse, and the more
+complicated statuses.
+EOF
+
+cat > lib/my_python.py << EOF
+#!/usr/bin/env python
+print ${USER}
+EOF
+
+cat > update_branch.txt << EOF
+This text file is to be updated and ...
+EOF
+
+cat > revert.txt << EOF
+This text file is for the revert demo.
+EOF
+
+cat > merge_reverse.txt << EOF
+This text file is for the merge reverse
+and it is one sentence long."
+EOF
+
+cat > statusesR.txt << EOF
+This file will be used to create a 
+replacement issue.
+EOF
+
+cat > statusesC_text.txt << EOF
+This file will be used to create a 
+text conflict issue.
+EOF
+
+cat > etc/statusesC_tree.txt << EOF
+This file will be used to create a 
+tree conflict issue.
+EOF
+
+svn add -q etc/my_test_text.txt etc/fcm_stuff.txt lib/my_python.py
+svn add -q update_branch.txt revert.txt merge_reverse.txt statusesR.txt 
+svn add -q statusesC_text.txt etc/statusesC_tree.txt
+svn ci -m "Setting up the Essentials III tutorial.
+These changes are for setting up a project so that it has all the files and directories that are needed for the EssentialsIII tutorial section."
+svn up
+ 
+# Add keywords
+keywords ${REPO_NAME} ${REPO_DIR2} ${PROJECT}
+
+# Branching
+REV=$(svn info | grep Revision | sed -e 's/Revision: *\([0-9]*\)/\1/')
+
+# Branch branch_update
+BRANCH_NAME="branch_update"
+branch-create-co ${BRANCH_NAME} ${REPO_NAME}
+
+# Branch branch_update2
+BRANCH_NAME="branch_update2"
+branch-create-co ${BRANCH_NAME} ${REPO_NAME}
+fcm sw -q fcm:${REPO_NAME}/branches/dev/${USER}/r${REV}_${BRANCH_NAME}
+cat >> update_branch.txt << EOF
+... here is the rest of it.
+EOF
+svn ci -m "This change to the trunk so that we can make an update."
+fcm sw trunk -q
+
+# Branch branch_revert
+BRANCH_NAME="branch_revert"
+branch-create-co ${BRANCH_NAME} ${REPO_NAME}
+
+# Branch branch_delete
+BRANCH_NAME="branch_delete"
+branch-create-co ${BRANCH_NAME} ${REPO_NAME}
+
+# Branch branch_merge_reverse
+BRANCH_NAME="branch_merge_reverse"
+branch-create-co ${BRANCH_NAME} ${REV} ${REPO_NAME}
+fcm sw -q fcm:${REPO_NAME}_br/dev/${USER}/r${REV}_${BRANCH_NAME}
+cat >> merge_reverse.txt << EOF
+This is the second sentence.
+EOF
+svn ci -m "branch_merge_reverse change, multiple commits, commit 1."
+cat >> merge_reverse.txt << EOF
+The third sentence.
+EOF
+svn ci -m "branch_merge_reverse change, multiple commits, commit 2."
+cat >> merge_reverse.txt << EOF
+Finally the forth sentence.
+EOF
+svn ci -m "branch_merge_reverse change, multiple commits, commit 3."
+fcm sw trunk -q
+
+# Branch branch_replacement
+BRANCH_NAME="branch_replacement"
+branch-create-co ${BRANCH_NAME} ${REPO_NAME}
+
+# Branch branch_conflict_text
+BRANCH_NAME="branch_conflict_text"
+branch-create-co ${BRANCH_NAME} ${REPO_NAME}
+
+# Branch branch_conflict_text2
+BRANCH_NAME="branch_conflict_text2"
+branch-create-co ${BRANCH_NAME} ${REPO_NAME}
+
+# Branch branch_conflict_tree
+BRANCH_NAME="branch_conflict_tree"
+branch-create-co ${BRANCH_NAME} ${REPO_NAME}
+# Populate branch_conflict_tree with a tree conflict for a merge
+fcm sw -q fcm:${REPO_NAME}_br/dev/${USER}/r${REV}_${BRANCH_NAME}
+svn mkdir utils
+cat >> utils/tool_list.txt << EOF
+merge, update, revert, bls, branch-list
+EOF
+svn add utils/tool_list.txt
+svn ci -m "branch_conflict_tree change, create a tree conflict(      C) status."
+fcm sw trunk
+
+# Branch branch_conflict_tree2
+BRANCH_NAME="branch_conflict_tree2"
+branch-create-co ${BRANCH_NAME} ${REPO_NAME}
+
+# Populate branch_conflict_tree2 with a tree conflict for a merge
+fcm sw -q fcm:${REPO_NAME}_br/dev/${USER}/r${REV}_${BRANCH_NAME}
+svn mkdir utils
+cat >> utils/tool_list.txt << EOF
+merge, update, revert, bls, text conflict
+EOF
+cat >> utils/tool_list.txt << EOF
+binfo
+EOF
+svn add utils/tool_list.txt
+svn ci -m "branch_conflict_tree2 change create a tree conflict(      C) status."
+svn up
+fcm sw trunk
+
+# ------------------------------------------------------------------------------
+#
+# Populate the project Specifics
+#
+# ------------------------------------------------------------------------------
+
+
+if [[ -e ~/my_fcm_tutorial/specifics ]];then
+    rm -rf ~/my_fcm_tutorial/specifics
+fi
+
+if svn ls file://${HOME}/fcm_tutorial/repository/specifics > /dev/null 2>&1; then
+    svn delete -q -m "delete" file://${HOME}/fcm_tutorial/repository/specifics
+fi
+
+setup_repos_specifics
+
+REPOS=${HOME}/fcm_tutorial/repository
+cat <<EOF >${REPOS}/hooks/pre-revprop-change
+#!/bin/sh
+exit 0
+EOF
+chmod 755 ${REPOS}/hooks/pre-revprop-change
+
+# Now populate the trunk copy with some files and directories
+
+PROJECT=specifics
+REPO_NAME=fcm_sp
+TEST_DIR=${HOME}/fcm_tutorial/repository/${PROJECT}
+REPOS_URL="file://${TEST_DIR}"
+ROOT_URL=${REPOS_URL}
+ROOT_PATH=${REPOS_URL}
+
+cd ~/my_fcm_tutorial/${PROJECT}
+
+svn mkdir lib
+# change for propset exe
+cat > lib/my_hello_script.py << EOF
+/usr/bin/env python
+print 'Hello world'
+EOF
+svn add lib/my_hello_script.py
+svn ci -m "Change properties of my_hello_script.py, demo propset svn:executable ON"
+# change for propset ign
+cat > ever_growing_file.dat << EOF 
+In theory this is a data file that will keep growing 
+during the life of the repository so we do not want to commit
+it to the repository and we just want to ignore it!
+EOF
+svn add ever_growing_file.dat
+svn ci -m "Change .dat file, demo propset svn:ignore"
+# change for propdel exe
+cat > lib/readme_only.py << EOF
+/usr/bin/env python
+print Read me only, please don't execute this file 
+EOF
+chmod 755 lib/readme_only.py
+svn add lib/readme_only.py
+svn ci -m "Change properties of readme_only.py, demo propdel svn:executable"
+# change for propedit
+svn mkdir etc
+svn ci -m "Adding the etd/ directory."
+cat > tree_conflict.txt << EOF
+In the following example, the branch in the working copy has had a 
+deletion of a file.
+EOF
+svn add tree_conflict.txt
+svn ci "Create a tree conflict, delete then merge."
+cat > etc/readme.txt << EOF
+Our final change to the trunk!
+EOF
+svn add etc/readme.txt
+svn ci -m "Setup trunk for Specifics tutorial section."
+svn up
+ 
+# Add fcm keywords
+keywords ${REPO_NAME} ${REPO_DIR2} ${PROJECT}
+
+# Branching
+REV=$(svn info | grep Revision | sed -e 's/Revision: *\([0-9]*\)/\1/')
+
+# Branch branch_merge_custom
+BRANCH_NAME="branch_merge_custom"
+branch-create-co ${BRANCH_NAME} ${REPO_NAME}
+
+# Branch branch_propset_exe
+BRANCH_NAME="branch_propset_exe"
+branch-create-co ${BRANCH_NAME} ${REPO_NAME}
+
+# Branch branch_propset_ign
+BRANCH_NAME="branch_propset_ign"
+branch-create-co ${BRANCH_NAME} ${REPO_NAME}
+
+# Branch branch_propdel
+BRANCH_NAME="branch_propdel"
+branch-create-co ${BRANCH_NAME} ${REPO_NAME}
+
+# Branch branch_propedit
+BRANCH_NAME="branch_propedit"
+branch-create-co ${BRANCH_NAME} ${REPO_NAME}
+
+# Branch branch_resolve
+BRANCH_NAME="branch_resolve"
+branch-create-co ${BRANCH_NAME} ${REPO_NAME}
+
+fcm sw -q fcm:${REPO_NAME}_br/dev/${USER}/r${REV}_${BRANCH_NAME}
+svn mkdir lib/utility/
+cat >> lib/utility/tool_list.txt << EOF
+more merge, propset|del|edit, xxdiff, resolve, Trac, browse, tickets,
+branch-diff -t,  text conflict
+EOF
+cat >> lib/utility/tool_list.txt << EOF
+conflicts, tree conflicts.
+EOF
+svn add lib/utility/tool_list.txt
+svn ci -m "Create a test conflict(      C) status with this branch."
+svn up
+fcm sw trunk
+
+# Branch branch_conflict_tree
+BRANCH_NAME="branch_conflict_tree"
+branch-create-co ${BRANCH_NAME} ${REPO_NAME}
+
+# Populate branch_conflict_tree with a tree conflict for a merge
+fcm sw -q fcm:${REPO_NAME}_br/dev/${USER}/r${REV}_${BRANCH_NAME}
+svn mkdir lib/utility/
+cat >> lib/utility/tool_list.txt << EOF
+more merge, propset|del|edit, xxdiff, resolve, Trac, browse, tickets,
+branch-diff -t,  text conflict
+EOF
+svn add lib/utility/tool_list.txt
+svn ci -m "Creating a tree conflict(      C) status with this branch."
+svn delete tree_conflict.txt
+svn ci -m "Creating a tree conflict with branch_conflict_tree2."
+fcm sw trunk
+
+# Branch branch_conflict_tree2
+BRANCH_NAME="branch_conflict_tree2"
+branch-create-co ${BRANCH_NAME} ${REPO_NAME}
+
+# Populate branch_conflict_tree2 with a tree conflict for a merge
+fcm sw -q fcm:${REPO_NAME}_br/dev/${USER}/r${REV}_${BRANCH_NAME}
+# Modifying the tree_conflict.txt file.
+cat >> tree_conflict.txt << EOF
+The branch that is being merged in has subsequently 
+modified the file, which means that you may want to incorporate these changes. 
+A tree conflict is therefore flagged up.
+EOF
+svn ci -m "Create a tree conflict(      C) status with this branch."
+svn up
+# Add multiple commits for the merge --custom --revision example
+svn ci -m "Adding the etc/ directory."
+cat >> etc/amazing_rock.txt << EOF
+Rock bands that are awesome in my opinon:
+Shinedown, Reckless Love, Romeos Daughter, Vega, 21 Octayne,
+Ozone, Avantasia, Black Star Rising, Blood Red Saints...
+EOF
+svn add etc/amazing_rock.txt
+svn ci -m "Adding a list of the rock bands that I enjoy."
+cat >> etc/amazing_rock.txt << EOF
+...Metallica, Bon Jovi, Whitesnake, Def Leppard, Danger Danger, 
+Guns and Roses, Blue Tears, Newman, Queen, Aerosmith
+EOF
+svn ci -m "This list is endless but it needed some amazing oldies."
+cat >> etc/90s_pop.txt << EOF
+My fav 90's pop:
+Take Take, Spice Girls, Boyzone, Westlife, East 17, Boyz2Men
+EOF
+svn add etc/90s_pop.txt
+svn ci -m "Adding a list of my fav 90's pop bands."
+cat >> etc/90s_pop.txt << EOF
+Okay I really did not like these, sorry!
+EOF
+svn ci -m "Adding a honest comment to the file etc/90s_pop.txt."
+cat >> etc/amazing_rock.txt << EOF
+Dare, Heat, Heart, Robin Beck, Meat Loaf, Iron Maiden
+Bryan Adams, Soul Assylum, Pink Floyd, The Jam, Rock Sugar, 
+Rolling Stones...
+EOF
+svn ci -m "Adding more to the list of amazing rock bands."
+svn up
+fcm sw trunk
+
+# Branch branch_merge_custom2
+BRANCH_NAME="branch_merge_custom2"
+branch-create-co ${BRANCH_NAME} ${REPO_NAME}
+
+exit
+

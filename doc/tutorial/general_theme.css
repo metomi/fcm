@@ -1,0 +1,50 @@
+body {
+  padding-top: 70px;
+  padding-bottom: 30px;
+}
+
+.theme-dropdown .dropdown-menu {
+  position: static;
+  display: block;
+  margin-bottom: 20px;
+}
+
+.theme-showcase > p > .btn {
+  margin: 5px 0;
+}
+
+.theme-showcase .navbar .container {
+  width: auto;
+}
+
+img {
+    width: 100%;
+}
+
+pre {
+    margin-top: 10px;
+}
+
+.highlight {
+    background-color: yellow;
+}
+
+.inputs {
+     color: green;
+}
+
+.outputs {
+    color: blue;
+}
+
+.enter {
+    color: black;
+}
+
+.error {
+    color: red;
+}
+
+.info {
+    color: purple;
+}
