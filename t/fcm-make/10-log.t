@@ -21,7 +21,7 @@
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
-tests 11
+tests 12
 cp -r $TEST_SOURCE_DIR/$TEST_KEY_BASE/* .
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE"
@@ -33,8 +33,10 @@ else
         $FCM_HOME/doc/etc/fcm-version.js)
     VERSION="FCM $VERSION"
 fi
-file_grep "$TEST_KEY.log.version" "\\[info\\] $VERSION" .fcm-make/log
-file_grep "$TEST_KEY.log.mode" '\[info\] mode=new' .fcm-make/log
+file_grep "${TEST_KEY}.log.version" "\\[info\\] ${VERSION}" '.fcm-make/log'
+file_grep "${TEST_KEY}.log.mode" '\[info\] mode=new' '.fcm-make/log'
+file_grep "${TEST_KEY}.log.description" \
+    '\[info\] description=There is nothing like a good test' '.fcm-make/log'
 if [[ $(ls .fcm-make/log-* | wc -l) == 1 ]]; then
     pass "$TEST_KEY-n-logs"
 else
