@@ -75,17 +75,17 @@ __END__
 
 =head1 NAME
 
-FCM::System::Make::Build::Task::Link
+FCM::System::Make::Build::Task::Archive
 
 =head1 SYNOPSIS
 
-    use FCM::System::Make::Build::Task::Link;
-    my $build_task = FCM::System::Make::Build::Task::Link->new(\%attrib);
+    use FCM::System::Make::Build::Task::Archive;
+    my $build_task = FCM::System::Make::Build::Task::Archive->new(\%attrib);
     $build_task->main($target);
 
 =head1 DESCRIPTION
 
-Invokes the linker to create the target executable.
+Invokes the archive to create the target archive library.
 
 =head1 METHODS
 
@@ -122,7 +122,7 @@ default values.
 
 =head1 CONSTANTS
 
-=item %FCM::System::Make::Build::Task::Link::PROP_OF
+=item %FCM::System::Make::Build::Task::Archive::PROP_OF
 
 A map containing the property names and their default values.
 
