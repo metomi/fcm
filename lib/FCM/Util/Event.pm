@@ -321,6 +321,7 @@ our %S = (
                                     . ' total-time=%.1fs',
     make_build_targets_fail_0    => '! %-20s: depends on failed target: %s',
     make_build_targets_fail_1    => '! %-20s: update task failed',
+    make_description             => 'description=%s',
     make_dest                    => 'dest=%s',
     make_dest_use                => 'use=%s',
     make_extract_project_tree    => 'location %5s:%2d: %s%s',
@@ -891,6 +892,9 @@ sub _event_make_build_shell_out {
 # Notification when a make destination is being set up.
 sub _event_make_dest {
     my ($m_ctx, $authority) = @_;
+    if ($m_ctx->get_description()) {
+        $R->report(sprintf($S{make_description}, $m_ctx->get_description()));
+    }
     $R->report(sprintf($S{make_dest}, $authority . ':' . $m_ctx->get_dest()));
     $R->report(sprintf(
         $S{make_mode},

@@ -32,6 +32,7 @@ use constant {
 
 __PACKAGE__->class({
     ctx_of            => '%',
+    description       => '$',
     dest              => '$',
     dest_lock         => '$',
     error             => {},
@@ -73,6 +74,10 @@ attributes:
 =item ctx_of
 
 A HASH containing the (keys) IDs and the (values) context objects of the make.
+
+=item description
+
+A description string for this make.
 
 =item dest
 

@@ -37,6 +37,7 @@ my $E = 'FCM::System::Exception';
 
 # Configuration parser label to action map
 my %CONFIG_PARSER_OF = (
+    'description'     => \&_parse_description,
     'dest'            => \&_parse_dest,
     'name'            => \&_parse_name,
     'require-version' => \&_parse_require_version,
@@ -207,6 +208,12 @@ sub _get_config_reader {
     );
 }
 
+# Reads the "description" declaration from a config entry.
+sub _parse_description {
+    my ($attrib_ref, $m_ctx, $entry) = @_;
+    $m_ctx->set_description($entry->get_value());
+}
+
 # Reads the "dest" declaration from a config entry.
 sub _parse_dest {
     my ($attrib_ref, $m_ctx, $entry) = @_;
@@ -324,10 +331,11 @@ sub _unparse {
                         : ()
                     ;
                 }
-            (   [sub {$m_ctx->get_name()}, 'name' ],
-                [\&_unparse_use          , 'use'  ],
-                [\&_unparse_steps        , 'steps'],
-                [sub {$m_ctx->get_dest()}, 'dest' ],
+            (   [sub {$m_ctx->get_name()}       , 'name'        ],
+                [\&_unparse_use                 , 'use'         ],
+                [\&_unparse_steps               , 'steps'       ],
+                [sub {$m_ctx->get_dest()}       , 'dest'        ],
+                [sub {$m_ctx->get_description()}, 'description' ],
             ),
         ),
         (   map {   my $id = $_;
