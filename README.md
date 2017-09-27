@@ -1,6 +1,7 @@
 # FCM
 
 [![Build Status](https://travis-ci.org/metomi/fcm.svg?branch=master)](https://travis-ci.org/metomi/fcm)
+[![DOI](https://zenodo.org/badge/6402932.svg)](https://zenodo.org/badge/latestdoi/6402932)
 
 FCM: a modern Fortran build system,
 and wrappers to Subversion for scientific software development
