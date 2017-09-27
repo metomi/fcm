@@ -5,6 +5,23 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## 2017.09.0 (2017-09-27)
+
+FCM release 39.
+
+### Noteworthy Changes
+
+[#246](https://github.com/metomi/fcm/pull/246):
+fcm make: new `description` setting to allow users to specify any string to
+describe the current make.
+
+[#245](https://github.com/metomi/fcm/pull/245):
+fcm make: build: a link task for creating an executable will no longer create
+an archive library with the `ar` command before calling the linker. The linker
+command will contain the full list of object files instead.
+
+--------------------------------------------------------------------------------
+
 ## 2017.02.0 (2017-02-24)
 
 FCM release 38.
