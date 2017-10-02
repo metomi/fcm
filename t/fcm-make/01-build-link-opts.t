@@ -19,11 +19,53 @@
 #-------------------------------------------------------------------------------
 # Tests some linker options for "fcm make".
 #-------------------------------------------------------------------------------
-. $(dirname $0)/test_header
+. "$(dirname "$0")/test_header"
 #-------------------------------------------------------------------------------
-tests 5
-cp -r $TEST_SOURCE_DIR/$TEST_KEY_BASE/* .
-PATH=$PWD/bin:$PATH
+tests 14
+cp -r "${TEST_SOURCE_DIR}/${TEST_KEY_BASE}/"* .
+PATH="${PWD}/bin:${PATH}"
+#-------------------------------------------------------------------------------
+TEST_KEY="${TEST_KEY_BASE}-ld-link-without-ar-new"
+run_pass "${TEST_KEY}" fcm make --new 'build.prop{link-without-ar}=true'
+find 'build' -type f | sort >"${TEST_KEY}.find"
+file_cmp "${TEST_KEY}.find" "${TEST_KEY}.find" <<'__OUT__'
+build/bin/hello.exe
+build/include/world.mod
+build/o/hello.o
+build/o/world.o
+__OUT__
+sed -n 's/^.*\(gfortran -obin.*\)$/\1/p' 'fcm-make.log' >"${TEST_KEY}.log.edited"
+file_cmp "${TEST_KEY}.log.edited" "${TEST_KEY}.log.edited" <<'__OUT__'
+gfortran -obin/hello.exe o/hello.o o/world.o
+__OUT__
+#-------------------------------------------------------------------------------
+TEST_KEY="$TEST_KEY_BASE-keep-lib-o-incr"
+fcm make -q --new
+echo 'build.prop{keep-lib-o} = true' >>fcm-make.cfg
+find build -type f -exec stat -c'%Y %n' {} \; | sort >"$TEST_KEY.mtime.old"
+run_pass "$TEST_KEY" fcm make
+find build -type f -exec stat -c'%Y %n' {} \; | sort >"$TEST_KEY.mtime"
+if cmp -s "$TEST_KEY.mtime.old" "$TEST_KEY.mtime"; then
+    fail "$TEST_KEY.mtime"
+else
+    pass "$TEST_KEY.mtime"
+fi
+file_grep "$TEST_KEY.mtime.grep" 'lib/libhello[.]a' "$TEST_KEY.mtime"
+sed -i '/hello[.]exe/d' "$TEST_KEY.mtime.old"
+sed -i '/libhello[.]a/d; /hello[.]exe/d' "$TEST_KEY.mtime"
+file_cmp "$TEST_KEY.mtime.old" "$TEST_KEY.mtime.old" "$TEST_KEY.mtime"
+#-------------------------------------------------------------------------------
+TEST_KEY="$TEST_KEY_BASE-keep-lib-o-new"
+# echo 'build.prop{keep-lib-o} = true' >>fcm-make.cfg # already done above
+run_pass "$TEST_KEY" fcm make --new
+find build -type f | sort >"$TEST_KEY.find"
+file_cmp "$TEST_KEY.find" "$TEST_KEY.find" <<'__OUT__'
+build/bin/hello.exe
+build/include/world.mod
+build/lib/libhello.a
+build/o/hello.o
+build/o/world.o
+__OUT__
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE-ld-incr"
 cp -r $TEST_SOURCE_DIR/$TEST_KEY_BASE/fcm-make.cfg .

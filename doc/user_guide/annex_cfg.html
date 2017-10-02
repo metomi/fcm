@@ -1336,13 +1336,27 @@ build.prop{fc.libs}[myprog.exe] = netcdf grib
 
     <dt id="make.build.prop.keep-lib-o">keep-lib-o</dt>
 
-    <dd>Obsolete. This setting does nothing and is retained only for backward
-    compatibility.</dd>
+    <dd>Relevant when linking a binary executable and <a href=
+    "#make.build.prop.link-without-ar">link-without-ar</a> is not set to
+    <kbd>true</kbd>. If <kbd>true</kbd>, create and keep the dependent object
+    library as <samp>lib/libNAME.a</samp>, where <var>NAME</var> is the root
+    name of the executable. In the absence of this setting, the behaviour is to
+    create the dependent object library in a temporary directory, which is
+    removed after the linker command is completed.</dd>
 
     <dt id="make.build.prop.ld">ld</dt>
 
     <dd>The linker command. If not specified, use the compiler of the source
     file.</dd>
+
+    <dt id="make.build.prop.link-without-ar">link-without-ar</dt>
+
+    <dd>Relevant when linking a binary executable. If <kbd>true</kbd>, do not
+    create the dependent object library when linking. Instead, locations of the
+    dependent objects will be specified on the command line of the linker. In
+    the absence of this setting, the behaviour is to create the dependent object
+    library in a temporary directory, with the location of the object library
+    specified using the relevant options of the linker.</dd>
 
     <dt id="make.build.prop.no-dep.bin">no-dep.bin</dt>
 
