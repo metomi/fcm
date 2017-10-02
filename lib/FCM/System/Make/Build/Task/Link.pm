@@ -38,6 +38,7 @@ my $E = 'FCM::System::Exception';
 our %PROP_OF = (
     %FCM::System::Make::Build::Task::Archive::PROP_OF,
     'ld' => '',
+    'link-without-ar' => '',
     'keep-lib-o' => '',
 );
 
@@ -65,35 +66,72 @@ sub _main {
         }
     }
     my $path_of_main_o = shift(@{$paths_of{o}});
-    my ($extension, $root)
-        = $attrib_ref->{util}->file_ext(basename($target->get_key()));
+    my @command_list_refs;
     my %opt_of = (
         o => $P->($NAME . '.flag-output'),
         L => $P->($NAME . '.flag-lib-path'),
         l => $P->($NAME . '.flag-lib'),
     );
-    my @command_list = (
+    # Create an intermediate archive library
+    # (when linking multiple objects and "link-without-ar" is not set)
+    my $link_with_ar = @{$paths_of{o}} && !$P->('link-without-ar');
+    my ($keep_lib_o, $lib_o_dir, $lib_o, @o_args);
+    if ($link_with_ar) {
+        # Archive (when linking multiple objects)
+        $keep_lib_o = $P->('keep-lib-o');
+        if ($keep_lib_o) {
+            $lib_o_dir = $target->CT_LIB;
+            mkpath($lib_o_dir);
+        }
+        else {
+            $lib_o_dir = tempdir(CLEANUP => 1);
+        }
+        my $root = (
+            $attrib_ref->{util}->file_ext(basename($target->get_key())))[1];
+        $lib_o = catfile($lib_o_dir, "lib$root.a");
+        push(@command_list_refs, [
+            shellwords($P->('ar')),
+            shellwords($P->('ar.flags')),
+            $lib_o,
+            @{$paths_of{o}},
+        ]);
+        @o_args = (
+            _props_to_opts($opt_of{L}, $lib_o_dir),
+            _props_to_opts($opt_of{l}, $root),
+        );
+    }
+    else {
+        @o_args = @{$paths_of{o}};
+    }
+    # Link
+    push(@command_list_refs, [
         ($P->('ld') ? shellwords($P->('ld')) : shellwords($P->($NAME))),
         _props_to_opts($opt_of{o}, $abs2rel_func->($target->get_path())),
         $path_of_main_o,
         @{$paths_of{'o.special'}},
-        @{$paths_of{o}},
+        @o_args,
         _props_to_opts($opt_of{L}, shellwords($P->($NAME .  '.lib-paths'))),
         _props_to_opts($opt_of{l}, shellwords($P->($NAME .  '.libs'))),
         shellwords($P->($NAME . '.flag-omp')),
         shellwords($P->($NAME . '.flags-ld')),
-    );
-    my %value_of = %{$attrib_ref->{util}->shell_simple(\@command_list)};
-    if ($value_of{rc}) {
-        return $E->throw(
-            $E->SHELL,
-            {command_list => \@command_list, %value_of},
-            $value_of{e},
+    ]);
+    for my $command_list_ref (@command_list_refs) {
+        my %value_of = %{$attrib_ref->{util}->shell_simple($command_list_ref)};
+        if ($value_of{rc}) {
+            return $E->throw(
+                $E->SHELL,
+                {command_list => $command_list_ref, %value_of},
+                $value_of{e},
+            );
+        }
+        $attrib_ref->{util}->event(
+            FCM::Context::Event->MAKE_BUILD_SHELL_OUT, @value_of{qw{o e}},
         );
     }
-    $attrib_ref->{util}->event(
-        FCM::Context::Event->MAKE_BUILD_SHELL_OUT, @value_of{qw{o e}},
-    );
+    if ($link_with_ar && !$keep_lib_o) {
+        unlink($lib_o);
+        rmtree($lib_o_dir);
+    }
     $target;
 }
 
