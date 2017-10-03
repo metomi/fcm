@@ -5,6 +5,22 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## 2017.10.0 (2017-10-03)
+
+FCM release 40.
+
+### Noteworthy Changes
+
+[#247](https://github.com/metomi/fcm/pull/247):
+fcm make: build: partially revert [#245](https://github.com/metomi/fcm/pull/245)
+so the link task will, as before, create a temporary dependent object library
+before linking the main object to it. However, users can now specify the
+`build.prop{link-without-ar}` setting in the configuration to prevent it from
+creating the temporary dependent object library, and put the full list of
+dependent object files in the linker command line instead.
+
+--------------------------------------------------------------------------------
+
 ## 2017.09.0 (2017-09-27)
 
 FCM release 39.
