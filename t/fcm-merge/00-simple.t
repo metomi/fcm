@@ -150,7 +150,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 TEST_KEY=$TEST_KEY_BASE-non-interactive-diff
 run_pass "$TEST_KEY" svn diff
 diff_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-diff_svn_version_filter >"$TEST_DIR/$TEST_KEY.sorted.ctrl" <<__OUT__
+file_cmp_filtered "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 
 Index: .
 ===================================================================
@@ -244,7 +244,6 @@ Index: subroutine/hello_sub_dummy.h
  #include "hello_sub.h"
 +Modified a line
 __OUT__
-file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" "$TEST_DIR/$TEST_KEY.sorted.ctrl"
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Test the various mergeinfo output after merging.

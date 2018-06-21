@@ -95,7 +95,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 TEST_KEY=$TEST_KEY_BASE-trunk-into-branch-1-diff
 run_pass "$TEST_KEY" svn diff
 diff_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-diff_svn_version_filter >"$TEST_DIR/$TEST_KEY.sorted.ctrl" <<__OUT__
+file_cmp_filtered "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 
 Index: .
 ===================================================================
@@ -115,8 +115,6 @@ Index: lib/python/info/__init__.py
 +trunk change
 +another trunk change
 __OUT__
-file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" \
-    "$TEST_DIR/$TEST_KEY.sorted.ctrl" 
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm commit of fcm merge (1)
@@ -298,7 +296,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-1-diff
 run_pass "$TEST_KEY" svn diff
 diff_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-diff_svn_version_filter >"$TEST_DIR/$TEST_KEY.sorted.ctrl" <<__OUT__
+file_cmp_filtered "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 
 Index: .
 ===================================================================
@@ -392,8 +390,6 @@ Index: subroutine/hello_sub_dummy.h
  #include "hello_sub.h"
 +Modified a line
 __OUT__
-file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" \
-    "$TEST_DIR/$TEST_KEY.sorted.ctrl"
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm commit of fcm merge (1)
@@ -574,7 +570,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-2-diff
 run_pass "$TEST_KEY" svn diff
 diff_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-diff_svn_version_filter >"$TEST_DIR/$TEST_KEY.sorted.ctrl" <<__OUT__
+file_cmp_filtered "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 
 Index: .
 ===================================================================
@@ -594,8 +590,6 @@ Index: added_file
  INCLUDE 'hello_constants.INc'
 +call_extra_feature()
 __OUT__
-file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" \
-    "$TEST_DIR/$TEST_KEY.sorted.ctrl"
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm commit of fcm merge branch-into-trunk (2)
@@ -768,7 +762,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 TEST_KEY=$TEST_KEY_BASE-trunk-into-branch-2-diff
 run_pass "$TEST_KEY" svn diff
 diff_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-diff_svn_version_filter >"$TEST_DIR/$TEST_KEY.sorted.ctrl" <<__OUT__
+file_cmp_filtered "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 
 Index: .
 ===================================================================
@@ -789,8 +783,6 @@ Index: added_file
  call_extra_feature()
 +# trunk modification
 __OUT__
-file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" \
-    "$TEST_DIR/$TEST_KEY.sorted.ctrl"
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm commit of fcm merge trunk-into-branch (2)
@@ -977,7 +969,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 TEST_KEY=$TEST_KEY_BASE-branch-into-trunk-3-diff
 run_pass "$TEST_KEY" svn diff
 diff_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-diff_svn_version_filter >"$TEST_DIR/$TEST_KEY.sorted.ctrl" <<__OUT__
+file_cmp_filtered "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 
 Index: .
 ===================================================================
@@ -999,8 +991,6 @@ Index: added_directory/hello_constants_dummy.inc
 #IF SVN1.9 Index: added_file.add
 #IF SVN1.9 ===================================================================
 __OUT__
-file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" \
-    "$TEST_DIR/$TEST_KEY.sorted.ctrl"
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm commit of fcm merge branch-into-trunk (3)
@@ -1289,7 +1279,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 TEST_KEY=$TEST_KEY_BASE-branch-into-branch-1-diff
 run_pass "$TEST_KEY" svn diff
 diff_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-diff_svn_version_filter >"$TEST_DIR/$TEST_KEY.sorted.ctrl" <<__OUT__
+file_cmp_filtered "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 
 Index: .
 ===================================================================
@@ -1392,8 +1382,6 @@ Index: subroutine/hello_sub_dummy.h
  #include "hello_sub.h"
 +Modified a line
 __OUT__
-file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" \
-    "$TEST_DIR/$TEST_KEY.sorted.ctrl"
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm commit of fcm merge branch-into-branch (1)

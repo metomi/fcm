@@ -1,1 +1,143 @@
-../lib/bash/test_header
+#!/bin/bash
+#-------------------------------------------------------------------------------
+# Copyright (C) 2006-2019 British Crown (Met Office) & Contributors.
+#
+# This file is part of FCM, tools for managing and building source code.
+#
+# FCM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FCM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FCM. If not, see <http://www.gnu.org/licenses/>.
+#-------------------------------------------------------------------------------
+# NAME
+#     test_header
+#
+# SYNOPSIS
+#     . $(dirname $0)/test_header
+#
+# DESCRIPTION
+#     Provide more bash shell functions for testing svn-hooks. Create a
+#     subversion repository. Create a Trac environment if possible. Set up
+#     repository hooks environment file.
+#
+# FUNCTIONS
+#     date2datefmt FILE
+#         Convert date time in YYYY-mm-ddTHH:MM:SSZ format into the format
+#         string itself.
+#     poll HOW_LONG COND ...
+#         Poll for COND to become true for HOW_LONG seconds.
+#
+# VARIABLES
+#     FCM_SVN_HOOK_REPOS_SUFFIX
+#     FCM_SVN_HOOK_ADMIN_EMAIL
+#         Optional. See definition in hook scripts.
+#     HOOK_PATH
+#         PATH for the hook scripts.
+#     REPOS_PATH
+#         Path to the Subversion repository ($PWD/svn-repos/foo).
+#     REPOS_URL
+#         URL of the Subversion repository root (file://$REPOS_PATH).
+#     TRAC_ENV_PATH
+#         Path to the Trac environment ($PWD/trac-env/foo).
+#     TRAC_RESYNC
+#         If true, use "trac-admin resync". If false, use "trac-admin
+#         changeset added|modified".
+#-------------------------------------------------------------------------------
+
+. $(dirname $0)/../lib/bash/test_header
+
+function file_cmp() {
+    local TEST_KEY=$1
+    local FILE_ACTUAL=$2
+    local FILE_EXPECT=${3:--}
+    if diff -u $FILE_EXPECT $FILE_ACTUAL >&2; then
+        pass $TEST_KEY
+        return
+    fi
+    fail $TEST_KEY
+}
+
+function file_grep() {
+    local TEST_KEY=$1
+    local PATTERN=$2
+    local FILE=$3
+    if grep -q -e "$PATTERN" $FILE; then
+        pass $TEST_KEY
+        return
+    fi
+    fail $TEST_KEY
+}
+
+date2datefmt() {
+    perl -p -e 's/\d+-\d\d-\d\dT\d\d:\d\d:\d\dZ/YYYY-mm-ddTHH:MM:SSZ/' "$@"
+}
+
+poll() {
+    local HOW_LONG=$1
+    shift 1
+    local WAIT_UNTIL=$(($(date +%s) + $HOW_LONG))
+    while (($(date +%s) < $WAIT_UNTIL)) && ! "$@" 2>/dev/null; do
+        sleep 1
+    done
+    "$@"
+}
+
+HOOK_PATH='/usr/local/bin:/usr/bin:/bin'
+mkdir bin svn-dumps svn-repos trac-env
+svnadmin create svn-repos/foo 2>/dev/null \
+    || skip_all 'cannot create Subversion repository'
+REPOS_PATH="$PWD/svn-repos/foo${FCM_SVN_HOOK_REPOS_SUFFIX:-}"
+REPOS_URL="file://$REPOS_PATH"
+ADMIN_DIR=$(dirname "$(which svnadmin)")
+if ! grep -q '^\(/usr/local/bin\|/usr/bin\|/bin\)$' <<<"$ADMIN_DIR"; then
+    HOOK_PATH="$ADMIN_DIR:$HOOK_PATH"
+fi
+if trac-admin trac-env/foo initenv foo sqlite:db/trac.db svn "$REPOS_PATH" \
+    1>/dev/null 2>&1
+then
+    FCM_SVN_HOOK_TRAC_ROOT_DIR="$PWD/trac-env"
+    TRAC_ENV_PATH="$FCM_SVN_HOOK_TRAC_ROOT_DIR/foo"
+    ADMIN_DIR=$(dirname "$(which trac-admin)")
+    if ! grep -q '^\(/usr/local/bin\|/usr/bin\|/bin\)$' <<<"$ADMIN_DIR"; then
+        HOOK_PATH="$ADMIN_DIR:$HOOK_PATH"
+    fi
+    if [[ $(trac-admin --version) == trac-admin\ 0.11* ]]; then
+        TRAC_RESYNC=true
+    else
+        TRAC_RESYNC=false
+    fi
+    cat >>"${TRAC_ENV_PATH}/conf/trac.ini" <<'__TRAC_INI___'
+
+[components]
+tracopt.versioncontrol.svn.* = enabled
+__TRAC_INI___
+fi
+unset ADMIN_DIR
+cat >bin/mail <<__BASH__
+#!/bin/bash
+{
+    echo "\$@"
+    cat
+} >$PWD/mail.out
+__BASH__
+chmod +x bin/mail
+HOOK_PATH="$PWD/bin:$HOOK_PATH"
+cat >"$REPOS_PATH/conf/hooks-env" <<__CONF__
+[default]
+FCM_HOME=$FCM_HOME
+FCM_SITE_HOME=$PWD
+FCM_SVN_HOOK_ADMIN_EMAIL=${FCM_SVN_HOOK_ADMIN_EMAIL:-}
+FCM_SVN_HOOK_COMMIT_DUMP_DIR=$PWD/svn-dumps
+FCM_SVN_HOOK_NOTIFICATION_FROM=notifications@localhost
+FCM_SVN_HOOK_REPOS_SUFFIX=${FCM_SVN_HOOK_REPOS_SUFFIX:-}
+FCM_SVN_HOOK_TRAC_ROOT_DIR=${FCM_SVN_HOOK_TRAC_ROOT_DIR:-}
+PATH=$HOOK_PATH
+__CONF__

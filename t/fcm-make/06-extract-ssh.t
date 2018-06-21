@@ -66,9 +66,9 @@ grep -e '\[info\] location hello: 0' -e '\[info\] AU hello:0' fcm-make.log \
 file_cmp "$TEST_KEY.log" "$TEST_KEY.log" <<__LOG__
 [info] location hello: 0: $T_HOST:$T_HOST_WORK_DIR/hello
 [info] AU hello:0      hi/hi_mars.txt
-[info] AU hello:0      greet/greet_venus.txt
-[info] AU hello:0      hello/hello_mercury.txt
 [info] AU hello:0      hello/hello_venus.txt
+[info] AU hello:0      hello/hello_mercury.txt
+[info] AU hello:0      greet/greet_venus.txt
 [info] AU hello:0      greet/greet_mars.txt
 [info] AU hello:0      hi/hi_mercury.txt
 [info] AU hello:0      greet/greet_earth.txt

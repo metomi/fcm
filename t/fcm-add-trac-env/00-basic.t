@@ -69,7 +69,7 @@ for NAME in bus car lorry taxi; do
 done
 
 TEST_KEY="$TEST_KEY_BASE-intertrac"
-file_cmp "$TEST_KEY" "$PWD/srv/trac/intertrac.ini" <<'__CONF__'
+file_cmp "$TEST_KEY" "srv/trac/intertrac.ini" <<'__CONF__'
 [intertrac]
 bus.title=bus
 bus.url=https://localhost/trac/bus

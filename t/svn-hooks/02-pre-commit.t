@@ -19,9 +19,8 @@
 #-------------------------------------------------------------------------------
 # Basic tests for "pre-commit".
 #-------------------------------------------------------------------------------
-. $(dirname $0)/test_header
 FCM_SVN_HOOK_ADMIN_EMAIL='your.admin.team'
-. $TEST_SOURCE_DIR/test_header_more
+. $(dirname $0)/test_header
 
 test_tidy() {
     rm -f \

@@ -56,7 +56,7 @@ svn switch -q $ROOT_URL/branches/dev/Share/branch_test
 TEST_KEY=$TEST_KEY_BASE-fcm-branch-diff
 run_pass "$TEST_KEY" fcm branch-diff
 diff_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-diff_svn_version_filter >"$TEST_DIR/$TEST_KEY.sorted.ctrl" <<__OUT__
+file_cmp_filtered "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 
 Index: added_directory/hello_constants.f90
 ===================================================================
@@ -164,15 +164,13 @@ Index: module/hello_constants_dummy.inc
 @@ -1 +0,0 @@
 -INCLUDE 'hello_constants.inc'
 __OUT__
-file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" \
-    "$TEST_DIR/$TEST_KEY.sorted.ctrl"
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm bdi
 TEST_KEY=$TEST_KEY_BASE-bdi
 run_pass "$TEST_KEY" fcm bdi
 diff_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-diff_svn_version_filter >"$TEST_DIR/$TEST_KEY.sorted.ctrl" <<__OUT__
+file_cmp_filtered "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 
 Index: added_directory/hello_constants.f90
 ===================================================================
@@ -280,8 +278,6 @@ Index: module/hello_constants_dummy.inc
 @@ -1 +0,0 @@
 -INCLUDE 'hello_constants.inc'
 __OUT__
-file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" \
-    "$TEST_DIR/$TEST_KEY.sorted.ctrl"
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm branch-diff --wiki
@@ -318,7 +314,7 @@ svn add -q added_directory/foo$TEST_KEY
 echo "bar" > added_directory/bar$TEST_KEY
 run_pass "$TEST_KEY" fcm bdi
 diff_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-diff_svn_version_filter >"$TEST_DIR/$TEST_KEY.sorted.ctrl" <<__OUT__
+file_cmp_filtered "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 
 Index: added_directory/foo00-simple-bdi-wc-changes
 ===================================================================
@@ -434,8 +430,6 @@ Index: module/hello_constants_dummy.inc
 @@ -1 +0,0 @@
 -INCLUDE 'hello_constants.inc'
 __OUT__
-file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" \
-    "$TEST_DIR/$TEST_KEY.sorted.ctrl"
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 teardown
 #-------------------------------------------------------------------------------

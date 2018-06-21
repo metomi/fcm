@@ -1,1 +1,54 @@
-../lib/bash/test_header
+#!/bin/bash
+#-------------------------------------------------------------------------------
+# Copyright (C) 2006-2019 British Crown (Met Office) & Contributors.
+#
+# This file is part of FCM, tools for managing and building source code.
+#
+# FCM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FCM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FCM. If not, see <http://www.gnu.org/licenses/>.
+#-------------------------------------------------------------------------------
+
+. $(dirname $0)/../lib/bash/test_header
+
+function file_cmp() {
+    local TEST_KEY=$1
+    local FILE_ACTUAL=$2
+    local FILE_EXPECT=${3:--}
+    if diff -u $FILE_EXPECT $FILE_ACTUAL >&2; then
+        pass $TEST_KEY
+        return
+    fi
+    fail $TEST_KEY
+}
+
+function file_test() {
+    local TEST_KEY=$1
+    local FILE=$2
+    local OPTION=${3:--e}
+    if test $OPTION $FILE; then
+        pass $TEST_KEY
+    else
+        fail $TEST_KEY
+    fi
+}
+
+function file_grep() {
+    local TEST_KEY=$1
+    local PATTERN=$2
+    local FILE=$3
+    if grep -q -e "$PATTERN" $FILE; then
+        pass $TEST_KEY
+        return
+    fi
+    fail $TEST_KEY
+}
