@@ -64,9 +64,9 @@ my %RE           = (
     INCLUDE   => qr{\#?\s*include\s*}imsx,
     OMP_SENT  => qr{\A(\s*!\$\s+)?(.*)\z}imsx,
     UNIT_ATTR => qr{\A\s*(?:(?:(?:impure\s+)?elemental|recursive|pure)\s+)+(.*)\z}imsx,
-    UNIT_BASE => qr{\A\s*($RE_UNIT_BASE)\s+($RE_NAME)\s*\z}imsx,
+    UNIT_BASE => qr{\A\s*($RE_UNIT_BASE)\s+($RE_NAME)\b}imsx,
     UNIT_CALL => qr{\A\s*($RE_UNIT_CALL)\s+($RE_NAME)\b}imsx,
-    UNIT_END  => qr{\A\s*(end)(?:\s+($RE_NAME)(?:\s+($RE_NAME))?)?\s*\z}imsx,
+    UNIT_END  => qr{\A\s*(end)(?:\s+($RE_NAME)(?:\s+($RE_NAME))?)?\b}imsx,
     UNIT_SPEC => qr{\A\s*$RE_SPEC\b(.*)\z}imsx,
 );
 
