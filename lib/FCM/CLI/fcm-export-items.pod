@@ -52,6 +52,6 @@ export.
 
 =head1 COPYRIGHT
 
-(C) Crown copyright Met Office. All rights reserved.
+Copyright (C) 2006-2019 British Crown (Met Office) & Contributors..
 
 =cut

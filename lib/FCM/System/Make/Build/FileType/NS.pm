@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# (C) British Crown Copyright 2006-17 Met Office.
+# Copyright (C) 2006-2019 British Crown (Met Office) & Contributors.
 #
 # This file is part of FCM, tools for managing and building source code.
 #
@@ -205,6 +205,6 @@ The configuration in this module is a bit hard coded. It can do with a refactor.
 
 =head1 COPYRIGHT
 
-(C) Crown copyright Met Office. All rights reserved.
+Copyright (C) 2006-2019 British Crown (Met Office) & Contributors..
 
 =cut

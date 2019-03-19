@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# (C) British Crown Copyright 2006-17 Met Office.
+# Copyright (C) 2006-2019 British Crown (Met Office) & Contributors.
 #
 # This file is part of FCM, tools for managing and building source code.
 #
@@ -140,6 +140,6 @@ Return a list of bad users in @users.
 
 =head1 COPYRIGHT
 
-E<169> Crown copyright Met Office. All rights reserved.
+Copyright (C) 2006-2019 British Crown (Met Office) & Contributors..
 
 =cut

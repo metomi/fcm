@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# (C) British Crown Copyright 2006-17 Met Office.
+# Copyright (C) 2006-2019 British Crown (Met Office) & Contributors.
 #
 # This file is part of FCM, tools for managing and building source code.
 #
@@ -2149,7 +2149,7 @@ Move C<mkpatch> out of this module.
 
 =head1 COPYRIGHT
 
-E<169> Crown copyright Met Office. All rights reserved.
+Copyright (C) 2006-2019 British Crown (Met Office) & Contributors..
 
 =cut
 opy already exists.
@@ -2179,7 +2179,7 @@ Move C<mkpatch> out of this module.
 
 =head1 COPYRIGHT
 
-E<169> Crown copyright Met Office. All rights reserved.
+Copyright (C) 2006-2019 British Crown (Met Office) & Contributors..
 
 =cut
 $e->CHDIR
@@ -2267,6 +2267,6 @@ Move C<mkpatch> out of this module.
 
 =head1 COPYRIGHT
 
-E<169> Crown copyright Met Office. All rights reserved.
+Copyright (C) 2006-2019 British Crown (Met Office) & Contributors..
 
 =cut
