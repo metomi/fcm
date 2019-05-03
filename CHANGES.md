@@ -5,6 +5,19 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## 2019.05.0 (2019-05-03)
+
+FCM release 41.
+
+### Noteworthy Changes
+
+[#253](https://github.com/metomi/fcm/pull/253):
+fcm make: build: fix handling of Fortran program unit tail comment. Fortran
+dependency analysis was not handling tail comment of a program unit correctly.
+This change fixes the issue.
+
+--------------------------------------------------------------------------------
+
 ## 2017.10.0 (2017-10-03)
 
 FCM release 40.
