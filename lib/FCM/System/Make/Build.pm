@@ -888,6 +888,7 @@ sub _targets_from_sources {
         }
     }
     # Determine the targets for each source
+    my %reverse_deps_of = ();
     SOURCE:
     while (my ($ns, $source) = each(%{$ctx->get_source_of()})) {
         my $type = $source->get_type();
@@ -918,6 +919,24 @@ sub _targets_from_sources {
             if (!$source->get_up_to_date()) {
                 $target->set_status($target->ST_OOD);
             }
+            if (exists($target->get_info_of()->{'parents'})) {
+                for my $parent (@{$target->get_info_of()->{'parents'}}) {
+                    if (!exists($reverse_deps_of{$parent})) {
+                        $reverse_deps_of{$parent} = [];
+                    }
+                    push(
+                        @{$reverse_deps_of{$parent}},
+                        [$key, $target->get_category()],
+                    );
+                }
+            }
+        }
+    }
+    # Add reverse dependencies
+    # E.g. Fortran module has link time dependency on its submodules
+    for my $target (@{$targets_ref}) {
+        if (exists($reverse_deps_of{$target->get_key()})) {
+            push(@{$target->get_deps()}, @{$reverse_deps_of{$target->get_key()}});
         }
     }
     # Determines name-space dependencies

@@ -55,7 +55,11 @@ my $RE_SPEC = qr{
     character|class|complex|double\s*complex|double\s*precision|integer|
     logical|procedure|real|type
 }imsx;
-my $RE_UNIT_BASE = qr{block\s*data|module|program|submodule}imsx;
+my $RE_UNIT_BASE = qr{
+    block\s*data|
+    module(?!\s*(?:function|subroutine|procedure))|
+    program|
+}imsx;
 my $RE_UNIT_CALL = qr{subroutine|function}imsx;
 my %RE           = (
     DEP_O     => qr{\A\s*!\s*depends\s*on\s*:\s*($RE_FILE)}imsx,
@@ -65,6 +69,7 @@ my %RE           = (
     OMP_SENT  => qr{\A(\s*!\$\s+)?(.*)\z}imsx,
     UNIT_ATTR => qr{\A\s*(?:(?:(?:impure\s+)?elemental|recursive|pure)\s+)+(.*)\z}imsx,
     UNIT_BASE => qr{\A\s*($RE_UNIT_BASE)\s+($RE_NAME)\b}imsx,
+    UNIT_SUBM => qr{\A\s*(submodule)\s*\(($RE_NAME)\)\s*($RE_NAME)\b}imsx,
     UNIT_CALL => qr{\A\s*($RE_UNIT_CALL)\s+($RE_NAME)\b}imsx,
     UNIT_END  => qr{\A\s*(end)(?:\s+($RE_NAME)(?:\s+($RE_NAME))?)?\b}imsx,
     UNIT_SPEC => qr{\A\s*$RE_SPEC\b(.*)\z}imsx,
@@ -156,14 +161,14 @@ sub _source_analyse_more {
     }
 
     # Program Unit
-    my ($type, $symbol) = _process_prog_unit($line);
+    my ($type, $symbol, @extras) = _process_prog_unit($line);
     if ($type) {
         if (!@{$state->{stack}}) {
             if ($type eq 'program') {
                 $info_hash_ref->{main} = 1;
             }
             $info_hash_ref->{symbols} ||= [];
-            push(@{$info_hash_ref->{symbols}}, [$type, $symbol]);
+            push(@{$info_hash_ref->{symbols}}, [$type, $symbol, @extras]);
         }
         push(@{$state->{stack}}, [$type, $symbol]);
         return 1;
@@ -216,12 +221,15 @@ sub _source_analyse_dep_module {
 # the symbol and the signature tokens of the program unit.
 sub _process_prog_unit {
     my ($string) = @_;
-    my ($type, $symbol, @args) = (q{}, q{});
+    my ($type, $symbol, $symbol_parent) = (q{}, q{}, q{});
     ($type, $symbol) = lc($string) =~ $RE{UNIT_BASE};
     if ($type) {
-        $type = lc($type);
         $type =~ s{\s*}{}gmsx;
         return ($type, $symbol);
+    }
+    ($type, $symbol_parent, $symbol) = lc($string) =~ $RE{UNIT_SUBM};
+    if ($type) {
+        return ($type, $symbol, $symbol_parent);
     }
     $string =~ s/$RE{UNIT_ATTR}/$1/;
     my ($match) = $string =~ $RE{UNIT_SPEC};
@@ -273,6 +281,11 @@ sub _source_to_targets {
         ),
     );
     my ($ext, $root) = $attrib_ref->{util}->file_ext($key);
+    # @{$symbols_ref} contains a list of [$type, $symbol, $symbol_parent]
+    # where $type is the program unit type
+    #       $symbol is the program unit symbol
+    #       $symbol_parent is the parent program unit symbol, e.g. name of
+    #       parent module of a submodule
     my $symbols_ref = $source->get_info_of()->{symbols};
     # FIXME: hard code the handling of "*.inc" files as include files
     if (!defined($symbols_ref) || !@{$symbols_ref} || $ext eq 'inc') {
@@ -300,13 +313,16 @@ sub _source_to_targets {
         );
         push(@keys_of_mod, $key_of_mod);
     }
+    my @symbol_parents = map {
+        scalar(@{$_}) > 2 ? $TARGET_OF->($_->[2], 'o') : ();
+    } @{$symbols_ref};
     push(
         @targets,
         $TARGET->new(
             {   category      => $TARGET->CT_O,
                 deps          => [@deps],
                 dep_policy_of => {'include' => $TARGET->POLICY_CAPTURE},
-                info_of       => {paths => []},
+                info_of       => {paths => [], parents => \@symbol_parents},
                 key           => $key_of_o,
                 task          => 'compile',
                 triggers      => \@keys_of_mod,
