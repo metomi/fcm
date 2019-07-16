@@ -5,6 +5,20 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## 2019.07.0 (2019-07-??)
+
+FCM release 42.
+
+### Noteworthy Changes
+
+[#256](https://github.com/metomi/fcm/pull/256):
+fcm make: build: correctly support Fortran submodule. A submodule depends on
+its parent module at compile time, but a parent module depends on its
+submodules at link time. This change also ensures that other modern syntax
+used in module/submodule definitions are handled correctly.
+
+--------------------------------------------------------------------------------
+
 ## 2019.05.0 (2019-05-03)
 
 FCM release 41.
