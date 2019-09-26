@@ -24,7 +24,7 @@
 if ! which trac-admin 1>/dev/null 2>/dev/null; then
     skip_all 'trac-admin not available'
 fi
-tests 28
+tests 31
 #-------------------------------------------------------------------------------
 set -e
 mkdir -p etc srv/{svn,trac}
@@ -61,9 +61,10 @@ for NAME in bus car lorry taxi; do
     file_grep "$TEST_KEY-d-perms-admin" "admin,TRAC_ADMIN" "$TEST_KEY-d-perms"
     # Subversion repository paths in place
     if [[ -d "srv/svn/$NAME" ]]; then
-        file_grep "$TEST_KEY-repository_dir" \
-            "dir=$PWD/srv/svn/$NAME" \
-            "$PWD/srv/trac/$NAME/conf/trac.ini"
+        run_pass "${TEST_KEY}-repos-list" \
+            trac-admin "${PWD}/srv/trac/${NAME}" repository list
+        file_grep "${TEST_KEY}-repos-list.out" \
+            "${NAME} *${PWD}/srv/svn/${NAME}"  "${TEST_KEY}-repos-list.out"
     fi
 done
 
