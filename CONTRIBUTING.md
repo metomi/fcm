@@ -34,7 +34,8 @@ below:
 * Roddy Sharp (Met Office, UK)
 * Matt Shin (Met Office, UK)
 * Stuart Whitehouse (Met Office, UK)
-* Tim Pillinger (Met Office, U)
+* Tim Pillinger (Met Office, UK)
+* Joe Mancell (Met Office, UK)
 
 (All contributors are identifiable with email addresses in the version
 control logs or otherwise.)
