@@ -57,7 +57,7 @@ my $RE_SPEC = qr{
 }imsx;
 my $RE_UNIT_BASE = qr{
     block\s*data|
-    module(?!\s*(?:function|subroutine|procedure))|
+    module(?!\s*(?:function|subroutine|procedure)\s+)|
     program|
 }imsx;
 my $RE_UNIT_CALL = qr{subroutine|function}imsx;
