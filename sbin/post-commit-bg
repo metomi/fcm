@@ -35,7 +35,8 @@
 #   The script does the following:
 #   1. Creates an incremental revision dump of the current revision.
 #   2. Update corresponding Trac environment, if relevant.
-#   3. Checks the size of the revision dump. Warns if it exceeds a threshold.
+#   3. Size check. Warn if transaction exceeds 2MB, or the number of
+#      MB specified in "$REPOS/hooks/post-commit-size-threshold.conf".
 #   4. If this changeset has a change to "^/svnperms.conf", install its HEAD
 #      revision at "$REPOS/hooks/", or remove it from "$REPOS/hooks/" if it is
 #      removed from the HEAD.
@@ -103,8 +104,8 @@ main() {
 
     # Check size - send warning email if threshold exceeded
     local MB=1048576
-    local THRESHOLD=10
-    local SIZE_THRESHOLD_FILE="${REPOS}/hooks/pre-commit-size-threshold.conf"
+    local THRESHOLD=2
+    local SIZE_THRESHOLD_FILE="${REPOS}/hooks/post-commit-size-threshold.conf"
     if [[ -f "${SIZE_THRESHOLD_FILE}" && -r "${SIZE_THRESHOLD_FILE}" ]]; then
         THRESHOLD=$(<"${SIZE_THRESHOLD_FILE}")
     fi
@@ -113,11 +114,8 @@ main() {
     if ((${REV_FILE_SIZE} > ${THRESHOLD} * ${MB})); then
         echo "REV_FILE_SIZE=${REV_FILE_SIZE} # >${THRESHOLD}MB"
         RET_CODE=1
-    elif ((${REV_FILE_SIZE} > ${MB})); then
-        echo "REV_FILE_SIZE=${REV_FILE_SIZE} # >1MB <${THRESHOLD}MB"
-        RET_CODE=1
     else
-        echo "REV_FILE_SIZE=${REV_FILE_SIZE} # <1MB"
+        echo "REV_FILE_SIZE=${REV_FILE_SIZE} # <${THRESHOLD}MB"
     fi
 
     # Install commit.conf and svnperms.conf, if necessary
