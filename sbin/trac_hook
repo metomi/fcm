@@ -46,7 +46,7 @@ trac_hook() {
     then
         local TRAC_NAME=$(basename "$REPOS")
         if [[ -n ${FCM_SVN_HOOK_REPOS_SUFFIX:-} ]]; then
-            TRAC_NAME=${NAME%$FCM_SVN_HOOK_REPOS_SUFFIX}
+            TRAC_NAME=${TRAC_NAME%$FCM_SVN_HOOK_REPOS_SUFFIX}
         fi
         local TRAC_DIR="$FCM_SVN_HOOK_TRAC_ROOT_DIR/$TRAC_NAME"
         if [[ -d "$TRAC_DIR" ]]; then
