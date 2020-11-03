@@ -59,7 +59,7 @@ svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
     | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
 mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
-REV_FILE_SIZE=??? # <1MB
+REV_FILE_SIZE=??? # <2MB
 RET_CODE=0
 __LOG__
 if [[ -n ${TRAC_ENV_PATH:-} ]] && ! $TRAC_RESYNC; then
@@ -103,7 +103,7 @@ svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
     | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
 mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
-REV_FILE_SIZE=??? # <1MB
+REV_FILE_SIZE=??? # <2MB
 RET_CODE=0
 __LOG__
     file_cmp "${TEST_KEY}.conf" \
@@ -133,7 +133,7 @@ svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
     | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
 mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
-REV_FILE_SIZE=??? # <1MB
+REV_FILE_SIZE=??? # <2MB
 svnlook cat $REPOS_PATH ${NAME} >$REPOS_PATH/hooks/${NAME}
 RET_CODE=0
 __LOG__
@@ -161,7 +161,7 @@ svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
     | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
 mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
-REV_FILE_SIZE=??? # <1MB
+REV_FILE_SIZE=??? # <2MB
 svnlook cat $REPOS_PATH ${NAME} >$REPOS_PATH/hooks/${NAME}
 RET_CODE=0
 __LOG__
@@ -183,7 +183,7 @@ svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
     | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
 mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
-REV_FILE_SIZE=??? # <1MB
+REV_FILE_SIZE=??? # <2MB
 rm -f $REPOS_PATH/hooks/${NAME}
 RET_CODE=0
 __LOG__
@@ -192,7 +192,7 @@ done
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE-size"
 test_tidy
-perl -e 'map {print(rand())} 1..524288' >file2 # compress should be >1MB
+perl -e 'map {print(rand())} 1..524288' >file2 # compress should be >2MB
 svn import --no-auth-cache -q -m"$TEST_KEY" file2 "$REPOS_URL/file2"
 REV=$(<rev)
 poll 10 grep -q '^RET_CODE=' "$REPOS_PATH/log/post-commit.log"
@@ -205,7 +205,7 @@ svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
     | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
 mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
-REV_FILE_SIZE=??? # >1MB <10MB
+REV_FILE_SIZE=??? # >2MB
 RET_CODE=1
 __LOG__
 date2datefmt mail.out \
@@ -218,7 +218,7 @@ svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
     | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
 mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
-REV_FILE_SIZE=??? # >1MB <10MB
+REV_FILE_SIZE=??? # >2MB
 RET_CODE=1
 __LOG__
 #-------------------------------------------------------------------------------
@@ -238,7 +238,7 @@ svnadmin dump -r${REV} --incremental --deltas ${REPOS_PATH} | gzip \\
     | (dd 'conv=fsync' "of=${PWD}/svn-dumps/foo-${REV}-tmp.gz" 2>/dev/null)
 * Dumped revision ${REV}.
 mv "${PWD}/svn-dumps/foo-${REV}-tmp.gz" "${PWD}/svn-dumps/foo-${REV}.gz"
-REV_FILE_SIZE=??? # >10MB
+REV_FILE_SIZE=??? # >2MB
 RET_CODE=1
 __LOG__
 date2datefmt mail.out \
@@ -251,7 +251,7 @@ svnadmin dump -r${REV} --incremental --deltas ${REPOS_PATH} | gzip \\
     | (dd 'conv=fsync' "of=${PWD}/svn-dumps/foo-${REV}-tmp.gz" 2>/dev/null)
 * Dumped revision ${REV}.
 mv "${PWD}/svn-dumps/foo-${REV}-tmp.gz" "${PWD}/svn-dumps/foo-${REV}.gz"
-REV_FILE_SIZE=??? # >10MB
+REV_FILE_SIZE=??? # >2MB
 RET_CODE=1
 __LOG__
 #-------------------------------------------------------------------------------
@@ -276,7 +276,7 @@ svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
     | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
 mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
-REV_FILE_SIZE=??? # <1MB
+REV_FILE_SIZE=??? # <2MB
 $REPOS_PATH/hooks/post-commit-bg-custom $REPOS_PATH $REV $TXN
 $REPOS_PATH $REV $TXN
 RET_CODE=0
@@ -305,7 +305,7 @@ svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
     | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
 * Dumped revision $REV.
 mv "$PWD/svn-dumps/foo-$REV-tmp.gz" "$PWD/svn-dumps/foo-$REV.gz"
-REV_FILE_SIZE=??? # <1MB
+REV_FILE_SIZE=??? # <2MB
 $REPOS_PATH/hooks/post-commit-background-custom $REPOS_PATH $REV $TXN
 I have gone to the dark side.
 RET_CODE=1
