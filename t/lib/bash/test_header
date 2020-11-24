@@ -172,11 +172,29 @@ function file_cmp() {
 function file_cmp_filtered() {
     local FILE_EXPECT=${3:--}
     if [[ $SVN_MINOR_VERSION == "1.8" ]]; then
-        cat $FILE_EXPECT | sed "s/^#IF SVN1.8 //g; /^#IF SVN1.9 /d" >"$TEST_DIR/$TEST_KEY.filtered-ctrl"
+        cat $FILE_EXPECT | sed \
+          -e "s/^#IF SVN1.8 //g" \
+          -e "s/^#IF SVN1.8\/9 //g" \
+          -e "/^#IF SVN1.9 /d" \
+          -e "/^#IF SVN1.10 /d" \
+          -e "/^#IF SVN1.9\/10 /d" \
+          >"$TEST_DIR/$TEST_KEY.filtered-ctrl"
     elif [[ $SVN_MINOR_VERSION == "1.9" ]]; then
-        cat $FILE_EXPECT | sed "s/^#IF SVN1.9 //g; /^#IF SVN1.8 /d" >"$TEST_DIR/$TEST_KEY.filtered-ctrl"
+        cat $FILE_EXPECT | sed \
+          -e "s/^#IF SVN1.9 //g" \
+          -e "s/^#IF SVN1.8\/9 //g" \
+          -e "s/^#IF SVN1.9\/10 //g" \
+          -e "/^#IF SVN1.8 /d" \
+          -e "/^#IF SVN1.10 /d" \
+          >"$TEST_DIR/$TEST_KEY.filtered-ctrl"
     else
-        cat $FILE_EXPECT | sed "s/^#IF SVN1.9 //g; /^#IF SVN1.8 /d" >"$TEST_DIR/$TEST_KEY.filtered-ctrl"
+        cat $FILE_EXPECT | sed \
+          -e "s/^#IF SVN1.10 //g" \
+          -e "s/^#IF SVN1.9\/10 //g" \
+          -e "/^#IF SVN1.9 /d" \
+          -e "/^#IF SVN1.9 /d" \
+          -e "/^#IF SVN1.8\/9 /d" \
+          >"$TEST_DIR/$TEST_KEY.filtered-ctrl"
     fi
     file_cmp "$1" "$2" "$TEST_DIR/$TEST_KEY.filtered-ctrl"
     rm "$TEST_DIR/$TEST_KEY.filtered-ctrl"
