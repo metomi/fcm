@@ -175,7 +175,7 @@ __OUT__
 #-------------------------------------------------------------------------------
 TEST_KEY="$TEST_KEY_BASE-size-2" # bigger than default, threshold increased
 test_tidy
-echo '20' >"$REPOS_PATH/hooks/pre-commit-size-threshold.conf"
+echo '40' >"$REPOS_PATH/hooks/pre-commit-size-threshold.conf"
 perl -e 'map {print(rand())} 1..2097152' >file3 # a large file
 run_pass "$TEST_KEY" \
     svn import --no-auth-cache -q -m'test' file3 "$REPOS_URL/file3"
