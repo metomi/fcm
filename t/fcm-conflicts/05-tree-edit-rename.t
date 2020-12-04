@@ -28,7 +28,6 @@ setup
 init_repos
 init_branch ctrl $REPOS_URL
 init_branch_wc ed_ren $REPOS_URL
-export SVN_EDITOR="sed -i 1i\foo"
 # Set a special (null) fcm-graphic-merge diff editor.
 export FCM_GRAPHIC_MERGE=fcm-dummy-diff
 cd $TEST_DIR/wc
@@ -52,7 +51,6 @@ fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ed_ren >/dev/null
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 n
 __IN__
-sed -i "/^Resolved conflicted state of 'pro\/hello.pro'$/d" $TEST_DIR/"$TEST_KEY.out"
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] pro/hello.pro: in tree conflict.
 Locally: edited.

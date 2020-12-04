@@ -48,7 +48,6 @@ fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ed_del >/dev/null
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 n
 __IN__
-sed -i "/^Resolved conflicted state of 'pro\/hello.pro'$/d" $TEST_DIR/"$TEST_KEY.out"
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] pro/hello.pro: in tree conflict.
 Locally: edited.
@@ -99,14 +98,15 @@ fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ed_del >/dev/null
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 y
 __IN__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp_filtered "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] pro/hello.pro: in tree conflict.
 Locally: edited.
 Externally: deleted.
 Answer (y) to keep the file.
 Answer (n) to accept the external delete.
 Keep the local version?
-Enter "y" or "n" (or just press <return> for "n") Resolved conflicted state of 'pro/hello.pro'
+#IF SVN1.8/9 Enter "y" or "n" (or just press <return> for "n") Resolved conflicted state of 'pro/hello.pro'
+#IF SVN1.10 Enter "y" or "n" (or just press <return> for "n") Tree conflict at 'pro/hello.pro' marked as resolved.
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------

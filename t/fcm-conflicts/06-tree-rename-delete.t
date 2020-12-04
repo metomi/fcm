@@ -48,7 +48,7 @@ fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ren_del >/dev/null
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 n
 __IN__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp_filtered "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] pro/hello.pro: in tree conflict.
 Locally: renamed to pro/hello.pro.renamed.
 Externally: deleted.
@@ -56,7 +56,8 @@ Answer (y) to accept the local rename.
 Answer (n) to accept the external delete.
 Keep the local version?
 Enter "y" or "n" (or just press <return> for "n") D         pro/hello.pro.renamed
-Resolved conflicted state of 'pro/hello.pro'
+#IF SVN1.8/9 Resolved conflicted state of 'pro/hello.pro'
+#IF SVN1.10 Tree conflict at 'pro/hello.pro' marked as resolved.
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
@@ -81,14 +82,15 @@ fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ren_del >/dev/null
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 y
 __IN__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp_filtered "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] pro/hello.pro: in tree conflict.
 Locally: renamed to pro/hello.pro.renamed.
 Externally: deleted.
 Answer (y) to accept the local rename.
 Answer (n) to accept the external delete.
 Keep the local version?
-Enter "y" or "n" (or just press <return> for "n") Resolved conflicted state of 'pro/hello.pro'
+#IF SVN1.8/9 Enter "y" or "n" (or just press <return> for "n") Resolved conflicted state of 'pro/hello.pro'
+#IF SVN1.10 Enter "y" or "n" (or just press <return> for "n") Tree conflict at 'pro/hello.pro' marked as resolved.
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
