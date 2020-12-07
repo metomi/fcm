@@ -64,7 +64,7 @@ for NAME in bus car lorry taxi; do
         run_pass "${TEST_KEY}-repos-list" \
             trac-admin "${PWD}/srv/trac/${NAME}" repository list
         file_grep "${TEST_KEY}-repos-list.out" \
-            "${NAME} *${PWD}/srv/svn/${NAME}"  "${TEST_KEY}-repos-list.out"
+            "(default) *${PWD}/srv/svn/${NAME}"  "${TEST_KEY}-repos-list.out"
     fi
 done
 

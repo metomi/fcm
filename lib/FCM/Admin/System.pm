@@ -175,8 +175,7 @@ sub add_trac_environment {
     if (-d $project->get_svn_live_path()) {
         $TRAC_ADMIN->(
             "adding repository",
-            qw{repository add},
-            $project->get_name(),
+            qw{repository add (default)},
             $project->get_svn_live_path(),
         );
     }
