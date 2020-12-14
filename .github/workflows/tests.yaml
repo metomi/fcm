@@ -1,0 +1,46 @@
+on: [pull_request, workflow_dispatch]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        ubuntu: ['ubuntu-16.04', 'ubuntu-18.04']
+    name: FCM Tests ${{matrix.ubuntu}}
+    runs-on: ${{matrix.ubuntu}}
+    steps:
+      - name: Check Perl Version
+        run: perl --version
+
+      - name: Check SVN Version
+        run: svn --version
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Pre-Install
+        run: |
+          echo "export PATH=${PWD}/bin:\${PATH}" >>"${HOME}/.bashrc"
+          echo "#!/bin/bash" >"${PWD}/bin/gfortran"
+          echo 'exec gfortran-9 "$@"' >>"${PWD}/bin/gfortran"
+          chmod +x "${PWD}/bin/gfortran"
+          source "${HOME}/.bashrc"
+
+      - name: Install
+        run: |
+          sudo add-apt-repository -y 'ppa:ubuntu-toolchain-r/test'
+          sudo add-apt-repository universe
+          sudo apt update
+          sudo apt install -y 'cpanminus'
+          sudo apt install -y 'build-essential' 'gfortran-9'
+          sudo apt install -y 'libconfig-inifiles-perl' 'libxml-parser-perl'
+          sudo apt install -y 'libdbi-perl' 'libdbd-sqlite3-perl'
+          sudo apt install -y 'subversion' 'python-subversion' 'libsvn-perl'
+          sudo apt install -y 's-nail'  # Provides mailx
+          sudo apt install -y 'python-pip'
+          sudo pip install 'trac'
+          cpanm 'Config::IniFiles' 'DBI' 'DBD::SQLite' 'XML::Parser'
+
+      - name: Run tests
+        run: |
+          export LOGNAME="${USER}"
+          bin/fcm test-battery -j8
