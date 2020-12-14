@@ -191,7 +191,7 @@ function file_cmp_filtered() {
         cat $FILE_EXPECT | sed \
           -e "s/^#IF SVN1.10 //g" \
           -e "s/^#IF SVN1.9\/10 //g" \
-          -e "/^#IF SVN1.9 /d" \
+          -e "/^#IF SVN1.8 /d" \
           -e "/^#IF SVN1.9 /d" \
           -e "/^#IF SVN1.8\/9 /d" \
           >"$TEST_DIR/$TEST_KEY.filtered-ctrl"
