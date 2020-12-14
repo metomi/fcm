@@ -105,7 +105,7 @@ Index: .
 Property changes on: .
 ___________________________________________________________________
 Added: svn:mergeinfo
-#IF SVN1.9 ## -0,0 +0,1 ##
+#IF SVN1.9/10 ## -0,0 +0,1 ##
    Merged /${PROJECT}trunk:r2-9
 Index: lib/python/info/__init__.py
 ===================================================================
@@ -306,16 +306,16 @@ Index: .
 Property changes on: .
 ___________________________________________________________________
 Added: svn:mergeinfo
-#IF SVN1.9 ## -0,0 +0,1 ##
+#IF SVN1.9/10 ## -0,0 +0,1 ##
    Merged /${PROJECT}branches/dev/Share/merge1:r4-11
-#IF SVN1.9 Index: added_directory/hello_constants.f90
-#IF SVN1.9 ===================================================================
-#IF SVN1.9 Index: added_directory/hello_constants.inc
-#IF SVN1.9 ===================================================================
-#IF SVN1.9 Index: added_directory/hello_constants_dummy.inc
-#IF SVN1.9 ===================================================================
-#IF SVN1.9 Index: added_file
-#IF SVN1.9 ===================================================================
+#IF SVN1.9/10 Index: added_directory/hello_constants.f90
+#IF SVN1.9/10 ===================================================================
+#IF SVN1.9/10 Index: added_directory/hello_constants.inc
+#IF SVN1.9/10 ===================================================================
+#IF SVN1.9/10 Index: added_directory/hello_constants_dummy.inc
+#IF SVN1.9/10 ===================================================================
+#IF SVN1.9/10 Index: added_file
+#IF SVN1.9/10 ===================================================================
 Index: lib/python/info/poems.py
 ===================================================================
 --- lib/python/info/poems.py	(revision 11)
@@ -380,8 +380,8 @@ Index: module/hello_constants_dummy.inc
 @@ -1 +1 @@
 -INCLUDE 'hello_constants.inc'
 +INCLUDE 'hello_constants.INc'
-#IF SVN1.9 Index: module/tree_conflict_file
-#IF SVN1.9 ===================================================================
+#IF SVN1.9/10 Index: module/tree_conflict_file
+#IF SVN1.9/10 ===================================================================
 Index: subroutine/hello_sub_dummy.h
 ===================================================================
 --- subroutine/hello_sub_dummy.h	(revision 11)
@@ -580,7 +580,7 @@ Index: .
 Property changes on: .
 ___________________________________________________________________
 Modified: svn:mergeinfo
-#IF SVN1.9 ## -0,0 +0,1 ##
+#IF SVN1.9/10 ## -0,0 +0,1 ##
    Merged /${PROJECT}branches/dev/Share/merge1:r12-13
 Index: added_file
 ===================================================================
@@ -772,7 +772,7 @@ Index: .
 Property changes on: .
 ___________________________________________________________________
 Modified: svn:mergeinfo
-#IF SVN1.9 ## -0,0 +0,1 ##
+#IF SVN1.9/10 ## -0,0 +0,1 ##
    Merged /${PROJECT}trunk:r10-16
 Index: added_file
 ===================================================================
@@ -979,7 +979,7 @@ Index: .
 Property changes on: .
 ___________________________________________________________________
 Modified: svn:mergeinfo
-#IF SVN1.9 ## -0,0 +0,1 ##
+#IF SVN1.9/10 ## -0,0 +0,1 ##
    Merged /${PROJECT}branches/dev/Share/merge1:r14-19
 Index: added_directory/hello_constants_dummy.inc
 ===================================================================
@@ -988,8 +988,8 @@ Index: added_directory/hello_constants_dummy.inc
 @@ -1,2 +0,0 @@
 -INCLUDE 'hello_constants.INc'
 -# added this line for simple repeat testing
-#IF SVN1.9 Index: added_file.add
-#IF SVN1.9 ===================================================================
+#IF SVN1.9/10 Index: added_file.add
+#IF SVN1.9/10 ===================================================================
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
@@ -1289,17 +1289,17 @@ Index: .
 Property changes on: .
 ___________________________________________________________________
 Added: svn:mergeinfo
-#IF SVN1.9 ## -0,0 +0,2 ##
+#IF SVN1.9/10 ## -0,0 +0,2 ##
    Merged /${PROJECT}trunk:r2-9
    Merged /${PROJECT}branches/dev/Share/merge1:r4-13
-#IF SVN1.9 Index: added_directory/hello_constants.f90
-#IF SVN1.9 ===================================================================
-#IF SVN1.9 Index: added_directory/hello_constants.inc
-#IF SVN1.9 ===================================================================
-#IF SVN1.9 Index: added_directory/hello_constants_dummy.inc
-#IF SVN1.9 ===================================================================
-#IF SVN1.9 Index: added_file
-#IF SVN1.9 ===================================================================
+#IF SVN1.9/10 Index: added_directory/hello_constants.f90
+#IF SVN1.9/10 ===================================================================
+#IF SVN1.9/10 Index: added_directory/hello_constants.inc
+#IF SVN1.9/10 ===================================================================
+#IF SVN1.9/10 Index: added_directory/hello_constants_dummy.inc
+#IF SVN1.9/10 ===================================================================
+#IF SVN1.9/10 Index: added_file
+#IF SVN1.9/10 ===================================================================
 Index: lib/python/info/__init__.py
 ===================================================================
 --- lib/python/info/__init__.py	(revision 21)
@@ -1372,8 +1372,8 @@ Index: module/hello_constants_dummy.inc
 @@ -1 +1 @@
 -INCLUDE 'hello_constants.inc'
 +INCLUDE 'hello_constants.INc'
-#IF SVN1.9 Index: module/tree_conflict_file
-#IF SVN1.9 ===================================================================
+#IF SVN1.9/10 Index: module/tree_conflict_file
+#IF SVN1.9/10 ===================================================================
 Index: subroutine/hello_sub_dummy.h
 ===================================================================
 --- subroutine/hello_sub_dummy.h	(revision 21)
