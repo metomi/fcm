@@ -234,7 +234,7 @@ function commit_sort() {
     # Sort the svn status part of the message
     status_sort $INPUT_FILE $TMP_OUTPUT_FILE
     # Sort the 'Adding/Deleting', etc part of the message
-    python -c 'import re, sys
+    python2 -c 'import re, sys
 text = sys.stdin.read()
 sending_lines = re.findall("^\w+ing  +.*$", text, re.M)
 prefix = text[:text.index(sending_lines[0])]
@@ -252,7 +252,7 @@ function diff_sort() {
     local INPUT_FILE=$1
     local OUTPUT_FILE=$2
     # Sort the diff file order.
-    python -c 'import re, sys
+    python2 -c 'import re, sys
 text = sys.stdin.read()
 print "\nIndex: ".join(
     [l.strip() for l in sorted(re.compile("^Index: ", re.M).split(text))])
@@ -264,7 +264,7 @@ print "\nIndex: ".join(
 function status_sort() {
     local INPUT_FILE=$1
     local OUTPUT_FILE=$2
-    python -c 'import re, sys
+    python2 -c 'import re, sys
 text = sys.stdin.read()
 status_lines = re.findall("^.{7} [\w./].*$", text, re.M)
 prefix = text[:text.index(status_lines[0])]
@@ -277,7 +277,7 @@ print prefix + "\n".join(status_lines) + suffix.rstrip()
 function merge_sort() {
     local INPUT_FILE=$1
     local OUTPUT_FILE=$2
-    python -c 'import re, sys
+    python2 -c 'import re, sys
 text = sys.stdin.read()
 status_lines = []
 for line in text.splitlines():
@@ -303,8 +303,8 @@ if status_lines:
 }
 
 function check_svn_version() {
-    if ! svn --version | head -1 | grep -q "^svn, version 1\.\(8\|9\|10\)"; then
-        skip_all "Tests require Subversion 1.8, 1.9 or 1.10"
+    if [[ ! $SVN_MINOR_VERSION =~ ^1\.(8|9|10)$ ]]; then
+        skip_all "Tests require Subversion 1.8 or later"
         exit 0
     fi
 }
@@ -336,6 +336,8 @@ SVN_MINOR_VERSION=undef
 if svn --version 1>/dev/null 2>&1; then
     SVN_MINOR_VERSION=$(svn --version | \
                         sed -n "s/^svn, version 1.\([0-9]\+\)\.[0-9]\+ .*/1.\1/p")
+    # Treat versions 1.10 and above the same for the moment
+    [[ $SVN_MINOR_VERSION =~ ^1\.1[0-9]$ ]] && SVN_MINOR_VERSION=1.10
 fi
 
 TEST_KEY_BASE=$(basename $0 .t)
