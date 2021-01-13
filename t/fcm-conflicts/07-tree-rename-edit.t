@@ -22,6 +22,7 @@
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
 check_svn_version
+[[ $SVN_MINOR_VERSION == "1.10" ]] && skip_all "Tests not working with svn 1.10"
 tests 18
 #-------------------------------------------------------------------------------
 setup
@@ -74,11 +75,12 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 # Tests fcm conflicts: rename, edit, discard local (status)
 TEST_KEY=$TEST_KEY_BASE-discard-status
 run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
-sed -i "/^ \{8\}> moved /d" $TEST_DIR/"$TEST_KEY.out"
 file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 A  +    pro/hello.pro
+        > moved from pro/hello.pro.renamed
 D       pro/hello.pro.renamed
+        > moved to pro/hello.pro
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------

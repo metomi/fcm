@@ -52,7 +52,7 @@ run_pass "$TEST_KEY" fcm commit --svn-non-interactive <<__IN__
 y
 __IN__
 commit_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
+file_cmp_filtered "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 [info] sed -i 1i\foo: starting commit message editor...
 Change summary:
 --------------------------------------------------------------------------------
@@ -63,9 +63,9 @@ Change summary:
 A  +    added_directory
 A  +    added_file
 D       module
-D       module/hello_constants.f90
-D       module/hello_constants.inc
-D       module/hello_constants_dummy.inc
+#IF SVN1.8/9 D       module/hello_constants.f90
+#IF SVN1.8/9 D       module/hello_constants.inc
+#IF SVN1.8/9 D       module/hello_constants_dummy.inc
 M       lib/python/info/poems.py
 M  +    added_directory/hello_constants.f90
 M  +    added_directory/hello_constants.inc

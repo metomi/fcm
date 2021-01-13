@@ -150,7 +150,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 TEST_KEY=$TEST_KEY_BASE-non-interactive-diff
 run_pass "$TEST_KEY" svn diff
 diff_sort "$TEST_DIR/$TEST_KEY.out" "$TEST_DIR/$TEST_KEY.sorted.out"
-diff_svn_version_filter >"$TEST_DIR/$TEST_KEY.sorted.ctrl" <<__OUT__
+file_cmp_filtered "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" <<__OUT__
 
 Index: .
 ===================================================================
@@ -160,16 +160,16 @@ Index: .
 Property changes on: .
 ___________________________________________________________________
 Added: svn:mergeinfo
-#IF SVN1.9 ## -0,0 +0,1 ##
+#IF SVN1.9/10 ## -0,0 +0,1 ##
    Merged /branches/dev/Share/merge1:r4-5
-#IF SVN1.9 Index: added_directory/hello_constants.f90
-#IF SVN1.9 ===================================================================
-#IF SVN1.9 Index: added_directory/hello_constants.inc
-#IF SVN1.9 ===================================================================
-#IF SVN1.9 Index: added_directory/hello_constants_dummy.inc
-#IF SVN1.9 ===================================================================
-#IF SVN1.9 Index: added_file
-#IF SVN1.9 ===================================================================
+#IF SVN1.9/10 Index: added_directory/hello_constants.f90
+#IF SVN1.9/10 ===================================================================
+#IF SVN1.9/10 Index: added_directory/hello_constants.inc
+#IF SVN1.9/10 ===================================================================
+#IF SVN1.9/10 Index: added_directory/hello_constants_dummy.inc
+#IF SVN1.9/10 ===================================================================
+#IF SVN1.9/10 Index: added_file
+#IF SVN1.9/10 ===================================================================
 Index: lib/python/info/poems.py
 ===================================================================
 --- lib/python/info/poems.py	(revision 9)
@@ -234,8 +234,8 @@ Index: module/hello_constants_dummy.inc
 @@ -1 +1 @@
 -INCLUDE 'hello_constants.inc'
 +INCLUDE 'hello_constants.INc'
-#IF SVN1.9 Index: module/tree_conflict_file
-#IF SVN1.9 ===================================================================
+#IF SVN1.9/10 Index: module/tree_conflict_file
+#IF SVN1.9/10 ===================================================================
 Index: subroutine/hello_sub_dummy.h
 ===================================================================
 --- subroutine/hello_sub_dummy.h	(revision 9)
@@ -244,7 +244,6 @@ Index: subroutine/hello_sub_dummy.h
  #include "hello_sub.h"
 +Modified a line
 __OUT__
-file_cmp "$TEST_KEY.sorted.out" "$TEST_KEY.sorted.out" "$TEST_DIR/$TEST_KEY.sorted.ctrl"
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Test the various mergeinfo output after merging.

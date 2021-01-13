@@ -24,39 +24,6 @@
 
 . $(dirname $0)/../lib/bash/test_header
 
-function file_cmp() {
-    local TEST_KEY=$1
-    local FILE_ACTUAL=$2
-    local FILE_EXPECT=${3:--}
-    if diff -u $TEST_DIR/$FILE_ACTUAL $FILE_EXPECT >&2; then
-        pass $TEST_KEY
-        return
-    fi
-    fail $TEST_KEY
-}
-
-function file_grep() {
-    local TEST_KEY=$1
-    local PATTERN=$2
-    local FILE=$3
-    if grep -q -e "$PATTERN" $TEST_DIR/$FILE; then
-        pass $TEST_KEY
-        return
-    fi
-    fail $TEST_KEY
-}
-
-function file_test() {
-    local TEST_KEY=$1
-    local FILE=$2
-    local OPTION=${3:--e}
-    if test $OPTION $TEST_DIR/$FILE; then
-        pass $TEST_KEY
-    else
-        fail $TEST_KEY
-    fi
-}
-
 function file_xxdiff() {
     local TEST_KEY=$1
     local FILE_ACTUAL=$2
@@ -195,26 +162,6 @@ function init_merge_branches() {
     svn update -q
 }
 
-function run_pass() {
-    local TEST_KEY=$1
-    shift 1
-    if ! "$@" 1>$TEST_DIR/$TEST_KEY.out 2>$TEST_DIR/$TEST_KEY.err; then
-        fail $TEST_KEY
-        return
-    fi
-    pass $TEST_KEY
-}
-
-function run_fail() {
-    local TEST_KEY=$1
-    shift 1
-    if "$@" 1>$TEST_DIR/$TEST_KEY.out 2>$TEST_DIR/$TEST_KEY.err; then
-        fail $TEST_KEY
-        return
-    fi
-    pass $TEST_KEY
-}
-
 function get_results() {
     local RESULT_KEY=$1
     local RESULTS_FILE=$2
@@ -230,7 +177,7 @@ function test_mergeinfo() {
     local DIFF_BRANCH=$2
     local INPUT_RESULTS_FILE=${3:--}
     local WC_REVISION=${4:-WC}
-    if "$SVN_VERSION_IS_19"; then
+    if [[ $SVN_MINOR_VERSION != "1.8" ]]; then
         WC_REVISION=WC
     elif (( WC_REVISION < 10 )); then
         WC_REVISION="$WC_REVISION "

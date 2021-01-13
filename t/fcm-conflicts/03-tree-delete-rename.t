@@ -22,6 +22,7 @@
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
 check_svn_version
+[[ $SVN_MINOR_VERSION == "1.10" ]] && skip_all "Tests not working with svn 1.10"
 tests 15
 #-------------------------------------------------------------------------------
 setup
@@ -48,14 +49,15 @@ fcm merge --non-interactive $ROOT_URL/branches/dev/Share/del_ren >/dev/null
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 n
 __IN__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp_filtered "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] pro/hello.pro: in tree conflict.
 Locally: deleted.
 Externally: renamed to pro/hello.pro.renamed.
 Answer (y) to accept the local delete.
 Answer (n) to accept the external rename.
 Keep the local version?
-Enter "y" or "n" (or just press <return> for "n") Resolved conflicted state of 'pro/hello.pro'
+#IF SVN1.8/9 Enter "y" or "n" (or just press <return> for "n") Resolved conflicted state of 'pro/hello.pro'
+#IF SVN1.10 Enter "y" or "n" (or just press <return> for "n") Tree conflict at 'pro/hello.pro' marked as resolved.
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------

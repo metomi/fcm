@@ -51,6 +51,9 @@
 #         Compare contents in $FILE_ACTUAL and $FILE_EXPECT. pass/fail
 #         $TEST_KEY if contents are identical/different. If $FILE_EXPECT is "-"
 #         or not defined, compare $FILE_ACTUAL with STDIN to this function.
+#     file_cmp_filtered TEST_KEY FILE_ACTUAL [$FILE_EXPECT]
+#         Preprocess $FILE_EXPECT based on relevant '#IF SVN1.X' prefixes before
+#         calling file_cmp.
 #     file_test TEST_KEY FILE [OPTION]
 #         pass/fail $TEST_KEY if "test $OPTION $FILE" returns 0/1. $OPTION is
 #         -e if not specified.
@@ -62,8 +65,6 @@
 #         Sort status and transmitting info within the commit output.
 #     diff_sort INPUT_FILE OUTPUT_FILE
 #         Sort Subversion diff output by filename.
-#     diff_svn_version_filter
-#         Preprocess stdin to stdout based on relevant '#IF SVN1.X' prefixes.
 #     status_sort INPUT_FILE OUTPUT_FILE
 #         Sort Subversion status lines.
 #     merge_sort INPUT_FILE OUTPUT_FILE
@@ -140,7 +141,7 @@ function fail() {
 function run_pass() {
     local TEST_KEY=$1
     shift 1
-    if ! "$@" 1>$TEST_KEY.out 2>$TEST_KEY.err; then
+    if ! "$@" 1>$TEST_DIR/$TEST_KEY.out 2>$TEST_DIR/$TEST_KEY.err; then
         fail $TEST_KEY
         return
     fi
@@ -150,7 +151,7 @@ function run_pass() {
 function run_fail() {
     local TEST_KEY=$1
     shift 1
-    if "$@" 1>$TEST_KEY.out 2>$TEST_KEY.err; then
+    if "$@" 1>$TEST_DIR/$TEST_KEY.out 2>$TEST_DIR/$TEST_KEY.err; then
         fail $TEST_KEY
         return
     fi
@@ -161,18 +162,49 @@ function file_cmp() {
     local TEST_KEY=$1
     local FILE_ACTUAL=$2
     local FILE_EXPECT=${3:--}
-    if diff -u $FILE_EXPECT $FILE_ACTUAL >&2; then
+    if diff -u $FILE_EXPECT $TEST_DIR/$FILE_ACTUAL >&2; then
         pass $TEST_KEY
         return
     fi
     fail $TEST_KEY
 }
 
+function file_cmp_filtered() {
+    local FILE_EXPECT=${3:--}
+    if [[ $SVN_MINOR_VERSION == "1.8" ]]; then
+        cat $FILE_EXPECT | sed \
+          -e "s/^#IF SVN1.8 //g" \
+          -e "s/^#IF SVN1.8\/9 //g" \
+          -e "/^#IF SVN1.9 /d" \
+          -e "/^#IF SVN1.10 /d" \
+          -e "/^#IF SVN1.9\/10 /d" \
+          >"$TEST_DIR/$TEST_KEY.filtered-ctrl"
+    elif [[ $SVN_MINOR_VERSION == "1.9" ]]; then
+        cat $FILE_EXPECT | sed \
+          -e "s/^#IF SVN1.9 //g" \
+          -e "s/^#IF SVN1.8\/9 //g" \
+          -e "s/^#IF SVN1.9\/10 //g" \
+          -e "/^#IF SVN1.8 /d" \
+          -e "/^#IF SVN1.10 /d" \
+          >"$TEST_DIR/$TEST_KEY.filtered-ctrl"
+    else
+        cat $FILE_EXPECT | sed \
+          -e "s/^#IF SVN1.10 //g" \
+          -e "s/^#IF SVN1.9\/10 //g" \
+          -e "/^#IF SVN1.8 /d" \
+          -e "/^#IF SVN1.9 /d" \
+          -e "/^#IF SVN1.8\/9 /d" \
+          >"$TEST_DIR/$TEST_KEY.filtered-ctrl"
+    fi
+    file_cmp "$1" "$2" "$TEST_DIR/$TEST_KEY.filtered-ctrl"
+    rm "$TEST_DIR/$TEST_KEY.filtered-ctrl"
+}
+
 function file_test() {
     local TEST_KEY=$1
     local FILE=$2
     local OPTION=${3:--e}
-    if test $OPTION $FILE; then
+    if test $OPTION $TEST_DIR/$FILE; then
         pass $TEST_KEY
     else
         fail $TEST_KEY
@@ -183,7 +215,7 @@ function file_grep() {
     local TEST_KEY=$1
     local PATTERN=$2
     local FILE=$3
-    if grep -q -e "$PATTERN" $FILE; then
+    if grep -q -e "$PATTERN" $TEST_DIR/$FILE; then
         pass $TEST_KEY
         return
     fi
@@ -229,14 +261,6 @@ print "\nIndex: ".join(
     sed -i "s/(nonexistent)/(working copy)/" "$OUTPUT_FILE"
 }
 
-function diff_svn_version_filter() {
-    if "$SVN_VERSION_IS_19"; then
-        sed "s/^#IF SVN1.9 //g; /^#IF SVN1.8 /d"
-    else
-        sed "s/^#IF SVN1.8 //g; /^#IF SVN1.9 /d"
-    fi
-}
-
 function status_sort() {
     local INPUT_FILE=$1
     local OUTPUT_FILE=$2
@@ -279,8 +303,8 @@ if status_lines:
 }
 
 function check_svn_version() {
-    if ! svn --version | head -1 | grep -q "^svn, version 1\.\(8\|9\)"; then
-        skip_all "Tests require Subversion 1.8 or 1.9"
+    if ! svn --version | head -1 | grep -q "^svn, version 1\.\(8\|9\|10\)"; then
+        skip_all "Tests require Subversion 1.8, 1.9 or 1.10"
         exit 0
     fi
 }
@@ -308,13 +332,10 @@ FCM_HOME=${FCM_HOME:-$(cd $(dirname $(readlink -f $BASH_SOURCE))/../../.. && pwd
 export FCM_HOME
 PATH=$FCM_HOME/bin:$PATH
 
-SVN_VERSION_IS_19=false
+SVN_MINOR_VERSION=undef
 if svn --version 1>/dev/null 2>&1; then
-    SVN_VERSION=$(svn --version | \
-                  sed -n "s/^svn, version \([0-9.]\+\) .*/\1/p")
-    if [[ $SVN_VERSION =~ "1.9." ]]; then
-        SVN_VERSION_IS_19=true
-    fi
+    SVN_MINOR_VERSION=$(svn --version | \
+                        sed -n "s/^svn, version 1.\([0-9]\+\)\.[0-9]\+ .*/1.\1/p")
 fi
 
 TEST_KEY_BASE=$(basename $0 .t)

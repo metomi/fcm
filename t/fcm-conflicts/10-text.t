@@ -65,7 +65,7 @@ run_pass "$TEST_KEY" fcm conflicts <<'__IN__'
 y
 y
 __IN__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp_filtered "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] lib/python/info/poems.py: in text conflict.
 diff3 $PWD/lib/python/info/poems.py.working $PWD/lib/python/info/poems.py.merge-left.r1 $PWD/lib/python/info/poems.py.merge-right.r5
 ====3
@@ -122,7 +122,8 @@ diff3 $PWD/lib/python/info/poems.py.working $PWD/lib/python/info/poems.py.merge-
 3:23c
   prINt "\n",  __doc__
 Run "svn resolve --accept working lib/python/info/poems.py"?
-Enter "y" or "n" (or just press <return> for "n") Resolved conflicted state of 'lib/python/info/poems.py'
+#IF SVN1.8/9 Enter "y" or "n" (or just press <return> for "n") Resolved conflicted state of 'lib/python/info/poems.py'
+#IF SVN1.10 Enter "y" or "n" (or just press <return> for "n") Merge conflicts in 'lib/python/info/poems.py' marked as resolved.
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------

@@ -20,7 +20,6 @@
 # Test "fcm-install-svn-hook", "hooks-env" installation.
 #-------------------------------------------------------------------------------
 . $(dirname $0)/test_header
-. $TEST_SOURCE_DIR/test_header_more
 #-------------------------------------------------------------------------------
 if ! which svnadmin 1>/dev/null 2>/dev/null; then
     skip_all 'svnadmin not available'
