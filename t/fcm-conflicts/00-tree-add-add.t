@@ -48,14 +48,15 @@ fcm merge --non-interactive $ROOT_URL/branches/dev/Share/add_add >/dev/null
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 n
 __IN__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp_filtered "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] new_file: in tree conflict.
 Locally: added.
 Externally: added.
 Answer (y) to keep the local file filename.
 Answer (n) to keep the external file filename.
 Keep the local version?
-Enter "y" or "n" (or just press <return> for "n") Resolved conflicted state of 'new_file'
+#IF SVN1.8/9 Enter "y" or "n" (or just press <return> for "n") Resolved conflicted state of 'new_file'
+#IF SVN1.10 Enter "y" or "n" (or just press <return> for "n") Tree conflict at 'new_file' marked as resolved.
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------

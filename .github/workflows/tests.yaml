@@ -25,7 +25,8 @@ jobs:
             libdbd-sqlite3-perl \
             python-subversion libsvn-perl \
             s-nail
-          [[ ${{matrix.ubuntu}} != "ubuntu-20.04" ]] && sudo pip install 'trac' || true
+          [[ ${{matrix.ubuntu}} == "ubuntu-16.04" ]] && sudo pip install 'trac==1.2' || true
+          [[ ${{matrix.ubuntu}} == "ubuntu-18.04" ]] && sudo pip install 'trac' || true
           echo "#!/bin/bash" >"${PWD}/bin/gfortran"
           echo 'exec gfortran-9 "$@"' >>"${PWD}/bin/gfortran"
           chmod +x "${PWD}/bin/gfortran"
