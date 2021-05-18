@@ -12,7 +12,7 @@ and wrappers to Subversion for scientific software development
 
 ## Copyright and Terms of Use
 
-Copyright (C) 2006-2019 British Crown (Met Office) & Contributors.
+Copyright (C) British Crown (Met Office) & Contributors.
 
 FCM is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

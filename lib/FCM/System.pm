@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Copyright (C) 2006-2019 British Crown (Met Office) & Contributors.
+# Copyright (C) British Crown (Met Office) & Contributors.
 #
 # This file is part of FCM, tools for managing and building source code.
 #
@@ -281,6 +281,6 @@ by methods of this class on error.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006-2019 British Crown (Met Office) & Contributors..
+Copyright (C) British Crown (Met Office) & Contributors..
 
 =cut
