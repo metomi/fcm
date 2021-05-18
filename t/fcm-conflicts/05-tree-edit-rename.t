@@ -22,7 +22,6 @@
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
 check_svn_version
-[[ $SVN_MINOR_VERSION == "1.10" ]] && skip_all "Tests not working with svn 1.10"
 tests 24
 #-------------------------------------------------------------------------------
 setup
@@ -125,7 +124,7 @@ fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ed_ren >/dev/null
 run_pass "$TEST_KEY" fcm conflicts <<__IN__
 y
 __IN__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp_filtered "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 [info] pro/hello.pro: in tree conflict.
 Locally: edited.
 Externally: renamed to pro/hello.pro.renamed.
@@ -142,7 +141,8 @@ Enter "y" or "n" (or just press <return> for "n") diff3 pro/hello.pro.working pr
   Merge contents (1)
   Merge contents (2)
 Reverted 'pro/hello.pro.renamed'
-Resolved conflicted state of 'pro/hello.pro'
+#IF SVN1.8/9 Resolved conflicted state of 'pro/hello.pro'
+#IF SVN1.10 Tree conflict at 'pro/hello.pro' marked as resolved.
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
