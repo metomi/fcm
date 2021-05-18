@@ -5,6 +5,25 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## 2020.05.0 (2019-09-30)
+
+FCM release 43.
+
+### Noteworthy Changes
+
+[#264](https://github.com/metomi/fcm/pull/264):
+[#267](https://github.com/metomi/fcm/pull/267):
+Ensure that fcm provides support for Subversion 1.10.
+
+[#258](https://github.com/metomi/fcm/pull/258):
+Changed the behaviour of fcm-add-trac-env to add a named repository rather
+than the default 
+
+[#261](https://github.com/metomi/fcm/pull/258):
+Make post commit hook threshold for size warning configurable.
+
+--------------------------------------------------------------------------------
+
 ## 2019.09.0 (2019-09-30)
 
 FCM release 42.

@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (C) 2006-2019 British Crown (Met Office) & Contributors.
+# Copyright (C) 2006-2021 British Crown (Met Office) & Contributors.
 #
 # This file is part of FCM, tools for managing and building source code.
 #
@@ -426,6 +426,6 @@ Turns $m_ctx back into a list of configuration entries.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006-2019 British Crown (Met Office) & Contributors..
+Copyright (C) 2006-2021 British Crown (Met Office) & Contributors.
 
 =cut

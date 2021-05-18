@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Copyright (C) 2006-2019 British Crown (Met Office) & Contributors.
+# Copyright (C) 2006-2021 British Crown (Met Office) & Contributors.
 #
 # This file is part of FCM, tools for managing and building source code.
 #
@@ -139,6 +139,6 @@ L<FCM1::Interactive::InputGetter::GUI|FCM1::Interactive::InputGetter::GUI>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006-2019 British Crown (Met Office) & Contributors..
+Copyright (C) 2006-2021 British Crown (Met Office) & Contributors.
 
 =cut

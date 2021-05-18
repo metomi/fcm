@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Copyright (C) 2006-2019 British Crown (Met Office) & Contributors.
+# Copyright (C) 2006-2021 British Crown (Met Office) & Contributors.
 #
 # This file is part of FCM, tools for managing and building source code.
 #
@@ -77,6 +77,6 @@ with configurations to install data files to the etc/ sub-directory of a build.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006-2019 British Crown (Met Office) & Contributors..
+Copyright (C) 2006-2021 British Crown (Met Office) & Contributors.
 
 =cut
