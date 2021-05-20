@@ -5,6 +5,17 @@ for a full listing of issues for each release.
 
 --------------------------------------------------------------------------------
 
+## 2021.05.0 (2021-05-20)
+
+FCM release 43.
+
+### Noteworthy Changes
+
+[260](https://github.com/metomi/fcm/pull/260)
+Fix bug where fcm would ignore modules that begin with function/subroutine.
+
+--------------------------------------------------------------------------------
+
 ## 2019.09.0 (2019-09-30)
 
 FCM release 42.
