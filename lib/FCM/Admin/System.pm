@@ -305,7 +305,8 @@ sub backup_svn_repository {
                         print($line);
                     }
                 }
-                return $pipe->close();
+                $pipe->close();
+                return $? ? () : (1);
                 # Note: "verify" is not yet possible via SVN::Repos
             },
         );
