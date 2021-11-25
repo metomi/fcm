@@ -75,8 +75,12 @@ if ! grep -q "$ACTION  *$PROPNAME" <<<"$OK_CHANGES"; then
         echo "[$ACTION $PROPNAME] permission denied." >&2
     fi
     if [[ -n ${FCM_SVN_HOOK_ADMIN_EMAIL:-} ]]; then
-        mail -s "$NAME:$THIS" "$FCM_SVN_HOOK_ADMIN_EMAIL" <<<"[! $NOW] $@" \
-            || true
+        FROM=
+        if [[ -n ${FCM_SVN_HOOK_NOTIFICATION_FROM:-} ]]; then
+            FROM="-r${FCM_SVN_HOOK_NOTIFICATION_FROM:-}"
+        fi
+        mail "$FROM" -s "$NAME:$THIS" \
+            "$FCM_SVN_HOOK_ADMIN_EMAIL" <<<"[! $NOW] $@" || true
     fi
     echo "[! $NOW] $@"
     exit 1

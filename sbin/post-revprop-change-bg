@@ -102,8 +102,12 @@ main() {
 }
 
 if ! main 1>$LOG_TMP 2>&1 && [[ -n ${FCM_SVN_HOOK_ADMIN_EMAIL:-} ]]; then
-    mail -s "[ERROR $THIS] $NAME" "$FCM_SVN_HOOK_ADMIN_EMAIL" <"$LOG_TMP" \
-        || true
+    FROM=
+    if [[ -n ${FCM_SVN_HOOK_NOTIFICATION_FROM:-} ]]; then
+        FROM="-r${FCM_SVN_HOOK_NOTIFICATION_FROM:-}"
+    fi
+    mail "$FROM" -s "[ERROR $THIS] $NAME" \
+        "$FCM_SVN_HOOK_ADMIN_EMAIL" <"$LOG_TMP" || true
 fi
 
 cat "$LOG_TMP"
