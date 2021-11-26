@@ -179,8 +179,12 @@ main() {
 
 if ! main 1>$LOG_REV 2>&1; then
     if [[ -n ${FCM_SVN_HOOK_ADMIN_EMAIL:-} ]]; then
-        mail -s "[$THIS] $REPOS@$REV" "$FCM_SVN_HOOK_ADMIN_EMAIL" <"$LOG_REV" \
-            || true
+        FROM=
+        if [[ -n ${FCM_SVN_HOOK_NOTIFICATION_FROM:-} ]]; then
+            FROM="-r${FCM_SVN_HOOK_NOTIFICATION_FROM:-}"
+        fi
+        mail "$FROM" -s "[$THIS] $REPOS@$REV" \
+            "$FCM_SVN_HOOK_ADMIN_EMAIL" <"$LOG_REV" || true
     fi
 fi
 cat "$LOG_REV"

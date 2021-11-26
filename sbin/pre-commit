@@ -108,8 +108,12 @@ begin 1>"${LOG_TXN}" 2>&1
 LOG_TXN_SIZE="$(stat -c '%s' "${LOG_TXN}")"
 if ! main 1>>"${LOG_TXN}" 2>&1; then
     if [[ -n ${FCM_SVN_HOOK_ADMIN_EMAIL:-} ]]; then
-        mail -s "[$THIS] $REPOS@$TXN" "$FCM_SVN_HOOK_ADMIN_EMAIL" <"$LOG_TXN" \
-            || true
+        FROM=
+        if [[ -n ${FCM_SVN_HOOK_NOTIFICATION_FROM:-} ]]; then
+            FROM="-r${FCM_SVN_HOOK_NOTIFICATION_FROM:-}"
+        fi
+        mail "$FROM" -s "[$THIS] $REPOS@$TXN" \
+            "$FCM_SVN_HOOK_ADMIN_EMAIL" <"$LOG_TXN" || true
     fi
     cat "$LOG_TXN"
     cat "$LOG_TXN" >&2

@@ -211,7 +211,7 @@ date2datefmt mail.out \
     | sed '/^trac-admin/d; s/^\(REV_FILE_SIZE=\).*\( #\)/\1???\2/' \
     >"$TEST_KEY.mail.out"
 file_cmp "$TEST_KEY.mail.out" "$TEST_KEY.mail.out" <<__LOG__
--s [post-commit-bg] $REPOS_PATH@$REV fcm.admin.team
+-rnotifications@localhost -s [post-commit-bg] $REPOS_PATH@$REV fcm.admin.team
 YYYY-mm-ddTHH:MM:SSZ+ $REV by $USER
 svnadmin dump -r$REV --incremental --deltas $REPOS_PATH | gzip \\
     | (dd 'conv=fsync' "of=$PWD/svn-dumps/foo-$REV-tmp.gz" 2>/dev/null)
@@ -244,7 +244,7 @@ date2datefmt mail.out \
     | sed '/^trac-admin/d; s/^\(REV_FILE_SIZE=\).*\( #\)/\1???\2/' \
     >"${TEST_KEY}.mail.out"
 file_cmp "${TEST_KEY}.mail.out" "${TEST_KEY}.mail.out" <<__LOG__
--s [post-commit-bg] ${REPOS_PATH}@${REV} fcm.admin.team
+-rnotifications@localhost -s [post-commit-bg] ${REPOS_PATH}@${REV} fcm.admin.team
 YYYY-mm-ddTHH:MM:SSZ+ ${REV} by ${USER}
 svnadmin dump -r${REV} --incremental --deltas ${REPOS_PATH} | gzip \\
     | (dd 'conv=fsync' "of=${PWD}/svn-dumps/foo-${REV}-tmp.gz" 2>/dev/null)

@@ -76,7 +76,7 @@ file_cmp "$TEST_KEY.svnperms.py.out" svnperms.py.out <<__OUT__
 __OUT__
 date2datefmt mail.out >"$TEST_KEY.mail.out.expected"
 file_cmp  "$TEST_KEY.mail.out" "$TEST_KEY.mail.out.expected" <<__LOG__
--s [pre-commit] $REPOS_PATH@$TXN your.admin.team
+-rnotifications@localhost -s [pre-commit] $REPOS_PATH@$TXN your.admin.team
 YYYY-mm-ddTHH:MM:SSZ+ $TXN by $USER
 A   file1
 Access denied!
@@ -106,7 +106,7 @@ __LOG__
 run_fail "$TEST_KEY.svnperms.py.out" test -e svnperms.py.out
 date2datefmt mail.out >"$TEST_KEY.mail.out.expected"
 file_cmp "$TEST_KEY.mail.out" "$TEST_KEY.mail.out.expected" <<__LOG__
--s [pre-commit] $REPOS_PATH@$TXN your.admin.team
+-rnotifications@localhost -s [pre-commit] $REPOS_PATH@$TXN your.admin.team
 YYYY-mm-ddTHH:MM:SSZ+ $TXN by $USER
 A   file1
 foo: permission configuration file not found.
@@ -166,7 +166,7 @@ __LOG__
 date2datefmt mail.out | sed 's/\(size \).*\(MB exceeds\)/\1??\2/' \
      >"$TEST_KEY.mail.out.expected"
 file_cmp "$TEST_KEY.mail.out.expected" "$TEST_KEY.mail.out.expected" <<__OUT__
--s [pre-commit] $REPOS_PATH@$TXN your.admin.team
+-rnotifications@localhost -s [pre-commit] $REPOS_PATH@$TXN your.admin.team
 YYYY-mm-ddTHH:MM:SSZ+ $TXN by $USER
 A   file3
 foo@$TXN: changeset size ??MB exceeds 10MB.
@@ -220,7 +220,7 @@ __OUT__
 date2datefmt mail.out | sed 's/\(size \).*\(MB exceeds\)/\1??\2/' \
      >"$TEST_KEY.mail.out.expected"
 file_cmp "$TEST_KEY.mail.out.expected" "$TEST_KEY.mail.out.expected" <<__OUT__
--s [pre-commit] $REPOS_PATH@$TXN your.admin.team
+-rnotifications@localhost -s [pre-commit] $REPOS_PATH@$TXN your.admin.team
 YYYY-mm-ddTHH:MM:SSZ+ $TXN by $USER
 A   file4
 I am a blocker.
@@ -278,7 +278,7 @@ A   hello/branches/dev/nosuchuser/whatever/
 __LOG__
 date2datefmt mail.out >"$TEST_KEY.mail.out.expected"
 file_cmp  "$TEST_KEY.mail.out" "$TEST_KEY.mail.out.expected" <<__LOG__
--s [pre-commit] $REPOS_PATH@$TXN your.admin.team
+-rnotifications@localhost -s [pre-commit] $REPOS_PATH@$TXN your.admin.team
 YYYY-mm-ddTHH:MM:SSZ+ $TXN by $USER
 A   hello/branches/dev/nosuchuser/
 A   hello/branches/dev/nosuchuser/whatever/
