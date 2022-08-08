@@ -99,6 +99,7 @@ function FINALLY() {
     done
     if [[ -n $TEST_DIR ]]; then
         cd ~
+        # DPM
         rm -rf $TEST_DIR
     fi
     if declare -F FINALLY_MORE >/dev/null; then
@@ -175,25 +176,41 @@ function file_cmp_filtered() {
         cat $FILE_EXPECT | sed \
           -e "s/^#IF SVN1.8 //g" \
           -e "s/^#IF SVN1.8\/9 //g" \
-          -e "/^#IF SVN1.9 /d" \
+          -e "s/^#IF SVN1.8\/9\/10 //g" \
+          -e "/^#IF SVN1.9\/10\/14 /d" \
           -e "/^#IF SVN1.10 /d" \
-          -e "/^#IF SVN1.9\/10 /d" \
+          -e "/^#IF SVN1.10\/14 /d" \
+          -e "/^#IF SVN1.14 /d" \
           >"$TEST_DIR/$TEST_KEY.filtered-ctrl"
     elif [[ $SVN_MINOR_VERSION == "1.9" ]]; then
         cat $FILE_EXPECT | sed \
-          -e "s/^#IF SVN1.9 //g" \
           -e "s/^#IF SVN1.8\/9 //g" \
-          -e "s/^#IF SVN1.9\/10 //g" \
+          -e "s/^#IF SVN1.8\/9\/10 //g" \
+          -e "s/^#IF SVN1.9\/10\/14 //g" \
           -e "/^#IF SVN1.8 /d" \
           -e "/^#IF SVN1.10 /d" \
+          -e "/^#IF SVN1.10\/14 /d" \
+          -e "/^#IF SVN1.14 /d" \
+          >"$TEST_DIR/$TEST_KEY.filtered-ctrl"
+    elif [[ $SVN_MINOR_VERSION == "1.10" ]]; then
+        cat $FILE_EXPECT | sed \
+          -e "s/^#IF SVN1.8\/9\/10 //g" \
+          -e "s/^#IF SVN1.9\/10\/14 //g" \
+          -e "s/^#IF SVN1.10 //g" \
+          -e "s/^#IF SVN1.10\/14 //g" \
+          -e "/^#IF SVN1.8 /d" \
+          -e "/^#IF SVN1.8\/9 /d" \
+          -e "/^#IF SVN1.14 /d" \
           >"$TEST_DIR/$TEST_KEY.filtered-ctrl"
     else
         cat $FILE_EXPECT | sed \
-          -e "s/^#IF SVN1.10 //g" \
-          -e "s/^#IF SVN1.9\/10 //g" \
+          -e "s/^#IF SVN1.10\/14 //g" \
+          -e "s/^#IF SVN1.9\/10\/14 //g" \
           -e "/^#IF SVN1.8 /d" \
-          -e "/^#IF SVN1.9 /d" \
           -e "/^#IF SVN1.8\/9 /d" \
+          -e "/^#IF SVN1.8\/9\/10 /d" \
+          -e "/^#IF SVN1.10 /d" \
+          -e "s/^#IF SVN1.14 //g" \
           >"$TEST_DIR/$TEST_KEY.filtered-ctrl"
     fi
     file_cmp "$1" "$2" "$TEST_DIR/$TEST_KEY.filtered-ctrl"
@@ -234,13 +251,13 @@ function commit_sort() {
     # Sort the svn status part of the message
     status_sort $INPUT_FILE $TMP_OUTPUT_FILE
     # Sort the 'Adding/Deleting', etc part of the message
-    python2 -c 'import re, sys
+    python3 -c 'import re, sys
 text = sys.stdin.read()
-sending_lines = re.findall("^\w+ing  +.*$", text, re.M)
+sending_lines = re.findall(r"^\w+ing  +.*$", text, re.M)
 prefix = text[:text.index(sending_lines[0])]
 suffix = text[(text.index(sending_lines[-1]) + len(sending_lines[-1])):]
 sending_lines.sort()
-print prefix + "\n".join(sending_lines) + suffix.rstrip()
+print(prefix + "\n".join(sending_lines) + suffix.rstrip())
 ' <"$TMP_OUTPUT_FILE" >"$OUTPUT_FILE"
     rm "$TMP_OUTPUT_FILE"
     # Remove 1.8 to 1.9 specific changes (transmitting, transaction lines).
@@ -252,10 +269,10 @@ function diff_sort() {
     local INPUT_FILE=$1
     local OUTPUT_FILE=$2
     # Sort the diff file order.
-    python2 -c 'import re, sys
+    python3 -c 'import re, sys
 text = sys.stdin.read()
-print "\nIndex: ".join(
-    [l.strip() for l in sorted(re.compile("^Index: ", re.M).split(text))])
+print("\nIndex: ".join(
+    [l.strip() for l in sorted(re.compile(r"^Index: ", re.M).split(text))]))
 ' <"$INPUT_FILE" >"$OUTPUT_FILE"
     # In 1.9, new files are (nonexistent) rather than (working copy).
     sed -i "s/(nonexistent)/(working copy)/" "$OUTPUT_FILE"
@@ -264,46 +281,46 @@ print "\nIndex: ".join(
 function status_sort() {
     local INPUT_FILE=$1
     local OUTPUT_FILE=$2
-    python2 -c 'import re, sys
+    python3 -c 'import re, sys
 text = sys.stdin.read()
-status_lines = re.findall("^.{7} [\w./].*$", text, re.M)
+status_lines = re.findall(r"^.{7} [\w./].*$", text, re.M)
 prefix = text[:text.index(status_lines[0])]
 suffix = text[(text.index(status_lines[-1]) + len(status_lines[-1])):]
 status_lines.sort()
-print prefix + "\n".join(status_lines) + suffix.rstrip()
+print(prefix + "\n".join(status_lines) + suffix.rstrip())
 ' <"$INPUT_FILE" >"$OUTPUT_FILE"
 }
 
 function merge_sort() {
     local INPUT_FILE=$1
     local OUTPUT_FILE=$2
-    python2 -c 'import re, sys
+    python3 -c 'import re, sys
 text = sys.stdin.read()
 status_lines = []
 for line in text.splitlines():
     if line.startswith("Enter \"y\"") and ": " in line:
         head, tail = line.split(": ", 1)
         if status_lines:
-            print "\n".join(sorted(status_lines))
+            print("\n".join(sorted(status_lines)))
             status_lines = []
-        print head + ": "
+        print(head + ": ")
         if tail:
             line = tail
-    if re.search("^.{4} [\w./].*$", line):
+    if re.search(r"^.{4} [\w./].*$", line):
         status_lines.append(line)
     elif status_lines:
-        print "\n".join(sorted(status_lines))
-        print line
+        print("\n".join(sorted(status_lines)))
+        print(line)
         status_lines = []
     else:
-        print line
+        print(line)
 if status_lines:
-    print "\n".join(sorted(status_lines))
+    print("\n".join(sorted(status_lines)))
 ' <"$INPUT_FILE" >"$OUTPUT_FILE"
 }
 
 function check_svn_version() {
-    if [[ ! $SVN_MINOR_VERSION =~ ^1\.(8|9|10)$ ]]; then
+    if [[ ! $SVN_MINOR_VERSION =~ ^1\.(8|9|10|14)$ ]]; then
         skip_all "Tests require Subversion 1.8 or later"
         exit 0
     fi
@@ -333,11 +350,14 @@ export FCM_HOME
 PATH=$FCM_HOME/bin:$PATH
 
 SVN_MINOR_VERSION=undef
+SVN_VERSION=undef
 if svn --version 1>/dev/null 2>&1; then
     SVN_MINOR_VERSION=$(svn --version | \
                         sed -n "s/^svn, version 1.\([0-9]\+\)\.[0-9]\+ .*/1.\1/p")
-    # Treat versions 1.10 and above the same for the moment
-    [[ $SVN_MINOR_VERSION =~ ^1\.1[0-9]$ ]] && SVN_MINOR_VERSION=1.10
+    SVN_VERSION=$(svn --version | \
+                        sed -n "s/^svn, version 1.\([0-9\.]\+\) .*/1.\1/p")
+    # Treat version 1.13 like 1.14
+    [[ $SVN_MINOR_VERSION == "1.13" ]] && SVN_MINOR_VERSION=1.14
 fi
 
 TEST_KEY_BASE=$(basename $0 .t)

@@ -22,6 +22,7 @@
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
 check_svn_version
+[[ $SVN_VERSION == "1.13.0" ]] && skip_all "Tests do not work with svn 1.13.0"
 tests 18
 #-------------------------------------------------------------------------------
 setup
@@ -70,7 +71,7 @@ Enter "y" or "n" (or just press <return> for "n") diff3 pro/hello.pro.renamed-me
   Merge contents (1)
 D         pro/hello.pro.renamed-local
 #IF SVN1.8/9 Resolved conflicted state of 'pro/hello.pro'
-#IF SVN1.10 Tree conflict at 'pro/hello.pro' marked as resolved.
+#IF SVN1.10/14 Tree conflict at 'pro/hello.pro' marked as resolved.
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
@@ -123,7 +124,7 @@ Enter "y" or "n" (or just press <return> for "n") diff3 pro/hello.pro.renamed-lo
   Merge contents (1)
 Reverted 'pro/hello.pro.renamed-merge'
 #IF SVN1.8/9 Resolved conflicted state of 'pro/hello.pro'
-#IF SVN1.10 Tree conflict at 'pro/hello.pro' marked as resolved.
+#IF SVN1.10/14 Tree conflict at 'pro/hello.pro' marked as resolved.
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------

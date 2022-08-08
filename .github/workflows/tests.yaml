@@ -5,12 +5,12 @@ jobs:
     strategy:
       fail-fast: False
       matrix:
-        ubuntu: ['ubuntu-18.04', 'ubuntu-20.04']
+        ubuntu: ['ubuntu-20.04', 'ubuntu-22.04']
     name: FCM Tests ${{matrix.ubuntu}}
     runs-on: ${{matrix.ubuntu}}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -23,9 +23,11 @@ jobs:
             libxml-parser-perl \
             libdbi-perl \
             libdbd-sqlite3-perl \
-            python-subversion libsvn-perl \
-            s-nail
-          [[ ${{matrix.ubuntu}} == "ubuntu-18.04" ]] && sudo pip install 'trac' || true
+            libsvn-perl \
+            s-nail \
+            subversion
+          [[ ${{matrix.ubuntu}} != "ubuntu-22.04" ]] && sudo apt install -y python-subversion || true
+          [[ ${{matrix.ubuntu}} == "ubuntu-22.04" ]] && sudo apt install -y python2 || true
           echo "#!/bin/bash" >"${PWD}/bin/gfortran"
           echo 'exec gfortran-9 "$@"' >>"${PWD}/bin/gfortran"
           chmod +x "${PWD}/bin/gfortran"

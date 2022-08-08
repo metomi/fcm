@@ -48,18 +48,26 @@ svn commit -q -m "Modified the merge copy of renamed conflict file"
 svn update -q
 svn switch -q $ROOT_URL/branches/dev/Share/ctrl
 fcm merge --non-interactive $ROOT_URL/branches/dev/Share/ed_ren >/dev/null
-run_pass "$TEST_KEY" fcm conflicts <<__IN__
+if [[ $SVN_MINOR_VERSION == "1.14" ]]; then
+  run_pass "$TEST_KEY" fcm conflicts <<__IN__
+y
+__IN__
+else
+  run_pass "$TEST_KEY" fcm conflicts <<__IN__
 n
 __IN__
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-[info] pro/hello.pro: in tree conflict.
-Locally: edited.
-Externally: renamed to pro/hello.pro.renamed.
-Answer (y) to keep the file.
-Answer (n) to accept the external rename.
-You can then merge in changes.
-Keep the local version?
-Enter "y" or "n" (or just press <return> for "n") diff3 pro/hello.pro.renamed.working pro/hello.pro.renamed.merge-left.r1 pro/hello.pro.renamed.merge-right.r8
+fi
+file_cmp_filtered "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+#IF SVN1.8/9/10 [info] pro/hello.pro: in tree conflict.
+#IF SVN1.14 [info] pro/hello.pro.renamed: in text conflict.
+#IF SVN1.8/9/10 Locally: edited.
+#IF SVN1.8/9/10 Externally: renamed to pro/hello.pro.renamed.
+#IF SVN1.8/9/10 Answer (y) to keep the file.
+#IF SVN1.8/9/10 Answer (n) to accept the external rename.
+#IF SVN1.8/9/10 You can then merge in changes.
+#IF SVN1.8/9/10 Keep the local version?
+#IF SVN1.8/9/10 Enter "y" or "n" (or just press <return> for "n") diff3 pro/hello.pro.renamed.working pro/hello.pro.renamed.merge-left.r1 pro/hello.pro.renamed.merge-right.r8
+#IF SVN1.14 diff3 $PWD/pro/hello.pro.renamed.3.tmp $PWD/pro/hello.pro.renamed.tmp $PWD/pro/hello.pro.renamed.2.tmp
 ====
 1:3c
   Local contents (1)
@@ -67,17 +75,21 @@ Enter "y" or "n" (or just press <return> for "n") diff3 pro/hello.pro.renamed.wo
 3:3,4c
   Merge contents (1)
   Merge contents (2)
-D         pro/hello.pro
+#IF SVN1.8/9/10 D         pro/hello.pro
+#IF SVN1.14 Run "svn resolve --accept working pro/hello.pro.renamed"?
+#IF SVN1.14 Enter "y" or "n" (or just press <return> for "n") Merge conflicts in 'pro/hello.pro.renamed' marked as resolved.
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: edit, rename, discard local (status)
 TEST_KEY=$TEST_KEY_BASE-discard-status
 run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp_filtered "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
 D       pro/hello.pro
+#IF SVN1.14         > moved to pro/hello.pro.renamed
 A  +    pro/hello.pro.renamed
+#IF SVN1.14         > moved from pro/hello.pro
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
@@ -85,7 +97,7 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 TEST_KEY=$TEST_KEY_BASE-discard-info
 run_pass "$TEST_KEY" svn info pro/hello.pro.renamed
 sed -i "/Date:\|Updated:\|UUID:\|Checksum\|Relative URL:\|Working Copy Root Path:/d" $TEST_DIR/"$TEST_KEY.out"
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp_filtered "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Path: pro/hello.pro.renamed
 Name: hello.pro.renamed
 URL: $ROOT_URL/branches/dev/Share/ctrl/pro/hello.pro.renamed
@@ -93,10 +105,13 @@ Repository Root: $REPOS_URL
 Revision: 8
 Node Kind: file
 Schedule: add
-Copied From URL: $ROOT_URL/branches/dev/Share/ed_ren/pro/hello.pro.renamed
+#IF SVN1.8/9/10 Copied From URL: $ROOT_URL/branches/dev/Share/ed_ren/pro/hello.pro.renamed
+#IF SVN1.14 Copied From URL: $ROOT_URL/branches/dev/Share/ctrl/pro/hello.pro
 Copied From Rev: 8
+#IF SVN1.14 Moved From: pro/hello.pro
 Last Changed Author: $LOGNAME
-Last Changed Rev: 8
+#IF SVN1.8/9/10 Last Changed Rev: 8
+#IF SVN1.14 Last Changed Rev: 6
 
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
@@ -104,11 +119,16 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 # Tests fcm conflicts: delete, rename, discard local (cat)
 TEST_KEY=$TEST_KEY_BASE-discard-cat
 run_pass "$TEST_KEY" cat pro/hello.pro.renamed
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp_filtered "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 PRO HELLO
 END
+#IF SVN1.14 <<<<<<< .working
+#IF SVN1.14 Local contents (1)
+#IF SVN1.14 ||||||| .old
+#IF SVN1.14 =======
 Merge contents (1)
 Merge contents (2)
+#IF SVN1.14 >>>>>>> .new
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
@@ -125,14 +145,16 @@ run_pass "$TEST_KEY" fcm conflicts <<__IN__
 y
 __IN__
 file_cmp_filtered "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
-[info] pro/hello.pro: in tree conflict.
-Locally: edited.
-Externally: renamed to pro/hello.pro.renamed.
-Answer (y) to keep the file.
-Answer (n) to accept the external rename.
-You can then merge in changes.
-Keep the local version?
-Enter "y" or "n" (or just press <return> for "n") diff3 pro/hello.pro.working pro/hello.pro.merge-left.r1 pro/hello.pro.merge-right.r8
+#IF SVN1.8/9/10 [info] pro/hello.pro: in tree conflict.
+#IF SVN1.14 [info] pro/hello.pro.renamed: in text conflict.
+#IF SVN1.8/9/10 Locally: edited.
+#IF SVN1.8/9/10 Externally: renamed to pro/hello.pro.renamed.
+#IF SVN1.8/9/10 Answer (y) to keep the file.
+#IF SVN1.8/9/10 Answer (n) to accept the external rename.
+#IF SVN1.8/9/10 You can then merge in changes.
+#IF SVN1.8/9/10 Keep the local version?
+#IF SVN1.8/9/10 Enter "y" or "n" (or just press <return> for "n") diff3 pro/hello.pro.working pro/hello.pro.merge-left.r1 pro/hello.pro.merge-right.r8
+#IF SVN1.14 diff3 $PWD/pro/hello.pro.renamed.3.tmp $PWD/pro/hello.pro.renamed.tmp $PWD/pro/hello.pro.renamed.2.tmp
 ====
 1:3c
   Local contents (1)
@@ -140,17 +162,23 @@ Enter "y" or "n" (or just press <return> for "n") diff3 pro/hello.pro.working pr
 3:3,4c
   Merge contents (1)
   Merge contents (2)
-Reverted 'pro/hello.pro.renamed'
+#IF SVN1.8/9/10 Reverted 'pro/hello.pro.renamed'
 #IF SVN1.8/9 Resolved conflicted state of 'pro/hello.pro'
 #IF SVN1.10 Tree conflict at 'pro/hello.pro' marked as resolved.
+#IF SVN1.14 Run "svn resolve --accept working pro/hello.pro.renamed"?
+#IF SVN1.14 Enter "y" or "n" (or just press <return> for "n") Merge conflicts in 'pro/hello.pro.renamed' marked as resolved.
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: edit, rename, keep local (status)
 TEST_KEY=$TEST_KEY_BASE-keep-status
 run_pass "$TEST_KEY" svn status --config-dir=$TEST_DIR/.subversion/
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp_filtered "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
  M      .
+#IF SVN1.14 D       pro/hello.pro
+#IF SVN1.14         > moved to pro/hello.pro.renamed
+#IF SVN1.14 A  +    pro/hello.pro.renamed
+#IF SVN1.14         > moved from pro/hello.pro
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
@@ -158,14 +186,16 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 TEST_KEY=$TEST_KEY_BASE-keep-info
 run_pass "$TEST_KEY" svn info pro/hello.pro
 sed -i "/Date:\|Updated:\|UUID:\|Checksum\|Relative URL:\|Working Copy Root Path:/d" $TEST_DIR/"$TEST_KEY.out"
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+file_cmp_filtered "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 Path: pro/hello.pro
 Name: hello.pro
 URL: $ROOT_URL/branches/dev/Share/ctrl/pro/hello.pro
 Repository Root: $REPOS_URL
 Revision: 8
 Node Kind: file
-Schedule: normal
+#IF SVN1.8/9/10 Schedule: normal
+#IF SVN1.14 Schedule: delete
+#IF SVN1.14 Moved To: pro/hello.pro.renamed
 Last Changed Author: $LOGNAME
 Last Changed Rev: 6
 
@@ -174,11 +204,21 @@ file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
 # Tests fcm conflicts: delete, rename, keep local (cat)
 TEST_KEY=$TEST_KEY_BASE-keep-cat
-run_pass "$TEST_KEY" cat pro/hello.pro
-file_cmp "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
+if [[ $SVN_MINOR_VERSION == "1.14" ]]; then
+  run_pass "$TEST_KEY" cat pro/hello.pro.renamed
+else
+  run_pass "$TEST_KEY" cat pro/hello.pro
+fi
+file_cmp_filtered "$TEST_KEY.out" "$TEST_KEY.out" <<__OUT__
 PRO HELLO
 END
+#IF SVN1.14 <<<<<<< .working
 Local contents (1)
+#IF SVN1.14 ||||||| .old
+#IF SVN1.14 =======
+#IF SVN1.14 Merge contents (1)
+#IF SVN1.14 Merge contents (2)
+#IF SVN1.14 >>>>>>> .new
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 teardown
