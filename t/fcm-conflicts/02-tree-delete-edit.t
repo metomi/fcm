@@ -22,6 +22,7 @@
 . $(dirname $0)/test_header
 #-------------------------------------------------------------------------------
 check_svn_version
+[[ $SVN_VERSION == "1.13.0" ]] && skip_all "Tests do not work with svn 1.13.0"
 tests 18
 #-------------------------------------------------------------------------------
 setup
@@ -57,7 +58,7 @@ Answer (n) to keep the file.
 Keep the local version?
 Enter "y" or "n" (or just press <return> for "n") A         pro/hello.pro
 #IF SVN1.8/9 Resolved conflicted state of 'pro/hello.pro'
-#IF SVN1.10 Tree conflict at 'pro/hello.pro' marked as resolved.
+#IF SVN1.10/14 Tree conflict at 'pro/hello.pro' marked as resolved.
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------
@@ -120,7 +121,7 @@ Answer (y) to accept the local delete.
 Answer (n) to keep the file.
 Keep the local version?
 #IF SVN1.8/9 Enter "y" or "n" (or just press <return> for "n") Resolved conflicted state of 'pro/hello.pro'
-#IF SVN1.10 Enter "y" or "n" (or just press <return> for "n") Tree conflict at 'pro/hello.pro' marked as resolved.
+#IF SVN1.10/14 Enter "y" or "n" (or just press <return> for "n") Tree conflict at 'pro/hello.pro' marked as resolved.
 __OUT__
 file_cmp "$TEST_KEY.err" "$TEST_KEY.err" </dev/null
 #-------------------------------------------------------------------------------

@@ -54,7 +54,7 @@ Answer (y) to keep the file.
 Answer (n) to accept the external replace.
 Keep the local version?
 #IF SVN1.8/9 Enter "y" or "n" (or just press <return> for "n") Resolved conflicted state of 'pro/hello.pro'
-#IF SVN1.10 Enter "y" or "n" (or just press <return> for "n") Tree conflict at 'pro/hello.pro' marked as resolved.
+#IF SVN1.10/14 Enter "y" or "n" (or just press <return> for "n") Tree conflict at 'pro/hello.pro' marked as resolved.
 __OUT__
 file_cmp "${TEST_KEY}.err" "${TEST_KEY}.err" <'/dev/null'
 #-------------------------------------------------------------------------------
